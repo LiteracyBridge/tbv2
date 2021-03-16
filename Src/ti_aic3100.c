@@ -59,7 +59,7 @@ AIC_REG					codec_regs[] = {	// array of info for codec registers in use -- must
    0,  37, 0x00, 0x00, 0x00, "DAC_Flag_Reg",                       			0x00,
    0,  53, 0x12, 0x1F, 0x00, "DOutCtrl",                            		0x12,
    0,  60, 0x01, 0x3F, 0x00, "DAC_Instruction_Set",                     0x01,
-   0,  61, 0x04, 0x1F, 0x00, "ADC_Instruction_Set",                     0x04,	
+   0,  61, 0x04, 0x1F, 0x00, "adc_prb",                     						0x04,	
    0,  62, 0x00, 0x77, 0x00, "Prog_Instr_Mode_Cntrl",   								0x00,		// Programmable_Instruction_Mode_Control
    0,  63, 0x14, 0xFF, 0x00, "DAC_Dpath",                               0x14,
    0,  64, 0x0C, 0x0F, 0x00, "DAC_Vol_Ctl",                             0x0C,
@@ -68,18 +68,18 @@ AIC_REG					codec_regs[] = {	// array of info for codec registers in use -- must
    0,  67, 0x00, 0x9F, 0x00, "Headset_Detection",                       0x00,
    0,  68, 0x6F, 0x7F, 0x00, "DRC_Control",                             0x6F,  // use actual reset 0x6f (DRC enabled)
 // pg,reg, reset, can1, must1,  "nm",																		curr
-   0,  81, 0x00, 0xBB, 0x00, "ADC_Digital_Mic",													0x00,
-   0,  82, 0x80, 0xF0, 0x00, "ADC_Volume_Control",											0x80, 
-   0,  83, 0x00, 0x7F, 0x00, "ADC_Volume_Control",											0x00, 
-   0,  86, 0x00, 0xF0, 0x00, "AGC_Control1",														0x00, 
+   0,  81, 0x00, 0xBB, 0x00, "adc_pwr",																	0x00,
+   0,  82, 0x80, 0xF0, 0x00, "adc_sm_vol",															0x80, 
+   0,  83, 0x00, 0x7F, 0x00, "adc_vol",																	0x00, 
+   0,  86, 0x00, 0xF0, 0x00, "agc_tgt",																	0x00, 
    0,  87, 0x00, 0xFE, 0x00, "AGC_Control2",														0x00, 
-   0,  88, 0x7F, 0x7F, 0x00, "AGC_MAX_Gain",														0x7F, 
-   0,  89, 0x00, 0xFF, 0x00, "AGC_Attack_Time",													0x00, 
-   0,  90, 0x00, 0xFF, 0x00, "AGC_Decay_Time",													0x00, 
-   0,  91, 0x00, 0x1F, 0x00, "AGC_Noise_Debounce",											0x00, 
-   0,  92, 0x00, 0x0F, 0x00, "AGC_Signal_Debounce",											0x00, 
-   0,  93, 0x00, 0x00, 0x00, "AGC_Gain",																0x00, 
-	 
+   0,  88, 0x7F, 0x7F, 0x00, "agc_maxg",																0x7F, 
+   0,  89, 0x00, 0xFF, 0x00, "agc_atak",																0x00, 
+   0,  90, 0x00, 0xFF, 0x00, "agc_decy",																0x00, 
+   0,  91, 0x00, 0x1F, 0x00, "agc_nois_dbnc",														0x00, 
+   0,  92, 0x00, 0x0F, 0x00, "agc_sig_dbnc",														0x00, 
+   0,  93, 0x00, 0x00, 0x00, "agc_c_gain",															0x00, 
+
 	 
 #ifdef PG0_XTRA_USED
 // 0,  28, 0x00, 0xFF, "Data_Slot_Offset_Programmability",
@@ -136,11 +136,11 @@ AIC_REG					codec_regs[] = {	// array of info for codec registers in use -- must
    1,  41, 0x02, 0x7E, 0x02, "HPR_Driver",                              0x02, 
    1,  42, 0x00, 0x1D, 0x00, "SPK_Driver",                              0x00,
    1,  44, 0x20, 0xFF, 0x00, "HP_Driver_Control",                       0x20, // use actual: 0x20 not 0x00 (debounce 8usec)
-   1,  46, 0x00, 0x8B, 0x00, "MICBIAS",                                 0x00,
-   1,  47, 0x80, 0xFF, 0x00, "MIC_PGA",                                 0x80,
-   1,  48, 0x00, 0xFC, 0x00, "ADC_Input_P",                             0x00,
-   1,  49, 0x00, 0xF0, 0x00, "ADC_Input_M",                             0x00,
-   1,  50, 0x00, 0xE0, 0x00, "Input_CM",                                0x00,
+   1,  46, 0x00, 0x8B, 0x00, "mic_bias",                                0x00,
+   1,  47, 0x80, 0xFF, 0x00, "mic_gain",                                0x80,
+   1,  48, 0x00, 0xFC, 0x00, "adc_in_p",                             		0x00,
+   1,  49, 0x00, 0xF0, 0x00, "adc_in_m",                             		0x00,
+   1,  50, 0x00, 0xE0, 0x00, "adc_in_cm",                               0x00,
    1,  51, 0x00, 0xFD, 0x00, "GPIO1_InOut_Pin_Ctrl",                    0x00,
 #ifdef PG1_XTRAS
 #endif
@@ -1607,64 +1607,181 @@ void						verifyCodecReg( int idx, int pg, int reg ){				// verify that codec_re
 static int 											LastVolume 	= 0;			// retain last setting, so audio restarts at last volume
 
 void						debugRecordingRegs(){
-	if ( !dbgEnab( '2' )) return;
+	if ( !dbgEnab( '8' )) return;
+	const int MAX_REC_OPTS = 8;
+	struct 
+	{
+		uint32_t idx;
+		char * optNm;
+		struct { 
+			uint8_t val; 
+			char *valNm; 
+		} vals[ MAX_REC_OPTS ]; 
+	} recOpts[] = 	// recording options -- reg values & description  -- (must have a value for 0x00)
+	{		
+// bias 1.46: 0x0A=2.5V, 0x09=1.5V
+		{ P1_R46_MICBIAS, 			"mic_bias", { { 0x0A, "2.5V" }, 	{ 0x09, "1.5V" },   { 0x00, "??" }													}},
+// pga  1.47: (0x08=4dB), 0x00=0dB, 0x10=8dB, 0x20=16dB		
+		{ P1_R47_MIC_PGA, 			"mic_pga",  { { 0x08, "4dB" }, 		{ 0x00, "0dB" }, 		{ 0x10, "8dB" }, 	{ 0x20, "16dB" } 			}},
+// aosr 0.20: 0x40=64, 0x80=128		
+		{ P0_R20_ADC_AOSR_VAL, 	"aosr", 		{ { 0x40, "64" }, 		{ 0x80, "128" },    { 0x00, "??" }													}},
+// prb  0.61: 0x04=PRB_R4, 0x0B=PRB_R11		
+		{ P0_R61_ADC_Instr_Set, "prb", 			{ { 0x04, "PRB_R4" }, { 0x0B, "PRB_R11" },{ 0x00, "??" }													}}, 
+// targ 0.86: 0x00=AGCoff, 0x80=targ -5.5dB, 0xA0=-10dB, 0xC0=-14dB, 0xD0=-17dB, 0xE0=-20dB, 0xF0=-24dB		
+		{ P0_R86_AGC_Control1, 	"agc_targ",	{ { 0x00, "AGCoff" }, { 0x80, "-5.5dB" }, { 0xA0, "-10dB" },{ 0xC0, "-14dB" },
+																					{ 0xD0, "-17dB"},   { 0xE0, "-20dB"},   { 0xF0, "-24dB"} 											  }},
+// maxg 0.88: 0x00=0dB, 0x08=4dB, 0x10=8dB, 0x20=16dB, 0x30=24dB, 0x40=32dB, 0x50=40dB
+		{ P0_R88_AGC_MAX_Gain, 	"agc_maxg", { { 0x00, "0dB" }, 		{ 0x08, "4dB" }, 		{ 0x10, "8dB" }, 	{ 0x20, "16dB" }, 
+																					{ 0x30, "24dB" }, 	{ 0x40, "32dB" }, 	{ 0x50, "40dB" } 												}},
+// vol  0.83: 0x68=-12dB, 0x78=-6dB, 0x00=0dB, 0x10=8dB, 0x20=16dB		
+		{ P0_R83_ADC_Volume_Control, "vol", { { 0x68, "-12dB" }, 	{ 0x78, "-6dB" }, 	{ 0x00, "0dB" }, 	{ 0x10, "8dB" },
+																					{ 0x20, "16dB" }																																}},
+// in_p 1.48: 0x40=MIC1LP_10k, 0x80=MIC1LP_20k, 0xC0=MIC1LP_40k	
+		{ P1_R48_ADC_Input_P, 	"in_p", 		{ { 0x40, "1LP_10k" },{ 0x80, "1LP_20k" },{ 0xC0, "1LP_40k" }, { 0x10, "1RP_10k" },
+																				  { 0x00, "no_P" }																																}},
+// in_m 1.49: 0x10=MIC1LM_10k, 0x20=MIC1LM_20k, 0x30=MIC1LM_40k	
+		{ P1_R49_ADC_Input_M, 	"in_m", 		{ { 0x10, "1LM_10k" },{ 0x20, "1LM_20k" },{ 0x30, "1LM_40k" }, { 0x40, "L_CM10k" },
+																					{ 0x00, "no_M" }																																}},
+//in_cm 1.50: 0x00=no CM, 0x80=MIC1LP to CM, 0x20=MIC1LM to CM, 0xA0 = MIC1LP & MIC1LM to CM	
+		{ P1_R50_Input_CM, 			"in_cm",		{ { 0x00, "no_CM" }, 	{ 0x80, "1LP_CM" }, { 0x20, "1LM_CM" }, { 0xA0, "P&M_CM" }	}},
+//out_route 1.35: 0x00=none, 0x20=MicL, 0x40=DacL, 0x60=MicL&DacL 
+		{ P1_R35_LDAC_and_RDAC_Output_Routing, "out_Route", 
+																				{ { 0x00, "none" }, 	{ 0x20, "MicL" }, 	{ 0x40, "DacL" }, 	{ 0x60, "DacL&MicL" } }},
+//classD  1.32:  0x80=SpkOn, 0x00=SpkOff
+		{ P1_R32_ClassD_Drivers, "classD",  { { 0x80, "SpkAmpOn" }, { 0x00, "SpkAmpOff" } }},
+//l_to_spkr 1.38: 
+		{ P1_R38_Left_Analog_Vol_to_SPL, "l_to_spkr", { { 0x00, "noLtoSpkr", }, {	0x80, "LtoSpkr_0dB" } }},	
+//L_ToSpkr 0.63:	0x00=Off  0x90=LDacOn		
+		{ P0_R63_DAC_Datapath_SETUP, "dac_pwr", { { 0x00, "off" }, { 0x90, "LDacOn" }	}},	
+		
+		{ 0, "", {{ 0,"" }}} // end of list
+	};
 	
-	uint8_t regList[] = { 
-		P1_R46_MICBIAS,	
-		P0_R81_ADC_Digital_Mic,
-		P1_R47_MIC_PGA,
-		P1_R48_ADC_Input_P,
-		P1_R49_ADC_Input_M,
-		P1_R50_Input_CM,
-		P0_R61_ADC_Instr_Set,
-		P0_R62_Prog_Instr_Md_Cntrl,
-		P0_R86_AGC_Control1, 
-		P0_R87_AGC_Control2,
-		P0_R88_AGC_MAX_Gain,
-		P0_R89_AGC_Attack_Time,
-		P0_R90_AGC_Decay_Time,
-		P0_R91_AGC_Noise_Debounce,
-		P0_R92_AGC_Signal_Debounce,
-		P0_R83_ADC_Volume_Control,
-		P0_R82_ADC_Volume_Control,
-		P0_R93_AGC_Gain 
-	};	
-	for ( int i=0; i < sizeof(regList); i++ ){
-		uint8_t ridx = regList[i];
+	for ( int i=0; i < 100; i++ ){
+		int ridx = recOpts[i].idx;
+		if ( ridx == 0 ) break;
+		
 		uint8_t val = aicGetReg( ridx );
-		dbgLog( "2 P%dR%02d %12s = %3d 0x%02x \n", codec_regs[ridx].pg, codec_regs[ridx].reg, codec_regs[ridx].nm, val, val );
+		int valIdx = -1;
+		for ( int j=0; j< MAX_REC_OPTS; j++ )
+		  if ( recOpts[i].vals[j].val == val ){ // found value in list
+				valIdx = j;
+				break;
+			}
+		char *valnm = "??";
+		if (valIdx >= 0) 
+			valnm = recOpts[i].vals[ valIdx ].valNm;
+			
+		dbgLog( "R%d.%d: %12s = 0x%02x = %s \n", codec_regs[ ridx ].pg, codec_regs[ ridx ].reg, recOpts[i].optNm, val, valnm );
+		tbDelay_ms(50);
 	}
 }
 void						cdc_RecordEnable( bool enable ){
 #if defined( AIC3100 )
-	if ( enable ){ 	
-		// power-on MIC & ADC, setup MIC PGA -- left channel only
-		aicSetReg( P1_R46_MICBIAS,						0x0A ); // P1_R46: MICBIAS output at 2.5V (re 7.3.9.1) even without headset detected, Software Power Down disabled
- 		aicSetReg( P1_R47_MIC_PGA,  					0x30 );	// P1_R47: D7=0, D6_0=11 0000: MIC PGA is at 48 = 24dB gain
-		aicSetReg( P1_R48_ADC_Input_P,  			0x40 );	// P1_R48: D7_6 = 01: MIC1LP is selected for the MIC PGA with feed-forward resistance RIN = 10 k?.
-		aicSetReg( P1_R49_ADC_Input_M,  			0x10 );	// P1_R49: D5_4 = 01: MIC1LM is selected for the MIC PGA with feed-forward resistance RIN = 10 k?.
-		aicSetReg( P1_R50_Input_CM,  					0x00 );	// P1_R50: no connections to internal Common Mode voltage
+	if ( enable ){ 
+		typedef struct  { 
+			uint8_t in_p;		// in_p 1.48: 0x40=MIC1LP_10k, 0x80=MIC1LP_20k, 0xC0=MIC1LP_40k
+			uint8_t in_m;		// in_m 1.49: 0x10=MIC1LM_10k, 0x20=MIC1LM_20k, 0x30=MIC1LM_40k
+			uint8_t in_cm;	//in_cm 1.50: 0x00=no CM, 0x80=MIC1LP to CM, 0x20=MIC1LM to CM, 0xA0 = MIC1LP & MIC1LM to CM
+			
+			uint8_t bias;		// bias 1.46: 0x0A=2.5V, 0x09=1.5V												//AK4637: used 2.4V
+			uint8_t pga; 		// pga  1.47: (0x08=4dB), 0x00=0dB, 0x10=8dB, 0x20=16dB		//AK4637: used +18dB
+			uint8_t aosr; 	// aosr 0.20: 0x40=64, 0x80=128
+			uint8_t prb; 		// prb  0.61: 0x04=PRB_R4, 0x0B=PRB_R11
+			uint8_t targ; 	// targ 0.86: 0x00=AGCoff, 0x80=targ -5.5dB, 0xA0=-10dB, 0xC0=-14dB, 0xD0=-17dB, 0xE0=-20dB, 0xF0=-24dB
+
+			uint8_t maxg;		// maxg 0.88: 0x00=0dB, 0x08=4dB, 0x10=8dB, 0x20=16dB, 0x30=24dB, 0x40=32dB, 0x50=40dB
+			uint8_t vol;		// vol  0.83: 0x68=-12dB, 0x78=-6dB, 0x00=0dB, 0x10=8dB, 0x20=16dB
+		} recP;
+ 
+		recP opts[] = 
+		{
+		// Record MIC1RP (per James Kim's suggestion)
+		 // in_p, in_m, in_cm, bias,  pga,  aosr, prb,  targ, maxg, vol			DbgRec    
+		//	{ 0x10, 0x00,  0x00, 0x0A,	0x08,	0x40,	0x04,	0xC0,	0x30, 0x00 }, // 0  P=MIC1RP 10k, M=nothing
+		//	{ 0x10, 0x40,  0x00, 0x0A,	0x08,	0x40,	0x04,	0xC0,	0x30, 0x00 }, // 1  P=MIC1RP 10k, M=CM 10k
+
+			// Test no amplification:  pga=0dB, AGC=off, coarse_vol=-12dB
+		//	{ 0xC0, 0x30,  0x00, 0x0A,	0x00,	0x40,	0x04,	0x00,	0x00, 0x68 }, //0
+			
+		 // in_p, in_m, in_cm, bias,  pga,  aosr, prb,  targ, maxg, vol			DbgRec    
+			{ 0x40, 0x10,  0x00, 0x0A,	0x08,	0x40,	0x04,	0xC0,	0x30, 0x00 }, // 0   defaults
+			
+	//	in_p 1.48: 0x40=MIC1LP_10k, 0x80=MIC1LP_20k, 0xC0=MIC1LP_40k
+	//	in_m 1.49: 0x10=MIC1LM_10k, 0x20=MIC1LM_20k, 0x30=MIC1LM_40k
+  //    in_p  in_m 
+			{ 0x80, 0x20,  0x00, 0x0A,	0x08,	0x40,	0x04,	0xC0,	0x30, 0x00 }, // 1   MIC1LP & MIC1LM @ 20kOhm
+			{ 0xC0, 0x30,  0x00, 0x0A,	0x08,	0x40,	0x04,	0xC0,	0x30, 0x00 }, // 2   MIC1LP & MIC1LM @ 40kOhm
+			
+	//  in_cm 1.50: 0x00=no CM, 0x80=MIC1LP to CM, 0x20=MIC1LM to CM, 0xA0 = MIC1LP & MIC1LM to CM
+	//                in_cm
+			{ 0x40, 0x10,  0x80, 0x0A,	0x08,	0x40,	0x04,	0xC0,	0x30, 0x00 }, // 3   MIC1LP to CM
+			{ 0x40, 0x10,  0x20, 0x0A,	0x08,	0x40,	0x04,	0xC0,	0x30, 0x00 }, // 4   MIC1LM to CM
+			{ 0x40, 0x10,  0xA0, 0x0A,	0x08,	0x40,	0x04,	0xC0,	0x30, 0x00 }, // 5   MIC1LP & LM to CM
+
+	// pga 1.47:  (0x08=4dB), 0x00=0dB, 0x10=8dB, 0x20=16dB
+	//                              pga
+			{ 0xC0, 0x30,  0x00, 0x0A,	0x08,	0x40,	0x04,	0xC0,	0x30, 0x00 }, // 6   MIC1LP & MIC1LM @ 40kOhm, pga 4dB
+			{ 0xC0, 0x30,  0x00, 0x0A,	0x00,	0x40,	0x04,	0xC0,	0x30, 0x00 }, // 7   MIC1LP & MIC1LM @ 40kOhm, pga 0dB
+
+	// targ 0.86: 0x00=AGCoff, 0x80=targ -5.5dB, 0xA0=-10dB, 0xC0=-14dB, 0xD0=-17dB, 0xE0=-20dB, 0xF0=-24dB
+	//                                                targ
+			{ 0xC0, 0x30,  0x00, 0x0A,	0x00,	0x40,	0x04,	0x00,	0x30, 0x00 }, // 8   MIC1LP & MIC1LM @ 40kOhm, pga 0dB, AGC off
+			{ 0xC0, 0x30,  0x00, 0x0A,	0x00,	0x40,	0x04,	0xE0,	0x30, 0x00 }, // 9   MIC1LP & MIC1LM @ 40kOhm, pga 0dB, targ -20dB
+			{ 0xC0, 0x30,  0x00, 0x0A,	0x00,	0x40,	0x04,	0xF0,	0x30, 0x00 }, //10   MIC1LP & MIC1LM @ 40kOhm, pga 0dB, targ -24dB
+
+	// maxg 0.88: 0x00=0dB, 0x08=4dB, 0x10=8dB, 0x20=16dB, 0x30=24dB, 0x40=32dB, 0x50=40dB			
+	//                                                      maxg
+			{ 0xC0, 0x30,  0x00, 0x0A,	0x00,	0x40,	0x04,	0xE0,	0x08, 0x00 }, //11   MIC1LP & MIC1LM @ 40kOhm, pga 0dB, targ -20dB, maxg 4dB
+			{ 0xC0, 0x30,  0x00, 0x0A,	0x00,	0x40,	0x04,	0xE0,	0x10, 0x00 }, //12   MIC1LP & MIC1LM @ 40kOhm, pga 0dB, targ -20dB, maxg 8dB
+			{ 0xC0, 0x30,  0x00, 0x0A,	0x00,	0x40,	0x04,	0xE0,	0x20, 0x00 }, //13   MIC1LP & MIC1LM @ 40kOhm, pga 0dB, targ -20dB, maxg 16dB
+			
+	// vol  0.83: 0x68=-12dB, 0x78=-6dB, 0x00=0dB, 0x10=8dB, 0x20=16dB		
+	//                                                            vol
+			{ 0xC0, 0x30,  0x00, 0x0A,	0x00,	0x40,	0x04,	0xE0,	0x10, 0x68 }, //14   MIC1LP & MIC1LM @ 40kOhm, pga 0dB, targ -20dB, maxg 8dB, vol -12dB
+			{ 0xC0, 0x30,  0x00, 0x0A,	0x00,	0x40,	0x04,	0xE0,	0x10, 0x78 }, //15   MIC1LP & MIC1LM @ 40kOhm, pga 0dB, targ -20dB, maxg 8dB, vol -6dB
+			{ 0xC0, 0x30,  0x00, 0x0A,	0x00,	0x40,	0x04,	0xE0,	0x10, 0x10 }, //16   MIC1LP & MIC1LM @ 40kOhm, pga 0dB, targ -20dB, maxg 8dB, vol 8dB
+		};
+		const int MAX_OPTS = sizeof(opts) / sizeof(recP);
+
+		if ( RecDBG < 0 ) RecDBG = 0;
+		if ( RecDBG >= MAX_OPTS ) RecDBG = MAX_OPTS-1;
+		recP RP = opts[ RecDBG ];
 		
-		aicSetReg( P0_R20_ADC_AOSR_VAL, 			0x40 );	// P0_R20: D7_0=64
-		aicSetReg( P0_R61_ADC_Instr_Set, 			0x04 ); // P0_R61: D4_0= 0 0100: ADC signal-processing block PRB_R4 
+		
+		//DEBUG-- route MIC to speaker
+		cdc_SpeakerEnable( true );		// turn on DAC to SPKR
+		aicSetReg( P1_R35_LDAC_and_RDAC_Output_Routing, 0x60 );	// P1_R35: D7_6=01 DacL->Mix, D5=1: MIC1LP->mix, R->nowhere: 0 0000
+		//DEBUG
+		
+		// power-on MIC & ADC, setup MIC PGA -- left channel only
+		// mic settings used for AK4637 --  Differential input, mic gain = +18dB, mic_pwr = 2.4V
+		aicSetReg( P1_R46_MICBIAS,						RP.bias ); //0x0A ); // P1_R46: MICBIAS output at 2.5V (re 7.3.9.1) even without headset detected, Software Power Down disabled
+ 		aicSetReg( P1_R47_MIC_PGA,  					RP.pga ); //0x08 );	// P1_R47: D7=0, D6_0=00 1000: MIC PGA is at 8 = 4dB gain
+		aicSetReg( P1_R48_ADC_Input_P,  			RP.in_p );	// P1_R48: D7_6 = 01: MIC1LP is selected for the MIC PGA with feed-forward resistance RIN = 10 k?.
+		aicSetReg( P1_R49_ADC_Input_M,  			RP.in_m );	// P1_R49: D5_4 = 01: MIC1LM is selected for the MIC PGA with feed-forward resistance RIN = 10 k?.
+		aicSetReg( P1_R50_Input_CM,  					RP.in_cm );	// P1_R50: no connections to internal Common Mode voltage
+		
+		aicSetReg( P0_R20_ADC_AOSR_VAL, 			RP.aosr ); //0x40 );	// P0_R20: D7_0=64
+		aicSetReg( P0_R61_ADC_Instr_Set, 			RP.prb ); //0x04 ); // P0_R61: D4_0= 0 0100: ADC signal-processing block PRB_R4 
 		aicSetReg( P0_R62_Prog_Instr_Md_Cntrl,0x00 ); // P0_R62: defaults 
 																											  
 		// enable & set up Auto Gain Control -- defaults for now
 		// datasheet  7.3.9.2 Automatic Gain Control  -- pg 30 
 		//####### AGC ENABLE EXAMPLE CODE  -- 
-		//# Set AGC enable and Target Level = -10 dB
+		//# Set AGC enable and Target Level = -10dB
 		//# Target level can be set lower if clipping occurs during speech
 		//# Target level is adjusted considering Max Gain also
-		aicSetReg( P0_R86_AGC_Control1, 			0xA0 );	// P0_R86: D7=1: AGC enabled, D6_4=010 AGC target level = –10 dB
+		aicSetReg( P0_R86_AGC_Control1, 			RP.targ ); //0xA0 );	// P0_R86: D7=1: AGC enabled, D6_4=010 AGC target level = –10 dB
 
 		//# AGC hysteresis=DISABLE, noise threshold = -90dB
 		//# Noise threshold should be set at higher level if noisy background is present in application
-		aicSetReg( P0_R87_AGC_Control2, 			0xFE );	// P0_R87: D7_6=11: AGC hysterysis disabled, D5_1=11 111 = AGC noise threshold = –90 dB
+		aicSetReg( P0_R87_AGC_Control2, 			0xFE );	// P0_R87: D7_6=11: AGC hysteresis disabled, D5_1=11 111 = AGC noise threshold = –90 dB
  
 		//# AGC maximum gain= 40 dB
     //# Higher Max gain is a trade off between gaining up a low sensitivity MIC, and the background acoustic noise
 		//# Microphone bias voltage (MICBIAS) level can be used to change the Microphone Sensitivity
-		aicSetReg( P0_R88_AGC_MAX_Gain, 			0x50 );	// P0_R88: D6_0=101 0000: ACG maximum gain = 40dB
+		aicSetReg( P0_R88_AGC_MAX_Gain, 			RP.maxg ); //0x50 );	// P0_R88: D6_0=101 0000: ACG maximum gain = 40dB
 
 		//# Attack time=864/Fs
 		aicSetReg( P0_R89_AGC_Attack_Time, 		0x68 );	// P0_R89: D7_3=0110 1: AGC attack time = 13 × (32 / fS) ( 13*32=416 not 864? )
@@ -1683,20 +1800,17 @@ void						cdc_RecordEnable( bool enable ){
 		//######### END of AGC SET UP  */		
 		
 		// set default gain for ADC volume, then unmute
-		aicSetReg( P0_R83_ADC_Volume_Control, 0x00 );	// P0_R83: D6_0=000 0000: Delta-Sigma Mono ADC Channel Volume Control Coarse Gain = 0dB
+		aicSetReg( P0_R83_ADC_Volume_Control, RP.vol ); //0x00 );	// P0_R83: D6_0=000 0000: Delta-Sigma Mono ADC Channel Volume Control Coarse Gain = 0dB
 		aicSetReg( P0_R82_ADC_Volume_Control, 0x00 );	// P0_R82: D7=0: ADC channel not muted, D6_4=000: Delta-Sigma Mono ADC Channel Volume Control Fine Gain = 0dB
 
 		// power up ADC (after AGC configured, re: pg. 30)
 		aicSetReg( P0_R81_ADC_Digital_Mic,    0x80 );	// P0_R81: D7= 1: ADC channel is powered up, D1_0 = 00: ADC digital soft-stepping enabled 1 step/sample
-
 		int8_t agc_gain = aicGetReg( P0_R93_AGC_Gain );	// P0_R93: applied reading of current AGC gain-- -24..63 = -12dB..59.5dB
-		dbgLog( "2 AIC MicPwr=2.5V,ADC on, AGC on, agcGain=%d, ADC unmuted \n", agc_gain );
-		
 	}	else {
 		// power down the ADC and the MIC
 		aicSetReg( P0_R81_ADC_Digital_Mic,    0x00 );	// P0_R81: D7= 0: ADC channel is powered down.
 		aicSetReg( P1_R46_MICBIAS,						0x00 ); // P1_R46: MICBIAS output off, Software Power Down disabled
-		dbgLog( "2 AIC ADC & MIC off \n");
+		dbgLog( "8 AIC ADC & MIC off \n");
 	}
 	debugRecordingRegs();
 #endif
@@ -1994,7 +2108,7 @@ void 						cdc_Init( ){ 																								// Init codec & I2C (i2s_stm32f4
 
 void 						cdc_PowerDown( void ){																				// power down entire codec (i2s_stm..)
 	dbgEvt( TB_cdcPwrDn, 0,0,0,0);
-	#if defined( AIC3100 )	//TODO power down DAC channel, wait till P0_R37_Power_Status_d7_d3 == 0, then power down MDAC, then NDAC 
+	#if defined( AIC3100 )	//to power down DAC channel, wait till P0_R37_Power_Status_d7_d3 == 0, then power down MDAC, then NDAC 
 	  const int MAX_DAC_PWR_WAIT = 10000;
 	//AIC3100: follow pg 65 rules
 		aicSetReg( P0_R63_DAC_Datapath_SETUP, 	0x14 ); // P0_R63: DAC L & R Pwr Off -- pg 65: begins internal sequence
@@ -2089,7 +2203,8 @@ void		 				cdc_SetMute( bool muted ){																	// true => enable mute on 
 	i2c_Upd();
 }
 void 						debugTimingRegs(){																					// configure ClkOut & report Reg values
-	if ( !dbgEnab( '2' )) return;
+	if ( !dbgEnab( '2' )) 
+		return;
 	
 	uint8_t regList[] = { 
 		P0_R4_ClockGen_Muxing, 	

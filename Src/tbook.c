@@ -7,7 +7,7 @@
 #include "fs_evr.h"					// FileSys components
 #include "fileOps.h"				// decode & encrypt audio files
 
-const char * 	TBV2_Version 				= "V3.02 of 3-Mar-2021";
+const char * 	TBV2_Version 				= "V3.02 of 16-Mar-2021";
 
 //
 // Thread stack sizes
@@ -89,16 +89,23 @@ void copyFile( const char *src, const char * dst ){
 	tbCloseFile( fdst );		// fclose(fdst);
 }
 int PlayDBG = 0;
+int RecDBG = 0;
 void 								saiEvent( uint32_t event );
 
 void debugLoop( bool autoUSB ){			// called if boot-PLUS, no file system,  autoUSB => usbMode
+	MsgStats tstStats;
+	char fname[40];
+	
 	if ( fsNDevs==0 ) dbgLog( "no storage avail \n" );
 	else dbgLog( "no TBook on %s \n", fsDevs[0]  );
 
 	MediaState st = Ready;
 	int ledCntr = 0, LEDpauseCnt = 0;
-	bool curPl,prvPl, curMi,prvMi, curTr,prvTr, curLH,prvLH, curRH,prvRH = false;
-	bool inTestSequence = false;
+//	bool curPl,prvPl, curMi,prvMi, curTr,prvTr, curLH,prvLH, curRH,prvRH = false;
+//	bool inTestSequence = false;
+	int idleCnt = 0;
+	RecDBG = 0;			// default recording params
+	int dbgIdx = 0;	// file index for current value of RecDBG
 	
 	initLogger();			// init Event log
 	logEvtNI( "DebugLoop", "NFSys", fsNDevs );
@@ -115,8 +122,45 @@ void debugLoop( bool autoUSB ){			// called if boot-PLUS, no file system,  autoU
 			gSet( gGREEN, 0 );
 			gSet( gRED, ((ledCntr >> 14) & 0x3)== 0 );		// flash RED ON for 1 of 4  
 	  }
-		
-		// AUDIO commands -- CIR, PL_CIR, MI_CIR, LH_CIR -- play different tones
+
+		// AUDIO recording
+		if ( st==Recording ){
+			if ( !gGet( gCIRCLE )){		// no CIRCLE while recording: stop
+				audRequestRecStop();
+				while ( audGetState() != Ready )
+					gSet( gGREEN, 0 );
+				gSet( gRED, 0 );
+				resetAudio();
+		//		gSet( gGREEN, 1 );
+		//		tbDelay_ms(200); //make sure printDebug catches up
+		//		audPlayAudio( fname, &tstStats );
+		// 		gSet( gGREEN, 0 );
+				LEDpauseCnt = 0;
+			}
+		}	else if ( gGet( gCIRCLE ) && st==Ready ){		// CIRCLE -- record while held down with current RecDBG
+			sprintf( fname, "M0:/REC_%d_%d.WAV", RecDBG, dbgIdx );	
+			dbgIdx++;
+			FILE* outFP = tbOpenWriteBinary( fname ); 
+			if ( outFP != NULL ){
+				resetAudio();			// clean up anything in progress 
+				dbgLog( "8 Rec to: %s \n", fname );
+				gSet( gRED, 1 );
+				LEDpauseCnt = -1;
+				tbDelay_ms(200); //make sure printDebug catches up
+				audStartRecording( outFP, &tstStats );
+			}		
+		} else { 
+			if (!gGet( gPLUS ) && !gGet( gMINUS )){  // PLUS & MINUS up -- idle
+				idleCnt++;
+			} else if ( idleCnt>2000 ){ // was idle for a while, count this click
+				idleCnt = 0;
+				dbgIdx = 0;			// reset file idx
+				if ( gGet(gPLUS) ) RecDBG++;
+				if ( gGet(gMINUS) ) RecDBG--;
+				dbgLog( "RecDBG: 0x%02x \n", RecDBG );
+			}
+		}
+		/* AUDIO playback -- CIR, PL_CIR, MI_CIR, LH_CIR -- play different tones
 		if ( st==Playing ){ // controls while playing  PLUS(vol+), MINUS(vol-), TREE(pause/resume), LH adjPos-2), RH adjPos(2)
 			curPl = gGet( gPLUS );
 			if ( curPl & !prvPl )
@@ -158,6 +202,7 @@ void debugLoop( bool autoUSB ){			// called if boot-PLUS, no file system,  autoU
 			}
 			LEDpauseCnt = -1;
 		}
+		*/
 		//
 		// USB commands -- have FS and autoUSB or HOME -- enable
 		if ( isMassStorageEnabled() ){
@@ -175,6 +220,7 @@ void debugLoop( bool autoUSB ){			// called if boot-PLUS, no file system,  autoU
 
 		//
 		// TestSequence -- RHAND to enter (RED), STAR to proceed (GREEN)
+		/*
 		if ( inTestSequence ){
 			if (gGet( gSTAR )){
 				gSet( gGREEN, 1 );
@@ -193,6 +239,7 @@ void debugLoop( bool autoUSB ){			// called if boot-PLUS, no file system,  autoU
 			cdc_PowerUp( );			// enable all codec power
 			LEDpauseCnt = 100000;	// long RED => power enabled
 		}
+		*/
 	}
 }
 

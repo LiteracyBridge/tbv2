@@ -224,7 +224,7 @@ void										tbRenameFile( const char *src, const char *dst ){  // rename path 
 		errLog( "frename %s to %s => %d \n", src, dst, stat );
 }
 
-fsStatus fsMount( char *drv ){		// try to finit() & mount()  drv:   finit() code, fmount() code
+fsStatus 								fsMount( char *drv ){		// try to finit() & mount()  drv:   finit() code, fmount() code
 		fsStatus stat = finit( drv );  		// init file system driver for device
 	  if ( stat != fsOK ){
 			dbgLog( "3 finit( %s ) got %d \n", drv, stat );
@@ -495,18 +495,18 @@ void 										usrLog( const char * fmt, ... ){
 
 int DebugMask =    // uncomment lines to enable dbgLog() calls starting with 'X'
 	//  0x01 +	// 1 system clock
-		0x02 +	// 2 audio codec debugging
+	//	0x02 +	// 2 audio codec debugging
 	//	0x04 +	// 3 file sys
 	//	0x08 +	// 4 threads & initialization
 	//	0x10 +	// 5 power checks
-		0x20 +	// 6 logging
+	//	0x20 +	// 6 logging
 	//	0x40 +	// 6 mp3 decoding
-	//	0x80 +	// 8 recording
+		0x80 +	// 8 recording
 	//	0x100 +	// 9 led
 	//	0x200 +	// A keyboard
 	//	0x400 +	// B token table
 	//	0x800 +	// C CSM
-	//	0x1000 + // D audio playback
+		0x1000 + // D audio playback
 0;
 bool										dbgEnab( char ch ){
 	switch( ch ){
@@ -522,7 +522,7 @@ bool										dbgEnab( char ch ){
 		case 'A': return (DebugMask & 0x200)!=0; 	// keyboard
 		case 'B': return (DebugMask & 0x400)!=0; 	// token table
 		case 'C': return (DebugMask & 0x800)!=0; 	// CSM
-		case 'D': return (DebugMask & 0x1000)!=0; 	// audio playback
+		case 'D': return (DebugMask & 0x1000)!=0; 	// audio playback/record
 		default:
 			return true; 	// no digit => always show
 	}

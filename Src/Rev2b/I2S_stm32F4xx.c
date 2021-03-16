@@ -536,7 +536,7 @@ dbgEvt( TB_saiPower, state, 0,0,0);
       NVIC_DisableIRQ( DMA1_Stream3_IRQn );     		// Disable SPI2_RX DMA IRQ
       NVIC_ClearPendingIRQ( DMA1_Stream3_IRQn );  	// Clear pending PI2_RX DMA interrupts
 
-			cdc_PowerDown();					// power down codec & I2C1 device
+	//		cdc_PowerDown();					// power down codec & I2C1 device    DEBUG-- gets I2C Tx hang trying to write to codec
  //     RCC->APB1ENR &= ~RCC_APB1ENR_I2C1EN; 	// disable I2C1 device
 
       RCC->APB1ENR &= ~RCC_APB1ENR_SPI2EN; 	// disable SPI2 device (i2s2 & i2s2_ext) 
@@ -579,6 +579,7 @@ dbgEvt( TB_saiPower, state, 0,0,0);
   }
   return ARM_DRIVER_OK;
 }
+
 static int32_t 								I2S2only_Send( const void *data, uint32_t nSamples, I2S_RESOURCES *i2s ){						// start data transmit
 // ONLY for I2S2 (SPI2) using DMA1_Stream4
 //   Start sending data to I2S transmitter.  
@@ -618,8 +619,8 @@ static int32_t 								I2S2only_Send( const void *data, uint32_t nSamples, I2S_R
 	while ( (dma->CR & DMA_SxCR_EN) != 0 )		// reset DMA CR.EN to make sure it's disabled
 		dma->CR &= 	~DMA_SxCR_EN;								// keep trying till its true
 	
-	// clear any leftover interrupt requests
-	DMA1->HIFCR &= ~( DMA_HISR_TCIF4 |DMA_HISR_HTIF4 |DMA_HISR_TEIF4 |DMA_HISR_DMEIF4 | DMA_HISR_FEIF4  );
+	// clear any leftover interrupt requests  -- OR values into Clear Register
+	DMA1->HIFCR |= ( DMA_HISR_TCIF4 | DMA_HISR_HTIF4 | DMA_HISR_TEIF4 | DMA_HISR_DMEIF4 | DMA_HISR_FEIF4 );
 
 	dma->PAR = (uint32_t) &SPI2->DR;		// periph is SPI2 DataRegister
 	dma->M0AR = (uint32_t) data;				// load M0AR -- 1st buff
@@ -704,8 +705,8 @@ static int32_t 								I2S2ext_Receive( void *data, uint32_t nSamples, I2S_RESOU
 	info->rx_req = nbytes;
 	info->rx_cnt = 0;	// bytes received
 
-	// clear any leftover interrupt requests-- stream 3
-	DMA1->LIFCR &= ~( DMA_LISR_TCIF3 |DMA_LISR_HTIF3 |DMA_LISR_TEIF3 |DMA_LISR_DMEIF3 | DMA_LISR_FEIF3  );
+	// clear any leftover interrupt requests-- stream 3 -- OR bits into CLEAR register
+	DMA1->LIFCR |= ( DMA_LISR_TCIF3 | DMA_LISR_HTIF3 | DMA_LISR_TEIF3 | DMA_LISR_DMEIF3 | DMA_LISR_FEIF3 );
 
 	// CHSEL, PFCTRL, PL, FIFO, BURST at defaults
 	int cfg = DMA_SxCR_MSIZE_0 | DMA_SxCR_PSIZE_0 | DMA_SxCR_MINC;  // codec->mem, 16bit words

@@ -5,7 +5,7 @@
 
 const int WaveHdrBytes 			= 44;					// length of .WAV file header
 const int SAMPLE_RATE_MIN 	=  8000;
-const int SAMPLE_RATE_MAX 	= 96000;
+const int SAMPLE_RATE_MAX 	= 48000;
 const int BuffLen 					= 4096;						// in bytes
 const int BuffWds						= BuffLen/2;  		// in shorts
 const int nPlyBuffs 				= 3;							// num buffers used in playback & record from pSt.Buff[] (must be <= N_AUDIO_BUFFS )
@@ -13,9 +13,9 @@ const int nSvBuffs 					= N_AUDIO_BUFFS;	// max buffers used in pSt.SvBuff[] whi
 
 const int MIN_AUDIO_PAD			= 37;							// minimum 0-padding samples at end of file, to clear codec pipeline before powering down
 
-const int RECORD_SAMPLE_RATE = 16000;
+const int RECORD_SAMPLE_RATE = 8000;					// AIC3100  7.3.8.2:  ADC, Mono, 8 kHz, DVDD = 1.8 V, AVDD = 3.3 V  AOSR=128,  PRB_R4 (example)
 const int RECORD_SEC 				= 30;
-const int WAV_DATA_SIZ			= RECORD_SAMPLE_RATE * 2 * RECORD_SEC; 		// 30sec at 16K 16bit samples
+const int WAV_DATA_SIZ			= RECORD_SAMPLE_RATE * 2 * RECORD_SEC; 		// 30sec at 8K 16bit samples
 const int WAV_FILE_SIZ	 		= WAV_DATA_SIZ + sizeof(WAVE_FormatTypeDef)-1;
 
 const WAVE_FormatTypeDef WaveRecordHdr = {
@@ -217,7 +217,7 @@ void 								audPlayAudio( const char* audioFileName, MsgStats *stats ){ // star
 	pSt.stats = stats;
 	stats->Start++;
 	
-	if ( strcmp( &audioFileName[ strlen( audioFileName )-4 ], ".wav" ) == 0 ){
+	if ( strcasecmp( &audioFileName[ strlen( audioFileName )-4 ], ".wav" ) == 0 ){
 		pSt.audType = audWave;
 		playWave( audioFileName );
 		// Let CSM know that playback has started
@@ -248,7 +248,7 @@ void 								audStopAudio( void ){													// abort any leftover operation
 	
 	if (st == Recording ){
 		if ( pSt.state==pbRecording ){
-			dbgLog( "! stopAud Rec %x\n", pSt.audF );
+			dbgLog( "8 audStop Rec %x\n", pSt.audF );
 			haltRecord();		// shut down dev, update timestamps
 			audRecordComplete();  // close file, report errors
 		}
@@ -266,7 +266,7 @@ void 								audStopAudio( void ){													// abort any leftover operation
 		freeBuffs();
 		pSt.stats->Left++;		// update stats for interrupted operation
 		int pct = audPlayPct();
-		dbgLog( "! audStop %d \n", pct );
+		dbgLog( "D audStop play %d \n", pct );
 		pSt.stats->LeftSumPct += pct;
 		if ( pct < pSt.stats->LeftMinPct ) pSt.stats->LeftMinPct = pct;
 		if ( pct > pSt.stats->LeftMaxPct ) pSt.stats->LeftMaxPct = pct;
@@ -294,7 +294,7 @@ void 								audStartRecording( FILE *outFP, MsgStats *stats ){	// start recordi
 
 	pSt.audF = outFP;
 	WAVE_FormatTypeDef *wav = pSt.wavHdr;
-	memcpy( wav, &WaveRecordHdr, WaveHdrBytes );		// header for 30 secs of mono 16K audio
+	memcpy( wav, &WaveRecordHdr, WaveHdrBytes );		// header for 30 secs of mono RECORD_SAMPLE_RATE audio
   
 	int cnt = fwrite( pSt.wavHdr, 1, WaveHdrBytes, pSt.audF );
 	if ( cnt != WaveHdrBytes ) tbErr( "wavHdr cnt=%d", cnt );
@@ -320,9 +320,10 @@ void 								audStartRecording( FILE *outFP, MsgStats *stats ){	// start recordi
 
 
 void 								audRequestRecStop( void ){										// signal record loop to stop
-	if ( pSt.state == pbRecording )
+	if ( pSt.state == pbRecording ){
+		dbgLog( "8 reqRecStp \n");
 		pSt.state = pbRecStop;		// handled by SaiEvent on next buffer complete
-	else if ( pSt.state == pbRecPaused ){
+	} else if ( pSt.state == pbRecPaused ){
 		ledFg( NULL );
 		audRecordComplete();			// already paused-- just finish up
 	}
@@ -341,7 +342,7 @@ void 								audPauseResumeAudio( void ){									// signal playback to request 
 				// subsequent call to audPauseResumeAudio() will start playing at pSt.msPlayed msec
 			pct = audPlayPct();
 			dbgEvt( TB_audPause, pct, pSt.msPlayed, pSt.nPlayed, 0);
-		  dbgLog( "2 pausePlay at %d ms \n", pSt.msPlayed );
+		  dbgLog( "D pausePlay at %d ms \n", pSt.msPlayed );
 			logEvtNININI( "plPause", "ms", pSt.msPlayed, "pct", pct, "nS", pSt.nPlayed  );
 			pSt.stats->Pause++;
 			break;
@@ -349,7 +350,7 @@ void 								audPauseResumeAudio( void ){									// signal playback to request 
 		case pbPaused:
 			// resuming == restarting at msPlayed
 			dbgEvt( TB_audResume, pSt.msPlayed, 0,0,0);
-		  dbgLog( "2 resumePlay at %d ms \n", pSt.msPlayed );
+		  dbgLog( "D resumePlay at %d ms \n", pSt.msPlayed );
 			logEvt( "plResume" );
 			pSt.stats->Resume++;
 			if ( pSt.audType==audWave ) 
@@ -362,7 +363,7 @@ void 								audPauseResumeAudio( void ){									// signal playback to request 
 			audSaveBuffs();			// write all filled SvBuff[], file left open
 		
 			dbgEvt( TB_recPause, 0,0,0,0);
-		  dbgLog( "2 pauseRec at %d ms \n", pSt.msRecorded );
+		  dbgLog( "8 pauseRec at %d ms \n", pSt.msRecorded );
 			ledFg( TB_Config.fgRecordPaused );	// blink red: while paused  
 				// subsequent call to audPauseResumeAudio() will append new recording 
 			logEvtNINI( "recPause", "ms", pSt.msRecorded, "nS", pSt.nSaved );
@@ -373,7 +374,7 @@ void 								audPauseResumeAudio( void ){									// signal playback to request 
 			// resuming == continue recording
 			dbgEvt( TB_recResume, pSt.msRecorded, 0,0,0);
 			logEvt( "recResume" );
-		  dbgLog( "2 resumeRec at %d ms \n", pSt.msRecorded );
+		  dbgLog( "8 resumeRec at %d ms \n", pSt.msRecorded );
 			pSt.stats->RecResume++;
 			Driver_SAI0.PowerControl( ARM_POWER_FULL );		// power audio back up
 			ctrl = ARM_SAI_CONFIGURE_RX | ARM_SAI_MODE_SLAVE  | ARM_SAI_ASYNCHRONOUS | ARM_SAI_PROTOCOL_I2S | ARM_SAI_DATA_SIZE(16);
@@ -407,7 +408,6 @@ void								audLoadBuffs(){																// called on mediaThread to preload a
 
 
 void 								audPlaybackComplete( void ){									// shut down after completed playback
-	dbgLog( "D PlyC: %d samp/ %d msec \n", pSt.nPlayed, pSt.msPlayed );
 	haltPlayback();
   audPlayDone();		
 
@@ -425,16 +425,18 @@ void 								audRecordComplete( void ){										// last buff recorded, finish s
 	freeBuffs( );
 	audSaveBuffs();			// write all filled SvBuff[]
 	tbCloseFile( pSt.audF );  //int err = fclose( pSt.audF );
+	pSt.audF = NULL; 
 	ledFg( NULL );
+	dbgLog( "8 RecComp %d errs \n", pSt.ErrCnt );
 	
 	dbgEvt( TB_audRecClose, pSt.nSaved, pSt.buffNum, minFreeBuffs, 0);
 	logEvtNINI( "recMsg", "ms", pSt.msRecorded, "nSamp", pSt.nSaved );
 
 	if ( pSt.ErrCnt > 0 ){ 
 		if (pSt.LastError == SAI_OutOfBuffs )
-			dbgLog( "%d record errs, out of buffs \n", pSt.ErrCnt );
+			dbgLog( "! %d record errs, out of buffs \n", pSt.ErrCnt );
 		else
-			dbgLog( "%d record errs, Lst=0x%x \n", pSt.ErrCnt, pSt.LastError );
+			dbgLog( "! %d record errs, Lst=0x%x \n", pSt.ErrCnt, pSt.LastError );
 		logEvtNINI( "RecErr", "cnt", pSt.ErrCnt, "last", pSt.LastError );
 	}
 	pSt.state = pbIdle;
@@ -443,7 +445,7 @@ void 								audRecordComplete( void ){										// last buff recorded, finish s
 
 //
 // INTERNAL functions
-static void adjBuffCnt( int adj ){
+static void 				adjBuffCnt( int adj ){
 	nFreeBuffs += adj;
 	int cnt = 0;
 	for ( int i=0; i<MxBuffs; i++ ) 
@@ -501,6 +503,9 @@ static void 				startPlayback( void ){												// preload buffers & start pla
 	cdc_SetMute( false );		// unmute
 
 	Driver_SAI0.Send( pSt.Buff[0]->data, BuffWds );		// start first buffer 
+	//BUG! -- on 2nd playback rh_for_subj:  apparently saiEvent() IS GETTING CALLED BETWEEN THESE TWO Send()'s
+	//  it calls send with Buff[2], then shifts [2] to [1], so the next line calls with the same value!
+	//CAUSE? DMA TXDN interrupt immediately after starting transfer?
 	Driver_SAI0.Send( pSt.Buff[1]->data, BuffWds );		// & set up next buffer 
 
   // buffer complete for cBuff calls saiEvent, which:
@@ -574,6 +579,11 @@ static void					saveBuff( Buffer_t * pB ){										// save buff to file, then f
 	int nS = BuffWds/2;	  // num mono samples
 	for ( int i = 0; i<BuffWds; i+=2 )	// nS*2 stereo samples
 		pB->data[ i >> 1 ] = pB->data[ i ];  // pB[0]=pB[0], [1]=[2], [2]=[4], [3]=[6], ... [(BuffWds-2)/2]=[BuffWds-2]
+	int bNum = pSt.nSaved / nS;
+	if ( bNum < 4 ){
+		bool zero = (pB->data[0]==0) && (pB->data[1]==0);
+		dbgLog( "8 %c%d R%d S%d\n", zero? '!':'D', bNum, pB->cntBytes-pSt.tsRecord, tbTimeStamp()-pSt.tsRecord  );
+	}
 	int nB = fwrite( pB->data, 1, nS*2, pSt.audF );		// write nS*2 bytes (1/2 buffer)
 	if ( nB != nS*2 ) tbErr("svBuf write(%d)=>%d", nS*2, nB );
 	
@@ -670,6 +680,7 @@ static Buffer_t * 	loadBuff( ){																	// read next block of audio into
 	}
 
 	if ( nSamp < BuffWds ){ 				// room left in buffer: at EOF, so fill rest with zeros
+		dbgLog( "D plyLast nS=%d \n", pSt.nLoaded + nSamp );
 		if ( nSamp <= BuffWds-MIN_AUDIO_PAD ){
 			pSt.audioEOF = true;							// enough padding, so stop after this
 			tbCloseFile( pSt.audF );  //int res = fclose( pSt.audF );
@@ -700,14 +711,14 @@ extern void 				playWave( const char *fname ){ 								// play the WAV file -- (
   if ( !pSt.SqrWAVE ){	// open file, unless SqrWAVE
 		pSt.audF = tbOpenRead( fname ); //fopen( fname, "r" );
 		if ( pSt.audF==NULL || fread( pSt.wavHdr, 1, WaveHdrBytes, pSt.audF ) != WaveHdrBytes ) 
-			{ errLog( "open wav failed, %s", fname ); return; }
+			{ errLog( "open wav failed, %s", fname ); audStopAudio(); return; }
 		if ( pSt.wavHdr->ChunkID != WaveRecordHdr.ChunkID || pSt.wavHdr->FileFormat != WaveRecordHdr.FileFormat )
-			{ errLog("bad wav: %s  ckID=0x%x FF=0x%x \n", fname, pSt.wavHdr->ChunkID, pSt.wavHdr->FileFormat ); return; }
+			{ errLog("bad wav: %s  ckID=0x%x FF=0x%x \n", fname, pSt.wavHdr->ChunkID, pSt.wavHdr->FileFormat ); audStopAudio(); return; }
 	}
 	pSt.state = pbGotHdr;
 	int audioFreq = pSt.wavHdr->SampleRate;
   if ((audioFreq < SAMPLE_RATE_MIN) || (audioFreq > SAMPLE_RATE_MAX))
-		{ errLog( "bad audioFreq, %d", audioFreq ); return; }
+		{ errLog( "bad audioFreq, %d", audioFreq ); audStopAudio(); return; }
 
 	pSt.samplesPerSec = audioFreq;
 	
@@ -754,23 +765,23 @@ extern void 				saiEvent( uint32_t event ){										// called by ISR on buffer 
 			dbgEvt( TB_saiPLYDN, 0, 0, 0, 0 );
 			osEventFlagsSet( mMediaEventId, CODEC_PLAYBACK_DN );	// signal mediaThread for rest
 		} else {
-			dbgLog( "Audio underrun\n" );
+			dbgLog( "! Audio underrun\n" );
 		}
 	}
 
 	if ( (event & ARM_SAI_EVENT_RECEIVE_COMPLETE) != 0 ){
 		Buffer_t * pB = pSt.Buff[2];		// next record buffer
-		if ( pSt.state == pbRecording && pB != NULL ){
+		if ( pSt.state == pbRecording && pB != NULL ){ // provide next buffer to device as quickly as possible
 			  pSt.nRecorded += pSt.samplesPerBuff;
 				pB->state = bRecording;
 			  pB->firstSample = pSt.nRecorded+1;
-				Driver_SAI0.Receive( pSt.Buff[2]->data, BuffWds );	// next buff ready for reception
+				Driver_SAI0.Receive( pB->data, BuffWds );	// next buff ready for reception
 	  }
 		
 		pSt.buffNum++;										// received 1 more buffer
 		Buffer_t * pFull = pSt.Buff[0];		// filled buffer
 		pFull->state = bRecorded;
-		pFull->cntBytes = tbTimeStamp();
+		pFull->cntBytes = tbTimeStamp();  // mark time of completion for DEBUG
 		
 		for ( int i=0; i < nPlyBuffs-1; i++ )  // shift receive buffer ptrs down
 			pSt.Buff[i] = pSt.Buff[i+1];
@@ -787,7 +798,7 @@ extern void 				saiEvent( uint32_t event ){										// called by ISR on buffer 
 		if (pSt.state == pbRecStop ){
 			haltRecord();		// stop audio input
 			osEventFlagsSet( mMediaEventId, CODEC_RECORD_DN );		// tell mediaThread to save
-			freeBuffs();						// free buffers waiting to record
+			freeBuffs();						// free buffers waiting to record -- pSt.Buff[*]
 		} else {
 			pSt.Buff[ nPlyBuffs-1 ] = allocBuff( true );		// add new empty buff for reception
 			if ( pSt.Buff[ nPlyBuffs-1 ]==NULL ){	// out of buffers-- try to shut down

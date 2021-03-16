@@ -130,7 +130,7 @@ void 						i2c_wrReg( uint8_t reg, uint8_t val ){									// write codec registe
   while (( I2C_Event & ARM_I2C_EVENT_TRANSFER_DONE ) == 0U){
 		waitCnt++;  // busy wait until transfer completed
 		if ( waitCnt > 1000 ){
-			errLog("I2C Tx hang, r=%d v=0x%x", reg, val);
+			dbgLog("I2C Tx hang, r=%d v=0x%x", reg, val);
 			reinitCnt++;
 			if ( reinitCnt > 16 ) tbErr( "Can't restart I2C\n" );
 			i2c_Reinit( reinitCnt );			// SW, RST, SW+RST, INIT, INIT+SW, ...

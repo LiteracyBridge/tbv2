@@ -357,8 +357,8 @@ static void 					doAction( Action act, char *arg, int iarg ){	// execute one csm
 static void						changeCSMstate( short nSt, short lastEvtTyp ){
 	dbgEvt( TB_csmChSt, nSt, 0,0,0 );
 	assertValidState(nSt);
-	if (nSt==TBook.iCurrSt)
-		logEvtNSNS( "Noop_evt", "state",TBook.cSt->nm, "evt", eventNm( (Event)lastEvtTyp) ); //DEBUG
+	if (nSt==TBook.iCurrSt) dbgLog( "C %s(%d): %s => %d \n", TBook.cSt->nm, TBook.iCurrSt, eventNm( (Event)lastEvtTyp), nSt);
+		//logEvtNSNS( "Noop_evt", "state",TBook.cSt->nm, "evt", eventNm( (Event)lastEvtTyp) ); //DEBUG
 	
 	// We twiddle with nSt and with iCurrSt in various ways. 
 	while ( nSt != TBook.iCurrSt ){
@@ -372,8 +372,7 @@ static void						changeCSMstate( short nSt, short lastEvtTyp ){
 		TBook.cSt = stateDef;
 		TBook.currStateName = stateDef->nm;	//DEBUG -- update currSt string
 		
-		// It appears that this loop updates values that are never read, every time through
-		// the enclosing while loop, every time changeCSMstate is called. ????
+		// Update status strings inside TBook -- solely for visibility in the debugger
 		for ( Event e=eNull; e<eUNDEF; e++ ){	//DEBUG -- update nextSt strings
 			// Aren't these names the same each and every time?
 			TBook.evtNms[ e ] = eventNm( e );

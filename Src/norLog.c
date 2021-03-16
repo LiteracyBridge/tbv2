@@ -460,6 +460,7 @@ void						CheckNLog( FILE * f ){											// reads & checks Nor Pg0, msgs about
 void						copyNorLog( const char * fpath ){						// copy curr Nor log into file at path
   if ( NLg.pNor == NULL ) return;				// Nor not initialized
 
+	osMutexAcquire( logLock, 0 );			// acquire lock, if not already locked (e.g. filled up during append)
 	dbgLog( "6 copyNorLog %s \n", fpath );
 	char fnm[40];
 	uint32_t stat, msec, tsStart = tbTimeStamp(), totcnt = 0;
@@ -504,6 +505,7 @@ void						copyNorLog( const char * fpath ){						// copy curr Nor log into file 
 	
 	msec = tbTimeStamp() - tsStart;
 	dbgLog( "6 copyNorLog: %s: %d in %d msec \n", fnm, totcnt, msec );
+	osMutexRelease( logLock );	// allow other threads to continue
 }
 void						restoreNorLog( const char * fpath ){				// copy file into current log
 	FILE * f = tbOpenRead( fpath ); //fopen( fpath, "r" );

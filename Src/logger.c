@@ -327,7 +327,11 @@ void						logEvtS( const char *evtID, const char *args ){		// write log entry: '
 	addHist( evtBuff, args );
 	dbgLog( "%s %s\n", evtBuff, args );
 	
-	if ( osMutexAcquire( logLock, osWaitForever )!=osOK )	tbErr("logLock");
+	if ( osMutexAcquire( logLock, osWaitForever )!=osOK ){
+		dbgLog( "! logLock lost %s \n", evtID );
+		return;
+		//tbErr("logLock");
+	}
 	norEvt( evtBuff, args );	// WRITE to NOR Log
 	if ( logF!=NULL ){
 		int nch = fprintf( logF, "%s, %s\n", evtBuff, args );

@@ -250,6 +250,7 @@ void 										FileSysPower( bool enable ){										// power up/down eMMC & SD 
 	if ( enable ){
 		if ( FSysPowered ) return;
 		
+		dbgLog( "5 FSysPwr up \n" );
 		gConfigOut( gEMMC_RSTN );		// 0 to reset? eMMC
 		gConfigOut( g3V3_SW_EN );		// 1 to enable power to SDCard & eMMC
 		gSet( gEMMC_RSTN, 1 );			// enable at power up?
@@ -262,6 +263,7 @@ void 										FileSysPower( bool enable ){										// power up/down eMMC & SD 
 	} else {
 		if ( !FSysPowered ) return;
 		
+		dbgLog( "5 FSysPwr dn \n" );
 		int st = funinit( "M0:" );
 		if ( st != fsOK ) 
 			errLog("funinit => %d", st );
@@ -270,7 +272,7 @@ void 										FileSysPower( bool enable ){										// power up/down eMMC & SD 
 		FSysPowered = false;
 	}
 }
-void osRtxIdleThread (void *argument) {
+void 										osRtxIdleThread (void *argument) {
   (void)argument;
   // The idle demon is a system thread, running when no other thread is ready to run. 
   for (;;) {
@@ -375,7 +377,7 @@ void 										showRTC( ){
 	sprintf(dttm, "%s %d-%s-%d %d:%02d:%02d", wkdy[day], date, month[mon], yr, hr,min,sec );
 	logEvtNS( "RTC", "DtTm", dttm );
 }
-void measureSystick(){
+void 										measureSystick(){
 	const int NTS = 6;
 	int msTS[ NTS ], minTS = 1000000, maxTS=0, sumTS=0;
 	
@@ -400,6 +402,7 @@ void measureSystick(){
 
 static uint32_t lastTmStmp = 0;
 static uint32_t lastHalTick = 0, HalSameCnt = 0;
+static uint32_t nDelays = 0, totDelay = 0;
 uint32_t 								tbTimeStamp(){																	// return msecs since boot
 	if ( osKernelGetState()==osKernelRunning )
 		lastTmStmp =  osKernelGetTickCount();
@@ -420,6 +423,8 @@ void 										tbDelay_ms( int ms ) {  												// Delay execution for a spec
 	if ( ms==0 ) ms = 1;
 	delayReq = ms;
 	actualDelay = 0;
+	nDelays++;
+	totDelay += ms;
 	if ( osKernelGetState()==osKernelRunning ){
 		osDelay( ms );
 		actualDelay = tbTimeStamp() - stTS;
@@ -454,10 +459,29 @@ void *									mp3_calloc( int num,int size ){
 	return ptr;
 }
 bool 										fexists( const char *fname ){										// return true if file path exists
+	FileSysPower( true );
 	fsFileInfo info;
 	info.fileID = 0;
 	fsStatus stat = ffind( fname, &info );
 	return ( stat==fsOK );
+}
+char *									findOnPathList( char * destpath, const char *search_path, const char * nm ){	// store path to 1st 'nm' on 'search_path' in 'destpath'
+	FileSysPower( true );
+	const char * p = search_path;
+	while ( p != NULL ){
+		for (int i=0; i<40; i++){
+			destpath[i] = *p++;
+			if ( destpath[i]==';' || destpath[i]==0 ){
+				if ( destpath[i]==0 ) p = NULL;  // last path
+				destpath[i] = 0;
+				break;
+			}
+		}
+		strcat( destpath, nm );		// append 'nm' to next path in search list
+		if ( fexists( destpath )) 
+			return destpath;
+	}
+	return NULL;
 }
 //
 // debug logging & printf to Dbg.Scr  & EVR events  *****************************
@@ -498,15 +522,15 @@ int DebugMask =    // uncomment lines to enable dbgLog() calls starting with 'X'
 	//	0x02 +	// 2 audio codec debugging
 	//	0x04 +	// 3 file sys
 	//	0x08 +	// 4 threads & initialization
-	//	0x10 +	// 5 power checks
+		0x10 +	// 5 power checks
 	//	0x20 +	// 6 logging
 	//	0x40 +	// 6 mp3 decoding
-		0x80 +	// 8 recording
+	//	0x80 +	// 8 recording
 	//	0x100 +	// 9 led
 	//	0x200 +	// A keyboard
 	//	0x400 +	// B token table
-	//	0x800 +	// C CSM
-		0x1000 + // D audio playback
+		0x800 +	// C CSM
+	//	0x1000 + // D audio playback
 0;
 bool										dbgEnab( char ch ){
 	switch( ch ){
@@ -861,6 +885,8 @@ uint32_t 								osRtxErrorNotify (uint32_t code, void *object_id) {	// osRtx er
 	return 0;
 }
 
+
+#ifdef DEVICE_STATE_SNAPSHOTS
 //
 // device state snapshots  *************************************
 struct  {
@@ -955,6 +981,6 @@ void 										chkDevState( char *loc, bool reset ){ // report any device change
 		}
 	}
 }
-
+#endif
 
 // END tbUtil

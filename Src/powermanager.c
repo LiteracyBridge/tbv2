@@ -93,15 +93,21 @@ void											setPowerCheckTimer( int timerMs ){
 	osTimerStart( pwrCheckTimer, timerMs );
 }
 
-void 											enableSleep( void ){						// low power mode -- CPU stops till interrupt
+void 											enableSleep( void ){						// low power mode -- (STM32 Stop) CPU stops till interrupt
+	dbgLog( "5 enSleep \n");
 	for (int i=0; i<3; i++){			// clear all pending ISR
 		uint32_t pend = NVIC->ISPR[i];
 		if ( pend != 0 ) 	// clear any pending interrupts
 			NVIC->ICPR[i] = pend;		
 	}
+	int sleep = osKernelSuspend();
+	
 	__WFI();	// sleep till interrupt
+	
+	osKernelResume( 0 ); // force reboot?
 }
-void 											enableStandby( void ){					// power off-- reboot on wakeup from NRST
+void 											enableStandby( void ){					// power off-- (STM32 Standby) reboot on wakeup from NRST
+	dbgLog( "5 enStandby \n");
 	PWR->CR |= PWR_CR_CWUF;							// clear wakeup flag
 	PWR->CR |= PWR_CR_PDDS;							// set power down deepsleep 
 	SCB->SCR |= SCB_SCR_SLEEPDEEP_Msk;	// set DeepSleep
@@ -114,10 +120,10 @@ void 											enableStandby( void ){					// power off-- reboot on wakeup from 
 	__WFI();	// standby till reboot
 }
 void											powerDownTBook( bool sleep ){					// shut down TBook
-	ledFg( TB_Config.fgPowerDown );
-	logEvt( "Standby" );
+//	ledFg( TB_Config.fgPowerDown );
+	logEvt( "PowerDown" );
 	logPowerDown();		// flush & close logs
-	tbDelay_ms( 3500 );	// wait for fgPowerDown to finish
+//	tbDelay_ms( 3500 );	// wait for fgPowerDown to finish
 	ledBg( NULL );
 	ledFg( NULL );
 	if (sleep)

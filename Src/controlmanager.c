@@ -332,9 +332,9 @@ static void 					doAction( Action act, char *arg, int iarg ){	// execute one csm
 			break;
 		case powerDown:		
 			ledBg( NULL );								// turn off background heartbeat
-			ledFg( TB_Config.fgPowerDown ); 	//  R R R   R R   R
-			tbDelay_ms( 15000 );					// wait for LED sequence to finish
-			powerDownTBook( false );
+			//ledFg( TB_Config.fgPowerDown ); 	//  R R R   R R   R
+			//tbDelay_ms( 2000 );					// wait for LED sequence to finish
+			powerDownTBook( true ); //false );
 			break;
 	  case sysTest:
 			controlTest();
@@ -357,7 +357,7 @@ static void 					doAction( Action act, char *arg, int iarg ){	// execute one csm
 static void						changeCSMstate( short nSt, short lastEvtTyp ){
 	dbgEvt( TB_csmChSt, nSt, 0,0,0 );
 	assertValidState(nSt);
-	if (nSt==TBook.iCurrSt) dbgLog( "C %s(%d): %s => %d \n", TBook.cSt->nm, TBook.iCurrSt, eventNm( (Event)lastEvtTyp), nSt);
+	if (nSt==TBook.iCurrSt) dbgLog( "C %s(%d): %s => %s \n", TBook.cSt->nm, TBook.iCurrSt, eventNm( (Event)lastEvtTyp), TBookCSM[nSt]->nm );
 		//logEvtNSNS( "Noop_evt", "state",TBook.cSt->nm, "evt", eventNm( (Event)lastEvtTyp) ); //DEBUG
 	
 	// We twiddle with nSt and with iCurrSt in various ways. 
@@ -407,7 +407,7 @@ static void						changeCSMstate( short nSt, short lastEvtTyp ){
 		// Log the list of actions.
 		// TODO: how is this useful in the log? If we're to do anything with the actions, they should
 		// be logged individually.
-		logEvtNSNSNS( "CSM_st", "ev", eventNm((Event)lastEvtTyp), "nm", stateDef->nm, "act", Actions );
+	//	logEvtNSNSNS( "CSM_st", "ev", eventNm((Event)lastEvtTyp), "nm", stateDef->nm, "act", Actions );
 		
 		// If one of the actions was goSavedSt, TBook.iNextSt was changed as a side effect of doAction()
 		// If one of the actions was goPrevSt, TBook.iCurrSt was also changed as a side effect.
@@ -455,7 +455,10 @@ void 					executeCSM( void ){								// execute TBook control state machine
 				osTimerStart( timers[0], TB_Config.shortIdleMS );
 				osTimerStart( timers[1], TB_Config.longIdleMS );
 				break;
-			case ShortIdle:
+			case ShortIdle:			// events that don't reset idle timers
+			case LowBattery:
+			case BattCharging:
+			case BattCharged:
 				break;
 			default:
 				osTimerStop( timers[0] );

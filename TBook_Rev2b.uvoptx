@@ -120,7 +120,7 @@
         <SetRegEntry>
           <Number>0</Number>
           <Key>EVENTREC_CNF</Key>
-          <Name>-l0 -a1 -s0 -h 3|vol -h 0| -h 5|Reset -h 8|ReadDone -h 4|Read -h 6|RESET* -h 7|Config* -h 8|*Config* -h 6|Config -h 4|lba* -h 5|Read* -fFE000000000000000000000000000000FF0000007F000000000000000080000012000000000000000000000000000000FF00000000000000000000000080000000000000000000000000000000000000FF00000000000000000000000080004000000000000000000000000000000000FF000000000000000000000000800000</Name>
+          <Name>-l0 -a1 -s0 -h 3|vol -h 0| -h 5|Reset -h 8|ReadDone -h 4|Read -h 6|RESET* -h 7|Config* -h 8|*Config* -h 6|Config -h 4|lba* -h 5|Read* -fFEEF03206D0C0008910B0008910B0008FF0B0008FF0B0008910B000800000000FE0100000000000000000000A90B0008FF0C00087F000000410C0008510C0008870C0008870C0008870C0008870C0008870C0008870C0008234B0008374B0008870C0008414B00084B4B0008870C0008870C0008870C0008A1490008C9490008</Name>
         </SetRegEntry>
         <SetRegEntry>
           <Number>0</Number>
@@ -290,6 +290,46 @@
           <WinNumber>1</WinNumber>
           <ItemText>I2S2_Resources</ItemText>
         </Ww>
+        <Ww>
+          <count>27</count>
+          <WinNumber>1</WinNumber>
+          <ItemText>recOpts[i]</ItemText>
+        </Ww>
+        <Ww>
+          <count>28</count>
+          <WinNumber>1</WinNumber>
+          <ItemText>recOpts</ItemText>
+        </Ww>
+        <Ww>
+          <count>29</count>
+          <WinNumber>1</WinNumber>
+          <ItemText>lstKey</ItemText>
+        </Ww>
+        <Ww>
+          <count>30</count>
+          <WinNumber>1</WinNumber>
+          <ItemText>dnKey</ItemText>
+        </Ww>
+        <Ww>
+          <count>31</count>
+          <WinNumber>1</WinNumber>
+          <ItemText>upCnt</ItemText>
+        </Ww>
+        <Ww>
+          <count>32</count>
+          <WinNumber>1</WinNumber>
+          <ItemText>TBook</ItemText>
+        </Ww>
+        <Ww>
+          <count>33</count>
+          <WinNumber>1</WinNumber>
+          <ItemText>nDelays,0x0A</ItemText>
+        </Ww>
+        <Ww>
+          <count>34</count>
+          <WinNumber>1</WinNumber>
+          <ItemText>totDelay,0x0A</ItemText>
+        </Ww>
       </WatchWindow1>
       <WatchWindow2>
         <Ww>
@@ -311,11 +351,19 @@
       <MemoryWindow1>
         <Mm>
           <WinNumber>1</WinNumber>
-          <SubType>10</SubType>
-          <ItemText>0x20016030</ItemText>
+          <SubType>8</SubType>
+          <ItemText>0x20010f9c</ItemText>
           <AccSizeX>0</AccSizeX>
         </Mm>
       </MemoryWindow1>
+      <MemoryWindow4>
+        <Mm>
+          <WinNumber>4</WinNumber>
+          <SubType>0</SubType>
+          <ItemText>LIFCR</ItemText>
+          <AccSizeX>0</AccSizeX>
+        </Mm>
+      </MemoryWindow4>
       <ScvdList>
         <Filename>..\..\..\..\Keil_v5\ARM\PACK\Keil\MDK-Middleware\7.10.0\FileSystem\FileSystem.scvd</Filename>
         <Type></Type>
@@ -380,12 +428,12 @@
       <pMultCmdsp></pMultCmdsp>
       <SystemViewers>
         <Entry>
-          <Name>System Viewer\DMA1</Name>
-          <WinId>35905</WinId>
+          <Name>System Viewer\GPIOB</Name>
+          <WinId>35904</WinId>
         </Entry>
         <Entry>
           <Name>System Viewer\I2S2ext</Name>
-          <WinId>35904</WinId>
+          <WinId>35905</WinId>
         </Entry>
       </SystemViewers>
       <DebugDescription>

@@ -7,7 +7,7 @@
 #include "fs_evr.h"					// FileSys components
 #include "fileOps.h"				// decode & encrypt audio files
 
-const char * 	TBV2_Version 				= "V3.02 of 16-Mar-2021";
+const char * 	TBV2_Version 				= "V3.02 of 2-Apr-2021";
 
 //
 // Thread stack sizes
@@ -18,7 +18,6 @@ const int 		MEDIA_STACK_SIZE 		= 4096;		// opens in/out files
 const int 		FILEOP_STACK_SIZE 	= 6144;		// opens in/out files, mp3 decode
 const int 		LED_STACK_SIZE 			= 512;
 
-//const int pSTATUS 				= 0;
 const int pCSM_VERS				= 0;
 const int	pBOOTCNT 				= 1; 
 const int	pCSM_DEF 				= 2;
@@ -31,26 +30,17 @@ const int pPKG_VERS  		  = 8;
 const int pAUDIO = 9;		// DEBUG
 const int pLAST = 9;
 char * TBP[] = {
-		"M0:/system/version.txt",
-		"M0:/system/bootcount.txt",
-		"M0:/system/control.def",
-		"M0:/log/tbLog.txt",
-		"M0:/stats/",
-		"M0:/messages/",
-		"M0:/package/list_of_subjects.txt",
-		"M0:/package/",
-		"M0:/package/version.txt",
-		"M0:/audio.wav"
+		"M0:/system/version.txt",							//	pCSM_VERS				= 0;
+		"M0:/system/bootcount.txt",						//	pBOOTCNT 				= 1;
+		"M0:/system/control.def",							//	pCSM_DEF 				= 2;
+		"M0:/log/tbLog.txt",									//	pLOG_TXT 				= 3;
+		"M0:/stats/",													//	pSTATS_PATH 		= 4;
+		"M0:/messages/",											//	pMSGS_PATH 			= 5;
+		"M0:/package/list_of_subjects.txt",		//	pLIST_OF_SUBJS 	= 6;
+		"M0:/package/",												//	pPACKAGE_DIR		= 7;
+		"M0:/package/version.txt",						//	pPKG_VERS  		  = 8;
+		"M0:/audio.wav"												//	pAUDIO = 9;		// DEBUG
 };
-	
-const char *	TBOOK_STATUS 				= "M0:/system/status.txt"; 
-const char *	TBOOK_BOOTCNT 			= "M0:/system/bootcount.txt"; 
-const char *	TBOOK_CSM_DEF 			= "M0:/system/control.def";
-const char *	TBOOK_LOG_TXT 			= "M0:/log/tbLog.txt";
-const char *	TBOOK_STATS_PATH 		= "M0:/stats/";
-const char *	TBOOK_MSGS_PATH 		= "M0:/messages/";
-const char *	TBOOK_LIST_OF_SUBJS = "M0:/package/list_of_subjects.txt";
-const char *	TBOOK_PACKAGE_DIR		= "M0:/package/";
 
 
 //TBOOK error codes
@@ -75,8 +65,8 @@ static char * fsDevs[] = { "M0:", "M1:", "N0:", "F0:", "F1:", NULL };
 static int    fsNDevs = 0;
 
 void copyFile( const char *src, const char * dst ){
-	FILE * fsrc = tbOpenRead( src ); //fopen( src, "r" );
-	FILE * fdst = tbOpenWrite( dst ); //fopen( dst, "w" );
+	FILE * fsrc = tbOpenRead( src ); 
+	FILE * fdst = tbOpenWrite( dst ); 
 	if ( fsrc==NULL || fdst==NULL ) return;
 	char buf[512];
 	while (true){
@@ -85,45 +75,247 @@ void copyFile( const char *src, const char * dst ){
 
 		fwrite( buf, 1, 512, fdst );
 	}
-	tbCloseFile( fsrc );		// fclose(fsrc);
-	tbCloseFile( fdst );		// fclose(fdst);
+	tbCloseFile( fsrc );	
+	tbCloseFile( fdst );	
 }
 int PlayDBG = 0;
 int RecDBG = 0;
 void 								saiEvent( uint32_t event );
 
-void debugLoop( bool autoUSB ){			// called if boot-PLUS, no file system,  autoUSB => usbMode
+//char dbgKeySt[6];
+int upCnt = 0;
+char lstKey,dnKey;
+
+GPIO_ID keyDown( ){
+
+	// gHOME, gCIRCLE, gPLUS,  gMINUS, gTREE, gLHAND, gRHAND, gPOT, gSTAR, gTABLE 
+	GPIO_ID dnK = gINVALID;
+	for ( GPIO_ID k = gHOME; k <= gTABLE; k++ ){
+		if ( gGet( k ))
+			dnK = k;
+	}
+	// 								gORANGE, gBLUE, gRED,	 gGREEN, gINVALID,	gHOME, gCIRCLE, gPLUS,  gMINUS, gTREE, gLHAND, gRHAND, gPOT,   gSTAR,  gTABLE
+//	const char * 		dbgNm[]= { "Or", 	 "Bl",  "Rd",  "Gr",   "In",  	"Hm", 	"Ci",   "Pl",   "Mi",   "Tr",  "Lh",   "Rh",   "Po",   "St",   "Ta" };
+	const char	dbgNm[]= { 'O', 'B','R','G','I','H','C','+','-','T','L','R','P','S','t' };
+//	sprintf( dbgKeySt, "%c%c%4d", dbgNm[lstKey], dbgNm[dnKey], upCnt );
+	dnKey = dbgNm[ dnK ];
+	if ( dnK == gINVALID ){
+		if ( upCnt < 1000 ) upCnt++;   // cnt since last key down
+	} else if ( upCnt == 1000 ){ 		// first key down after all were solidly up
+			upCnt = 0;		// reporting down click, reset up counter
+			lstKey = dbgNm[ dnK ];
+			return dnK;
+		}
+	return gINVALID;
+}
+extern int DebugMask;
+void						cdc_Init( void );
+void 						cdc_PowerDown( void );
+void						cdc_RecordEnable( bool enable );
+void 						cdc_SpeakerEnable( bool enable );
+void		 				cdc_SetMute( bool muted );
+void						cdc_SetMasterFreq( int freq );
+void						showCdcRegs( bool always, bool nonReset ); //void						showCdcRegs( bool always );
+void 						debugTimingRegs( bool );
+
+void tglUSBmode(){
+	if ( isMassStorageEnabled() ){
+		disableMassStorage();
+		gSet( gGREEN, 0 );	gSet( gRED, 0 );
+	} else if ( fsNDevs > 0){  // HOME => if have a filesystem but no data -- try USB MSC
+		gSet( gGREEN, 1 );	gSet( gRED, 1 );
+		for ( int i=fsNDevs; fsDevs[i]!=NULL; i++ ) fsDevs[i] = NULL;
+		enableMassStorage( fsDevs[0], fsDevs[1], fsDevs[2], fsDevs[3] );		// just put 1st device on USB
+	}	
+}
+void tglDebugMask( int bit ){
+	int d = 1 << (bit-1);
+	if ( DebugMask & d )
+		DebugMask &= ~d;		// reset
+	else
+		DebugMask |= d;			// set
+	dbgLog("! Tgl %d DbgMsk= 0x%06x \n", bit, DebugMask );
+}
+
+
+int ts_recStart = 0;  // timestamp of recording start
+void CheckRecording(){
+	if ( audGetState()==Recording ){ 
+		int msec = tbTimeStamp()-ts_recStart;
+		if (msec > 8000){
+			audRequestRecStop();
+			dbgLog(" RecStop\n");
+			while ( audGetState() != Ready )
+				gSet( gGREEN, 0 );
+			gSet( gRED, 0 );
+			resetAudio();
+		}
+	}
+}
+void PlayRecCmd( GPIO_ID k, int dbgIdx ){
 	MsgStats tstStats;
 	char fname[40];
-	
-	if ( fsNDevs==0 ) dbgLog( "no storage avail \n" );
-	else dbgLog( "no TBook on %s \n", fsDevs[0]  );
 
-	MediaState st = Ready;
-	int ledCntr = 0, LEDpauseCnt = 0;
-//	bool curPl,prvPl, curMi,prvMi, curTr,prvTr, curLH,prvLH, curRH,prvRH = false;
+	switch ( k ){
+		case gTREE: 	
+			if ( audGetState()==Ready ){
+				dbgLog(" Tr: play welcome\n");
+				gSet( gGREEN, 1 );	gSet( gRED, 0 );
+				playWave( "M0:/system/audio/welcome.wav" );
+				showCdcRegs( false, true); 		// regs during playback
+			}
+			break;
+			
+		case gCIRCLE: 
+			if ( audGetState()==Ready ){
+				sprintf( fname, "M0:/REC_%d_%d.WAV", RecDBG, dbgIdx );	
+				dbgIdx++;
+				FILE* outFP = tbOpenWriteBinary( fname ); 
+				if ( outFP != NULL ){
+					resetAudio();			// clean up anything in progress 
+					dbgLog( " Cir: record 5sec to: %s  RecDbg=%d\n", fname, RecDBG );
+					gSet( gGREEN, 0 );		gSet( gRED, 1 );
+					ts_recStart = tbTimeStamp();
+					audStartRecording( outFP, &tstStats );
+					showCdcRegs( false, true ); 		// regs during record
+				}		
+			}
+			break;
+			
+		case gLHAND:		// adjust debug flags mask
+			tglDebugMask( RecDBG );
+			break;
+		case gRHAND:			// USB commands -- have FS and autoUSB or HOME -- enable
+			tglUSBmode();
+			break;
+		
+		case gTABLE: 	
+			showCdcRegs( true, true );
+			break;
+		
+		default: 						
+			break;
+	}
+}
+void setCodecFreq( int idx ){
+	int speeds[] = {  0, 8000, 11025, 12000,  16000,  22050,  24000,  32000,  44100,  48000 };
+	int freq = speeds[ (idx % 10) ]; 
+	cdc_SetMasterFreq( freq ); 
+	cdc_SetVolume(5); 
+	cdc_SpeakerEnable( true );
+	cdc_SetMute( false );
+	dbgLog( " Cir: setFreq %d \n", freq );	
+	showCdcRegs(true,true);	
+}
+void CodecCmd( GPIO_ID k ){
+	static uint16_t freqCnt;
+	static bool pwrOn=false, mutOn=false, spkrOn=false, recOn=false; 
+	switch ( k ){
+		case gTREE: 	// pwr
+			pwrOn = !pwrOn;
+			if (pwrOn){
+				dbgLog( " Tr: codec pwr up \n");
+				cdc_SetVolume(5); 
+				cdc_Init(); 
+			} else {
+				dbgLog( " Tr: codec pwr down \n");
+				cdc_PowerDown();		
+			}
+			break;
+			
+		case gCIRCLE: 
+			freqCnt++;
+			setCodecFreq( freqCnt ); 
+			break;
+			
+		case gLHAND: 	
+			mutOn = !mutOn;
+			dbgLog( " LH: mute %s \n", mutOn? "on":"off" );	
+			cdc_SetMute( mutOn ); 	
+			break;
+		case gPOT: 
+			spkrOn = !spkrOn;
+			dbgLog( " Pot: spkr enab %s \n", spkrOn? "on":"off" );	
+			cdc_SpeakerEnable( spkrOn );
+			break;
+		case gRHAND: 	
+			recOn = !recOn;
+			dbgLog( " RH: record enab %s \n", recOn? "on":"off" );	
+			cdc_RecordEnable( recOn ); 
+			break;
+		case gTABLE: 	
+			showCdcRegs( true,true ); 
+			break;
+		default: 		
+			break;
+	}
+}
+void debugLoop( bool autoUSB ){			// called if boot-MINUS, no file system,  autoUSB => usbMode
+	if ( fsNDevs==0 ) dbgLog( " no storage avail \n" );
+	else dbgLog( " no TBook on %s \n", fsDevs[0]  );
+
+	int ledCntr = 0; //, LEDpauseCnt = 0;
 //	bool inTestSequence = false;
-	int idleCnt = 0;
 	RecDBG = 0;			// default recording params
 	int dbgIdx = 0;	// file index for current value of RecDBG
 	
 	initLogger();			// init Event log
 	logEvtNI( "DebugLoop", "NFSys", fsNDevs );
+//	const char *spath = "M0:/local/en/;/Prompts/en/;/messages/en/";
+//	char fpath[50];
+//	char * dlp_nm = findOnPathList( fpath, spath, "debug_loop.wav" );
 	
+	if ( autoUSB && fsNDevs>0 && audGetState()==Ready )
+		tglUSBmode();
+	
+	dbgLog(" DebugLoop: +/-: Dbg, St:chgMode, Ta: shRegs \n");
+	
+	const int nMDs = 2;
+	char * cmdMd[] = { "Rec/Play: Tr: play, Cir: record, LH: mask, RH: USB", "Codec: Tr: pwr, Cir: freq, LH: mute, Pot: spkrEn, RH: recEn" };
+	int iMd = 0;
 	while ( true ){		// loop processing debug commands
+		CheckRecording();
 		
-		// LED control-- don't change LEDs unless LEDpauseCnt == 0, <0 while USB or Playing, >0 long flash
-		st = audGetState();
-		if ( LEDpauseCnt != 0 ){		// =-1 
-			if ( LEDpauseCnt > 0 )
-				LEDpauseCnt--;
-		} else if (st == Ready) {  // audio Ready-- flash RED ON for 1 of 4  
+		GPIO_ID k = keyDown();   // key down
+		switch ( k ){
+			case gINVALID:  break;
+			
+			case gSTAR:  // switch modes
+				iMd++; 
+				if ( iMd==nMDs ) iMd=0;	
+				dbgLog( " %s \n", cmdMd[iMd] );
+				break;
+			
+			case gPLUS:
+				RecDBG++;
+				dbgLog( " + DBG: %d \n", RecDBG );
+				dbgIdx = 0;
+				break;
+			
+			case gMINUS:
+				if (RecDBG>0) RecDBG--;	
+				dbgLog( " - DBG: %d \n", RecDBG ); 
+				dbgIdx = 0; 
+			break;
+			
+			default:		// other keys depend on mode
+				if (iMd==0) {
+					PlayRecCmd( k, dbgIdx );
+				}
+				else {
+					CodecCmd( k );
+				}
+		}
+		// LED control-- 
+		if (audGetState()==Ready && !isMassStorageEnabled() ){		// blink LED while idle
 			ledCntr++;
-			gSet( gGREEN, 0 );
-			gSet( gRED, ((ledCntr >> 14) & 0x3)== 0 );		// flash RED ON for 1 of 4  
-	  }
+			gSet( gGREEN, ((ledCntr >> 14) & 0x3)== 0 );
+			gSet( gRED, 	((ledCntr >> 14) & 0x3)== 2 );		// flash: Red off Green off  
+		}
+	}
+}  // debugLoop
 
-		// AUDIO recording
+/*		// AUDIO recording
 		if ( st==Recording ){
 			if ( !gGet( gCIRCLE )){		// no CIRCLE while recording: stop
 				audRequestRecStop();
@@ -150,17 +342,27 @@ void debugLoop( bool autoUSB ){			// called if boot-PLUS, no file system,  autoU
 				audStartRecording( outFP, &tstStats );
 			}		
 		} else { 
-			if (!gGet( gPLUS ) && !gGet( gMINUS )){  // PLUS & MINUS up -- idle
+			if (!gGet( gPLUS ) && !gGet( gMINUS ) && !gGet( gLHAND )){  // PLUS, MINUS & LHAND up -- idle
 				idleCnt++;
 			} else if ( idleCnt>2000 ){ // was idle for a while, count this click
 				idleCnt = 0;
 				dbgIdx = 0;			// reset file idx
 				if ( gGet(gPLUS) ) RecDBG++;
 				if ( gGet(gMINUS) ) RecDBG--;
-				dbgLog( "RecDBG: 0x%02x \n", RecDBG );
+				if ( RecDBG<0 ) RecDBG = 0;
+				dbgLog( "! RecDBG: %d \n", RecDBG );
+				if ( gGet( gLHAND )){
+					int d = 1 << (RecDBG-1);
+					if ( DebugMask & d )
+						DebugMask &= ~d;
+					else
+						DebugMask |= d;
+					dbgLog("! DebugMask = 0x%06x \n", DebugMask );
+				}
 			}
 		}
-		/* AUDIO playback -- CIR, PL_CIR, MI_CIR, LH_CIR -- play different tones
+*/
+/*    AUDIO playback -- CIR, PL_CIR, MI_CIR, LH_CIR -- play different tones
 		if ( st==Playing ){ // controls while playing  PLUS(vol+), MINUS(vol-), TREE(pause/resume), LH adjPos-2), RH adjPos(2)
 			curPl = gGet( gPLUS );
 			if ( curPl & !prvPl )
@@ -203,24 +405,8 @@ void debugLoop( bool autoUSB ){			// called if boot-PLUS, no file system,  autoU
 			LEDpauseCnt = -1;
 		}
 		*/
-		//
-		// USB commands -- have FS and autoUSB or HOME -- enable
-		if ( isMassStorageEnabled() ){
-			if (gGet( gSTAR ) || gGet( gHOME )){	 // STAR HOME => close MSC, continue boot
-				disableMassStorage();
-				gSet( gRED, 0 );
-				return;		// exit DebugLoop after disabling USB
-			}
-		} else if ( fsNDevs > 0 && ( autoUSB || gGet( gHOME ))){  // HOME => if have a filesystem but no data -- try USB MSC
-			gSet( gRED, 1 );
-			LEDpauseCnt = -1;		// solid RED while in USB
-			for ( int i=fsNDevs; fsDevs[i]!=NULL; i++ ) fsDevs[i] = NULL;
-			enableMassStorage( fsDevs[0], fsDevs[1], fsDevs[2], fsDevs[3] );		// just put 1st device on USB
-		}			
-
-		//
-		// TestSequence -- RHAND to enter (RED), STAR to proceed (GREEN)
-		/*
+/*		// TestSequence -- RHAND to enter (RED), STAR to proceed (GREEN)
+		
 		if ( inTestSequence ){
 			if (gGet( gSTAR )){
 				gSet( gGREEN, 1 );
@@ -240,8 +426,6 @@ void debugLoop( bool autoUSB ){			// called if boot-PLUS, no file system,  autoU
 			LEDpauseCnt = 100000;	// long RED => power enabled
 		}
 		*/
-	}
-}
 
 //
 //  TBook main thread
@@ -277,9 +461,6 @@ void talking_book( void *arg ) {
 
 	if ( osKernelGetState() != osKernelRunning ) // no OS, so straight to debugLoop (no threads)
 		debugLoop( fsNDevs > 0 );	
-	
-	//usrLog( "%s\n", CPU_ID );
-	//usrLog( "%s\n", TB_ID );
 
 	initMediaPlayer( );
 	
@@ -302,9 +483,6 @@ void talking_book( void *arg ) {
 			}
 		}
 
-		if ( !fexists( TBP[pCSM_VERS] ) && fexists( "M0:/system/status.txt" ))
-			copyFile( TBP[pCSM_VERS], "M0:/system/status.txt" );  // backward compatibility
-		
 		if ( gGet( gMINUS ) || !fexists( TBP[pCSM_VERS] ))	
 			debugLoop( !fexists( TBP[pCSM_VERS] ) );	// if no version.txt -- go straight to USB mode
 	}

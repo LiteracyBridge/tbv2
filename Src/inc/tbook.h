@@ -83,6 +83,8 @@ extern uint32_t 	tbTimeStamp( void );
 extern void 			tbDelay_ms( int ms ); 					//  Delay execution for a specified number of milliseconds
 extern void *			tbAlloc( int nbytes, const char *msg );
 extern bool 			fexists( const char *fname );		// return true if file path exists
+extern char *			findOnPathList( char * destpath, const char *search_path, const char * nm );	// store path to 1st 'nm' on 'search_path' in 'destpath'
+
 #include "tb_evr.h"
 
 extern void 			dbgEvt( int id, int a1, int a2, int a3, int a4 );

@@ -321,7 +321,7 @@ void 								audStartRecording( FILE *outFP, MsgStats *stats ){	// start recordi
 
 void 								audRequestRecStop( void ){										// signal record loop to stop
 	if ( pSt.state == pbRecording ){
-		dbgLog( "8 reqRecStp \n");
+		//dbgLog( "8 reqRecStp \n");
 		pSt.state = pbRecStop;		// handled by SaiEvent on next buffer complete
 	} else if ( pSt.state == pbRecPaused ){
 		ledFg( NULL );
@@ -579,11 +579,11 @@ static void					saveBuff( Buffer_t * pB ){										// save buff to file, then f
 	int nS = BuffWds/2;	  // num mono samples
 	for ( int i = 0; i<BuffWds; i+=2 )	// nS*2 stereo samples
 		pB->data[ i >> 1 ] = pB->data[ i ];  // pB[0]=pB[0], [1]=[2], [2]=[4], [3]=[6], ... [(BuffWds-2)/2]=[BuffWds-2]
-	int bNum = pSt.nSaved / nS;
-	if ( bNum < 4 ){
-		bool zero = (pB->data[0]==0) && (pB->data[1]==0);
-		dbgLog( "8 %c%d R%d S%d\n", zero? '!':'D', bNum, pB->cntBytes-pSt.tsRecord, tbTimeStamp()-pSt.tsRecord  );
-	}
+//	int bNum = pSt.nSaved / nS;
+//	if ( bNum < 4 ){
+//		bool zero = (pB->data[0]==0) && (pB->data[1]==0);
+//		dbgLog( "8 %c%d R%d S%d\n", zero? '!':'D', bNum, pB->cntBytes-pSt.tsRecord, tbTimeStamp()-pSt.tsRecord  );
+//	}
 	int nB = fwrite( pB->data, 1, nS*2, pSt.audF );		// write nS*2 bytes (1/2 buffer)
 	if ( nB != nS*2 ) tbErr("svBuf write(%d)=>%d", nS*2, nB );
 	

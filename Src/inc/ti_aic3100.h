@@ -90,12 +90,13 @@ struct {		// AIC_init_sequence -- from eval board
 *************************/
 
 typedef struct { 		// AIC_reg_def -- definitions for TLV320AIC3100 registers to that are referenced
-	uint8_t pg;						// register page index, 0..15
-	uint8_t reg;					// register number 0..127
-	uint8_t reset_val;
-	uint8_t W1_allowed;		// mask of bits that can be written as 1
-	uint8_t W1_required;  //  bits that MUST be written as 1
-	char * nm;
+	const uint8_t pg;						// register page index, 0..15
+	const uint8_t reg;					// register number 0..127
+	const uint8_t reset_val;
+	const uint8_t W1_allowed;		// mask of bits that can be written as 1
+	const uint8_t W1_required;  //  bits that MUST be written as 1
+	const char * nm;
+	uint8_t prev_val;			// for reporting changes
 	uint8_t curr_val;			// last value written to (or read from) this register of chip
 	} AIC_REG;
 

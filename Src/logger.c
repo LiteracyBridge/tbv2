@@ -23,9 +23,10 @@ const int				STAT_SIZ = sizeof( MsgStats );
 const char *		norEraseFile = "M0:/system/EraseNorLog.txt";			// flag file to force full erase of NOR flash
 const char *		logFilePatt = "M0:/LOG/tbLog_%d.txt";			// file name of previous log on first boot
 
+const int				MAX_EVT_LEN1 = 32, MAX_EVT_LEN2 = 64;
+/*
 TBH_arr 				TBH;	//DEBUG -- accessible log history
 
-const int				MAX_EVT_LEN1 = 32, MAX_EVT_LEN2 = 64;
 static void			initTBHistory(){
 	for ( int i=0; i < MAX_TB_HIST; i++ ){
 		TBH[i*2] = tbAlloc( MAX_EVT_LEN1, "log hist" );
@@ -50,6 +51,7 @@ static void			addHist( const char * s1, const char * s2 ){			// DEBUG:  prepend 
 	strcpy( old1, s1 );
 	strcpy( old2, s2 );
 }
+*/
 
 char *					loadLine( char * line, char * fpath, fsTime *tm ){		// => 1st line of 'fpath'
 	const fsTime nullTm = { 0,0,0,1,1, 2020 };
@@ -324,7 +326,7 @@ void						logEvtS( const char *evtID, const char *args ){		// write log entry: '
 		sprintf( evtBuff,  "%d_%02d_%02d.%d: %8s", hr, min %60, sec % 60, tsec % 10, evtID );
 	else
 		sprintf( evtBuff,  "%d_%02d.%d: %8s", min %60, sec % 60, tsec % 10, evtID );
-	addHist( evtBuff, args );
+//	addHist( evtBuff, args );
 	dbgLog( "%s %s\n", evtBuff, args );
 	
 	if ( osMutexAcquire( logLock, osWaitForever )!=osOK ){

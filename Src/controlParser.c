@@ -60,7 +60,7 @@ static char *	loadPath( TknID tknid ){	// build file path prefix from tkn in pat
 	buildPath( path, tknStr(tknid), "", "" );
 	return allocStr( path );
 }
-char *				getStrFld( TknID listObj, const char *nm, char *defVal ){ // copy string value of fied 'nm', if present
+char *				getStrFld( TknID listObj, const char *nm, char *defVal ){ // copy string value of field 'nm', if present
 	TknID v = getField( listObj, nm );
 	if ( v.tknID==0 )
 		return defVal;
@@ -69,12 +69,13 @@ char *				getStrFld( TknID listObj, const char *nm, char *defVal ){ // copy stri
 	return allocStr( buff );
 }
 void					findPackages( void ){						// scan for M0:/package*/  directories
-	const char *packageDirPatt = "M0:/package*";
+	const char *packageDirPatt = "M0:/package*";		//TODO:  "M0:/packages/packages.list"
 
 	fsFileInfo fInfo;
 	fInfo.fileID = 0;
 	nPackages = 0;
 	int pkgNmLen = 100;
+																									//TODO: read directories from packages.list
 	while ( ffind( packageDirPatt, &fInfo )==fsOK ){		// find all package directories on device
 		char pkgPath[ MAX_PATH ];
 		buildPath( pkgPath, "M0:/", fInfo.name, "/" );
@@ -89,7 +90,8 @@ void					findPackages( void ){						// scan for M0:/package*/  directories
 }
 TBPackage_t * readContent( const char * pkgPath, int pkgIdx ){		// parse list_of_subjects.txt & messages.txt for each Subj => Content	
 	char pth[MAX_PATH];
-	buildPath( pth, pkgPath, "list_of_subjects", ".txt" );
+	buildPath( pth, pkgPath, "list_of_subjects", ".txt" );		//TODO: playlists.list
+																									//TODO: read package.properties  => audio_path, version, playlists?
 	
 	FILE *inFile = tbOpenReadBinary( pth ); //fopen( pth, "rb" );
 	if ( inFile==NULL )
@@ -98,14 +100,15 @@ TBPackage_t * readContent( const char * pkgPath, int pkgIdx ){		// parse list_of
 	TBPackage_t * Pkg = tbAlloc( sizeof(TBPackage_t), "pkg" );
 	Pkg->idx = pkgIdx;
 	Pkg->nSubjs = 0;
-	Pkg->path = allocStr( pkgPath );
+	Pkg->path = allocStr( pkgPath );								
+	//TODO: audio_path=path1;path2;...;pathn
 	buildPath( pth, pkgPath, "package", ".wav" );
 	Pkg->packageName = allocStr( pth );
 	logEvtNINS( "loadPkg", "idx", pkgIdx, "path", pkgPath );
 	
 	char 		line[200], dt[30];			// up to 200 characters per line
 	fsTime tm;
-	buildPath( pth, pkgPath, "version", ".txt" );
+	buildPath( pth, pkgPath, "version", ".txt" );				//TODO: from package.properties
 	char *	contentVersion = loadLine( line, pth, &tm );
 	sprintf( dt, "%d-%d-%d %d:%d", tm.year, tm.mon, tm.day, tm.hr, tm.min );
 	logEvtNSNS( "Package", "dt", dt, "ver", contentVersion );

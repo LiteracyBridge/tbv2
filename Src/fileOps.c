@@ -50,6 +50,7 @@ static void 				encryptCopy( ){
  	startEncrypt( basenm );				// write basenm.key & initialize AES encryption
 	strcat( basenm, ".dat" );
 	
+
 	FILE * fwav = tbOpenReadBinary( (const char *)mFileArgPath ); //fopen( (const char *)mFileArgPath, "rb" );
 	FILE * fdat = tbOpenWriteBinary( basenm ); //fopen( basenm, "wb" );
 	if ( fwav==NULL || fdat==NULL ) tbErr("encryptCopy: fwav=%x fdat=%x", fwav, fdat );

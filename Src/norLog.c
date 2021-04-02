@@ -67,8 +67,20 @@ const char *					norLogPath = "M0:/LOG";
 const int 						BUFFSZ = 260;   // 256 plus space for null to terminate string
 const int							N_SADDR = 64;		// number of startAddresses in page0
 
-int maxBusyWait = 0;
+int 						maxBusyWait = 0;
+bool 						norErrInProgress = false;
 
+void						norErr(const char * fmt, ...){
+	char s[100];
+	norErrInProgress = true;
+
+	va_list arg_ptr;
+	va_start( arg_ptr, fmt );
+	vsprintf( s, fmt, arg_ptr );
+	va_end( arg_ptr );
+	
+	tbErr( s );
+}
 void						NLogShowStatus(){														// write event with NorLog status details
 		logEvtNININI( "NorLog", "Idx", NLg.currLogIdx, "Sz", NLg.Nxt-NLg.logBase, "Free%", (NLg.MAX_ADDR-NLg.Nxt)*100/NLg.MAX_ADDR );
 }
@@ -87,7 +99,7 @@ bool						NLogReadPage( uint32_t addr ){							// read NOR page at 'addr' into N
 		addr = addr - (addr % NLg.PGSZ);
 	}
 	uint32_t stat = NLg.pNor->ReadData( addr, NLg.pg, NLg.PGSZ );			// read page at addr into NLg.pg 
-	if ( stat != NLg.PGSZ ) tbErr(" pNor read(%d) => %d", addr, stat );
+	if ( stat != NLg.PGSZ ) norErr(" pNor read(%d) => %d", addr, stat );
 	NLg.currPgAddr = addr;
 	
 	//verify log page consistency-- 0-256 non E_VAL's, followed by E_VAL's
@@ -121,13 +133,13 @@ void						waitWhileBusy(){														// wait until NorFlash driver doesn't re
 	int cnt = 0;
 	while ( flstat.busy ){ // wait till complete
 		cnt++;	
-		if (cnt > 10000000) tbErr( "NLog wait too long \n");
+		if (cnt > 10000000) norErr( "NLog wait too long \n");
 		flstat = NLg.pNor->GetStatus();
 	}
 	if (cnt > maxBusyWait) 
 		maxBusyWait = cnt;
 	if ( flstat.error ) 
-		tbErr(" pNor wait: stat.error \n");
+		norErr(" pNor wait: stat.error \n");
 }
 int							NLogReadSA(){					// read StartAddress array in page 0 & verify consistency
 	//verify NLg. basic consistency
@@ -147,7 +159,7 @@ int							NLogReadSA(){					// read StartAddress array in page 0 & verify consis
 		dbgLog( "! bad .SECTORSZ = %d \n", NLg.SECTORSZ );
 		NLg.SECTORSZ 	= NLg.pI->sector_size;
 	}
-	if ( NLg.PGSZ > BUFFSZ ) tbErr("NLog: buff too small");
+	if ( NLg.PGSZ > BUFFSZ ) norErr("NLog: buff too small");
 	if ( NLg.E_VAL != 0xFF ){
 		dbgLog( "! bad .E_VAL = %d \n", NLg.E_VAL );
 		NLg.E_VAL	 		= NLg.pI->erased_value;
@@ -158,7 +170,7 @@ int							NLogReadSA(){					// read StartAddress array in page 0 & verify consis
 	}
 	
 	uint32_t stat = NLg.pNor->ReadData( 0, NLg.pg, NLg.PGSZ );			// read NOR page 0 into NLg.pg -- check consistency & return idx of 1st unused or -1 if invalid, -2 if full
-	if ( stat != NLg.PGSZ ) tbErr(" pNor read0 => %d", stat );
+	if ( stat != NLg.PGSZ ) norErr(" pNor read0 => %d", stat );
 	
 	uint32_t E_VAL32 = (((((NLg.E_VAL << 8) + NLg.E_VAL) << 8) + NLg.E_VAL) << 8) + NLg.E_VAL;
 	NLg.currPgAddr = 0;
@@ -213,7 +225,7 @@ void						NLogWriteSA( uint32_t idx, uint32_t addr ){	// write pg0: startAddr[ i
 		else {  // everything checks out-- write the startAddr
 			dbgLog( "6 NLogWrSA: sa[%d] = 0x%08x \n", idx, addr );
 			uint32_t stat = NLg.pNor->ProgramData( idx*4, &addr, 4 );		// write from copy with no E_VALs
-			if ( stat != ARM_DRIVER_OK ) tbErr(" pNor wr => %d", stat );
+			if ( stat != ARM_DRIVER_OK ) norErr(" pNor wr => %d", stat );
 			waitWhileBusy();
 			
 			NLogReadSA();				// read & verify updated Pg0
@@ -221,6 +233,8 @@ void						NLogWriteSA( uint32_t idx, uint32_t addr ){	// write pg0: startAddr[ i
 	}
 }
 void 						NLogWrite( uint32_t addr, const char *data, int len ){	// write len bytes at 'addr' -- MUST be within one page
+  if ( norErrInProgress ) return;
+	
 	if ( addr < NLg.PGSZ ){
 		dbgLog( "! write to pg0: 0x%08x  len=%d data=0x%08x \n", addr, len, data );
 		__breakpoint(1);
@@ -233,11 +247,11 @@ void 						NLogWrite( uint32_t addr, const char *data, int len ){	// write len b
 		locData[i] = data[i]==NLg.E_VAL? '.' : data[i];
 	}
 	int stpg = addr/NLg.PGSZ, endpg = (addr + len-1)/ NLg.PGSZ;
-	if ( stpg != endpg ) tbErr( "NLgWr a=%d l=%d", addr, len );
+	if ( stpg != endpg ) norErr( "NLgWr a=%d l=%d", addr, len );
 	
 	//dbgLog( "6 NLogWr: %d @ 0x%08x \n", len, addr );
 	uint32_t stat = NLg.pNor->ProgramData( addr, locData, len );		// write from copy with no E_VALs
-	if ( stat != ARM_DRIVER_OK ) tbErr(" pNor wr => %d", stat );
+	if ( stat != ARM_DRIVER_OK ) norErr(" pNor wr => %d", stat );
 	waitWhileBusy();
 }
 int 						nxtBlk( int addr, int blksz ){							// => 1st multiple of 'blksz' after 'addr'
@@ -260,7 +274,7 @@ void						findLogNext(){															// sets NLg.Nxt to first erased byte in c
 //	dbgLog("linear: 0x%x %d in %dms \n", norAddr, pgcnt, ms );
 //	
 //	if (norAddr >= NLg.MAX_ADDR )
-//		tbErr("NorFlash Full");
+//		norErr("NorFlash Full");
 */
 	
 	// binary search -- find lowest non-full page between logBase & MAX_ADDR
@@ -287,10 +301,10 @@ void						findLogNext(){															// sets NLg.Nxt to first erased byte in c
 		norAddr += NLg.PGSZ;
 		NLogReadPage( norAddr );
 		pgcnt++;
-		if ( pNx==NLg.PGSZ )	tbErr("NLog BSearch fail");
+		if ( NLg.pgNxt==NLg.PGSZ )	norErr("NLog BSearch fail");
 	}
 	if (norAddr >= NLg.MAX_ADDR )	// should have been caught when it was being written
-		tbErr("NorFlash Full");
+		norErr("NorFlash Full");
 
 	// verify that NLg.pgNxt is in [0..PGSZ-1], pg[pgNxt-1] is valid, & pg[pgNxt] is ERASED
 	if ( (pNx < 0 || pNx >= NLg.PGSZ-1 ) || 
@@ -360,7 +374,7 @@ void 						eraseNorFlash( bool svCurrLog ){						// erase entire chip & re-init 
 	bool needToInit = true;
 	for ( uint32_t addr = 0; addr < NLg.MAX_ADDR; addr += NLg.SECTORSZ ){
 		int stat = NLg.pNor->EraseSector( addr );	
-		if ( stat != ARM_DRIVER_OK ) tbErr(" pNor erase => %d", stat );
+		if ( stat != ARM_DRIVER_OK ) norErr(" pNor erase => %d", stat );
 		waitWhileBusy();	// non-blocking-- wait till done
 		
 		if ( needToInit ){		// re-init current log as soon as 1 sector erased
@@ -376,7 +390,7 @@ void 						eraseNorFlash( bool svCurrLog ){						// erase entire chip & re-init 
 	ledFg( NULL );
 	
 	//int stat = NLg.pNor->EraseChip( );	//DOESN'T WORK!
-	//if ( stat != ARM_DRIVER_OK ) tbErr(" pNor erase => %d", stat );
+	//if ( stat != ARM_DRIVER_OK ) norErr(" pNor erase => %d", stat );
 	
 	if ( svCurrLog )		// could have some new entries that will be out of order
 		restoreNorLog( norTmpFile );
@@ -389,15 +403,15 @@ void						initNorLog( bool startNewLog ){							// init driver for W25Q64JV NOR 
 	NLg.pI 				= NLg.pNor->GetInfo();   // get key NORFLASH parameters (defined in W25Q64JV.h)
 	NLg.PGSZ 			= NLg.pI->page_size;
 	NLg.SECTORSZ 	= NLg.pI->sector_size;
-	if ( NLg.PGSZ > BUFFSZ ) tbErr("NLog: buff too small");
+	if ( NLg.PGSZ > BUFFSZ ) norErr("NLog: buff too small");
 	NLg.E_VAL	 		= NLg.pI->erased_value;
 	NLg.MAX_ADDR 	= ( NLg.pI->sector_count * NLg.pI->sector_size )-1;
 	
 	stat = NLg.pNor->Initialize( NULL );
-	if ( stat != ARM_DRIVER_OK ) tbErr(" pNor->Init => %d", stat );
+	if ( stat != ARM_DRIVER_OK ) norErr(" pNor->Init => %d", stat );
 	
 	stat = NLg.pNor->PowerControl( ARM_POWER_FULL );
-	if ( stat != ARM_DRIVER_OK ) tbErr(" pNor->Pwr => %d", stat );
+	if ( stat != ARM_DRIVER_OK ) norErr(" pNor->Pwr => %d", stat );
 
 	findCurrNLog( startNewLog );			// locates (and creates, if startNewLog ) current log-- sets logBase & Nxt
 	
@@ -409,11 +423,12 @@ void						initNorLog( bool startNewLog ){							// init driver for W25Q64JV NOR 
 	lg_thread_attr.stack_size = LOG_STACK_SIZE; 
 	osThreadId_t lg_thread =  osThreadNew( NLogThreadProc, 0, &lg_thread_attr ); 
 	if ( lg_thread == NULL ) 
-		tbErr( "logThreadProc not created" );
+		norErr( "logThreadProc not created" );
 */
 	
 }
 void						appendNorLog( const char * s ){							// append text to Nor flash
+  if ( norErrInProgress ) return;
   if ( NLg.pNor == NULL ) return;				// Nor not initialized
 
 	int len = strlen( s );
@@ -427,7 +442,7 @@ void						appendNorLog( const char * s ){							// append text to Nor flash
 	int nxtPg = nxtBlk( NLg.Nxt, NLg.PGSZ ); 
 	if ( NLg.Nxt+len > nxtPg ){ // crosses page boundary, split into two writes
 		int flen = nxtPg-NLg.Nxt;		// bytes on this page
-		if ( flen > NLg.PGSZ ) tbErr("append too long");
+		if ( flen > NLg.PGSZ ) norErr("append too long");
 		
 //		dbgLog( "6 app %d @ 0x%08x, %d @ 0x%08x \n", flen, NLg.Nxt, len-flen, NLg.Nxt+flen );
 		NLogWrite( NLg.Nxt, s, flen );						// write rest of this page
@@ -473,7 +488,7 @@ void						copyNorLog( const char * fpath ){						// copy curr Nor log into file 
 	const char * badLogPatt = "M0:/LOG/badLog_%d.txt";
 	
 	FILE * f = tbOpenWrite( tmpNm ); //fopen( tmp, "w" );
-	if ( f==NULL ) tbErr("cpyNor fopen err");
+	if ( f==NULL ) norErr("cpyNor fopen err");
 	
 	CheckNLog( f );			// check & correct any consistency issues in NLg or Page0
 	bool validLog = true;
@@ -509,7 +524,7 @@ void						copyNorLog( const char * fpath ){						// copy curr Nor log into file 
 }
 void						restoreNorLog( const char * fpath ){				// copy file into current log
 	FILE * f = tbOpenRead( fpath ); //fopen( fpath, "r" );
-	if ( f==NULL ) tbErr("rstrNor fopen err");
+	if ( f==NULL ) norErr("rstrNor fopen err");
 	
 	int cnt = fread( NLg.pg, 1, NLg.PGSZ, f );
 	while ( cnt > 0 ){

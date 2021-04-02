@@ -145,10 +145,12 @@ void 						i2c_wrReg( uint8_t reg, uint8_t val ){									// write codec registe
 	reinitCnt = 0;			// success-- reset recursive counter
 }
 void  					i2c_ReportErrors(){																					// report I2C error counts
+  static int prevI2CerrTot = 0;
   int tot = 0;
 	for ( int i=0; i<= Cdc_WrReg; i++ )
 	  tot += I2C_ErrCnt[i];
-	if (tot==0) return;
+	if ( tot==prevI2CerrTot ) return;  // no change since report
+	prevI2CerrTot = tot;
 	
 	dbgLog( "! %d I2C Errs-- Xmt:%d Rcv:%d Evt:%d Def:%d WrReg:%d \n", tot,
 		I2C_ErrCnt[ I2C_Xmt ], I2C_ErrCnt[ I2C_Rcv ], I2C_ErrCnt[ I2C_Evt ], I2C_ErrCnt[ Cdc_DefReg ], I2C_ErrCnt[ Cdc_WrReg ] );

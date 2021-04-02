@@ -75,7 +75,7 @@ void								seqAddShade( ledSeq *seq, ledShade shade, int ms ){				// add ms of 
 	seq->msec[ step ] = ms;
 	seq->nSteps = step+1;
 }
-void								convertSeq( ledSeq *seq, const char *def ){		// fill 'seq' based on def e.g. "R20G100_10" 
+void								convertSeq( ledSeq *seq, const char *def ){		// fill 'seq' based on def e.g. "R20G100_10"
 	seq->nextStep = 0;
 	seq->shadeStep = 0;
 	seq->delayLeft = 0;
@@ -206,6 +206,8 @@ void 								ledFg( const char *def ){						// install 'def' as foreground patte
 }
 void								ledBg( const char *def ){						// install 'def' as background pattern
 	dbgLog( "9 ledBg: %s \n", def );
+	if (def==NULL)	// NULL = turn off
+		def = "_100!";
 	convertSeq( prepSeq, def );		// convert into prep
 	prepSeq->repeat = true;
 	

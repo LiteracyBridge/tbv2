@@ -26,1486 +26,451 @@ static bool			cdcMuted			 	= false;
 static int 			aicCurrPg = 0;			// keeps track of currently selected register page
 static int 			WatchReg   = 0;			//DEBUG: log register read/write ops for a specific codec register
 
-// AIC_REG{ pg, reg, reset_val, W1_allowed, W1_required, nm, curr_val, next_val }
+// AIC_REG{ pg, reg, reset_val, W1_allowed, W1_required, nm, prev_val, curr_val }
 AIC_REG					codec_regs[] = {	// array of info for codec registers in use -- must include Page_Select for all pages in use
 //********** AIC3100 PAGE 0
-// pg,reg, reset, can1, must1,  "nm",																		curr
-   0,   0, 0x00, 0xFF, 0x00, "Page_Select_Register",                    0x00,  // must include Page_Select for all pages in use
-   0,   1, 0x00, 0x01, 0x00, "Software_Reset_Register",                 0x00,
-	 0,   3, 0x66, 0x02, 0x00, "OT_FLAG",                                 0x66,  // X bits D2, D5,D6 set in practice-- actual: 0x66 not 0x02
-   0,   4, 0x00, 0x0F, 0x00, "ClkGen_Mux",                        			0x00,  
-   0,   5, 0x11, 0xFF, 0x00, "PLL_P&R",                             		0x11,  
-   0,   6, 0x04, 0x3F, 0x00, "PLL_J",                              			0x04,  
-   0,   7, 0x00, 0x3F, 0x00, "PLL_D_Hi",                          			0x00,  
-   0,   8, 0x00, 0xFF, 0x00, "PLL_D_Lo",                          			0x00,
-   0,  11, 0x01, 0xFF, 0x00, "DAC_NDAC",                           		 	0x01,  
-   0,  12, 0x01, 0xFF, 0x00, "DAC_MDAC",                           			0x01,  
-   0,  13, 0x00, 0x03, 0x00, "DAC_DOSR_Hi",                        			0x00,
-   0,  14, 0x80, 0xFF, 0x00, "DAC_DOSR_Lo",                        			0x80,  
-   0,  15, 0x80, 0xFF, 0x00, "DAC_IDAC_VAL",                            0x80,  
-   0,  16, 0x08, 0x0F, 0x00, "DAC_MAC_Engine_Interpolation",            0x08, 
-   0,  18, 0x01, 0xFF, 0x00, "ADC_NADC_VAL",                            0x01, 
-   0,  19, 0x01, 0xFF, 0x00, "ADC_MADC_VAL",                            0x01,  
-   0,  20, 0x80, 0xFF, 0x00, "ADC_AOSR_VAL",                            0x80,  
-   0,  21, 0x80, 0xFF, 0x00, "ADC_IADC_VAL",                            0x80,  
-   0,  22, 0x04, 0xFF, 0x00, "ADC_PRB_Engine_Decimation",               0x04,  // use actual: 0x04 not 0x80 (reserved)
-   0,  25, 0x00, 0x07, 0x00, "ClkOut_Mux",                              0x00,  
-   0,  26, 0x01, 0xFF, 0x00, "ClkOut_M",                            		0x01,  
-   0,  27, 0x00, 0xFD, 0x00, "InfcCtrl1",                								0x00,
-   0,  29, 0x00, 0x3F, 0x00, "InfcCtrl2",                								0x00,
-   0,  30, 0x01, 0xFF, 0x00, "BClk_N",                              		0x01,
-   0,  33, 0x00, 0xFF, 0x00, "InfcCtrl3",			 													0x00,	 
-   0,  36, 0x80, 0x00, 0x00, "ADC_Flag_Reg",														0x80,		// use actual: 0x80 not 0x00
-   0,  37, 0x00, 0x00, 0x00, "DAC_Flag_Reg",                       			0x00,
-   0,  53, 0x12, 0x1F, 0x00, "DOutCtrl",                            		0x12,
-   0,  60, 0x01, 0x3F, 0x00, "DAC_Instruction_Set",                     0x01,
-   0,  61, 0x04, 0x1F, 0x00, "adc_prb",                     						0x04,	
-   0,  62, 0x00, 0x77, 0x00, "Prog_Instr_Mode_Cntrl",   								0x00,		// Programmable_Instruction_Mode_Control
-   0,  63, 0x14, 0xFF, 0x00, "DAC_Dpath",                               0x14,
-   0,  64, 0x0C, 0x0F, 0x00, "DAC_Vol_Ctl",                             0x0C,
-   0,  65, 0x00, 0xFF, 0x00, "DAC_LVol_Ctl",                            0x00,
-   0,  66, 0x00, 0xFF, 0x00, "DAC_RVol_Ctl",                        		0x00,
-   0,  67, 0x00, 0x9F, 0x00, "Headset_Detection",                       0x00,
-   0,  68, 0x6F, 0x7F, 0x00, "DRC_Control",                             0x6F,  // use actual reset 0x6f (DRC enabled)
-// pg,reg, reset, can1, must1,  "nm",																		curr
-   0,  81, 0x00, 0xBB, 0x00, "adc_pwr",																	0x00,
-   0,  82, 0x80, 0xF0, 0x00, "adc_sm_vol",															0x80, 
-   0,  83, 0x00, 0x7F, 0x00, "adc_vol",																	0x00, 
-   0,  86, 0x00, 0xF0, 0x00, "agc_tgt",																	0x00, 
-   0,  87, 0x00, 0xFE, 0x00, "AGC_Control2",														0x00, 
-   0,  88, 0x7F, 0x7F, 0x00, "agc_maxg",																0x7F, 
-   0,  89, 0x00, 0xFF, 0x00, "agc_atak",																0x00, 
-   0,  90, 0x00, 0xFF, 0x00, "agc_decy",																0x00, 
-   0,  91, 0x00, 0x1F, 0x00, "agc_nois_dbnc",														0x00, 
-   0,  92, 0x00, 0x0F, 0x00, "agc_sig_dbnc",														0x00, 
-   0,  93, 0x00, 0x00, 0x00, "agc_c_gain",															0x00, 
+// pg,reg, reset, can1, must1,  "nm",		prev, curr
+   0,   0, 0x00, 0xFF, 0x00, "psr0",      0, 0x00,  // 0=0.0  must include Page_Select for all pages in use
+   0,   1, 0x00, 0x01, 0x00, "s_rst",     0, 0x00,	// 1=0.1
+	 0,		2, 0x01, 0x00, 0xff, "rsv",				0, 0x01,	// actual: 0:02  0x01 not 0x00 // reserved-- reset = XX, can1=0x00, must1=0xff 
+	 0,   3, 0x66, 0x02, 0x00, "ot_flg",    0, 0x66,  // X bits D2, D5,D6 set in practice-- actual: 0x66 not 0x02
+   0,   4, 0x00, 0x0F, 0x00, "clk_mux",   0, 0x00,  // 4=0.4
+   0,   5, 0x11, 0xFF, 0x00, "pll_p_r",   0, 0x11,  
+   0,   6, 0x04, 0x3F, 0x00, "pll_j",     0, 0x04,  
+   0,   7, 0x00, 0x3F, 0x00, "pll_dhi",   0, 0x00,  
+   0,   8, 0x00, 0xFF, 0x00, "pll_dlo",   0, 0x00,
+	 0,		9, 0x00, 0x00, 0xff, "rsv",				0, 0x00,	// reserved-- reset = XX, can1=0x00, must1=0xff 
+	 0,	 10, 0x00, 0x00, 0xff, "rsv",				0, 0x00,	// reserved-- reset = XX, can1=0x00, must1=0xff 
+   0,  11, 0x01, 0xFF, 0x00, "dac_n",     0, 0x01,  
+   0,  12, 0x01, 0xFF, 0x00, "dac_m",     0, 0x01,  
+   0,  13, 0x00, 0x03, 0x00, "dosr_hi",   0, 0x00,
+   0,  14, 0x80, 0xFF, 0x00, "dosr_lo",   0, 0x80,  
+   0,  15, 0x80, 0xFF, 0x00, "dac_idac",  0, 0x80,  
+   0,  16, 0x08, 0x0F, 0x00, "dac_mac_en",0, 0x08, 
+	 0,	 17, 0x00, 0x00, 0xff, "rsv",				0, 0x00,	// reserved-- reset = XX, can1=0x00, must1=0xff 
+   0,  18, 0x01, 0xFF, 0x00, "adc_n",     0, 0x01, 
+   0,  19, 0x01, 0xFF, 0x00, "adc_m",     0, 0x01,  
+   0,  20, 0x80, 0xFF, 0x00, "aosr",      0, 0x80,  
+   0,  21, 0x80, 0xFF, 0x00, "adc_iadc",  0, 0x80,  
+   0,  22, 0x04, 0xFF, 0x00, "adc_prb",   0, 0x04,  // use actual: 0x04 not 0x80 (reserved)
+ 	 0,	 23, 0x00, 0x00, 0xff, "rsv",				0, 0x00,	// reserved-- reset = XX, can1=0x00, must1=0xff 
+	 0,	 24, 0x00, 0x00, 0xff, "rsv",				0, 0x00,	// reserved-- reset = XX, can1=0x00, must1=0xff 
+	 0,  25, 0x00, 0x07, 0x00, "out_mux",   0, 0x00,  
+   0,  26, 0x01, 0xFF, 0x00, "out_m",     0, 0x01,  
+   0,  27, 0x00, 0xFD, 0x00, "i2s",       0, 0x00,
+	 0,	 28, 0x00, 0xff, 0x00, "d_off",			0, 0x00,
+   0,  29, 0x00, 0x3F, 0x00, "bclk",      0, 0x00,
+   0,  30, 0x01, 0xFF, 0x00, "bclk_n",    0, 0x01,
+	 0,	 31, 0x00, 0xff, 0x00, "cdc2_ctl1", 0, 0x00,
+	 0,	 32, 0x00, 0xff, 0x00, "cdc2_ctl2", 0, 0x00,
+   0,  33, 0x00, 0xFF, 0x00, "b&w_clks",	0, 0x00,	 
+ 	 0,	 34, 0x00, 0x20, 0x00, "i2c_bus", 	0, 0x00,
+	 0,	 35, 0x00, 0x00, 0xff, "rsv",				0, 0x00,	// reserved-- reset = XX, can1=0x00, must1=0xff 
+   0,  36, 0x80, 0x00, 0x00, "adc_flg",		0, 0x80,	// use actual: 0x80 not 0x00
+   0,  37, 0x00, 0x00, 0x00, "dac_flg",   0, 0x00,  // 37=0.37
+   0,  38, 0x00, 0x00, 0x00, "dac_flg2",  0, 0x00,
+   0,  39, 0x00, 0x00, 0x00, "ovfl_flg",  0, 0x00,
+	 0,	 40, 0x00, 0x00, 0xff, "rsv",				0, 0x00,	// 40=0.40  reserved-- reset = XX, can1=0x00, must1=0xff 
+	 // dup 41..43
+	 0,	 44, 0x00, 0x00, 0x00, "dac_ints",	0, 0x00,	// 41=0.44
+	 0,	 45, 0x00, 0x00, 0x00, "adc_ints",	0, 0x00,	
+	 0,	 46, 0x00, 0x00, 0x00, "dac_ints2",	0, 0x00,	
+	 0,	 47, 0x00, 0x00, 0x00, "adc_ints2",	0, 0x00,	
+	 0,	 48, 0x00, 0xff, 0x00, "int_ctl1",	0, 0x00,	
+	 0,	 49, 0x00, 0xff, 0x00, "int_ctl2",	0, 0x00,	
+	 0,	 50, 0x00, 0x00, 0xff, "rsv",				0, 0x00,	// reserved-- reset = XX, can1=0x00, must1=0xff 
+	 0,	 51, 0x02, 0xfd, 0x00, "gpio_pin",	0, 0x02,  // actual: 0:51  0x02 not 0x00
+	 0,	 52, 0x32, 0x00, 0xff, "rsv",				0, 0x00,	// actual: 0:52  0x32 not 0x00  //reserved-- reset = XX, can1=0x00, must1=0xff 
+   0,  53, 0x12, 0x1F, 0x00, "d_out",     0, 0x12,  // 50=0.53
+   0,  54, 0x03, 0xfe, 0x00, "d_in",      0, 0x02,  // actual: 0:54  0x03 not 0x02
+	 0,	 55, 0x02, 0x00, 0xff, "rsv",				0, 0x00,	// reserved-- reset = XX, can1=0x00, must1=0xff 
+	 // dup 56..59
+	 0,  60, 0x01, 0x3F, 0x00, "dac_prb",   0, 0x01,  // 53=0.60
+   0,  61, 0x04, 0x1F, 0x00, "adc_prb",   0, 0x04,	
+   0,  62, 0x00, 0x77, 0x00, "pr_ctrl",   0, 0x00,		// Programmable_Instruction_Mode_Control
+   0,  63, 0x14, 0xFF, 0x00, "dac_path",  0, 0x14,  // 56=0.63
+   0,  64, 0x0C, 0x0F, 0x00, "dac_vol",   0, 0x0C,
+   0,  65, 0x00, 0xFF, 0x00, "dac_l_vol", 0, 0x00,
+   0,  66, 0x00, 0xFF, 0x00, "dac_r_vol", 0, 0x00,
+   0,  67, 0x00, 0x9F, 0x00, "hp_det",    0, 0x00,  // 60=0.67
+   0,  68, 0x6F, 0x7F, 0x00, "drc_ctl",   0, 0x6F,  // use actual reset 0x6f (DRC enabled)
+   0,  69, 0x38, 0x78, 0x00, "drc_ctl2",  0, 0x38,  
+   0,  70, 0x00, 0xff, 0x00, "drc_ctl3",  0, 0x00, 
+   0,  71, 0x00, 0xbf, 0x00, "l_beep",  	0, 0x00, 
+   0,  72, 0x00, 0xff, 0x00, "r_beep",  	0, 0x00, 
+   0,  73, 0x00, 0xff, 0x00, "bp_ln_msb", 0, 0x00, 
+   0,  74, 0x00, 0xff, 0x00, "bp_ln_mid", 0, 0x00, 
+   0,  75, 0xee, 0xff, 0x00, "bp_ln_lsb", 0, 0x00,
+   0,  76, 0x10, 0xff, 0x00, "bp_sin_msb",0, 0x10, 
+   0,  77, 0xd8, 0xff, 0x00, "bp_sin_lsb",0, 0xd8,  // 70=0.77
+   0,  78, 0x7e, 0xff, 0x00, "bp_cos_msb",0, 0x7e, 
+   0,  79, 0xe3, 0xff, 0x00, "bp_cos_lsb",0, 0xe3, 
+	 0,	 80, 0x00, 0x00, 0xff, "rsv",				0, 0x00,	// reserved-- reset = XX, can1=0x00, must1=0xff 
+// pg,reg, reset, can1, must1,  "nm",		prev, curr
+   0,  81, 0x00, 0xBB, 0x00, "adc_pwr",		0, 0x00,  // 74=0.81
+   0,  82, 0x80, 0xF0, 0x00, "adc_sm_vol",0, 0x80, 
+   0,  83, 0x00, 0x7F, 0x00, "adc_vol",		0, 0x00, 
+	 0,	 84, 0x00, 0x00, 0xff, "rsv",				0, 0x00,	// reserved-- reset = XX, can1=0x00, must1=0xff 
+	 0,	 85, 0x00, 0x00, 0xff, "rsv",				0, 0x00,	// reserved-- reset = XX, can1=0x00, must1=0xff 
+   0,  86, 0x00, 0xF0, 0x00, "agc_tgt",		0, 0x00,  // 79=0.86
+   0,  87, 0x00, 0xFE, 0x00, "agc_ctl2",	0, 0x00,  // 80=0.87
+   0,  88, 0x7F, 0x7F, 0x00, "agc_maxg",	0, 0x7F, 
+   0,  89, 0x00, 0xFF, 0x00, "agc_atak",	0, 0x00, 
+   0,  90, 0x00, 0xFF, 0x00, "agc_decy",	0, 0x00, 
+   0,  91, 0x00, 0x1F, 0x00, "agc_nois",	0, 0x00, 
+   0,  92, 0x00, 0x0F, 0x00, "agc_sig",		0, 0x00,  // 85=0.92
+   0,  93, 0x00, 0x00, 0x00, "agc_gain",	0, 0x00, 
+	 0,	 94, 0x00, 0x00, 0xff, "rsv",				0, 0x00,	// reserved-- reset = XX, can1=0x00, must1=0xff 
+	 // dup 95..101
+	 0, 102, 0x00, 0xBF, 0x00, "adc_meas", 	0, 0x00,  // 88=0.102  // discovered by Marc
+	 0, 103, 0x00, 0x7F, 0x00, "adc_meas2", 0, 0x00, 
+	 0, 104, 0x00, 0x00, 0x00, "dc_meas1", 	0, 0x00,  // 90=0.104
+	 0, 105, 0x00, 0x00, 0x00, "dc_meas2", 	0, 0x00,
+	 0, 106, 0x00, 0x00, 0x00, "dc_meas3", 	0, 0x00,
+	 0,	107, 0x00, 0x00, 0xff, "rsv",				0, 0x00,	// 93=0.107 // reserved-- reset = XX, can1=0x00, must1=0xff 
+	 // dup 108..115
+	 0,	116, 0x00, 0xf7, 0x00, "mdet_vol",	0, 0x00,	// 94=0.116 
+	 0,	117, 0x40, 0x80, 0x00, "mdet_gn",	  0, 0x00,  // actual: 0:117  0x40 not 0x00	 
+	 0,	118, 0x00, 0x00, 0xff, "rsv",				0, 0x00,	// 96=0.118 // reserved-- reset = XX, can1=0x00, must1=0xff 
+	 // dup 119..127
 
+// ********** AIC3100 PAGE 1
+// pg,reg, reset, can1, must1,  "nm",		prev, curr
+   1,   0, 0x01, 0x00, 0x00, "psr1",      0, 0x01,  // 97=1.0  // 1:0 reads as 0x01
+	 1,	  1, 0x00, 0x00, 0xff, "rsv",				0, 0x00,	// reserved-- reset = XX, can1=0x00, must1=0xff 
+	 // dup 2..29
+   1,  30, 0x00, 0x03, 0x00, "err_ctl",   0, 0x00,  // 99=1.30 // Not Used by init
+   1,  31, 0x04, 0xDE, 0x04, "dp_dr",     0, 0x04,  // 100=1.31
+   1,  32, 0x06, 0xFE, 0x06, "cls_d",     0, 0x06, 
+   1,  33, 0x3E, 0xFF, 0x00, "pop_rem",  	0, 0x3E, 
+   1,  34, 0x00, 0xFF, 0x00, "pga_ramp", 	0, 0x00, 
+   1,  35, 0x00, 0xFF, 0x00, "dac_rout",  0, 0x00,
+   1,  36, 0x7F, 0xFF, 0x00, "l_vol_hp",  0, 0x7F,  // 105=1.36
+   1,  37, 0x7F, 0xFF, 0x00, "r_vol_hp",  0, 0x7F,
+   1,  38, 0x7F, 0xFF, 0x00, "l_vol_spk", 0, 0x7F,
+   1,  39, 0x7F, 0xFF, 0x00, "r_vol_spk", 0, 0x7F,  // 108=1.39
+   1,  40, 0x02, 0x7E, 0x02, "hpl_dr",    0, 0x02,
+   1,  41, 0x02, 0x7E, 0x02, "hpl_dr",    0, 0x02,  // 110=1.41
+   1,  42, 0x00, 0x1D, 0x00, "spk_dr",    0, 0x00,
+	 1,	 43, 0x00, 0x00, 0xff, "rsv",				0, 0x00,	  // reserved-- reset = XX, can1=0x00, must1=0xff 
+	 1,  44, 0x20, 0xFF, 0x00, "hp_dr",     0, 0x20,    // use actual: 0x20 not 0x00 (debounce 8usec)
+	 1,	 45, 0x86, 0x00, 0xff, "rsv",				0, 0x00,	// actual: 1:45  0x86 not 0x00   // reserved-- reset = XX, can1=0x00, must1=0xff 
+   1,  46, 0x00, 0x8B, 0x00, "mic_bias",  0, 0x00,  // 115=1.46
+   1,  47, 0x80, 0xFF, 0x00, "mic_gain",  0, 0x80,
+   1,  48, 0x00, 0xFC, 0x00, "adc_in_p",  0, 0x00,  // 117=1.48
+   1,  49, 0x00, 0xF0, 0x00, "adc_in_m",  0, 0x00,  // 118=1.49
+   1,  50, 0x00, 0xE0, 0x00, "adc_in_cm", 0, 0x00,  
+ 	 1,	 51, 0x00, 0x00, 0xff, "rsv",				0, 0x00,	// 120=1.51  // reserved-- reset = XX, can1=0x00, must1=0xff 
+	 // dup 52..127
 	 
-#ifdef PG0_XTRA_USED
-// 0,  28, 0x00, 0xFF, "Data_Slot_Offset_Programmability",
-// 0,  31, 0x00, 0xFF, "Codec_Secondary_Interface_Control1",
-// 0,  32, 0x00, 0xEF, "Codec_Secondary_Interface_Control2",
-// 0,  33, 0x00, 0xFF, "Codec_Secondary_Interface_Control3",
-// 0,  34, 0x00, 0xAF, "I2C_Bus_Condition",
-// 0,  36, 0x00, 0x00, "ADC_Flag_Register",
-// 0,  38, 0x00, 0x00, "DAC_Flag_Register",
-// 0,  39, 0x00, 0x00, "Overflow_Flags",
-// 0,  44, 0x00, 0x00, "Interrupt_Flags-DAC",
-// 0,  45, 0x00, 0x00, "Interrupt_Flags-ADC",
-// 0,  46, 0x00, 0x00, "Interrupt_Flags-DAC",
-// 0,  47, 0x00, 0x00, "Interrupt_Flags-ADC",
-// 0,  48, 0x00, 0xFF, "INT1_Control_Register",
-// 0,  49, 0x00, 0xFF, "INT2_Control_Register",
-// 0,  50, 0x00, 0xF0, "INT1&INT2_Control_Register",
-// 0,  51, 0x00, 0xFD, "GPIO1_Control",
-// 0,  54, 0x02, 0x06, "DIN_Control",
-// 0,  69, 0x38, 0x7F, "DRC_Control",
-// 0,  70, 0x00, 0xFF, "DRC_Control",
-// 0,  71, 0x00, 0xFF, "Left_Beep_Generator",
-// 0,  72, 0x00, 0xFF, "Right_Beep_Generator",
-// 0,  73, 0x00, 0xFF, "Beep_Length_MSB",
-// 0,  74, 0x00, 0xFF, "Beep_Length_Middle",
-// 0,  75, 0xEE, 0xFF, "Beep_Length_LSB",
-// 0,  76, 0x10, 0xFF, "Beep_Sin(x)_MSB",
-// 0,  77, 0xD8, 0xFF, "Beep_Sin(x)_LSB",
-// 0,  78, 0x7E, 0xFF, "Beep_Cos(x)_MSB",
-// 0,  79, 0xE3, 0xFF, "Beep_Cos(x)_LSB",
-// 0, 102, 0x00, 0xBF, "ADC_DC_Measurement",
-// 0, 103, 0x00, 0x7F, "ADC_DC_Measurement",
-// 0, 104, 0x00, 0x00, "ADC_DC_MSB",
-// 0, 105, 0x00, 0x00, "ADC_DC_MID",
-// 0, 106, 0x00, 0x00, "ADC_DC_LSB",
-// 0, 116, 0x00, 0xFF, "DAC_Pin_Volume_Control_SAR_ADC",
-// 0, 117, 0x00, 0x00, "VOL_Pin_Gain",
-#endif
+ 
+// ********** AIC3100 PAGE 3
+// pg,reg, reset, can1, must1,  "nm",		prev, curr
+   3,   0, 0x03, 0x00, 0x00, "psr3",      0, 0x03,  // 121=3.0 3:0 reads as 0x03
+	 3,	  1, 0x00, 0x00, 0xff, "rsv",				0, 0x00,	// reserved-- reset = XX, can1=0x00, must1=0xff 
+	 // dup 2..15
+	 3,  16, 0x81, 0xff, 0x00, "mclk_div",  0, 0x81,	// 123=3.16
+	 3,	 17, 0x81, 0x00, 0xff, "rsv",				0, 0x00,	// actual: 3:17  0x81 not 0x00	// reserved-- reset = XX, can1=0x00, must1=0xff 
+	 // dup 18..127
+// ********** AIC3100 PAGE 4
+// pg,reg, reset, can1, must1,  "nm",		prev, curr
+   4,   0, 0x04, 0x00, 0x00, "psr4",      0, 0x04,  // 125=4.0  4:0 reads as 0x04
+	 4,	  1, 0x00, 0x00, 0xff, "rsv",				0, 0x00,	// reserved-- reset = XX, can1=0x00, must1=0xff 
+	 4,	  2, 0x01, 0xff, 0x00, "n0_lpf_h",		0, 0x01,
+	 4,	  3, 0x17, 0xff, 0x00, "n0_lpf_l",		0, 0x17,
+	 4,	  4, 0x01, 0xff, 0x00, "n1_lpf_h",		0, 0x01,
+	 4,	  5, 0x17, 0xff, 0x00, "n1_lpf_l",		0, 0x17, // 130=4.5
+	 4,	  6, 0x7d, 0xff, 0x00, "d1_lpf_h",		0, 0x7d,
+	 4,	  7, 0xd3, 0xff, 0x00, "d1_lpf_l",		0, 0xd3,
+	 4,	  8, 0x7f, 0xff, 0x00, "n0_iir_h",		0, 0x7f,
+	 4,	  9, 0xff, 0xff, 0x00, "n0_iir_l",		0, 0xff,
+	 4,  10, 0x00, 0xff, 0x00, "iir",					0, 0x00,
+	 // dup 11..13
+	 4,	 14, 0x7f, 0xff, 0x00, "n0_bqa_h",		0, 0x7f,
+	 4,	 15, 0xff, 0xff, 0x00, "n0_bqa_l",		0, 0xff,
+	 4,  16, 0x00, 0xff, 0x00, "bqa",					0, 0x00,
+	 // dup 17..23
+	 4,	 24, 0x7f, 0xff, 0x00, "n0_bqb_h",		0, 0x7f,
+	 4,	 25, 0xff, 0xff, 0x00, "n0_bqb_l",		0, 0xff, // 140=4.25
+	 4,  26, 0x00, 0xff, 0x00, "bqb",					0, 0x00, 
+	 // dup 27..33
+	 4,	 34, 0x7f, 0xff, 0x00, "n0_bqc_h",		0, 0x7f,
+	 4,	 35, 0xff, 0xff, 0x00, "n0_bqc_l",		0, 0xff,
+	 4,  36, 0x00, 0xff, 0x00, "bqc",					0, 0x00,
+	 // dup 37..43
+	 4,	 44, 0x7f, 0xff, 0x00, "n0_bqd_h",		0, 0x7f,
+	 4,	 45, 0xff, 0xff, 0x00, "n0_bqd_l",		0, 0xff,
+	 4,  46, 0x00, 0xff, 0x00, "bqd",					0, 0x00,
+	 // dup 47..53
+	 4,	 54, 0x7f, 0xff, 0x00, "n0_bqe_h",		0, 0x7f,
+	 4,	 55, 0xff, 0xff, 0x00, "n0_bqe_l",		0, 0xff,
+	 4,  56, 0x00, 0xff, 0x00, "bqe",					0, 0x00, // 150=4.56
+	 // dup 57..127
 
-//********** AIC3100 PAGE 1
-// pg,reg, reset, can1, must1,  "nm",																		curr
-   1,   0, 0x01, 0x00, 0x00, "Page_Select_Register",                    0x01,  // 1:0 reads as 0x01
-   1,  30, 0x00, 0x03, 0x00, "Headphone_Speaker_Amp_Error_Control",     0x00,  // Not Used by init
-   1,  31, 0x04, 0xDE, 0x04, "Headphone_Drivers",                       0x04, 
-   1,  32, 0x06, 0xFE, 0x06, "Cl-D_Drv",                                0x06, 
-   1,  33, 0x3E, 0xFF, 0x00, "HP_Output_Drivers_POP_Removal_Settings",  0x3E, 
-   1,  34, 0x00, 0xFF, 0x00, "Output_Driver_PGA_Ramp-Down_Period_Ctrl", 0x00, 
-   1,  35, 0x00, 0xFF, 0x00, "LnRDAC_Out",                              0x00,
-   1,  36, 0x7F, 0xFF, 0x00, "Left_Analog_Vol_to_HPL",                  0x7F, 
-   1,  37, 0x7F, 0xFF, 0x00, "Right_Analog_Vol_to_HPR",                 0x7F,
-   1,  38, 0x7F, 0xFF, 0x00, "LAnlg_V_SPL",                             0x7F,
-   1,  39, 0x7F, 0xFF, 0x00, "RAnlg_V_SPR",                             0x7F,
-   1,  40, 0x02, 0x7E, 0x02, "HPL_Driver",                              0x02,
-   1,  41, 0x02, 0x7E, 0x02, "HPR_Driver",                              0x02, 
-   1,  42, 0x00, 0x1D, 0x00, "SPK_Driver",                              0x00,
-   1,  44, 0x20, 0xFF, 0x00, "HP_Driver_Control",                       0x20, // use actual: 0x20 not 0x00 (debounce 8usec)
-   1,  46, 0x00, 0x8B, 0x00, "mic_bias",                                0x00,
-   1,  47, 0x80, 0xFF, 0x00, "mic_gain",                                0x80,
-   1,  48, 0x00, 0xFC, 0x00, "adc_in_p",                             		0x00,
-   1,  49, 0x00, 0xF0, 0x00, "adc_in_m",                             		0x00,
-   1,  50, 0x00, 0xE0, 0x00, "adc_in_cm",                               0x00,
-   1,  51, 0x00, 0xFD, 0x00, "GPIO1_InOut_Pin_Ctrl",                    0x00,
-#ifdef PG1_XTRAS
-#endif
-#ifdef PG3_7_XTRAS
-// 3,   0, 0x00, 0x00, "Page_Select_Register",
-// 3,  16, 0x81, 0xFF, "Timer_Clock_MCLK_Divider",
-// 4,   0, 0x00, 0x00, "Page_Select_Register",
-// 4,   2, 0x01, 0xFF, "C1_MSB",
-// 4,   3, 0x17, 0xFF, "C1_LSB",
-// 4,   4, 0x01, 0xFF, "C2_MSB",
-// 4,   5, 0x17, 0xFF, "C2_LSB",
-// 4,   6, 0x7D, 0xFF, "C3_MSB",
-// 4,   7, 0xD3, 0xFF, "C3_LSB",
-// 4,   8, 0x7F, 0xFF, "C4_MSB",
-// 4,   9, 0xFF, 0xFF, "C4_LSB",
-// 4,  10, 0x00, 0xFF, "C5_MSB",
-// 4,  11, 0x00, 0xFF, "C5_LSB",
-// 4,  12, 0x00, 0xFF, "C6_MSB",
-// 4,  13, 0x00, 0xFF, "C6_LSB",
-// 4,  14, 0x7F, 0xFF, "C7_MSB",
-// 4,  15, 0xFF, 0xFF, "C7_LSB",
-// 4,  16, 0x00, 0xFF, "C8_MSB",
-// 4,  17, 0x00, 0xFF, "C8_LSB",
-// 4,  18, 0x00, 0xFF, "C9_MSB",
-// 4,  19, 0x00, 0xFF, "C9_LSB",
-// 4,  20, 0x00, 0xFF, "C10_MSB",
-// 4,  21, 0x00, 0xFF, "C10_LSB",
-// 4,  22, 0x00, 0xFF, "C11_MSB",
-// 4,  23, 0x00, 0xFF, "C11_LSB",
-// 4,  24, 0x7F, 0xFF, "C12_MSB",
-// 4,  25, 0xFF, 0xFF, "C12_LSB",
-// 4,  26, 0x00, 0xFF, "C13_MSB",
-// 4,  27, 0x00, 0xFF, "C13_LSB",
-// 4,  28, 0x00, 0xFF, "C14_MSB",
-// 4,  29, 0x00, 0xFF, "C14_LSB",
-// 4,  30, 0x00, 0xFF, "C15_MSB",
-// 4,  31, 0x00, 0xFF, "C15_LSB",
-// 4,  32, 0x00, 0xFF, "C16_MSB",
-// 4,  33, 0x00, 0xFF, "C16_LSB",
-// 4,  34, 0x7F, 0xFF, "C17_MSB",
-// 4,  35, 0xFF, 0xFF, "C17_LSB",
-// 4,  36, 0x00, 0xFF, "C18_MSB",
-// 4,  37, 0x00, 0xFF, "C18_LSB",
-// 4,  38, 0x00, 0xFF, "C19_MSB",
-// 4,  39, 0x00, 0xFF, "C19_LSB",
-// 4,  40, 0x00, 0xFF, "C20_MSB",
-// 4,  41, 0x00, 0xFF, "C20_LSB",
-// 4,  42, 0x00, 0xFF, "C21_MSB",
-// 4,  43, 0x00, 0xFF, "C21_LSB",
-// 4,  44, 0x7F, 0xFF, "C22_MSB",
-// 4,  45, 0xFF, 0xFF, "C22_LSB",
-// 4,  46, 0x00, 0xFF, "C23_MSB",
-// 4,  47, 0x00, 0xFF, "C23_LSB",
-// 4,  48, 0x00, 0xFF, "C24_MSB",
-// 4,  49, 0x00, 0xFF, "C24_LSB",
-// 4,  50, 0x00, 0xFF, "C25_MSB",
-// 4,  51, 0x00, 0xFF, "C25_LSB",
-// 4,  52, 0x00, 0xFF, "C26_MSB",
-// 4,  53, 0x00, 0xFF, "C26_LSB",
-// 4,  54, 0x7F, 0xFF, "C27_MSB",
-// 4,  55, 0xFF, 0xFF, "C27_LSB",
-// 4,  56, 0x00, 0xFF, "C28_MSB",
-// 4,  57, 0x00, 0xFF, "C28_LSB",
-// 4,  58, 0x00, 0xFF, "C29_MSB",
-// 4,  59, 0x00, 0xFF, "C29_LSB",
-// 4,  60, 0x00, 0xFF, "C30_MSB",
-// 4,  61, 0x00, 0xFF, "C30_LSB",
-// 4,  62, 0x00, 0xFF, "C31_MSB",
-// 4,  63, 0x00, 0xFF, "C31_LSB",
-// 4,  64, 0x00, 0xFF, "C32_MSB",
-// 4,  65, 0x00, 0xFF, "C32_LSB",
-// 4,  66, 0x00, 0xFF, "C33_MSB",
-// 4,  67, 0x00, 0xFF, "C33_LSB",
-// 4,  68, 0x00, 0xFF, "C34_MSB",
-// 4,  69, 0x00, 0xFF, "C34_LSB",
-// 4,  70, 0x00, 0xFF, "C35_MSB",
-// 4,  71, 0x00, 0xFF, "C35_LSB",
-// 4,  72, 0x7F, 0xFF, "C36_MSB",
-// 4,  73, 0xFF, 0xFF, "C36_LSB",
-// 4,  74, 0x00, 0xFF, "C37_MSB",
-// 4,  75, 0x00, 0xFF, "C37_LSB",
-// 4,  76, 0x00, 0xFF, "C38_MSB",
-// 4,  77, 0x00, 0xFF, "C38_LSB",
-// 4,  78, 0x7F, 0xFF, "C39_MSB",
-// 4,  79, 0xFF, 0xFF, "C39_LSB",
-// 4,  80, 0x00, 0xFF, "C40_MSB",
-// 4,  81, 0x00, 0xFF, "C40_LSB",
-// 4,  82, 0x00, 0xFF, "C41_MSB",
-// 4,  83, 0x00, 0xFF, "C41_LSB",
-// 4,  84, 0x00, 0xFF, "C42_MSB",
-// 4,  85, 0x00, 0xFF, "C42_LSB",
-// 4,  86, 0x00, 0xFF, "C43_MSB",
-// 4,  87, 0x00, 0xFF, "C43_LSB",
-// 4,  88, 0x7F, 0xFF, "C44_MSB",
-// 4,  89, 0xFF, 0xFF, "C44_LSB",
-// 4,  90, 0x00, 0xFF, "C45_MSB",
-// 4,  91, 0x00, 0xFF, "C45_LSB",
-// 4,  92, 0x00, 0xFF, "C46_MSB",
-// 4,  93, 0x00, 0xFF, "C46_LSB",
-// 4,  94, 0x00, 0xFF, "C47_MSB",
-// 4,  95, 0x00, 0xFF, "C47_LSB",
-// 4,  96, 0x00, 0xFF, "C48_MSB",
-// 4,  97, 0x00, 0xFF, "C48_LSB",
-// 4,  98, 0x7F, 0xFF, "C49_MSB",
-// 4,  99, 0xFF, 0xFF, "C49_LSB",
-// 4, 100, 0x00, 0xFF, "C50_MSB",
-// 4, 101, 0x00, 0xFF, "C50_LSB",
-// 4, 102, 0x00, 0xFF, "C51_MSB",
-// 4, 103, 0x00, 0xFF, "C51_LSB",
-// 4, 104, 0x00, 0xFF, "C52_MSB",
-// 4, 105, 0x00, 0xFF, "C52_LSB",
-// 4, 106, 0x00, 0xFF, "C53_MSB",
-// 4, 107, 0x00, 0xFF, "C53_LSB",
-// 4, 108, 0x7F, 0xFF, "C54_MSB",
-// 4, 109, 0xFF, 0xFF, "C54_LSB",
-// 4, 110, 0x00, 0xFF, "C55_MSB",
-// 4, 111, 0x00, 0xFF, "C55_LSB",
-// 4, 112, 0x00, 0xFF, "C56_MSB",
-// 4, 113, 0x00, 0xFF, "C56_LSB",
-// 4, 114, 0x00, 0xFF, "C57_MSB",
-// 4, 115, 0x00, 0xFF, "C57_LSB",
-// 4, 116, 0x00, 0xFF, "C58_MSB",
-// 4, 117, 0x00, 0xFF, "C58_LSB",
-// 4, 118, 0x7F, 0xFF, "C59_MSB",
-// 4, 119, 0xFF, 0xFF, "C59_LSB",
-// 4, 120, 0x00, 0xFF, "C60_MSB",
-// 4, 121, 0x00, 0xFF, "C60_LSB",
-// 4, 122, 0x00, 0xFF, "C61_MSB",
-// 4, 123, 0x00, 0xFF, "C61_LSB",
-// 4, 124, 0x00, 0xFF, "C62_MSB",
-// 4, 125, 0x00, 0xFF, "C62_LSB",
-// 4, 126, 0x00, 0xFF, "C63_MSB",
-// 4, 127, 0x00, 0xFF, "C63_LSB",
-// 5,   0, 0x00, 0x00, "Page_Select_Register",
-// 5,   2, 0x00, 0xFF, "C65_MSB",
-// 5,   3, 0x00, 0xFF, "C65_LSB",
-// 5,   4, 0x00, 0xFF, "C66_MSB",
-// 5,   5, 0x00, 0xFF, "C66_LSB",
-// 5,   6, 0x00, 0xFF, "C67_MSB",
-// 5,   7, 0x00, 0xFF, "C67_LSB",
-// 5,   8, 0x00, 0xFF, "C68_MSB",
-// 5,   9, 0x00, 0xFF, "C68_LSB",
-// 5,  10, 0x00, 0xFF, "C69_MSB",
-// 5,  11, 0x00, 0xFF, "C69_LSB",
-// 5,  12, 0x00, 0xFF, "C70_MSB",
-// 5,  13, 0x00, 0xFF, "C70_LSB",
-// 5,  14, 0x00, 0xFF, "C71_MSB",
-// 5,  15, 0x00, 0xFF, "C71_LSB",
-// 5,  16, 0x00, 0xFF, "C72_MSB",
-// 5,  17, 0x00, 0xFF, "C72_LSB",
-// 5,  18, 0x00, 0xFF, "C73_MSB",
-// 5,  19, 0x00, 0xFF, "C73_LSB",
-// 5,  20, 0x00, 0xFF, "C74_MSB",
-// 5,  21, 0x00, 0xFF, "C74_LSB",
-// 5,  22, 0x00, 0xFF, "C75_MSB",
-// 5,  23, 0x00, 0xFF, "C75_LSB",
-// 5,  24, 0x00, 0xFF, "C76_MSB",
-// 5,  25, 0x00, 0xFF, "C76_LSB",
-// 5,  26, 0x00, 0xFF, "C77_MSB",
-// 5,  27, 0x00, 0xFF, "C77_LSB",
-// 5,  28, 0x00, 0xFF, "C78_MSB",
-// 5,  29, 0x00, 0xFF, "C78_LSB",
-// 5,  30, 0x00, 0xFF, "C79_MSB",
-// 5,  31, 0x00, 0xFF, "C79_LSB",
-// 5,  32, 0x00, 0xFF, "C80_MSB",
-// 5,  33, 0x00, 0xFF, "C80_LSB",
-// 5,  34, 0x00, 0xFF, "C81_MSB",
-// 5,  35, 0x00, 0xFF, "C81_LSB",
-// 5,  36, 0x00, 0xFF, "C82_MSB",
-// 5,  37, 0x00, 0xFF, "C82_LSB",
-// 5,  38, 0x00, 0xFF, "C83_MSB",
-// 5,  39, 0x00, 0xFF, "C83_LSB",
-// 5,  40, 0x00, 0xFF, "C84_MSB",
-// 5,  41, 0x00, 0xFF, "C84_LSB",
-// 5,  42, 0x00, 0xFF, "C85_MSB",
-// 5,  43, 0x00, 0xFF, "C85_LSB",
-// 5,  44, 0x00, 0xFF, "C86_MSB",
-// 5,  45, 0x00, 0xFF, "C86_LSB",
-// 5,  46, 0x00, 0xFF, "C87_MSB",
-// 5,  47, 0x00, 0xFF, "C87_LSB",
-// 5,  48, 0x00, 0xFF, "C88_MSB",
-// 5,  49, 0x00, 0xFF, "C88_LSB",
-// 5,  50, 0x00, 0xFF, "C89_MSB",
-// 5,  51, 0x00, 0xFF, "C89_LSB",
-// 5,  52, 0x00, 0xFF, "C90_MSB",
-// 5,  53, 0x00, 0xFF, "C90_LSB",
-// 5,  54, 0x00, 0xFF, "C91_MSB",
-// 5,  55, 0x00, 0xFF, "C91_LSB",
-// 5,  56, 0x00, 0xFF, "C92_MSB",
-// 5,  57, 0x00, 0xFF, "C92_LSB",
-// 5,  58, 0x00, 0xFF, "C93_MSB",
-// 5,  59, 0x00, 0xFF, "C93_LSB",
-// 5,  60, 0x00, 0xFF, "C94_MSB",
-// 5,  61, 0x00, 0xFF, "C94_LSB",
-// 5,  62, 0x00, 0xFF, "C95_MSB",
-// 5,  63, 0x00, 0xFF, "C95_LSB",
-// 5,  64, 0x00, 0xFF, "C96_MSB",
-// 5,  65, 0x00, 0xFF, "C96_LSB",
-// 5,  66, 0x00, 0xFF, "C97_MSB",
-// 5,  67, 0x00, 0xFF, "C97_LSB",
-// 5,  68, 0x00, 0xFF, "C98_MSB",
-// 5,  69, 0x00, 0xFF, "C98_LSB",
-// 5,  70, 0x00, 0xFF, "C99_MSB",
-// 5,  71, 0x00, 0xFF, "C99_LSB",
-// 5,  72, 0x00, 0xFF, "C100_MSB",
-// 5,  73, 0x00, 0xFF, "C100_LSB",
-// 5,  74, 0x00, 0xFF, "C101_MSB",
-// 5,  75, 0x00, 0xFF, "C101_LSB",
-// 5,  76, 0x00, 0xFF, "C102_MSB",
-// 5,  77, 0x00, 0xFF, "C102_LSB",
-// 5,  78, 0x00, 0xFF, "C103_MSB",
-// 5,  79, 0x00, 0xFF, "C103_LSB",
-// 5,  80, 0x00, 0xFF, "C104_MSB",
-// 5,  81, 0x00, 0xFF, "C104_LSB",
-// 5,  82, 0x00, 0xFF, "C105_MSB",
-// 5,  83, 0x00, 0xFF, "C105_LSB",
-// 5,  84, 0x00, 0xFF, "C106_MSB",
-// 5,  85, 0x00, 0xFF, "C106_LSB",
-// 5,  86, 0x00, 0xFF, "C107_MSB",
-// 5,  87, 0x00, 0xFF, "C107_LSB",
-// 5,  88, 0x00, 0xFF, "C108_MSB",
-// 5,  89, 0x00, 0xFF, "C108_LSB",
-// 5,  90, 0x00, 0xFF, "C109_MSB",
-// 5,  91, 0x00, 0xFF, "C109_LSB",
-// 5,  92, 0x00, 0xFF, "C110_MSB",
-// 5,  93, 0x00, 0xFF, "C110_LSB",
-// 5,  94, 0x00, 0xFF, "C111_MSB",
-// 5,  95, 0x00, 0xFF, "C111_LSB",
-// 5,  96, 0x00, 0xFF, "C112_MSB",
-// 5,  97, 0x00, 0xFF, "C112_LSB",
-// 5,  98, 0x00, 0xFF, "C113_MSB",
-// 5,  99, 0x00, 0xFF, "C113_LSB",
-// 5, 100, 0x00, 0xFF, "C114_MSB",
-// 5, 101, 0x00, 0xFF, "C114_LSB",
-// 5, 102, 0x00, 0xFF, "C115_MSB",
-// 5, 103, 0x00, 0xFF, "C115_LSB",
-// 5, 104, 0x00, 0xFF, "C116_MSB",
-// 5, 105, 0x00, 0xFF, "C116_LSB",
-// 5, 106, 0x00, 0xFF, "C117_MSB",
-// 5, 107, 0x00, 0xFF, "C117_LSB",
-// 5, 108, 0x00, 0xFF, "C118_MSB",
-// 5, 109, 0x00, 0xFF, "C118_LSB",
-// 5, 110, 0x00, 0xFF, "C119_MSB",
-// 5, 111, 0x00, 0xFF, "C119_LSB",
-// 5, 112, 0x00, 0xFF, "C120_MSB",
-// 5, 113, 0x00, 0xFF, "C120_LSB",
-// 5, 114, 0x00, 0xFF, "C121_MSB",
-// 5, 115, 0x00, 0xFF, "C121_LSB",
-// 5, 116, 0x00, 0xFF, "C122_MSB",
-// 5, 117, 0x00, 0xFF, "C122_LSB",
-// 5, 118, 0x00, 0xFF, "C123_MSB",
-// 5, 119, 0x00, 0xFF, "C123_LSB",
-// 5, 120, 0x00, 0xFF, "C124_MSB",
-// 5, 121, 0x00, 0xFF, "C124_LSB",
-// 5, 122, 0x00, 0xFF, "C125_MSB",
-// 5, 123, 0x00, 0xFF, "C125_LSB",
-// 5, 124, 0x00, 0xFF, "C126_MSB",
-// 5, 125, 0x00, 0xFF, "C126_LSB",
-// 5, 126, 0x00, 0xFF, "C127_MSB",
-// 5, 127, 0x00, 0xFF, "C127_LSB",
-#endif
-//********** AIC3100 PAGE 8
-// pg,reg, reset, can1, must1,  "nm",																		curr, 
-   8,   0, 0x08, 0x00, 0x00, "Page_Select_Register",                    0x08,  // 8:0 reads as 0x08
-   8,   1, 0x00, 0x05, 0x00, "DAC_Coefficient_RAM_Control",             0x00,
-#ifdef PG8_15_XTRAS
-// 8,   2, 0x7F, 0xFF, "C1_MSB",
-// 8,   3, 0xFF, 0xFF, "C1_LSB",
-// 8,   4, 0x00, 0xFF, "C2_MSB",
-// 8,   5, 0x00, 0xFF, "C2_LSB",
-// 8,   6, 0x00, 0xFF, "C3_MSB",
-// 8,   7, 0x00, 0xFF, "C3_LSB",
-// 8,   8, 0x00, 0xFF, "C4_MSB",
-// 8,   9, 0x00, 0xFF, "C4_LSB",
-// 8,  10, 0x00, 0xFF, "C5_MSB",
-// 8,  11, 0x00, 0xFF, "C5_LSB",
-// 8,  12, 0x7F, 0xFF, "C6_MSB",
-// 8,  13, 0xFF, 0xFF, "C6_LSB",
-// 8,  14, 0x00, 0xFF, "C7_MSB",
-// 8,  15, 0x00, 0xFF, "C7_LSB",
-// 8,  16, 0x00, 0xFF, "C8_MSB",
-// 8,  17, 0x00, 0xFF, "C8_LSB",
-// 8,  18, 0x00, 0xFF, "C9_MSB",
-// 8,  19, 0x00, 0xFF, "C9_LSB",
-// 8,  20, 0x00, 0xFF, "C10_MSB",
-// 8,  21, 0x00, 0xFF, "C10_LSB",
-// 8,  22, 0x7F, 0xFF, "C11_MSB",
-// 8,  23, 0xFF, 0xFF, "C11_LSB",
-// 8,  24, 0x00, 0xFF, "C12_MSB",
-// 8,  25, 0x00, 0xFF, "C12_LSB",
-// 8,  26, 0x00, 0xFF, "C13_MSB",
-// 8,  27, 0x00, 0xFF, "C13_LSB",
-// 8,  28, 0x00, 0xFF, "C14_MSB",
-// 8,  29, 0x00, 0xFF, "C14_LSB",
-// 8,  30, 0x00, 0xFF, "C15_MSB",
-// 8,  31, 0x00, 0xFF, "C15_LSB",
-// 8,  32, 0x7F, 0xFF, "C16_MSB",
-// 8,  33, 0xFF, 0xFF, "C16_LSB",
-// 8,  34, 0x00, 0xFF, "C17_MSB",
-// 8,  35, 0x00, 0xFF, "C17_LSB",
-// 8,  36, 0x00, 0xFF, "C18_MSB",
-// 8,  37, 0x00, 0xFF, "C18_LSB",
-// 8,  38, 0x00, 0xFF, "C19_MSB",
-// 8,  39, 0x00, 0xFF, "C19_LSB",
-// 8,  40, 0x00, 0xFF, "C20_MSB",
-// 8,  41, 0x00, 0xFF, "C20_LSB",
-// 8,  42, 0x7F, 0xFF, "C21_MSB",
-// 8,  43, 0xFF, 0xFF, "C21_LSB",
-// 8,  44, 0x00, 0xFF, "C22_MSB",
-// 8,  45, 0x00, 0xFF, "C22_LSB",
-// 8,  46, 0x00, 0xFF, "C23_MSB",
-// 8,  47, 0x00, 0xFF, "C23_LSB",
-// 8,  48, 0x00, 0xFF, "C24_MSB",
-// 8,  49, 0x00, 0xFF, "C24_LSB",
-// 8,  50, 0x00, 0xFF, "C25_MSB",
-// 8,  51, 0x00, 0xFF, "C25_LSB",
-// 8,  52, 0x7F, 0xFF, "C26_MSB",
-// 8,  53, 0xFF, 0xFF, "C26_LSB",
-// 8,  54, 0x00, 0xFF, "C27_MSB",
-// 8,  55, 0x00, 0xFF, "C27_LSB",
-// 8,  56, 0x00, 0xFF, "C28_MSB",
-// 8,  57, 0x00, 0xFF, "C28_LSB",
-// 8,  58, 0x00, 0xFF, "C29_MSB",
-// 8,  59, 0x00, 0xFF, "C29_LSB",
-// 8,  60, 0x00, 0xFF, "C30_MSB",
-// 8,  61, 0x00, 0xFF, "C30_LSB",
-// 8,  62, 0x00, 0xFF, "C31_MSB",
-// 8,  63, 0x00, 0xFF, "C31_LSB",
-// 8,  64, 0x00, 0xFF, "C32_MSB",
-// 8,  65, 0x00, 0xFF, "C32_LSB",
-// 8,  66, 0x7F, 0xFF, "C33_MSB",
-// 8,  67, 0xFF, 0xFF, "C33_LSB",
-// 8,  68, 0x00, 0xFF, "C34_MSB",
-// 8,  69, 0x00, 0xFF, "C34_LSB",
-// 8,  70, 0x00, 0xFF, "C35_MSB",
-// 8,  71, 0x00, 0xFF, "C35_LSB",
-// 8,  72, 0x00, 0xFF, "C36_MSB",
-// 8,  73, 0x00, 0xFF, "C36_LSB",
-// 8,  74, 0x00, 0xFF, "C37_MSB",
-// 8,  75, 0x00, 0xFF, "C37_LSB",
-// 8,  76, 0x7F, 0xFF, "C38_MSB",
-// 8,  77, 0xFF, 0xFF, "C38_LSB",
-// 8,  78, 0x00, 0xFF, "C39_MSB",
-// 8,  79, 0x00, 0xFF, "C39_LSB",
-// 8,  80, 0x00, 0xFF, "C40_MSB",
-// 8,  81, 0x00, 0xFF, "C40_LSB",
-// 8,  82, 0x00, 0xFF, "C41_MSB",
-// 8,  83, 0x00, 0xFF, "C41_LSB",
-// 8,  84, 0x00, 0xFF, "C42_MSB",
-// 8,  85, 0x00, 0xFF, "C42_LSB",
-// 8,  86, 0x7F, 0xFF, "C43_MSB",
-// 8,  87, 0xFF, 0xFF, "C43_LSB",
-// 8,  88, 0x00, 0xFF, "C44_MSB",
-// 8,  89, 0x00, 0xFF, "C44_LSB",
-// 8,  90, 0x00, 0xFF, "C45_MSB",
-// 8,  91, 0x00, 0xFF, "C45_LSB",
-// 8,  92, 0x00, 0xFF, "C46_MSB",
-// 8,  93, 0x00, 0xFF, "C46_LSB",
-// 8,  94, 0x00, 0xFF, "C47_MSB",
-// 8,  95, 0x00, 0xFF, "C47_LSB",
-// 8,  96, 0x7F, 0xFF, "C48_MSB",
-// 8,  97, 0xFF, 0xFF, "C48_LSB",
-// 8,  98, 0x00, 0xFF, "C49_MSB",
-// 8,  99, 0x00, 0xFF, "C49_LSB",
-// 8, 100, 0x00, 0xFF, "C50_MSB",
-// 8, 101, 0x00, 0xFF, "C50_LSB",
-// 8, 102, 0x00, 0xFF, "C51_MSB",
-// 8, 103, 0x00, 0xFF, "C51_LSB",
-// 8, 104, 0x00, 0xFF, "C52_MSB",
-// 8, 105, 0x00, 0xFF, "C52_LSB",
-// 8, 106, 0x7F, 0xFF, "C53_MSB",
-// 8, 107, 0xFF, 0xFF, "C53_LSB",
-// 8, 108, 0x00, 0xFF, "C54_MSB",
-// 8, 109, 0x00, 0xFF, "C54_LSB",
-// 8, 110, 0x00, 0xFF, "C55_MSB",
-// 8, 111, 0x00, 0xFF, "C55_LSB",
-// 8, 112, 0x00, 0xFF, "C56_MSB",
-// 8, 113, 0x00, 0xFF, "C56_LSB",
-// 8, 114, 0x00, 0xFF, "C57_MSB",
-// 8, 115, 0x00, 0xFF, "C57_LSB",
-// 8, 116, 0x7F, 0xFF, "C58_MSB",
-// 8, 117, 0xFF, 0xFF, "C58_LSB",
-// 8, 118, 0x00, 0xFF, "C59_MSB",
-// 8, 119, 0x00, 0xFF, "C59_LSB",
-// 8, 120, 0x00, 0xFF, "C60_MSB",
-// 8, 121, 0x00, 0xFF, "C60_LSB",
-// 8, 122, 0x00, 0xFF, "C61_MSB",
-// 8, 123, 0x00, 0xFF, "C61_LSB",
-// 8, 124, 0x00, 0xFF, "C62_MSB",
-// 8, 125, 0x00, 0xFF, "C62_LSB",
-// 8, 126, 0x00, 0xFF, "C63_MSB",
-// 8, 127, 0x00, 0xFF, "C63_LSB",
-// 9,   0, 0x00, 0x00, "Page_Select_Register",
-// 9,   2, 0x7F, 0xFF, "C65_MSB",
-// 9,   3, 0xFF, 0xFF, "C65_LSB",
-// 9,   4, 0x00, 0xFF, "C66_MSB",
-// 9,   5, 0x00, 0xFF, "C66_LSB",
-// 9,   6, 0x00, 0xFF, "C67_MSB",
-// 9,   7, 0x00, 0xFF, "C67_LSB",
-// 9,   8, 0x7F, 0xFF, "C68_MSB",
-// 9,   9, 0xFF, 0xFF, "C68_LSB",
-// 9,  10, 0x00, 0xFF, "C69_MSB",
-// 9,  11, 0x00, 0xFF, "C69_LSB",
-// 9,  12, 0x00, 0xFF, "C70_MSB",
-// 9,  13, 0x00, 0xFF, "C70_LSB",
-// 9,  14, 0x7F, 0xFF, "C71_MSB",
-// 9,  15, 0xF7, 0xFF, "C71_LSB",
-// 9,  16, 0x80, 0xFF, "C72_MSB",
-// 9,  17, 0x09, 0xFF, "C72_LSB",
-// 9,  18, 0x7F, 0xFF, "C73_MSB",
-// 9,  19, 0xEF, 0xFF, "C73_LSB",
-// 9,  20, 0x00, 0xFF, "C74_MSB",
-// 9,  21, 0x11, 0xFF, "C74_LSB",
-// 9,  22, 0x00, 0xFF, "C75_MSB",
-// 9,  23, 0x11, 0xFF, "C75_LSB",
-// 9,  24, 0x7F, 0xFF, "C76_MSB",
-// 9,  25, 0xDE, 0xFF, "C76_LSB",
-// 9,  26, 0x00, 0xFF, "C77_MSB",
-// 9,  27, 0x00, 0xFF, "C77_LSB",
-// 9,  28, 0x00, 0xFF, "C78_MSB",
-// 9,  29, 0x00, 0xFF, "C78_LSB",
-// 9,  30, 0x00, 0xFF, "C79_MSB",
-// 9,  31, 0x00, 0xFF, "C79_LSB",
-// 9,  32, 0x00, 0xFF, "C80_MSB",
-// 9,  33, 0x00, 0xFF, "C80_LSB",
-// 9,  34, 0x00, 0xFF, "C81_MSB",
-// 9,  35, 0x00, 0xFF, "C81_LSB",
-// 9,  36, 0x00, 0xFF, "C82_MSB",
-// 9,  37, 0x00, 0xFF, "C82_LSB",
-// 9,  38, 0x00, 0xFF, "C83_MSB",
-// 9,  39, 0x00, 0xFF, "C83_LSB",
-// 9,  40, 0x00, 0xFF, "C84_MSB",
-// 9,  41, 0x00, 0xFF, "C84_LSB",
-// 9,  42, 0x00, 0xFF, "C85_MSB",
-// 9,  43, 0x00, 0xFF, "C85_LSB",
-// 9,  44, 0x00, 0xFF, "C86_MSB",
-// 9,  45, 0x00, 0xFF, "C86_LSB",
-// 9,  46, 0x00, 0xFF, "C87_MSB",
-// 9,  47, 0x00, 0xFF, "C87_LSB",
-// 9,  48, 0x00, 0xFF, "C88_MSB",
-// 9,  49, 0x00, 0xFF, "C88_LSB",
-// 9,  50, 0x00, 0xFF, "C89_MSB",
-// 9,  51, 0x00, 0xFF, "C89_LSB",
-// 9,  52, 0x00, 0xFF, "C90_MSB",
-// 9,  53, 0x00, 0xFF, "C90_LSB",
-// 9,  54, 0x00, 0xFF, "C91_MSB",
-// 9,  55, 0x00, 0xFF, "C91_LSB",
-// 9,  56, 0x00, 0xFF, "C92_MSB",
-// 9,  57, 0x00, 0xFF, "C92_LSB",
-// 9,  58, 0x00, 0xFF, "C93_MSB",
-// 9,  59, 0x00, 0xFF, "C93_LSB",
-// 9,  60, 0x00, 0xFF, "C94_MSB",
-// 9,  61, 0x00, 0xFF, "C94_LSB",
-// 9,  62, 0x00, 0xFF, "C95_MSB",
-// 9,  63, 0x00, 0xFF, "C95_LSB",
-// 9,  64, 0x00, 0xFF, "C96_MSB",
-// 9,  65, 0x00, 0xFF, "C96_LSB",
-// 9,  66, 0x00, 0xFF, "C97_MSB",
-// 9,  67, 0x00, 0xFF, "C97_LSB",
-// 9,  68, 0x00, 0xFF, "C98_MSB",
-// 9,  69, 0x00, 0xFF, "C98_LSB",
-// 9,  70, 0x00, 0xFF, "C99_MSB",
-// 9,  71, 0x00, 0xFF, "C99_LSB",
-// 9,  72, 0x00, 0xFF, "C100_MSB",
-// 9,  73, 0x00, 0xFF, "C100_LSB",
-// 9,  74, 0x00, 0xFF, "C101_MSB",
-// 9,  75, 0x00, 0xFF, "C101_LSB",
-// 9,  76, 0x00, 0xFF, "C102_MSB",
-// 9,  77, 0x00, 0xFF, "C102_LSB",
-// 9,  78, 0x00, 0xFF, "C103_MSB",
-// 9,  79, 0x00, 0xFF, "C103_LSB",
-// 9,  80, 0x00, 0xFF, "C104_MSB",
-// 9,  81, 0x00, 0xFF, "C104_LSB",
-// 9,  82, 0x00, 0xFF, "C105_MSB",
-// 9,  83, 0x00, 0xFF, "C105_LSB",
-// 9,  84, 0x00, 0xFF, "C106_MSB",
-// 9,  85, 0x00, 0xFF, "C106_LSB",
-// 9,  86, 0x00, 0xFF, "C107_MSB",
-// 9,  87, 0x00, 0xFF, "C107_LSB",
-// 9,  88, 0x00, 0xFF, "C108_MSB",
-// 9,  89, 0x00, 0xFF, "C108_LSB",
-// 9,  90, 0x00, 0xFF, "C109_MSB",
-// 9,  91, 0x00, 0xFF, "C109_LSB",
-// 9,  92, 0x00, 0xFF, "C110_MSB",
-// 9,  93, 0x00, 0xFF, "C110_LSB",
-// 9,  94, 0x00, 0xFF, "C111_MSB",
-// 9,  95, 0x00, 0xFF, "C111_LSB",
-// 9,  96, 0x00, 0xFF, "C112_MSB",
-// 9,  97, 0x00, 0xFF, "C112_LSB",
-// 9,  98, 0x00, 0xFF, "C113_MSB",
-// 9,  99, 0x00, 0xFF, "C113_LSB",
-// 9, 100, 0x00, 0xFF, "C114_MSB",
-// 9, 101, 0x00, 0xFF, "C114_LSB",
-// 9, 102, 0x00, 0xFF, "C115_MSB",
-// 9, 103, 0x00, 0xFF, "C115_LSB",
-// 9, 104, 0x00, 0xFF, "C116_MSB",
-// 9, 105, 0x00, 0xFF, "C116_LSB",
-// 9, 106, 0x00, 0xFF, "C117_MSB",
-// 9, 107, 0x00, 0xFF, "C117_LSB",
-// 9, 108, 0x00, 0xFF, "C118_MSB",
-// 9, 109, 0x00, 0xFF, "C118_LSB",
-// 9, 110, 0x00, 0xFF, "C119_MSB",
-// 9, 111, 0x00, 0xFF, "C119_LSB",
-// 9, 112, 0x00, 0xFF, "C120_MSB",
-// 9, 113, 0x00, 0xFF, "C120_LSB",
-// 9, 114, 0x00, 0xFF, "C121_MSB",
-// 9, 115, 0x00, 0xFF, "C121_LSB",
-// 9, 116, 0x00, 0xFF, "C122_MSB",
-// 9, 117, 0x00, 0xFF, "C122_LSB",
-// 9, 118, 0x00, 0xFF, "C123_MSB",
-// 9, 119, 0x00, 0xFF, "C123_LSB",
-// 9, 120, 0x00, 0xFF, "C124_MSB",
-// 9, 121, 0x00, 0xFF, "C124_LSB",
-// 9, 122, 0x00, 0xFF, "C125_MSB",
-// 9, 123, 0x00, 0xFF, "C125_LSB",
-// 9, 124, 0x00, 0xFF, "C126_MSB",
-// 9, 125, 0x00, 0xFF, "C126_LSB",
-// 9, 126, 0x00, 0xFF, "C127_MSB",
-// 9, 127, 0x00, 0xFF, "C127_LSB",
-// 10,   0, 0x00, 0x00, "Page_Select_Register",
-// 10,   2, 0x7F, 0xFF, "C129_MSB",
-// 10,   3, 0xFF, 0xFF, "C129_LSB",
-// 10,   4, 0x00, 0xFF, "C130_MSB",
-// 10,   5, 0x00, 0xFF, "C130_LSB",
-// 10,   6, 0x00, 0xFF, "C131_MSB",
-// 10,   7, 0x00, 0xFF, "C131_LSB",
-// 10,   8, 0x7F, 0xFF, "C132_MSB",
-// 10,   9, 0xFF, 0xFF, "C132_LSB",
-// 10,  10, 0x00, 0xFF, "C133_MSB",
-// 10,  11, 0x00, 0xFF, "C133_LSB",
-// 10,  12, 0x00, 0xFF, "C134_MSB",
-// 10,  13, 0x00, 0xFF, "C134_LSB",
-// 10,  14, 0x7F, 0xFF, "C135_MSB",
-// 10,  15, 0xF7, 0xFF, "C135_LSB",
-// 10,  16, 0x80, 0xFF, "C136_MSB",
-// 10,  17, 0x10, 0xFF, "C136_LSB",
-// 10,  18, 0x7F, 0xFF, "C137_MSB",
-// 10,  19, 0xEF, 0xFF, "C137_LSB",
-// 10,  20, 0x00, 0xFF, "C138_MSB",
-// 10,  21, 0x11, 0xFF, "C138_LSB",
-// 10,  22, 0x00, 0xFF, "C139_MSB",
-// 10,  23, 0x11, 0xFF, "C139_LSB",
-// 10,  24, 0x7F, 0xFF, "C140_MSB",
-// 10,  25, 0xDE, 0xFF, "C140_LSB",
-// 10,  26, 0x00, 0xFF, "C141_MSB",
-// 10,  27, 0x00, 0xFF, "C141_LSB",
-// 10,  28, 0x00, 0xFF, "C142_MSB",
-// 10,  29, 0x00, 0xFF, "C142_LSB",
-// 10,  30, 0x00, 0xFF, "C143_MSB",
-// 10,  31, 0x00, 0xFF, "C143_LSB",
-// 10,  32, 0x00, 0xFF, "C144_MSB",
-// 10,  33, 0x00, 0xFF, "C144_LSB",
-// 10,  34, 0x00, 0xFF, "C145_MSB",
-// 10,  35, 0x00, 0xFF, "C145_LSB",
-// 10,  36, 0x00, 0xFF, "C146_MSB",
-// 10,  37, 0x00, 0xFF, "C146_LSB",
-// 10,  38, 0x00, 0xFF, "C147_MSB",
-// 10,  39, 0x00, 0xFF, "C147_LSB",
-// 10,  40, 0x00, 0xFF, "C148_MSB",
-// 10,  41, 0x00, 0xFF, "C148_LSB",
-// 10,  42, 0x00, 0xFF, "C149_MSB",
-// 10,  43, 0x00, 0xFF, "C149_LSB",
-// 10,  44, 0x00, 0xFF, "C150_MSB",
-// 10,  45, 0x00, 0xFF, "C150_LSB",
-// 10,  46, 0x00, 0xFF, "C151_MSB",
-// 10,  47, 0x00, 0xFF, "C151_LSB",
-// 10,  48, 0x00, 0xFF, "C152_MSB",
-// 10,  49, 0x00, 0xFF, "C152_LSB",
-// 10,  50, 0x00, 0xFF, "C153_MSB",
-// 10,  51, 0x00, 0xFF, "C153_LSB",
-// 10,  52, 0x00, 0xFF, "C154_MSB",
-// 10,  53, 0x00, 0xFF, "C154_LSB",
-// 10,  54, 0x00, 0xFF, "C155_MSB",
-// 10,  55, 0x00, 0xFF, "C155_LSB",
-// 10,  56, 0x00, 0xFF, "C156_MSB",
-// 10,  57, 0x00, 0xFF, "C156_LSB",
-// 10,  58, 0x00, 0xFF, "C157_MSB",
-// 10,  59, 0x00, 0xFF, "C157_LSB",
-// 10,  60, 0x00, 0xFF, "C158_MSB",
-// 10,  61, 0x00, 0xFF, "C158_LSB",
-// 10,  62, 0x00, 0xFF, "C159_MSB",
-// 10,  63, 0x00, 0xFF, "C159_LSB",
-// 10,  64, 0x00, 0xFF, "C160_MSB",
-// 10,  65, 0x00, 0xFF, "C160_LSB",
-// 10,  66, 0x00, 0xFF, "C161_MSB",
-// 10,  67, 0x00, 0xFF, "C161_LSB",
-// 10,  68, 0x00, 0xFF, "C162_MSB",
-// 10,  69, 0x00, 0xFF, "C162_LSB",
-// 10,  70, 0x00, 0xFF, "C163_MSB",
-// 10,  71, 0x00, 0xFF, "C163_LSB",
-// 10,  72, 0x00, 0xFF, "C164_MSB",
-// 10,  73, 0x00, 0xFF, "C164_LSB",
-// 10,  74, 0x00, 0xFF, "C165_MSB",
-// 10,  75, 0x00, 0xFF, "C165_LSB",
-// 10,  76, 0x00, 0xFF, "C166_MSB",
-// 10,  77, 0x00, 0xFF, "C166_LSB",
-// 10,  78, 0x00, 0xFF, "C167_MSB",
-// 10,  79, 0x00, 0xFF, "C167_LSB",
-// 10,  80, 0x00, 0xFF, "C168_MSB",
-// 10,  81, 0x00, 0xFF, "C168_LSB",
-// 10,  82, 0x00, 0xFF, "C169_MSB",
-// 10,  83, 0x00, 0xFF, "C169_LSB",
-// 10,  84, 0x00, 0xFF, "C170_MSB",
-// 10,  85, 0x00, 0xFF, "C170_LSB",
-// 10,  86, 0x00, 0xFF, "C171_MSB",
-// 10,  87, 0x00, 0xFF, "C171_LSB",
-// 10,  88, 0x00, 0xFF, "C172_MSB",
-// 10,  89, 0x00, 0xFF, "C172_LSB",
-// 10,  90, 0x00, 0xFF, "C173_MSB",
-// 10,  91, 0x00, 0xFF, "C173_LSB",
-// 10,  92, 0x00, 0xFF, "C174_MSB",
-// 10,  93, 0x00, 0xFF, "C174_LSB",
-// 10,  94, 0x00, 0xFF, "C175_MSB",
-// 10,  95, 0x00, 0xFF, "C175_LSB",
-// 10,  96, 0x00, 0xFF, "C176_MSB",
-// 10,  97, 0x00, 0xFF, "C176_LSB",
-// 10,  98, 0x00, 0xFF, "C177_MSB",
-// 10,  99, 0x00, 0xFF, "C177_LSB",
-// 10, 100, 0x00, 0xFF, "C178_MSB",
-// 10, 101, 0x00, 0xFF, "C178_LSB",
-// 10, 102, 0x00, 0xFF, "C179_MSB",
-// 10, 103, 0x00, 0xFF, "C179_LSB",
-// 10, 104, 0x00, 0xFF, "C180_MSB",
-// 10, 105, 0x00, 0xFF, "C180_LSB",
-// 10, 106, 0x00, 0xFF, "C181_MSB",
-// 10, 107, 0x00, 0xFF, "C181_LSB",
-// 10, 108, 0x00, 0xFF, "C182_MSB",
-// 10, 109, 0x00, 0xFF, "C182_LSB",
-// 10, 110, 0x00, 0xFF, "C183_MSB",
-// 10, 111, 0x00, 0xFF, "C183_LSB",
-// 10, 112, 0x00, 0xFF, "C184_MSB",
-// 10, 113, 0x00, 0xFF, "C184_LSB",
-// 10, 114, 0x00, 0xFF, "C185_MSB",
-// 10, 115, 0x00, 0xFF, "C185_LSB",
-// 10, 116, 0x00, 0xFF, "C186_MSB",
-// 10, 117, 0x00, 0xFF, "C186_LSB",
-// 10, 118, 0x00, 0xFF, "C187_MSB",
-// 10, 119, 0x00, 0xFF, "C187_LSB",
-// 10, 120, 0x00, 0xFF, "C188_MSB",
-// 10, 121, 0x00, 0xFF, "C188_LSB",
-// 10, 122, 0x00, 0xFF, "C189_MSB",
-// 10, 123, 0x00, 0xFF, "C189_LSB",
-// 10, 124, 0x00, 0xFF, "C190_MSB",
-// 10, 125, 0x00, 0xFF, "C190_LSB",
-// 10, 126, 0x00, 0xFF, "C191_MSB",
-// 10, 127, 0x00, 0xFF, "C191_LSB",
-// 11,   0, 0x00, 0x00, "Page_Select_Register",
-// 11,   2, 0x00, 0xFF, "C193_MSB",
-// 11,   3, 0x00, 0xFF, "C193_LSB",
-// 11,   4, 0x00, 0xFF, "C194_MSB",
-// 11,   5, 0x00, 0xFF, "C194_LSB",
-// 11,   6, 0x00, 0xFF, "C195_MSB",
-// 11,   7, 0x00, 0xFF, "C195_LSB",
-// 11,   8, 0x00, 0xFF, "C196_MSB",
-// 11,   9, 0x00, 0xFF, "C196_LSB",
-// 11,  10, 0x00, 0xFF, "C197_MSB",
-// 11,  11, 0x00, 0xFF, "C197_LSB",
-// 11,  12, 0x00, 0xFF, "C198_MSB",
-// 11,  13, 0x00, 0xFF, "C198_LSB",
-// 11,  14, 0x00, 0xFF, "C199_MSB",
-// 11,  15, 0x00, 0xFF, "C199_LSB",
-// 11,  16, 0x00, 0xFF, "C200_MSB",
-// 11,  17, 0x00, 0xFF, "C200_LSB",
-// 11,  18, 0x00, 0xFF, "C201_MSB",
-// 11,  19, 0x00, 0xFF, "C201_LSB",
-// 11,  20, 0x00, 0xFF, "C202_MSB",
-// 11,  21, 0x00, 0xFF, "C202_LSB",
-// 11,  22, 0x00, 0xFF, "C203_MSB",
-// 11,  23, 0x00, 0xFF, "C203_LSB",
-// 11,  24, 0x00, 0xFF, "C204_MSB",
-// 11,  25, 0x00, 0xFF, "C204_LSB",
-// 11,  26, 0x00, 0xFF, "C205_MSB",
-// 11,  27, 0x00, 0xFF, "C205_LSB",
-// 11,  28, 0x00, 0xFF, "C206_MSB",
-// 11,  29, 0x00, 0xFF, "C206_LSB",
-// 11,  30, 0x00, 0xFF, "C207_MSB",
-// 11,  31, 0x00, 0xFF, "C207_LSB",
-// 11,  32, 0x00, 0xFF, "C208_MSB",
-// 11,  33, 0x00, 0xFF, "C208_LSB",
-// 11,  34, 0x00, 0xFF, "C209_MSB",
-// 11,  35, 0x00, 0xFF, "C209_LSB",
-// 11,  36, 0x00, 0xFF, "C210_MSB",
-// 11,  37, 0x00, 0xFF, "C210_LSB",
-// 11,  38, 0x00, 0xFF, "C211_MSB",
-// 11,  39, 0x00, 0xFF, "C211_LSB",
-// 11,  40, 0x00, 0xFF, "C212_MSB",
-// 11,  41, 0x00, 0xFF, "C212_LSB",
-// 11,  42, 0x00, 0xFF, "C213_MSB",
-// 11,  43, 0x00, 0xFF, "C213_LSB",
-// 11,  44, 0x00, 0xFF, "C214_MSB",
-// 11,  45, 0x00, 0xFF, "C214_LSB",
-// 11,  46, 0x00, 0xFF, "C215_MSB",
-// 11,  47, 0x00, 0xFF, "C215_LSB",
-// 11,  48, 0x00, 0xFF, "C216_MSB",
-// 11,  49, 0x00, 0xFF, "C216_LSB",
-// 11,  50, 0x00, 0xFF, "C217_MSB",
-// 11,  51, 0x00, 0xFF, "C217_LSB",
-// 11,  52, 0x00, 0xFF, "C218_MSB",
-// 11,  53, 0x00, 0xFF, "C218_LSB",
-// 11,  54, 0x00, 0xFF, "C219_MSB",
-// 11,  55, 0x00, 0xFF, "C219_LSB",
-// 11,  56, 0x00, 0xFF, "C220_MSB",
-// 11,  57, 0x00, 0xFF, "C220_LSB",
-// 11,  58, 0x00, 0xFF, "C221_MSB",
-// 11,  59, 0x00, 0xFF, "C221_LSB",
-// 11,  60, 0x00, 0xFF, "C222_MSB",
-// 11,  61, 0x00, 0xFF, "C222_LSB",
-// 11,  62, 0x00, 0xFF, "C223_MSB",
-// 11,  63, 0x00, 0xFF, "C223_LSB",
-// 11,  64, 0x00, 0xFF, "C224_MSB",
-// 11,  65, 0x00, 0xFF, "C224_LSB",
-// 11,  66, 0x00, 0xFF, "C225_MSB",
-// 11,  67, 0x00, 0xFF, "C225_LSB",
-// 11,  68, 0x00, 0xFF, "C226_MSB",
-// 11,  69, 0x00, 0xFF, "C226_LSB",
-// 11,  70, 0x00, 0xFF, "C227_MSB",
-// 11,  71, 0x00, 0xFF, "C227_LSB",
-// 11,  72, 0x00, 0xFF, "C228_MSB",
-// 11,  73, 0x00, 0xFF, "C228_LSB",
-// 11,  74, 0x00, 0xFF, "C229_MSB",
-// 11,  75, 0x00, 0xFF, "C229_LSB",
-// 11,  76, 0x00, 0xFF, "C230_MSB",
-// 11,  77, 0x00, 0xFF, "C230_LSB",
-// 11,  78, 0x00, 0xFF, "C231_MSB",
-// 11,  79, 0x00, 0xFF, "C231_LSB",
-// 11,  80, 0x00, 0xFF, "C232_MSB",
-// 11,  81, 0x00, 0xFF, "C232_LSB",
-// 11,  82, 0x00, 0xFF, "C233_MSB",
-// 11,  83, 0x00, 0xFF, "C233_LSB",
-// 11,  84, 0x00, 0xFF, "C234_MSB",
-// 11,  85, 0x00, 0xFF, "C234_LSB",
-// 11,  86, 0x00, 0xFF, "C235_MSB",
-// 11,  87, 0x00, 0xFF, "C235_LSB",
-// 11,  88, 0x00, 0xFF, "C236_MSB",
-// 11,  89, 0x00, 0xFF, "C236_LSB",
-// 11,  90, 0x00, 0xFF, "C237_MSB",
-// 11,  91, 0x00, 0xFF, "C237_LSB",
-// 11,  92, 0x00, 0xFF, "C238_MSB",
-// 11,  93, 0x00, 0xFF, "C238_LSB",
-// 11,  94, 0x00, 0xFF, "C239_MSB",
-// 11,  95, 0x00, 0xFF, "C239_LSB",
-// 11,  96, 0x00, 0xFF, "C240_MSB",
-// 11,  97, 0x00, 0xFF, "C240_LSB",
-// 11,  98, 0x00, 0xFF, "C241_MSB",
-// 11,  99, 0x00, 0xFF, "C241_LSB",
-// 11, 100, 0x00, 0xFF, "C242_MSB",
-// 11, 101, 0x00, 0xFF, "C242_LSB",
-// 11, 102, 0x00, 0xFF, "C243_MSB",
-// 11, 103, 0x00, 0xFF, "C243_LSB",
-// 11, 104, 0x00, 0xFF, "C244_MSB",
-// 11, 105, 0x00, 0xFF, "C244_LSB",
-// 11, 106, 0x00, 0xFF, "C245_MSB",
-// 11, 107, 0x00, 0xFF, "C245_LSB",
-// 11, 108, 0x00, 0xFF, "C246_MSB",
-// 11, 109, 0x00, 0xFF, "C246_LSB",
-// 11, 110, 0x00, 0xFF, "C247_MSB",
-// 11, 111, 0x00, 0xFF, "C247_LSB",
-// 11, 112, 0x00, 0xFF, "C248_MSB",
-// 11, 113, 0x00, 0xFF, "C248_LSB",
-// 11, 114, 0x00, 0xFF, "C249_MSB",
-// 11, 115, 0x00, 0xFF, "C249_LSB",
-// 11, 116, 0x00, 0xFF, "C250_MSB",
-// 11, 117, 0x00, 0xFF, "C250_LSB",
-// 11, 118, 0x00, 0xFF, "C251_MSB",
-// 11, 119, 0x00, 0xFF, "C251_LSB",
-// 11, 120, 0x00, 0xFF, "C252_MSB",
-// 11, 121, 0x00, 0xFF, "C252_LSB",
-// 11, 122, 0x00, 0xFF, "C253_MSB",
-// 11, 123, 0x00, 0xFF, "C253_LSB",
-// 11, 124, 0x00, 0xFF, "C254_MSB",
-// 11, 125, 0x00, 0xFF, "C254_LSB",
-// 11, 126, 0x00, 0xFF, "C255_MSB",
-// 11, 127, 0x00, 0xFF, "C255_LSB",
-// 12,   0, 0x00, 0x00, "Page_Select_Register",
-// 12,   2, 0x7F, 0xFF, "C1_MSB",
-// 12,   3, 0xFF, 0xFF, "C1_LSB",
-// 12,   4, 0x00, 0xFF, "C2_MSB",
-// 12,   5, 0x00, 0xFF, "C2_LSB",
-// 12,   6, 0x00, 0xFF, "C3_MSB",
-// 12,   7, 0x00, 0xFF, "C3_LSB",
-// 12,   8, 0x00, 0xFF, "C4_MSB",
-// 12,   9, 0x00, 0xFF, "C4_LSB",
-// 12,  10, 0x00, 0xFF, "C5_MSB",
-// 12,  11, 0x00, 0xFF, "C5_LSB",
-// 12,  12, 0x7F, 0xFF, "C6_MSB",
-// 12,  13, 0xFF, 0xFF, "C6_LSB",
-// 12,  14, 0x00, 0xFF, "C7_MSB",
-// 12,  15, 0x00, 0xFF, "C7_LSB",
-// 12,  16, 0x00, 0xFF, "C8_MSB",
-// 12,  17, 0x00, 0xFF, "C8_LSB",
-// 12,  18, 0x00, 0xFF, "C9_MSB",
-// 12,  19, 0x00, 0xFF, "C9_LSB",
-// 12,  20, 0x00, 0xFF, "C10_MSB",
-// 12,  21, 0x00, 0xFF, "C10_LSB",
-// 12,  22, 0x7F, 0xFF, "C11_MSB",
-// 12,  23, 0xFF, 0xFF, "C11_LSB",
-// 12,  24, 0x00, 0xFF, "C12_MSB",
-// 12,  25, 0x00, 0xFF, "C12_LSB",
-// 12,  26, 0x00, 0xFF, "C13_MSB",
-// 12,  27, 0x00, 0xFF, "C13_LSB",
-// 12,  28, 0x00, 0xFF, "C14_MSB",
-// 12,  29, 0x00, 0xFF, "C14_LSB",
-// 12,  30, 0x00, 0xFF, "C15_MSB",
-// 12,  31, 0x00, 0xFF, "C15_LSB",
-// 12,  32, 0x7F, 0xFF, "C16_MSB",
-// 12,  33, 0xFF, 0xFF, "C16_LSB",
-// 12,  34, 0x00, 0xFF, "C17_MSB",
-// 12,  35, 0x00, 0xFF, "C17_LSB",
-// 12,  36, 0x00, 0xFF, "C18_MSB",
-// 12,  37, 0x00, 0xFF, "C18_LSB",
-// 12,  38, 0x00, 0xFF, "C19_MSB",
-// 12,  39, 0x00, 0xFF, "C19_LSB",
-// 12,  40, 0x00, 0xFF, "C20_MSB",
-// 12,  41, 0x00, 0xFF, "C20_LSB",
-// 12,  42, 0x7F, 0xFF, "C21_MSB",
-// 12,  43, 0xFF, 0xFF, "C21_LSB",
-// 12,  44, 0x00, 0xFF, "C22_MSB",
-// 12,  45, 0x00, 0xFF, "C22_LSB",
-// 12,  46, 0x00, 0xFF, "C23_MSB",
-// 12,  47, 0x00, 0xFF, "C23_LSB",
-// 12,  48, 0x00, 0xFF, "C24_MSB",
-// 12,  49, 0x00, 0xFF, "C24_LSB",
-// 12,  50, 0x00, 0xFF, "C25_MSB",
-// 12,  51, 0x00, 0xFF, "C25_LSB",
-// 12,  52, 0x7F, 0xFF, "C26_MSB",
-// 12,  53, 0xFF, 0xFF, "C26_LSB",
-// 12,  54, 0x00, 0xFF, "C27_MSB",
-// 12,  55, 0x00, 0xFF, "C27_LSB",
-// 12,  56, 0x00, 0xFF, "C28_MSB",
-// 12,  57, 0x00, 0xFF, "C28_LSB",
-// 12,  58, 0x00, 0xFF, "C29_MSB",
-// 12,  59, 0x00, 0xFF, "C29_LSB",
-// 12,  60, 0x00, 0xFF, "C30_MSB",
-// 12,  61, 0x00, 0xFF, "C30_LSB",
-// 12,  62, 0x00, 0xFF, "C31_MSB",
-// 12,  63, 0x00, 0xFF, "C31_LSB",
-// 12,  64, 0x00, 0xFF, "C32_MSB",
-// 12,  65, 0x00, 0xFF, "C32_LSB",
-// 12,  66, 0x7F, 0xFF, "C33_MSB",
-// 12,  67, 0xFF, 0xFF, "C33_LSB",
-// 12,  68, 0x00, 0xFF, "C34_MSB",
-// 12,  69, 0x00, 0xFF, "C34_LSB",
-// 12,  70, 0x00, 0xFF, "C35_MSB",
-// 12,  71, 0x00, 0xFF, "C35_LSB",
-// 12,  72, 0x00, 0xFF, "C36_MSB",
-// 12,  73, 0x00, 0xFF, "C36_LSB",
-// 12,  74, 0x00, 0xFF, "C37_MSB",
-// 12,  75, 0x00, 0xFF, "C37_LSB",
-// 12,  76, 0x7F, 0xFF, "C38_MSB",
-// 12,  77, 0xFF, 0xFF, "C38_LSB",
-// 12,  78, 0x00, 0xFF, "C39_MSB",
-// 12,  79, 0x00, 0xFF, "C39_LSB",
-// 12,  80, 0x00, 0xFF, "C40_MSB",
-// 12,  81, 0x00, 0xFF, "C40_LSB",
-// 12,  82, 0x00, 0xFF, "C41_MSB",
-// 12,  83, 0x00, 0xFF, "C41_LSB",
-// 12,  84, 0x00, 0xFF, "C42_MSB",
-// 12,  85, 0x00, 0xFF, "C42_LSB",
-// 12,  86, 0x7F, 0xFF, "C43_MSB",
-// 12,  87, 0xFF, 0xFF, "C43_LSB",
-// 12,  88, 0x00, 0xFF, "C44_MSB",
-// 12,  89, 0x00, 0xFF, "C44_LSB",
-// 12,  90, 0x00, 0xFF, "C45_MSB",
-// 12,  91, 0x00, 0xFF, "C45_LSB",
-// 12,  92, 0x00, 0xFF, "C46_MSB",
-// 12,  93, 0x00, 0xFF, "C46_LSB",
-// 12,  94, 0x00, 0xFF, "C47_MSB",
-// 12,  95, 0x00, 0xFF, "C47_LSB",
-// 12,  96, 0x7F, 0xFF, "C48_MSB",
-// 12,  97, 0xFF, 0xFF, "C48_LSB",
-// 12,  98, 0x00, 0xFF, "C49_MSB",
-// 12,  99, 0x00, 0xFF, "C49_LSB",
-// 12, 100, 0x00, 0xFF, "C50_MSB",
-// 12, 101, 0x00, 0xFF, "C50_LSB",
-// 12, 102, 0x00, 0xFF, "C51_MSB",
-// 12, 103, 0x00, 0xFF, "C51_LSB",
-// 12, 104, 0x00, 0xFF, "C52_MSB",
-// 12, 105, 0x00, 0xFF, "C52_LSB",
-// 12, 106, 0x7F, 0xFF, "C53_MSB",
-// 12, 107, 0xFF, 0xFF, "C53_LSB",
-// 12, 108, 0x00, 0xFF, "C54_MSB",
-// 12, 109, 0x00, 0xFF, "C54_LSB",
-// 12, 110, 0x00, 0xFF, "C55_MSB",
-// 12, 111, 0x00, 0xFF, "C55_LSB",
-// 12, 112, 0x00, 0xFF, "C56_MSB",
-// 12, 113, 0x00, 0xFF, "C56_LSB",
-// 12, 114, 0x00, 0xFF, "C57_MSB",
-// 12, 115, 0x00, 0xFF, "C57_LSB",
-// 12, 116, 0x7F, 0xFF, "C58_MSB",
-// 12, 117, 0xFF, 0xFF, "C58_LSB",
-// 12, 118, 0x00, 0xFF, "C59_MSB",
-// 12, 119, 0x00, 0xFF, "C59_LSB",
-// 12, 120, 0x00, 0xFF, "C60_MSB",
-// 12, 121, 0x00, 0xFF, "C60_LSB",
-// 12, 122, 0x00, 0xFF, "C61_MSB",
-// 12, 123, 0x00, 0xFF, "C61_LSB",
-// 12, 124, 0x00, 0xFF, "C62_MSB",
-// 12, 125, 0x00, 0xFF, "C62_LSB",
-// 12, 126, 0x00, 0xFF, "C63_MSB",
-// 12, 127, 0x00, 0xFF, "C63_LSB",
-// 13,   0, 0x00, 0x00, "Page_Select_Register",
-// 13,   2, 0x7F, 0xFF, "C65_MSB",
-// 13,   3, 0xFF, 0xFF, "C65_LSB",
-// 13,   4, 0x00, 0xFF, "C66_MSB",
-// 13,   5, 0x00, 0xFF, "C66_LSB",
-// 13,   6, 0x00, 0xFF, "C67_MSB",
-// 13,   7, 0x00, 0xFF, "C67_LSB",
-// 13,   8, 0x7F, 0xFF, "C68_MSB",
-// 13,   9, 0xFF, 0xFF, "C68_LSB",
-// 13,  10, 0x00, 0xFF, "C69_MSB",
-// 13,  11, 0x00, 0xFF, "C69_LSB",
-// 13,  12, 0x00, 0xFF, "C70_MSB",
-// 13,  13, 0x00, 0xFF, "C70_LSB",
-// 13,  14, 0x7F, 0xFF, "C71_MSB",
-// 13,  15, 0xF7, 0xFF, "C71_LSB",
-// 13,  16, 0x80, 0xFF, "C72_MSB",
-// 13,  17, 0x09, 0xFF, "C72_LSB",
-// 13,  18, 0x7F, 0xFF, "C73_MSB",
-// 13,  19, 0xEF, 0xFF, "C73_LSB",
-// 13,  20, 0x00, 0xFF, "C74_MSB",
-// 13,  21, 0x11, 0xFF, "C74_LSB",
-// 13,  22, 0x00, 0xFF, "C75_MSB",
-// 13,  23, 0x11, 0xFF, "C75_LSB",
-// 13,  24, 0x7F, 0xFF, "C76_MSB",
-// 13,  25, 0xDE, 0xFF, "C76_LSB",
-// 13,  26, 0x00, 0xFF, "C77_MSB",
-// 13,  27, 0x00, 0xFF, "C77_LSB",
-// 13,  28, 0x00, 0xFF, "C78_MSB",
-// 13,  29, 0x00, 0xFF, "C78_LSB",
-// 13,  30, 0x00, 0xFF, "C79_MSB",
-// 13,  31, 0x00, 0xFF, "C79_LSB",
-// 13,  32, 0x00, 0xFF, "C80_MSB",
-// 13,  33, 0x00, 0xFF, "C80_LSB",
-// 13,  34, 0x00, 0xFF, "C81_MSB",
-// 13,  35, 0x00, 0xFF, "C81_LSB",
-// 13,  36, 0x00, 0xFF, "C82_MSB",
-// 13,  37, 0x00, 0xFF, "C82_LSB",
-// 13,  38, 0x00, 0xFF, "C83_MSB",
-// 13,  39, 0x00, 0xFF, "C83_LSB",
-// 13,  40, 0x00, 0xFF, "C84_MSB",
-// 13,  41, 0x00, 0xFF, "C84_LSB",
-// 13,  42, 0x00, 0xFF, "C85_MSB",
-// 13,  43, 0x00, 0xFF, "C85_LSB",
-// 13,  44, 0x00, 0xFF, "C86_MSB",
-// 13,  45, 0x00, 0xFF, "C86_LSB",
-// 13,  46, 0x00, 0xFF, "C87_MSB",
-// 13,  47, 0x00, 0xFF, "C87_LSB",
-// 13,  48, 0x00, 0xFF, "C88_MSB",
-// 13,  49, 0x00, 0xFF, "C88_LSB",
-// 13,  50, 0x00, 0xFF, "C89_MSB",
-// 13,  51, 0x00, 0xFF, "C89_LSB",
-// 13,  52, 0x00, 0xFF, "C90_MSB",
-// 13,  53, 0x00, 0xFF, "C90_LSB",
-// 13,  54, 0x00, 0xFF, "C91_MSB",
-// 13,  55, 0x00, 0xFF, "C91_LSB",
-// 13,  56, 0x00, 0xFF, "C92_MSB",
-// 13,  57, 0x00, 0xFF, "C92_LSB",
-// 13,  58, 0x00, 0xFF, "C93_MSB",
-// 13,  59, 0x00, 0xFF, "C93_LSB",
-// 13,  60, 0x00, 0xFF, "C94_MSB",
-// 13,  61, 0x00, 0xFF, "C94_LSB",
-// 13,  62, 0x00, 0xFF, "C95_MSB",
-// 13,  63, 0x00, 0xFF, "C95_LSB",
-// 13,  64, 0x00, 0xFF, "C96_MSB",
-// 13,  65, 0x00, 0xFF, "C96_LSB",
-// 13,  66, 0x00, 0xFF, "C97_MSB",
-// 13,  67, 0x00, 0xFF, "C97_LSB",
-// 13,  68, 0x00, 0xFF, "C98_MSB",
-// 13,  69, 0x00, 0xFF, "C98_LSB",
-// 13,  70, 0x00, 0xFF, "C99_MSB",
-// 13,  71, 0x00, 0xFF, "C99_LSB",
-// 13,  72, 0x00, 0xFF, "C100_MSB",
-// 13,  73, 0x00, 0xFF, "C100_LSB",
-// 13,  74, 0x00, 0xFF, "C101_MSB",
-// 13,  75, 0x00, 0xFF, "C101_LSB",
-// 13,  76, 0x00, 0xFF, "C102_MSB",
-// 13,  77, 0x00, 0xFF, "C102_LSB",
-// 13,  78, 0x00, 0xFF, "C103_MSB",
-// 13,  79, 0x00, 0xFF, "C103_LSB",
-// 13,  80, 0x00, 0xFF, "C104_MSB",
-// 13,  81, 0x00, 0xFF, "C104_LSB",
-// 13,  82, 0x00, 0xFF, "C105_MSB",
-// 13,  83, 0x00, 0xFF, "C105_LSB",
-// 13,  84, 0x00, 0xFF, "C106_MSB",
-// 13,  85, 0x00, 0xFF, "C106_LSB",
-// 13,  86, 0x00, 0xFF, "C107_MSB",
-// 13,  87, 0x00, 0xFF, "C107_LSB",
-// 13,  88, 0x00, 0xFF, "C108_MSB",
-// 13,  89, 0x00, 0xFF, "C108_LSB",
-// 13,  90, 0x00, 0xFF, "C109_MSB",
-// 13,  91, 0x00, 0xFF, "C109_LSB",
-// 13,  92, 0x00, 0xFF, "C110_MSB",
-// 13,  93, 0x00, 0xFF, "C110_LSB",
-// 13,  94, 0x00, 0xFF, "C111_MSB",
-// 13,  95, 0x00, 0xFF, "C111_LSB",
-// 13,  96, 0x00, 0xFF, "C112_MSB",
-// 13,  97, 0x00, 0xFF, "C112_LSB",
-// 13,  98, 0x00, 0xFF, "C113_MSB",
-// 13,  99, 0x00, 0xFF, "C113_LSB",
-// 13, 100, 0x00, 0xFF, "C114_MSB",
-// 13, 101, 0x00, 0xFF, "C114_LSB",
-// 13, 102, 0x00, 0xFF, "C115_MSB",
-// 13, 103, 0x00, 0xFF, "C115_LSB",
-// 13, 104, 0x00, 0xFF, "C116_MSB",
-// 13, 105, 0x00, 0xFF, "C116_LSB",
-// 13, 106, 0x00, 0xFF, "C117_MSB",
-// 13, 107, 0x00, 0xFF, "C117_LSB",
-// 13, 108, 0x00, 0xFF, "C118_MSB",
-// 13, 109, 0x00, 0xFF, "C118_LSB",
-// 13, 110, 0x00, 0xFF, "C119_MSB",
-// 13, 111, 0x00, 0xFF, "C119_LSB",
-// 13, 112, 0x00, 0xFF, "C120_MSB",
-// 13, 113, 0x00, 0xFF, "C120_LSB",
-// 13, 114, 0x00, 0xFF, "C121_MSB",
-// 13, 115, 0x00, 0xFF, "C121_LSB",
-// 13, 116, 0x00, 0xFF, "C122_MSB",
-// 13, 117, 0x00, 0xFF, "C122_LSB",
-// 13, 118, 0x00, 0xFF, "C123_MSB",
-// 13, 119, 0x00, 0xFF, "C123_LSB",
-// 13, 120, 0x00, 0xFF, "C124_MSB",
-// 13, 121, 0x00, 0xFF, "C124_LSB",
-// 13, 122, 0x00, 0xFF, "C125_MSB",
-// 13, 123, 0x00, 0xFF, "C125_LSB",
-// 13, 124, 0x00, 0xFF, "C126_MSB",
-// 13, 125, 0x00, 0xFF, "C126_LSB",
-// 13, 126, 0x00, 0xFF, "C127_MSB",
-// 13, 127, 0x00, 0xFF, "C127_LSB",
-// 14,   0, 0x00, 0x00, "Page_Select_Register",
-// 14,   2, 0x7F, 0xFF, "C129_MSB",
-// 14,   3, 0xFF, 0xFF, "C129_LSB",
-// 14,   4, 0x00, 0xFF, "C130_MSB",
-// 14,   5, 0x00, 0xFF, "C130_LSB",
-// 14,   6, 0x00, 0xFF, "C131_MSB",
-// 14,   7, 0x00, 0xFF, "C131_LSB",
-// 14,   8, 0x7F, 0xFF, "C132_MSB",
-// 14,   9, 0xFF, 0xFF, "C132_LSB",
-// 14,  10, 0x00, 0xFF, "C133_MSB",
-// 14,  11, 0x00, 0xFF, "C133_LSB",
-// 14,  12, 0x00, 0xFF, "C134_MSB",
-// 14,  13, 0x00, 0xFF, "C134_LSB",
-// 14,  14, 0x7F, 0xFF, "C135_MSB",
-// 14,  15, 0xF7, 0xFF, "C135_LSB",
-// 14,  16, 0x80, 0xFF, "C136_MSB",
-// 14,  17, 0x10, 0xFF, "C136_LSB",
-// 14,  18, 0x7F, 0xFF, "C137_MSB",
-// 14,  19, 0xEF, 0xFF, "C137_LSB",
-// 14,  20, 0x00, 0xFF, "C138_MSB",
-// 14,  21, 0x11, 0xFF, "C138_LSB",
-// 14,  22, 0x00, 0xFF, "C139_MSB",
-// 14,  23, 0x11, 0xFF, "C139_LSB",
-// 14,  24, 0x7F, 0xFF, "C140_MSB",
-// 14,  25, 0xDE, 0xFF, "C140_LSB",
-// 14,  26, 0x00, 0xFF, "C141_MSB",
-// 14,  27, 0x00, 0xFF, "C141_LSB",
-// 14,  28, 0x00, 0xFF, "C142_MSB",
-// 14,  29, 0x00, 0xFF, "C142_LSB",
-// 14,  30, 0x00, 0xFF, "C143_MSB",
-// 14,  31, 0x00, 0xFF, "C143_LSB",
-// 14,  32, 0x00, 0xFF, "C144_MSB",
-// 14,  33, 0x00, 0xFF, "C144_LSB",
-// 14,  34, 0x00, 0xFF, "C145_MSB",
-// 14,  35, 0x00, 0xFF, "C145_LSB",
-// 14,  36, 0x00, 0xFF, "C146_MSB",
-// 14,  37, 0x00, 0xFF, "C146_LSB",
-// 14,  38, 0x00, 0xFF, "C147_MSB",
-// 14,  39, 0x00, 0xFF, "C147_LSB",
-// 14,  40, 0x00, 0xFF, "C148_MSB",
-// 14,  41, 0x00, 0xFF, "C148_LSB",
-// 14,  42, 0x00, 0xFF, "C149_MSB",
-// 14,  43, 0x00, 0xFF, "C149_LSB",
-// 14,  44, 0x00, 0xFF, "C150_MSB",
-// 14,  45, 0x00, 0xFF, "C150_LSB",
-// 14,  46, 0x00, 0xFF, "C151_MSB",
-// 14,  47, 0x00, 0xFF, "C151_LSB",
-// 14,  48, 0x00, 0xFF, "C152_MSB",
-// 14,  49, 0x00, 0xFF, "C152_LSB",
-// 14,  50, 0x00, 0xFF, "C153_MSB",
-// 14,  51, 0x00, 0xFF, "C153_LSB",
-// 14,  52, 0x00, 0xFF, "C154_MSB",
-// 14,  53, 0x00, 0xFF, "C154_LSB",
-// 14,  54, 0x00, 0xFF, "C155_MSB",
-// 14,  55, 0x00, 0xFF, "C155_LSB",
-// 14,  56, 0x00, 0xFF, "C156_MSB",
-// 14,  57, 0x00, 0xFF, "C156_LSB",
-// 14,  58, 0x00, 0xFF, "C157_MSB",
-// 14,  59, 0x00, 0xFF, "C157_LSB",
-// 14,  60, 0x00, 0xFF, "C158_MSB",
-// 14,  61, 0x00, 0xFF, "C158_LSB",
-// 14,  62, 0x00, 0xFF, "C159_MSB",
-// 14,  63, 0x00, 0xFF, "C159_LSB",
-// 14,  64, 0x00, 0xFF, "C160_MSB",
-// 14,  65, 0x00, 0xFF, "C160_LSB",
-// 14,  66, 0x00, 0xFF, "C161_MSB",
-// 14,  67, 0x00, 0xFF, "C161_LSB",
-// 14,  68, 0x00, 0xFF, "C162_MSB",
-// 14,  69, 0x00, 0xFF, "C162_LSB",
-// 14,  70, 0x00, 0xFF, "C163_MSB",
-// 14,  71, 0x00, 0xFF, "C163_LSB",
-// 14,  72, 0x00, 0xFF, "C164_MSB",
-// 14,  73, 0x00, 0xFF, "C164_LSB",
-// 14,  74, 0x00, 0xFF, "C165_MSB",
-// 14,  75, 0x00, 0xFF, "C165_LSB",
-// 14,  76, 0x00, 0xFF, "C166_MSB",
-// 14,  77, 0x00, 0xFF, "C166_LSB",
-// 14,  78, 0x00, 0xFF, "C167_MSB",
-// 14,  79, 0x00, 0xFF, "C167_LSB",
-// 14,  80, 0x00, 0xFF, "C168_MSB",
-// 14,  81, 0x00, 0xFF, "C168_LSB",
-// 14,  82, 0x00, 0xFF, "C169_MSB",
-// 14,  83, 0x00, 0xFF, "C169_LSB",
-// 14,  84, 0x00, 0xFF, "C170_MSB",
-// 14,  85, 0x00, 0xFF, "C170_LSB",
-// 14,  86, 0x00, 0xFF, "C171_MSB",
-// 14,  87, 0x00, 0xFF, "C171_LSB",
-// 14,  88, 0x00, 0xFF, "C172_MSB",
-// 14,  89, 0x00, 0xFF, "C172_LSB",
-// 14,  90, 0x00, 0xFF, "C173_MSB",
-// 14,  91, 0x00, 0xFF, "C173_LSB",
-// 14,  92, 0x00, 0xFF, "C174_MSB",
-// 14,  93, 0x00, 0xFF, "C174_LSB",
-// 14,  94, 0x00, 0xFF, "C175_MSB",
-// 14,  95, 0x00, 0xFF, "C175_LSB",
-// 14,  96, 0x00, 0xFF, "C176_MSB",
-// 14,  97, 0x00, 0xFF, "C176_LSB",
-// 14,  98, 0x00, 0xFF, "C177_MSB",
-// 14,  99, 0x00, 0xFF, "C177_LSB",
-// 14, 100, 0x00, 0xFF, "C178_MSB",
-// 14, 101, 0x00, 0xFF, "C178_LSB",
-// 14, 102, 0x00, 0xFF, "C179_MSB",
-// 14, 103, 0x00, 0xFF, "C179_LSB",
-// 14, 104, 0x00, 0xFF, "C180_MSB",
-// 14, 105, 0x00, 0xFF, "C180_LSB",
-// 14, 106, 0x00, 0xFF, "C181_MSB",
-// 14, 107, 0x00, 0xFF, "C181_LSB",
-// 14, 108, 0x00, 0xFF, "C182_MSB",
-// 14, 109, 0x00, 0xFF, "C182_LSB",
-// 14, 110, 0x00, 0xFF, "C183_MSB",
-// 14, 111, 0x00, 0xFF, "C183_LSB",
-// 14, 112, 0x00, 0xFF, "C184_MSB",
-// 14, 113, 0x00, 0xFF, "C184_LSB",
-// 14, 114, 0x00, 0xFF, "C185_MSB",
-// 14, 115, 0x00, 0xFF, "C185_LSB",
-// 14, 116, 0x00, 0xFF, "C186_MSB",
-// 14, 117, 0x00, 0xFF, "C186_LSB",
-// 14, 118, 0x00, 0xFF, "C187_MSB",
-// 14, 119, 0x00, 0xFF, "C187_LSB",
-// 14, 120, 0x00, 0xFF, "C188_MSB",
-// 14, 121, 0x00, 0xFF, "C188_LSB",
-// 14, 122, 0x00, 0xFF, "C189_MSB",
-// 14, 123, 0x00, 0xFF, "C189_LSB",
-// 14, 124, 0x00, 0xFF, "C190_MSB",
-// 14, 125, 0x00, 0xFF, "C190_LSB",
-// 14, 126, 0x00, 0xFF, "C191_MSB",
-// 14, 127, 0x00, 0xFF, "C191_LSB",
-// 15,   0, 0x00, 0x00, "Page_Select_Register",
-// 15,   2, 0x00, 0xFF, "C193_MSB",
-// 15,   3, 0x00, 0xFF, "C193_LSB",
-// 15,   4, 0x00, 0xFF, "C194_MSB",
-// 15,   5, 0x00, 0xFF, "C194_LSB",
-// 15,   6, 0x00, 0xFF, "C195_MSB",
-// 15,   7, 0x00, 0xFF, "C195_LSB",
-// 15,   8, 0x00, 0xFF, "C196_MSB",
-// 15,   9, 0x00, 0xFF, "C196_LSB",
-// 15,  10, 0x00, 0xFF, "C197_MSB",
-// 15,  11, 0x00, 0xFF, "C197_LSB",
-// 15,  12, 0x00, 0xFF, "C198_MSB",
-// 15,  13, 0x00, 0xFF, "C198_LSB",
-// 15,  14, 0x00, 0xFF, "C199_MSB",
-// 15,  15, 0x00, 0xFF, "C199_LSB",
-// 15,  16, 0x00, 0xFF, "C200_MSB",
-// 15,  17, 0x00, 0xFF, "C200_LSB",
-// 15,  18, 0x00, 0xFF, "C201_MSB",
-// 15,  19, 0x00, 0xFF, "C201_LSB",
-// 15,  20, 0x00, 0xFF, "C202_MSB",
-// 15,  21, 0x00, 0xFF, "C202_LSB",
-// 15,  22, 0x00, 0xFF, "C203_MSB",
-// 15,  23, 0x00, 0xFF, "C203_LSB",
-// 15,  24, 0x00, 0xFF, "C204_MSB",
-// 15,  25, 0x00, 0xFF, "C204_LSB",
-// 15,  26, 0x00, 0xFF, "C205_MSB",
-// 15,  27, 0x00, 0xFF, "C205_LSB",
-// 15,  28, 0x00, 0xFF, "C206_MSB",
-// 15,  29, 0x00, 0xFF, "C206_LSB",
-// 15,  30, 0x00, 0xFF, "C207_MSB",
-// 15,  31, 0x00, 0xFF, "C207_LSB",
-// 15,  32, 0x00, 0xFF, "C208_MSB",
-// 15,  33, 0x00, 0xFF, "C208_LSB",
-// 15,  34, 0x00, 0xFF, "C209_MSB",
-// 15,  35, 0x00, 0xFF, "C209_LSB",
-// 15,  36, 0x00, 0xFF, "C210_MSB",
-// 15,  37, 0x00, 0xFF, "C210_LSB",
-// 15,  38, 0x00, 0xFF, "C211_MSB",
-// 15,  39, 0x00, 0xFF, "C211_LSB",
-// 15,  40, 0x00, 0xFF, "C212_MSB",
-// 15,  41, 0x00, 0xFF, "C212_LSB",
-// 15,  42, 0x00, 0xFF, "C213_MSB",
-// 15,  43, 0x00, 0xFF, "C213_LSB",
-// 15,  44, 0x00, 0xFF, "C214_MSB",
-// 15,  45, 0x00, 0xFF, "C214_LSB",
-// 15,  46, 0x00, 0xFF, "C215_MSB",
-// 15,  47, 0x00, 0xFF, "C215_LSB",
-// 15,  48, 0x00, 0xFF, "C216_MSB",
-// 15,  49, 0x00, 0xFF, "C216_LSB",
-// 15,  50, 0x00, 0xFF, "C217_MSB",
-// 15,  51, 0x00, 0xFF, "C217_LSB",
-// 15,  52, 0x00, 0xFF, "C218_MSB",
-// 15,  53, 0x00, 0xFF, "C218_LSB",
-// 15,  54, 0x00, 0xFF, "C219_MSB",
-// 15,  55, 0x00, 0xFF, "C219_LSB",
-// 15,  56, 0x00, 0xFF, "C220_MSB",
-// 15,  57, 0x00, 0xFF, "C220_LSB",
-// 15,  58, 0x00, 0xFF, "C221_MSB",
-// 15,  59, 0x00, 0xFF, "C221_LSB",
-// 15,  60, 0x00, 0xFF, "C222_MSB",
-// 15,  61, 0x00, 0xFF, "C222_LSB",
-// 15,  62, 0x00, 0xFF, "C223_MSB",
-// 15,  63, 0x00, 0xFF, "C223_LSB",
-// 15,  64, 0x00, 0xFF, "C224_MSB",
-// 15,  65, 0x00, 0xFF, "C224_LSB",
-// 15,  66, 0x00, 0xFF, "C225_MSB",
-// 15,  67, 0x00, 0xFF, "C225_LSB",
-// 15,  68, 0x00, 0xFF, "C226_MSB",
-// 15,  69, 0x00, 0xFF, "C226_LSB",
-// 15,  70, 0x00, 0xFF, "C227_MSB",
-// 15,  71, 0x00, 0xFF, "C227_LSB",
-// 15,  72, 0x00, 0xFF, "C228_MSB",
-// 15,  73, 0x00, 0xFF, "C228_LSB",
-// 15,  74, 0x00, 0xFF, "C229_MSB",
-// 15,  75, 0x00, 0xFF, "C229_LSB",
-// 15,  76, 0x00, 0xFF, "C230_MSB",
-// 15,  77, 0x00, 0xFF, "C230_LSB",
-// 15,  78, 0x00, 0xFF, "C231_MSB",
-// 15,  79, 0x00, 0xFF, "C231_LSB",
-// 15,  80, 0x00, 0xFF, "C232_MSB",
-// 15,  81, 0x00, 0xFF, "C232_LSB",
-// 15,  82, 0x00, 0xFF, "C233_MSB",
-// 15,  83, 0x00, 0xFF, "C233_LSB",
-// 15,  84, 0x00, 0xFF, "C234_MSB",
-// 15,  85, 0x00, 0xFF, "C234_LSB",
-// 15,  86, 0x00, 0xFF, "C235_MSB",
-// 15,  87, 0x00, 0xFF, "C235_LSB",
-// 15,  88, 0x00, 0xFF, "C236_MSB",
-// 15,  89, 0x00, 0xFF, "C236_LSB",
-// 15,  90, 0x00, 0xFF, "C237_MSB",
-// 15,  91, 0x00, 0xFF, "C237_LSB",
-// 15,  92, 0x00, 0xFF, "C238_MSB",
-// 15,  93, 0x00, 0xFF, "C238_LSB",
-// 15,  94, 0x00, 0xFF, "C239_MSB",
-// 15,  95, 0x00, 0xFF, "C239_LSB",
-// 15,  96, 0x00, 0xFF, "C240_MSB",
-// 15,  97, 0x00, 0xFF, "C240_LSB",
-// 15,  98, 0x00, 0xFF, "C241_MSB",
-// 15,  99, 0x00, 0xFF, "C241_LSB",
-// 15, 100, 0x00, 0xFF, "C242_MSB",
-// 15, 101, 0x00, 0xFF, "C242_LSB",
-// 15, 102, 0x00, 0xFF, "C243_MSB",
-// 15, 103, 0x00, 0xFF, "C243_LSB",
-// 15, 104, 0x00, 0xFF, "C244_MSB",
-// 15, 105, 0x00, 0xFF, "C244_LSB",
-// 15, 106, 0x00, 0xFF, "C245_MSB",
-// 15, 107, 0x00, 0xFF, "C245_LSB",
-// 15, 108, 0x00, 0xFF, "C246_MSB",
-// 15, 109, 0x00, 0xFF, "C246_LSB",
-// 15, 110, 0x00, 0xFF, "C247_MSB",
-// 15, 111, 0x00, 0xFF, "C247_LSB",
-// 15, 112, 0x00, 0xFF, "C248_MSB",
-// 15, 113, 0x00, 0xFF, "C248_LSB",
-// 15, 114, 0x00, 0xFF, "C249_MSB",
-// 15, 115, 0x00, 0xFF, "C249_LSB",
-// 15, 116, 0x00, 0xFF, "C250_MSB",
-// 15, 117, 0x00, 0xFF, "C250_LSB",
-// 15, 118, 0x00, 0xFF, "C251_MSB",
-// 15, 119, 0x00, 0xFF, "C251_LSB",
-// 15, 120, 0x00, 0xFF, "C252_MSB",
-// 15, 121, 0x00, 0xFF, "C252_LSB",
-// 15, 122, 0x00, 0xFF, "C253_MSB",
-// 15, 123, 0x00, 0xFF, "C253_LSB",
-// 15, 124, 0x00, 0xFF, "C254_MSB",
-// 15, 125, 0x00, 0xFF, "C254_LSB",
-// 15, 126, 0x00, 0xFF, "C255_MSB",
-#endif
-  16,   0, 0x00, 0x00, 0x00, "LAST_ENTRY_MARKER",                       0x00  // last entry marker
+
+// ********** AIC3100 PAGE 8
+// pg,reg, reset, can1, must1,  "nm",		prev, curr
+   8,   0, 0x08, 0x00, 0x00, "psr8",      0, 0x08,   // 151=8.0  // 8:0 reads as 0x08
+   8,   1, 0x00, 0x05, 0x00, "dac_mode",  0, 0x00,
+
+	 8,	  2, 0x7f, 0xff, 0x00, "dac_bqa_h",	0, 0x7f,
+	 8,	  3, 0xff, 0xff, 0x00, "dac_bqa_l",	0, 0xff,
+	 8,   4, 0x00, 0xff, 0x00, "dac_bqa",		0, 0x00,
+	 // dup 5..11
+	 8,	 12, 0x7f, 0xff, 0x00, "dac_bqb_h",	0, 0x7f,
+	 8,	 13, 0xff, 0xff, 0x00, "dac_bqb_l",	0, 0xff,
+	 8,  14, 0x00, 0xff, 0x00, "dac_bqb",		0, 0x00,
+	 // dup 15..21
+	 8,	 22, 0x7f, 0xff, 0x00, "dac_bqc_h",	0, 0x7f,
+	 8,	 23, 0xff, 0xff, 0x00, "dac_bqc_l",	0, 0xff,   // 160=8.23 
+	 8,  24, 0x00, 0xff, 0x00, "dac_bqc",		0, 0x00,
+	 // dup 25..31
+	 8,	 32, 0x7f, 0xff, 0x00, "dac_bqd_h",	0, 0x7f,
+	 8,	 33, 0xff, 0xff, 0x00, "dac_bqd_l",	0, 0xff,
+	 8,  34, 0x00, 0xff, 0x00, "dac_bqd",		0, 0x00,
+	 // dup 35..41
+	 8,	 42, 0x7f, 0xff, 0x00, "dac_bqe_h",	0, 0x7f,
+	 8,	 43, 0xff, 0xff, 0x00, "dac_bqe_l",	0, 0xff,
+	 8,  44, 0x00, 0xff, 0x00, "dac_bqe",		0, 0x00,
+	 // dup 45..51
+	 8,	 52, 0x7f, 0xff, 0x00, "dac_bqf_h",	0, 0x7f,
+	 8,	 53, 0xff, 0xff, 0x00, "dac_bqf_l",	0, 0xff,
+	 8,  54, 0x00, 0xff, 0x00, "dac_bqf",		0, 0x00,	// 170=8.54
+	 // dup 55..61
+	 8,	 62, 0x00, 0x00, 0xff, "rsv",				0, 0x00,  // reserved-- reset = XX, can1=0x00, must1=0xff 
+	 8,	 63, 0x00, 0x00, 0xff, "rsv",				0, 0x00,	// reserved-- reset = XX, can1=0x00, must1=0xff 
+	 8,  64, 0x00, 0xff, 0x00, "pga_gn_h",	0, 0x00,
+	 8,  65, 0x00, 0xff, 0x00, "pga_gn_l",	0, 0x00,
+	 8,	 66, 0x7f, 0xff, 0x00, "dac_rbqa_h",0, 0x7f,
+	 8,	 67, 0xff, 0xff, 0x00, "dac_rbqa_l",0, 0xff,
+	 8,  68, 0x00, 0xff, 0x00, "dac_rbqa",	0, 0x00,
+	 // dup 69..75
+	 8,	 76, 0x7f, 0xff, 0x00, "dac_rbqb_h",0, 0x7f,
+	 8,	 77, 0xff, 0xff, 0x00, "dac_rbqb_l",0, 0xff,
+	 8,  78, 0x00, 0xff, 0x00, "dac_rbqb",	0, 0x00,	// 180=8.78
+	 // dup 79..85
+	 8,	 86, 0x7f, 0xff, 0x00, "dac_rbqc_h",0, 0x7f,
+	 8,	 87, 0xff, 0xff, 0x00, "dac_rbqc_l",0, 0xff,
+	 8,  88, 0x00, 0xff, 0x00, "dac_rbqc",	0, 0x00,
+	 // dup 89..95
+	 8,	 96, 0x7f, 0xff, 0x00, "dac_rbqd_h",0, 0x7f,
+	 8,	 97, 0xff, 0xff, 0x00, "dac_rbqd_l",0, 0xff,
+	 8,  98, 0x00, 0xff, 0x00, "dac_rbqd",	0, 0x00,
+	 // dup 99..105
+	 8,	106, 0x7f, 0xff, 0x00, "dac_rbqe_h",0, 0x7f,
+	 8,	107, 0xff, 0xff, 0x00, "dac_rbqe_l",0, 0xff,
+	 8, 108, 0x00, 0xff, 0x00, "dac_rbqe",	0, 0x00,
+	 // dup 109..115
+	 8,	116, 0x7f, 0xff, 0x00, "dac_rbqf_h",0, 0x7f,	// 190=8.116
+	 8,	117, 0xff, 0xff, 0x00, "dac_rbqf_l",0, 0xff,
+	 8, 118, 0x00, 0xff, 0x00, "dac_rbqf",	0, 0x00,
+	 // dup 119..125
+	 8, 126, 0x00, 0x00, 0xff, "rsv",				0, 0x00,	// reserved-- reset = XX, can1=0x00, must1=0xff 
+	 8,	127, 0x00, 0x00, 0xff, "rsv",				0, 0x00,	// reserved-- reset = XX, can1=0x00, must1=0xff 
+// ********** AIC3100 PAGE 9
+// pg,reg, reset, can1, must1,  "nm",		prev, curr
+   9,   0, 0x09, 0x00, 0x00, "psr9",      0, 0x09,  // 195=9.0   9:0 reads as 0x09
+	 9,	  1, 0x00, 0x00, 0xff, "rsv",				0, 0x00,	// reserved-- reset = XX, can1=0x00, must1=0xff 
+	 9,	  2, 0x7f, 0xff, 0x00, "ldac_iir_h",0, 0x7f,
+	 9,	  3, 0xff, 0xff, 0x00, "ldac_iir_l",0, 0xff,
+	 9,   4, 0x00, 0xff, 0x00, "ldac_iir",	0, 0x00,
+	 // dup 5..7
+	 9,	  8, 0x7f, 0xff, 0x00, "rdac_iir_h",0, 0x7f,	// 200=9.8
+	 9,	  9, 0xff, 0xff, 0x00, "rdac_iir_l",0, 0xff,
+	 9,  10, 0x00, 0xff, 0x00, "rdac_iir",	0, 0x00,
+	 // dup 11..13
+	 9,	 14, 0x7f, 0xff, 0x00, "drc_hn0_h",	0, 0x7f,
+	 9,	 15, 0xf7, 0xff, 0x00, "drc_hn0_l",	0, 0xf7,
+	 9,  16, 0x80, 0xff, 0x00, "drc_hn1_h",	0, 0x80,
+	 9,  17, 0x09, 0xff, 0x00, "drc_hn1_l",	0, 0x09,
+	 9,	 18, 0x7f, 0xff, 0x00, "drc_hd1_h",	0, 0x7f,
+	 9,	 19, 0xef, 0xff, 0x00, "drc_hd1_l",	0, 0xef,
+	 9,  20, 0x00, 0xff, 0x00, "drc_ln0_h",	0, 0x00,
+	 9,  21, 0x11, 0xff, 0x00, "drc_ln0_l",	0, 0x11,	// 210=9.21
+	 9,  22, 0x00, 0xff, 0x00, "drc_ln1_h",	0, 0x00,
+	 9,  23, 0x11, 0xff, 0x00, "drc_ln1_l",	0, 0x11,
+	 9,  24, 0x7f, 0xff, 0x00, "drc_ld1_h",	0, 0x7f,
+	 9,  25, 0xde, 0xff, 0x00, "drc_ld1_l",	0, 0xde,
+	 9,	 26, 0x00, 0x00, 0xff, "rsv",				0, 0x00,  //215	// reserved-- reset = XX, can1=0x00, must1=0xff 
+	 // dup 27..127
+// ********** AIC3100 PAGE 12
+// pg,reg, reset, can1, must1,  "nm",		prev, curr
+  12,  0, 0x0c, 0x00, 0x00, "psr12",      0, 0x0c,  // 216=12.0   12:0 reads as 0x0c
+	12,	 1, 0x00, 0x00, 0xff, "rsv",				0, 0x00,	// reserved-- reset = XX, can1=0x00, must1=0xff 
+	12,	 2, 0x7f, 0xff, 0x00, "ldac_bqa_h", 0, 0x7f,
+	12,	 3, 0xff, 0xff, 0x00, "ldac_bqa_l", 0, 0xff,
+	12,  4, 0x00, 0xff, 0x00, "ldac_bqa",	  0, 0x00,  // 220
+	 // dup 5..11
+	12,	12, 0x7f, 0xff, 0x00, "ldac_bqb_h", 0, 0x7f,
+	12,	13, 0xff, 0xff, 0x00, "ldac_bqb_l", 0, 0xff,
+	12, 14, 0x00, 0xff, 0x00, "ldac_bqb",	  0, 0x00,
+	 // dup 15..21
+	12,	22, 0x7f, 0xff, 0x00, "ldac_bqc_h", 0, 0x7f,
+	12,	23, 0xff, 0xff, 0x00, "ldac_bqc_l", 0, 0xff,
+	12, 24, 0x00, 0xff, 0x00, "ldac_bqc",	  0, 0x00,
+	 // dup 25..31
+	12,	32, 0x7f, 0xff, 0x00, "ldac_bqd_h", 0, 0x7f,
+	12,	33, 0xff, 0xff, 0x00, "ldac_bqd_l", 0, 0xff,
+	12, 34, 0x00, 0xff, 0x00, "ldac_bqd",	  0, 0x00,
+	 // dup 35..41
+	12,	42, 0x7f, 0xff, 0x00, "ldac_bqe_h", 0, 0x7f,	// 230
+	12,	43, 0xff, 0xff, 0x00, "ldac_bqe_l", 0, 0xff,
+	12, 44, 0x00, 0xff, 0x00, "ldac_bqe",	  0, 0x00,
+	 // dup 45..51
+	12,	52, 0x7f, 0xff, 0x00, "ldac_bqf_h", 0, 0x7f,
+	12,	53, 0xff, 0xff, 0x00, "ldac_bqf_l", 0, 0xff,
+	12, 54, 0x00, 0xff, 0x00, "ldac_bqf",	  0, 0x00,
+	 // dup 55..61
+	12,	62, 0x00, 0x00, 0xff, "rsv",				0, 0x00,	// reserved-- reset = XX, can1=0x00, must1=0xff 
+	12,	63, 0x00, 0x00, 0xff, "rsv",				0, 0x00,	// reserved-- reset = XX, can1=0x00, must1=0xff 
+	12, 64, 0x00, 0xff, 0x00, "pga_gn_h",		0, 0x00,
+	12, 65, 0x00, 0xff, 0x00, "pga_gn_l",		0, 0x00,
+	12,	66, 0x7f, 0xff, 0x00, "dac_rbqa_h",	0, 0x7f,	// 240
+	12,	67, 0xff, 0xff, 0x00, "dac_rbqa_l",	0, 0xff,
+	12, 68, 0x00, 0xff, 0x00, "dac_rbqa",		0, 0x00,
+	 // dup 69..75
+	12,	76, 0x7f, 0xff, 0x00, "dac_rbqb_h",	0, 0x7f,
+	12,	77, 0xff, 0xff, 0x00, "dac_rbqb_l",	0, 0xff,
+	12,	78, 0x00, 0xff, 0x00, "dac_rbqb",		0, 0x00,
+	 // dup 79..85
+	12,	86, 0x7f, 0xff, 0x00, "dac_rbqc_h",	0, 0x7f,
+	12,	87, 0xff, 0xff, 0x00, "dac_rbqc_l",	0, 0xff,
+	12,	88, 0x00, 0xff, 0x00, "dac_rbqc",		0, 0x00,
+	 // dup 89..95
+	12,	96, 0x7f, 0xff, 0x00, "dac_rbqd_h",	0, 0x7f,
+	12,	97, 0xff, 0xff, 0x00, "dac_rbqd_l",	0, 0xff,	// 250
+	12,	98, 0x00, 0xff, 0x00, "dac_rbqd",		0, 0x00,
+	 // dup 99..105
+	12,	106, 0x7f, 0xff, 0x00, "dac_rbqe_h",0, 0x7f,
+	12,	107, 0xff, 0xff, 0x00, "dac_rbqe_l",0, 0xff,
+	12,	108, 0x00, 0xff, 0x00, "dac_rbqe",	0, 0x00,
+	 // dup 109..115
+	12,	116, 0x7f, 0xff, 0x00, "dac_rbqf_h",0, 0x7f,
+	12,	117, 0xff, 0xff, 0x00, "dac_rbqf_l",0, 0xff,
+	12,	118, 0x00, 0xff, 0x00, "dac_rbqf",	0, 0x00,
+	 // dup 119..125
+	12,	126, 0x00, 0x00, 0xff, "rsv",				0, 0x00,	// reserved-- reset = XX, can1=0x00, must1=0xff 
+	12,	127, 0x00, 0x00, 0xff, "rsv",				0, 0x00,	// reserved-- reset = XX, can1=0x00, must1=0xff 
+// ********** AIC3100 PAGE 13
+// pg,reg, reset, can1, must1,  "nm",		prev, curr
+  13,  0, 0x0d, 0x00, 0x00, "psr13",      0, 0x0d,  // 260=13.0    13:0 reads as 0x0d
+	13,	 1, 0x00, 0x00, 0xff, "rsv",				0, 0x00,  // reserved-- reset = XX, can1=0x00, must1=0xff 
+	13,	 2, 0x7f, 0xff, 0x00, "ldac_iir_h", 0, 0x7f,
+	13,	 3, 0xff, 0xff, 0x00, "ldac_iir_l", 0, 0xff,
+	13,  4, 0x00, 0xff, 0x00, "ldac_iir",	  0, 0x00,
+	 // dup 5..7
+	13,	 8, 0x7f, 0xff, 0x00, "rdac_iir_h", 0, 0x7f,
+	13,	 9, 0xff, 0xff, 0x00, "rdac_iir_l", 0, 0xff,
+	13, 10, 0x00, 0xff, 0x00, "rdac_iir",	  0, 0x00,
+	 // dup 11..13
+	13,	14, 0x7f, 0xff, 0x00, "h_drc_h", 		0, 0x7f,
+	13,	15, 0xf7, 0xff, 0x00, "h_drc_l", 		0, 0xf7,
+	13, 16, 0x80, 0xff, 0x00, "h_drc",	  	0, 0x80,	// 270
+	13, 17, 0x09, 0xff, 0x00, "h_drc",	  	0, 0x09,
+	13,	18, 0x7f, 0xff, 0x00, "h_drc_h", 		0, 0x7f,
+	13,	19, 0xef, 0xff, 0x00, "h_drc_l", 		0, 0xef,
+	13, 20, 0x00, 0xff, 0x00, "h_drc",	  	0, 0x00,
+	13, 21, 0x11, 0xff, 0x00, "h_drc",	  	0, 0x11,
+	13, 22, 0x00, 0xff, 0x00, "h_drc",	  	0, 0x00,
+	13, 23, 0x11, 0xff, 0x00, "h_drc",	  	0, 0x11,
+	13,	24, 0x7f, 0xff, 0x00, "h_drc_h", 		0, 0x7f,
+	13,	25, 0xde, 0xff, 0x00, "h_drc_l", 		0, 0xde,
+	13,	26, 0x00, 0x00, 0xff, "rsv",				0, 0x00,	// 280 // reserved-- reset = XX, can1=0x00, must1=0xff 
+
+// dup 27..127
+  16,   0, 0x00, 0x00, 0x00, "LAST_ENTRY",0, 0x00  // 281=16.0    last entry marker
 };
 int							codecNREGS = (sizeof(codec_regs)/sizeof(AIC_REG)) - 1;  // exclude last entry marker
 
 // define constants to match slots of codec_regs -- verified by 
  const int  P0_R0_Page_Select_Register                   =  0;
  const int  P0_R1_Software_Reset_Register                =  1;
- const int  P0_R3_OT_FLAG                                =  2;
-const int   P0_R4_ClockGen_Muxing                        =  3;
- const int  P0_R5_PLL_P_R_VAL                            =  4;
- const int  P0_R6_PLL_J_VAL                              =  5;
- const int  P0_R7_PLL_D_VAL_16B                          =  6;
- const int  P0_R8_PLL_D_VAL_LSB                          =  7;
- const int  P0_R11_DAC_NDAC_VAL                          =  8;
- const int  P0_R12_DAC_MDAC_VAL                          =  9;
- const int  P0_R13_DAC_DOSR_VAL_16B                      = 10;
-const int   P0_R14_DAC_DOSR_VAL_LSB                      = 11;
- const int  P0_R15_DAC_IDAC_VAL                          = 12;
- const int  P0_R16_DAC_MAC_Engine_Interpolation          = 13;
- const int  P0_R18_ADC_NADC_VAL                          = 14;
- const int  P0_R19_ADC_MADC_VAL                          = 15;
- const int  P0_R20_ADC_AOSR_VAL                          = 16;
- const int  P0_R21_ADC_IADC_VAL                          = 17;
-const int   P0_R22_ADC_MAC_Engine_Decimation             = 18;
- const int  P0_R25_CLKOUT_MUX                            = 19;
- const int  P0_R26_CLKOUT_M_VAL                          = 20;
- const int  P0_R27_Codec_Interface_Control1              = 21;
-const int   P0_R29_Codec_Interface_Control2              = 22;
- const int  P0_R30_BCLK_N_VAL                            = 23;
- const int  P0_R33_Codec_Interface_Control3              = 24;
- const int  P0_R36_ADC_Flag_Register                     = 25;		//  verify ADC power from P0_R36_  D6
- const int  P0_R37_DAC_Flag_Register                     = 26;
- const int  P0_R53_DOUT_Pin_Control                      = 27;
- const int  P0_R60_DAC_Instruction_Set                   = 28;
- const int  P0_R61_ADC_Instr_Set                  			 = 29;		// P0_R61_ADC_Instruction_Set
- const int  P0_R62_Prog_Instr_Md_Cntrl 									 = 30;		// P0_R62_Programmable_Instruction_Mode_Control
- const int  P0_R63_DAC_Datapath_SETUP                    = 31;
- const int  P0_R64_DAC_VOLUME_CONTROL                    = 32;
- const int  P0_R65_DAC_Left_Volume_Control               = 33;
- const int  P0_R66_DAC_Right_Volume_Control              = 34;
- const int  P0_R67_Headset_Detection                     = 35;
- const int  P0_R68_DRC_Control                           = 36;
+ const int  P0_R3_OT_FLAG                                =  3;
+const int   P0_R4_ClockGen_Muxing                        =  4;
+ const int  P0_R5_PLL_P_R_VAL                            =  5;
+ const int  P0_R6_PLL_J_VAL                              =  6;
+ const int  P0_R7_PLL_D_VAL_16B                          =  7;
+ const int  P0_R8_PLL_D_VAL_LSB                          =  8;
+ const int  P0_R11_DAC_NDAC_VAL                          = 11;
+ const int  P0_R12_DAC_MDAC_VAL                          = 12;
+ const int  P0_R13_DAC_DOSR_VAL_16B                      = 13;
+const int   P0_R14_DAC_DOSR_VAL_LSB                      = 14;
+ const int  P0_R15_DAC_IDAC_VAL                          = 15;
+ const int  P0_R16_DAC_MAC_Engine_Interpolation          = 16;
+ const int  P0_R18_ADC_NADC_VAL                          = 18;
+ const int  P0_R19_ADC_MADC_VAL                          = 19;
+ const int  P0_R20_ADC_AOSR_VAL                          = 20;
+ const int  P0_R21_ADC_IADC_VAL                          = 21;
+const int   P0_R22_ADC_MAC_Engine_Decimation             = 22;
+ const int  P0_R25_CLKOUT_MUX                            = 25;
+ const int  P0_R26_CLKOUT_M_VAL                          = 26;
+ const int  P0_R27_Codec_Interface_Control1              = 27;
+const int   P0_R29_Codec_Interface_Control2              = 29;
+ const int  P0_R30_BCLK_N_VAL                            = 30;
+ const int  P0_R33_Codec_Interface_Control3              = 33;
+ const int  P0_R36_ADC_Flag_Register                     = 36;  //  verify ADC power from P0_R36_  D6
+ const int  P0_R37_DAC_Flag_Register                     = 37;
+ const int  P0_R51_gpio_pin                              = 48;
+ const int  P0_R53_DOUT_Pin_Control                      = 50;
+ const int  P0_R60_DAC_Instruction_Set                   = 53;
+ const int  P0_R61_ADC_Instr_Set                         = 54;  // P0_R61_ADC_Instruction_Set
+ const int  P0_R62_prb_ctl                               = 55;  // P0_R62_Programmable_Instruction_Mode_Control
+ const int  P0_R63_DAC_Datapath_SETUP                    = 56;
+ const int  P0_R64_DAC_VOLUME_CONTROL                    = 57;
+ const int  P0_R65_DAC_Left_Volume_Control               = 58;
+ const int  P0_R66_DAC_Right_Volume_Control              = 59;
+ const int  P0_R67_Headset_Detection                     = 60;
+ const int  P0_R68_DRC_Control                           = 61;
+ const int  P0_R81_ADC_Digital_Mic                       = 74; // ADC power up  P0_R81_  D7     
+ const int  P0_R82_ADC_Volume_Control                    = 75;
+ const int  P0_R83_ADC_Volume_Control                    = 76;
+ const int  P0_R86_AGC_Control1                          = 79;
+ const int  P0_R87_AGC_Control2                          = 80;
+ const int  P0_R88_AGC_MAX_Gain                          = 81;
+ const int  P0_R89_AGC_Attack_Time                       = 82;
+ const int  P0_R90_AGC_Decay_Time                        = 83;
+ const int  P0_R91_AGC_Noise_Debounce                    = 84;
+ const int  P0_R92_AGC_Signal_Debounce                   = 85;
+ const int  P0_R93_AGC_Gain                              = 86;
+ const int  P0_R102_ADC_DC_Measurement1                  = 88;
+const int   P1_R0_Page_Select_Register                   = 97;
+ const int  P1_R30_HP_Spkr_Amp_Err_Ctl                   = 99;
+ const int  P1_R31_Headphone_Drivers                     = 100;
+ const int  P1_R32_ClassD_Drivers                        = 101;
+ const int  P1_R33_HP_Output_Drivers_POP_Rem_Settings    = 102;
+ const int  P1_R34_Out_Driver_PGA_RampDown_Period_Ctrl   = 103;
+ const int  P1_R35_LDAC_and_RDAC_Output_Routing          = 104;
+ const int  P1_R36_Left_Analog_Vol_to_HPL                = 105;
+ const int  P1_R37_Right_Analog_Vol_to_HPR               = 106;
+ const int  P1_R38_Left_Analog_Vol_to_SPL                = 107;
+const int   P1_R39_Right_Analog_Vol_to_SPR               = 108;
+ const int  P1_R40_HPL_Driver                            = 109;
+ const int  P1_R41_HPR_Driver                            = 110;
+ const int  P1_R42_SPK_Driver                            = 111;
+ const int  P1_R44_HP_Driver_Control                     = 113;
+ const int  P1_R46_MICBIAS                               = 115;
+ const int  P1_R47_MIC_PGA                               = 116;
+ const int  P1_R48_ADC_Input_P                           = 117;
+ const int  P1_R49_ADC_Input_M                           = 118;
+ const int  P1_R50_Input_CM                              = 119;
+const int 	P3_R0_psr																		 = 121; // 121=3.0
+const int 	P4_R0_psr																		 = 125; // 125=4.0 
+const int 	P8_R0_psr																		 = 151; // 151=8.0
+const int 	P9_R0_psr																		 = 195; // 195=9.0
+const int 	P12_R0_psr																	 = 216; // 216=12.0
+const int 	P13_R0_psr																	 = 260; // 260=13.0 
 
- const int  P0_R81_ADC_Digital_Mic                    	 = 37;     		// ADC power up  P0_R81_  D7     
- const int  P0_R82_ADC_Volume_Control                    = 38;          
- const int  P0_R83_ADC_Volume_Control                    = 39;          
- const int  P0_R86_AGC_Control1                          = 40;    
- const int  P0_R87_AGC_Control2                          = 41;    
- const int  P0_R88_AGC_MAX_Gain                          = 42;    
- const int  P0_R89_AGC_Attack_Time                       = 43;       
- const int  P0_R90_AGC_Decay_Time                        = 44;      
- const int  P0_R91_AGC_Noise_Debounce                    = 45;          
- const int  P0_R92_AGC_Signal_Debounce                   = 46;           
- const int  P0_R93_AGC_Gain                              = 47;
-const int   P1_R0_Page_Select_Register                   = 48;
- const int  P1_R30_Headphone_Speaker_Amp_Error_Control   = 49;
- const int  P1_R31_Headphone_Drivers                     = 50;
- const int  P1_R32_ClassD_Drivers                        = 51;
- const int  P1_R33_HP_Output_Drivers_POP_Rem_Settings    = 52;
- const int  P1_R34_Out_Driver_PGA_RampDown_Period_Ctrl   = 53;
- const int  P1_R35_LDAC_and_RDAC_Output_Routing          = 54;
- const int  P1_R36_Left_Analog_Vol_to_HPL                = 55;
- const int  P1_R37_Right_Analog_Vol_to_HPR               = 56;
- const int  P1_R38_Left_Analog_Vol_to_SPL                = 57;
-const int   P1_R39_Right_Analog_Vol_to_SPR               = 58;
- const int  P1_R40_HPL_Driver                            = 59;
- const int  P1_R41_HPR_Driver                            = 60;
- const int  P1_R42_SPK_Driver                            = 61;
- const int  P1_R44_HP_Driver_Control                     = 62;
- const int  P1_R46_MICBIAS                               = 63;
- const int  P1_R47_MIC_PGA                               = 64;
- const int  P1_R48_ADC_Input_P                           = 65;
- const int  P1_R49_ADC_Input_M                           = 66;
- const int  P1_R50_Input_CM                              = 67;
- const int  P1_R51_GPIO1_Pin_Ctrl                        = 68;
- const int  P8_R0_Page_Select_Register                   = 69;
-const int   P8_R1_DAC_Coefficient_RAM_Control            = 70; 
 
 #if !defined (VERIFY_WRITTENDATA)  
 // Uncomment this line to enable verifying data sent to codec after each write operation (for debug purpose)
 #define VERIFY_WRITTENDATA 
 #endif /* VERIFY_WRITTENDATA */
 
+bool codecIsReady = false;
+int  codecClockFreq = 0;
+
 void 						aicSetCurrPage( uint8_t page ){
+	if ( !codecIsReady ) return;
 	if ( page == aicCurrPg ) 		// already on correct page?
 		return;
 
@@ -1514,6 +479,9 @@ void 						aicSetCurrPage( uint8_t page ){
 	aicCurrPg = page;
 }
 uint8_t					aicGetReg( int idx ){
+	if ( !codecIsReady )
+		return 0;
+	
 	uint8_t	pg = codec_regs[ idx ].pg;
 	uint8_t reg = codec_regs[ idx ].reg;
 
@@ -1524,6 +492,8 @@ uint8_t					aicGetReg( int idx ){
 	return val;
 }
 void						aicSetReg( int idx, uint8_t val ){
+	if ( !codecIsReady ) return;
+	
 	uint8_t pg = codec_regs[ idx ].pg;
 	uint8_t reg = codec_regs[ idx ].reg;
 	
@@ -1587,9 +557,11 @@ void 						i2c_CheckRegs(){																						// Debug -- read codec regs
 			uint8_t defval = codec_regs[i].reset_val;
 			uint8_t val = aicGetReg( i ); 
 			codec_regs[i].curr_val = val;
+			codec_regs[i].prev_val = val;
 			
 			cntErr( Cdc_DefReg, defval, val, i, 9 );	
 			if (defval != val) nErrs++;
+			tbDelay_ms(10);
 		}
 		WatchReg = svWReg;
 		i2c_ReportErrors();
@@ -1606,129 +578,324 @@ void						verifyCodecReg( int idx, int pg, int reg ){				// verify that codec_re
 
 static int 											LastVolume 	= 0;			// retain last setting, so audio restarts at last volume
 
-void						debugRecordingRegs(){
-	if ( !dbgEnab( '8' )) return;
-	const int MAX_REC_OPTS = 8;
-	struct 
-	{
-		uint32_t idx;
-		char * optNm;
-		struct { 
-			uint8_t val; 
-			char *valNm; 
-		} vals[ MAX_REC_OPTS ]; 
-	} recOpts[] = 	// recording options -- reg values & description  -- (must have a value for 0x00)
-	{		
-// bias 1.46: 0x0A=2.5V, 0x09=1.5V
-		{ P1_R46_MICBIAS, 			"mic_bias", { { 0x0A, "2.5V" }, 	{ 0x09, "1.5V" },   { 0x00, "??" }													}},
-// pga  1.47: (0x08=4dB), 0x00=0dB, 0x10=8dB, 0x20=16dB		
-		{ P1_R47_MIC_PGA, 			"mic_pga",  { { 0x08, "4dB" }, 		{ 0x00, "0dB" }, 		{ 0x10, "8dB" }, 	{ 0x20, "16dB" } 			}},
-// aosr 0.20: 0x40=64, 0x80=128		
-		{ P0_R20_ADC_AOSR_VAL, 	"aosr", 		{ { 0x40, "64" }, 		{ 0x80, "128" },    { 0x00, "??" }													}},
-// prb  0.61: 0x04=PRB_R4, 0x0B=PRB_R11		
-		{ P0_R61_ADC_Instr_Set, "prb", 			{ { 0x04, "PRB_R4" }, { 0x0B, "PRB_R11" },{ 0x00, "??" }													}}, 
-// targ 0.86: 0x00=AGCoff, 0x80=targ -5.5dB, 0xA0=-10dB, 0xC0=-14dB, 0xD0=-17dB, 0xE0=-20dB, 0xF0=-24dB		
-		{ P0_R86_AGC_Control1, 	"agc_targ",	{ { 0x00, "AGCoff" }, { 0x80, "-5.5dB" }, { 0xA0, "-10dB" },{ 0xC0, "-14dB" },
-																					{ 0xD0, "-17dB"},   { 0xE0, "-20dB"},   { 0xF0, "-24dB"} 											  }},
-// maxg 0.88: 0x00=0dB, 0x08=4dB, 0x10=8dB, 0x20=16dB, 0x30=24dB, 0x40=32dB, 0x50=40dB
-		{ P0_R88_AGC_MAX_Gain, 	"agc_maxg", { { 0x00, "0dB" }, 		{ 0x08, "4dB" }, 		{ 0x10, "8dB" }, 	{ 0x20, "16dB" }, 
-																					{ 0x30, "24dB" }, 	{ 0x40, "32dB" }, 	{ 0x50, "40dB" } 												}},
-// vol  0.83: 0x68=-12dB, 0x78=-6dB, 0x00=0dB, 0x10=8dB, 0x20=16dB		
-		{ P0_R83_ADC_Volume_Control, "vol", { { 0x68, "-12dB" }, 	{ 0x78, "-6dB" }, 	{ 0x00, "0dB" }, 	{ 0x10, "8dB" },
-																					{ 0x20, "16dB" }																																}},
-// in_p 1.48: 0x40=MIC1LP_10k, 0x80=MIC1LP_20k, 0xC0=MIC1LP_40k	
-		{ P1_R48_ADC_Input_P, 	"in_p", 		{ { 0x40, "1LP_10k" },{ 0x80, "1LP_20k" },{ 0xC0, "1LP_40k" }, { 0x10, "1RP_10k" },
-																				  { 0x00, "no_P" }																																}},
-// in_m 1.49: 0x10=MIC1LM_10k, 0x20=MIC1LM_20k, 0x30=MIC1LM_40k	
-		{ P1_R49_ADC_Input_M, 	"in_m", 		{ { 0x10, "1LM_10k" },{ 0x20, "1LM_20k" },{ 0x30, "1LM_40k" }, { 0x40, "L_CM10k" },
-																					{ 0x00, "no_M" }																																}},
-//in_cm 1.50: 0x00=no CM, 0x80=MIC1LP to CM, 0x20=MIC1LM to CM, 0xA0 = MIC1LP & MIC1LM to CM	
-		{ P1_R50_Input_CM, 			"in_cm",		{ { 0x00, "no_CM" }, 	{ 0x80, "1LP_CM" }, { 0x20, "1LM_CM" }, { 0xA0, "P&M_CM" }	}},
-//out_route 1.35: 0x00=none, 0x20=MicL, 0x40=DacL, 0x60=MicL&DacL 
-		{ P1_R35_LDAC_and_RDAC_Output_Routing, "out_Route", 
-																				{ { 0x00, "none" }, 	{ 0x20, "MicL" }, 	{ 0x40, "DacL" }, 	{ 0x60, "DacL&MicL" } }},
-//classD  1.32:  0x80=SpkOn, 0x00=SpkOff
-		{ P1_R32_ClassD_Drivers, "classD",  { { 0x80, "SpkAmpOn" }, { 0x00, "SpkAmpOff" } }},
-//l_to_spkr 1.38: 
-		{ P1_R38_Left_Analog_Vol_to_SPL, "l_to_spkr", { { 0x00, "noLtoSpkr", }, {	0x80, "LtoSpkr_0dB" } }},	
-//L_ToSpkr 0.63:	0x00=Off  0x90=LDacOn		
-		{ P0_R63_DAC_Datapath_SETUP, "dac_pwr", { { 0x00, "off" }, { 0x90, "LDacOn" }	}},	
-		
-		{ 0, "", {{ 0,"" }}} // end of list
-	};
+int RegsCallCnt = 0;			// to detect 1st call
+void						showCdcRegs( bool always, bool nonReset ){  // display changes in codec regs
+	if ( !always && !dbgEnab( '2' )) return;
+	if ( !codecIsReady ){ dbgLog( "! showRegs: not powered up! \n" ); return; }
 	
-	for ( int i=0; i < 100; i++ ){
-		int ridx = recOpts[i].idx;
-		if ( ridx == 0 ) break;
-		
-		uint8_t val = aicGetReg( ridx );
-		int valIdx = -1;
-		for ( int j=0; j< MAX_REC_OPTS; j++ )
-		  if ( recOpts[i].vals[j].val == val ){ // found value in list
-				valIdx = j;
-				break;
-			}
-		char *valnm = "??";
-		if (valIdx >= 0) 
-			valnm = recOpts[i].vals[ valIdx ].valNm;
+	typedef struct { 
+		uint8_t val;  // register idx in codec_vals[] if valNm==NULL
+		char *valNm; 
+	} ValDef;
+	ValDef reg_vals[] = {  // define strings for register values
+		{ P0_R4_ClockGen_Muxing, NULL }, 			// clk_mux		0.4:  0x03="M>PLL>Cdc"  0x00="M>Cdc"
+			{ 0x03, "M>PLL>Cdc" },
+			{ 0x00, "M>Cdc" },
+		{ P0_R5_PLL_P_R_VAL, NULL }, 					// pll_p_r		0.5:   0x91="PllOn,R=1,P=1"		
+			{ 0x91, "PllOn,R=1,P=1" }, 
+			{ 0x00, "off" },
+		{ P0_R6_PLL_J_VAL, NULL }, 						// pll_j 			0.6:  0x07=7, 0x08=8
+			{ 0x07, "J=7" },
+			{ 0x08, "J=8" },
+			{ 0x00, "??" },
+		{ P0_R7_PLL_D_VAL_16B, NULL }, 				// pll_d 			0.7,8:  0x0230=560, 0x1a90=6800, 0x0780=1920
+			{ 0x07, "1920" },
+			{ 0x1a, "6800" },
+			{ 0x02, "560" },
+			{ 0x01, "368" },
+			{ 0x00, "??" },
+		{ P0_R8_PLL_D_VAL_LSB, NULL },				// pll_d 	 
+			{ 0x80, "0780" },
+			{ 0x90, "1a90" },
+			{ 0x30, "0230" },
+			{ 0x70, "0170" },
+			{ 0x00, "??" },
+		{ P0_R11_DAC_NDAC_VAL, NULL }, 				// pll_dac_n  0.11: 0x04=4, 0x18=24, 0x03=3, 0x06=6, 0x0c=12 	
+			{ 0x84, "N=4" },
+			{ 0x98, "N=24" },
+			{ 0x83, "N=3" },
+			{ 0x86, "N=6" },
+			{ 0x8c, "N=12" },
+			{ 0x00, "off" },
+		{ P0_R12_DAC_MDAC_VAL, NULL }, 				// pll_dac_m	0.12:  0x2d=45, 0x05=5, 0x28=40, 0x10=16, 0x0a=10	
+			{ 0x85, "M=5" },
+			{ 0x8a, "M=10" },
+			{ 0x90, "M=16" },
+			{ 0xa8, "M=40" },
+			{ 0xad, "M=45" },
+			{ 0x00, "off" },
+		{ P0_R13_DAC_DOSR_VAL_16B, NULL }, 		// dosr				0.13,14:  0x0040=64
+			{ 0x00, "64" },
+			{ 0x00, "??" },
+		{ P0_R14_DAC_DOSR_VAL_LSB, NULL },  	// dosr	lsb
+			{ 0x40, "0040" },
+		{ P0_R20_ADC_AOSR_VAL, NULL }, 				// aosr 			0.20: 0x40=64, 0x80=128		
+			{ 0x40, "64" },
+			{ 0x80, "128" },
+			{ 0x00, "??" },
+		{ P0_R25_CLKOUT_MUX, NULL }, 					// outMux  		0.25:  0x00="out=M" 0x03="out=PLL"  0x04="out=Dac"  0x05="out=DacMod"  0x06="out=Adc"  0x07="out=AdcMod"
+			{ 0x00, "out=M" },
+			{ 0x03, "out=PLL" },
+			{ 0x04, "out=Dac" },
+			{ 0x05, "out=DacMod" }, 
+			{ 0x06, "out=Adc" },
+			{ 0x07, "out=AdcMod" },
+		{ P0_R26_CLKOUT_M_VAL, NULL }, 				// outM  			0.26:  0x80="M=0"
+			{ 0x01, "off=1" },
+			{ 0x00, "off" },
+		{ P0_R27_Codec_Interface_Control1, NULL }, // i2s  	0.27:  0x0c="I2S 16 B&Wout"
+			{ 0x0c, "I2S_16_B&Wout" },
+			{ 0x00, "??" },
+		{ P0_R29_Codec_Interface_Control2, NULL }, // bclk  0.29:  0x01="BDIV=DAC_MOD_CLK"
+			{ 0x01, "DacMod>B" },
+			{ 0x00, "??" },
+		{ P0_R30_BCLK_N_VAL, NULL }, 					// BclkN 			0.30:  0x82=2		
+			{ 0x82, "N=2" },
+			{ 0x00, "off" },
+		{ P0_R33_Codec_Interface_Control3, NULL }, // b&w_clks  	0.33:  0x00="B,W=Dacfs,D"
+			{ 0x00, "B,W=Dacfs,D" },
+			{ 0x00, "??" },
+		{ P0_R37_DAC_Flag_Register, NULL }, 	// DacFlg 		0.37: 0x80=LDac_On,  0x10=ClsD_on, 0x08="RDac_on", 0x90="LDac_ClsD_on"
+			{ 0x90, "LDac&ClsD_on" },
+			{ 0x98, "L&RDac&ClsD_on" },
+			{ 0x88, "L&RDac_on" },
+			{ 0x00, "??" },
+		{ P0_R53_DOUT_Pin_Control, NULL }, 		// D_pin  		0.53: 0x11="~BK,Dout", 0x01="BK,DOut"  0x12="~BK,D=Gpio"
+			{ 0x01, "Dout,BK" },
+			{ 0x11, "Dout,~BK" },
+			{ 0x00, "noDOut" },
+		{ P0_R61_ADC_Instr_Set, NULL }, 			// prb  			0.61: 0x04=PRB_R4, 0x0B=PRB_R11		
+			{ 0x04, "PRB_R4" },
+			{ 0x0B, "PRB_R11" },
+			{ 0x00, "??" },
+		{ P0_R63_DAC_Datapath_SETUP, NULL },	// DacPath 		0.63:  0x90="LDacOnL", 	
+			{ 0x90, "LDacOnL" },
+		{ P0_R64_DAC_VOLUME_CONTROL, NULL }, 	// DacVol 		0.64:  0x0c="L&Rmute" 0x04="Lon,Rmute"
+			{ 0x0c, "L&Rmute" },
+			{ 0x04, "Lon,Rmute" },
+			{ 0x00, "??" },
+		{ P0_R65_DAC_Left_Volume_Control, NULL }, // DacLVol		0.65:  0x30="24dB", 0x0a="5dB", 0x00="0dB", 0xc0="-32dB", 0x81="-63.5dB"
+			{ 0x30, "24dB" },
+			{ 0x0a, "5dB" },
+			{ 0x00, "0dB" },
+			{ 0xc0, "-32dB" },
+			{ 0x81, "-63.5dB" },
+			{ 0x00, "??" },
+		{ P0_R81_ADC_Digital_Mic, NULL }, 		// dig_mic		0.81:
+			{ 0x00, "adc_off" },
+			{ 0x80, "adc_on" },
+		{ P0_R82_ADC_Volume_Control, NULL }, // fn_vol  		0.82: 0x68=-12dB, 0x78=-6dB, 0x00=0dB, 0x10=8dB, 0x20=16dB
+			{ 0x00, "unmute 0dB" },
+			{ 0x80, "mute 0dB" },
+		{ P0_R83_ADC_Volume_Control, NULL }, // vol  			0.83: 0x68=-12dB, 0x78=-6dB, 0x00=0dB, 0x10=8dB, 0x20=16dB		
+			{ 0x68, "-12dB" },
+			{ 0x78, "-6dB" },
+			{ 0x00, "0dB" },
+			{ 0x10, "8dB" },
+			{ 0x20, "16dB" },
+		{ P0_R86_AGC_Control1, NULL }, 			// targ 			0.86: 0x00=AGCoff, 0x80=targ -5.5dB, 0xA0=-10dB, 0xC0=-14dB, 0xD0=-17dB, 0xE0=-20dB, 0xF0=-24dB
+			{ 0x00, "AGCoff" },
+			{ 0x80, "-5.5dB" },
+			{ 0xA0, "-10dB" },
+			{ 0xC0, "-14dB" },
+			{ 0xD0, "-17dB"},
+			{ 0xE0, "-20dB"},
+			{ 0xF0, "-24dB"},
+		{ P0_R88_AGC_MAX_Gain, NULL }, 			// maxg 			0.88: 0x00=0dB, 0x08=4dB, 0x10=8dB, 0x20=16dB, 0x30=24dB, 0x40=32dB, 0x50=40dB, 0x7f=reset
+			{ 0x00, "0dB" }, 		
+			{ 0x08, "4dB" },
+			{ 0x10, "8dB" },
+			{ 0x20, "16dB" },
+			{ 0x30, "24dB" },
+			{ 0x40, "32dB" },
+			{ 0x50, "40dB" },
+			{ 0x7f, "reset" },
+		{ P0_R102_ADC_DC_Measurement1, NULL },	// dc_meas 		0.102:  0x00=off
+			{ 0x00, "off" },
+	// PAGE 1
+		{ P1_R32_ClassD_Drivers, NULL }, 				// ClsD				1.32:	0x86="PwrOn"
+			{ 0x86, "PwrOn" }, { 0x06, "off" },
+		{ P1_R35_LDAC_and_RDAC_Output_Routing, NULL },	// DacRout 		1.35: 0x40="DacL_Spk", 0x20="MicLP_Spk"  0x60="DacL&MicL_Spk"
+			{ 0x40, "DacL>Spk" }, 
+			{ 0x20, "MicLP>Spk" },
+			{ 0x60, "DacL+MicL>Spk" },
+			{ 0x00, "off" },
+		{ P1_R38_Left_Analog_Vol_to_SPL, NULL }, 	// l_to_spkr 	1.38: 
+			{ 0x00, "noLtoSpkr", },
+			{	0x80, "LtoSpkr_0dB" },
+			{ 0x7F, "noLtoSpkr", },
+			{	0xFF, "LtoSpkr_-78dB" },
+		{ P1_R42_SPK_Driver, NULL }, 							// SpkDrv			1.42: 	0x00="SpkMute", 0x04="Spk=6dB"
+			{ 0x04, "Spk=6dB" },
+			{ 0x00, "SpkMute" },
+		{ P1_R46_MICBIAS, NULL }, 								// bias 			1.46: 0x0A=2.5V, 0x09=1.5V
+			{ 0x0A, "2.5V" },
+			{ 0x09, "1.5V" },
+			{ 0x00, "??" },
+		{ P1_R47_MIC_PGA, NULL }, 								// pga  			1.47: (0x08=4dB), 0x00=0dB, 0x10=8dB, 0x20=16dB, 0x40=32dB  0x80="0dB"
+			{ 0x08, "4dB" },
+			{ 0x00, "0dB" },
+			{ 0x10, "8dB" },
+			{ 0x20, "16dB" },
+			{ 0x30, "24dB" },
+			{ 0x40, "32dB" },
+			{ 0x80, "0dB" },
+		{ P1_R48_ADC_Input_P, NULL }, 						// in_p 			1.48: 0x40=MIC1LP_10k, 0x80=MIC1LP_20k, 0xC0=MIC1LP_40k	
+			{ 0x40, "1LP_10k" },
+			{ 0x80, "1LP_20k" },
+			{ 0xC0, "1LP_40k" },
+			{ 0x10, "1RP_10k" },
+			{ 0x00, "no_P" },
+		{ P1_R49_ADC_Input_M, NULL }, 						// in_m 			1.49: 0x10=MIC1LM_10k, 0x20=MIC1LM_20k, 0x30=MIC1LM_40k	
+			{ 0x10, "1LM_10k" },
+			{ 0x20, "1LM_20k" },
+			{ 0x30, "1LM_40k" },
+			{ 0x40, "L_CM10k" },
+			{ 0x00, "no_M" },
+		{ P1_R50_Input_CM, NULL }, 								// in_cm 			1.50: 0x00=no CM, 0x80=MIC1LP to CM, 0x20=MIC1LM to CM, 0xA0 = MIC1LP & MIC1LM to CM	
+			{ 0x00, "no_CM" },
+			{ 0x80, "1LP_CM" },
+			{ 0x20, "1LM_CM" },
+			{ 0xA0, "P&M_CM" },
+			{ 0x01, "noCM+" },
+			{ 0x81, "1LP_CM+" },
+			{ 0x21, "1LM_CM+" },
+			{ 0xA1, "P&M_CM+" },
+		{ 0,  NULL } // end of list
+	};
+
+	int							codecNVALS = (sizeof(reg_vals)/sizeof(ValDef)) - 1;  // exclude last entry marker
+	
+	for ( int ridx=0; ridx < codecNREGS; ridx++){
+		AIC_REG regDef = codec_regs[ ridx ];
+		if ( regDef.reg != 0 ){
+			if ((regDef.pg > 1) && !dbgEnab( '8' )) break;   // higher pages only if debug '8'
 			
-		dbgLog( "R%d.%d: %12s = 0x%02x = %s \n", codec_regs[ ridx ].pg, codec_regs[ ridx ].reg, recOpts[i].optNm, val, valnm );
-		tbDelay_ms(50);
+			if ( RegsCallCnt==0 ) // 1st time, set prev_val to reset_val
+				codec_regs[ ridx ].prev_val = regDef.reset_val;
+			uint8_t val = aicGetReg( ridx );
+			bool changed = nonReset? (val != regDef.reset_val) : (val != regDef.prev_val);
+		
+			int valIdx = -1;
+			char *valnm = NULL;
+			for ( int j=0; j < codecNVALS; j++ )
+				if ( reg_vals[j].valNm==NULL ) 
+					valIdx = reg_vals[j].val;
+				else if ( valIdx==ridx && val==reg_vals[j].val ){	 // found value in list
+					valnm = reg_vals[j].valNm;
+					break;
+				}
+
+			char *rst = (val == regDef.reset_val)? "*":"";
+			if ( changed ){
+				if (valnm==NULL)
+					dbgLog( "R%d.%3d: %12s = 0x%02x %s (0x%02x)\n", regDef.pg, regDef.reg, regDef.nm, val, rst, regDef.prev_val );
+				else
+					dbgLog( "R%d.%3d: %12s = 0x%02x = %s %s (0x%02x)\n", regDef.pg, regDef.reg, regDef.nm, val, valnm, rst, regDef.prev_val );
+			}
+			codec_regs[ ridx ].prev_val = val;
+			tbDelay_ms(10);
+		}
 	}
+	RegsCallCnt++;
+	i2c_ReportErrors();
 }
 void						cdc_RecordEnable( bool enable ){
 #if defined( AIC3100 )
 	if ( enable ){ 
 		typedef struct  { 
-			uint8_t in_p;		// in_p 1.48: 0x40=MIC1LP_10k, 0x80=MIC1LP_20k, 0xC0=MIC1LP_40k
-			uint8_t in_m;		// in_m 1.49: 0x10=MIC1LM_10k, 0x20=MIC1LM_20k, 0x30=MIC1LM_40k
-			uint8_t in_cm;	//in_cm 1.50: 0x00=no CM, 0x80=MIC1LP to CM, 0x20=MIC1LM to CM, 0xA0 = MIC1LP & MIC1LM to CM
+			const uint8_t in_p;		// in_p 1.48: 0x40=MIC1LP_10k, 0x80=MIC1LP_20k, 0xC0=MIC1LP_40k
+			const uint8_t in_m;		// in_m 1.49: 0x10=MIC1LM_10k, 0x20=MIC1LM_20k, 0x30=MIC1LM_40k
+			const uint8_t in_cm;	//in_cm 1.50: 0x00=no CM, 0x80=MIC1LP to CM, 0x20=MIC1LM to CM, 0xA0 = MIC1LP & MIC1LM to CM
 			
-			uint8_t bias;		// bias 1.46: 0x0A=2.5V, 0x09=1.5V												//AK4637: used 2.4V
-			uint8_t pga; 		// pga  1.47: (0x08=4dB), 0x00=0dB, 0x10=8dB, 0x20=16dB		//AK4637: used +18dB
-			uint8_t aosr; 	// aosr 0.20: 0x40=64, 0x80=128
-			uint8_t prb; 		// prb  0.61: 0x04=PRB_R4, 0x0B=PRB_R11
-			uint8_t targ; 	// targ 0.86: 0x00=AGCoff, 0x80=targ -5.5dB, 0xA0=-10dB, 0xC0=-14dB, 0xD0=-17dB, 0xE0=-20dB, 0xF0=-24dB
+			const uint8_t bias;		// bias 1.46: 0x0A=2.5V, 0x09=1.5V												//AK4637: used 2.4V
+			const uint8_t pga; 		// pga  1.47: (0x08=4dB), 0x00=0dB, 0x10=8dB, 0x20=16dB		//AK4637: used +18dB
+			const uint8_t aosr; 	// aosr 0.20: 0x40=64, 0x80=128
+			const uint8_t prb; 		// prb  0.61: 0x04=PRB_R4, 0x0B=PRB_R11
+			const uint8_t targ; 	// targ 0.86: 0x00=AGCoff, 0x80=targ -5.5dB, 0xA0=-10dB, 0xC0=-14dB, 0xD0=-17dB, 0xE0=-20dB, 0xF0=-24dB
 
-			uint8_t maxg;		// maxg 0.88: 0x00=0dB, 0x08=4dB, 0x10=8dB, 0x20=16dB, 0x30=24dB, 0x40=32dB, 0x50=40dB
-			uint8_t vol;		// vol  0.83: 0x68=-12dB, 0x78=-6dB, 0x00=0dB, 0x10=8dB, 0x20=16dB
+			const uint8_t maxg;		// maxg 0.88: 0x00=0dB, 0x08=4dB, 0x10=8dB, 0x20=16dB, 0x30=24dB, 0x40=32dB, 0x50=40dB
+			const uint8_t vol;		// vol  0.83: 0x68=-12dB, 0x78=-6dB, 0x00=0dB, 0x10=8dB, 0x20=16dB
 		} recP;
  
 		recP opts[] = 
 		{
-		// Record MIC1RP (per James Kim's suggestion)
-		 // in_p, in_m, in_cm, bias,  pga,  aosr, prb,  targ, maxg, vol			DbgRec    
-		//	{ 0x10, 0x00,  0x00, 0x0A,	0x08,	0x40,	0x04,	0xC0,	0x30, 0x00 }, // 0  P=MIC1RP 10k, M=nothing
-		//	{ 0x10, 0x40,  0x00, 0x0A,	0x08,	0x40,	0x04,	0xC0,	0x30, 0x00 }, // 1  P=MIC1RP 10k, M=CM 10k
+	/* Record settings suggested by Marc
+			Page 1 Reg 46:  0x0a		P1_R46_MICBIAS 			2.5V
+			Page 1 Reg 47:  0x40		P1_R47_MIC_PGA   		32dB
+			Page 1 Reg 48:  0x40		P1_R48_ADC_Input_P	1LP_10k
+			Page 1 Reg 49:  0x10		P1_R49_ADC_Input_M	1LM_10k
+			Page 1 Reg 50:  0x00		P1_R50_Input_CM			no_CM
 
-			// Test no amplification:  pga=0dB, AGC=off, coarse_vol=-12dB
-		//	{ 0xC0, 0x30,  0x00, 0x0A,	0x00,	0x40,	0x04,	0x00,	0x00, 0x68 }, //0
+			Page 0 Reg 81:  0x80		P0_R81_ADC_Digital_Mic	  					ADC_pwr_on
+			Page 0 Reg 82:  0x00		P0_R82_ADC_Volume_Control (fine)  	unmute 0dB
+			Page 0 Reg 83:  0x00		P0_R83_ADC_Volume_Control (coarse) 	0dB  [reset]
+			Page 0 Reg 86:  0x00 		P0_R86_AGC_Control1									agc_disabled		(for no AGC; can discuss if we want AGC later)
+			Page 0 Reg 102:  0x00		P0_R102_ADC_DC_Measurement1 				meas_disabled [reset]
+			P0_R53 should be configured to 0x02.
+		*/			
+			
+		 // 1.48, 1.49, 1.50,  1.46,  1.47, 0.20, 0.61, 0.83, 0.88, 0.83 
+		 // in_p, in_m,  in_cm,bias,  pga,  aosr, prb,  targ, maxg, vol			DbgRec    
+		//	{ 0x40, 0x10,  0x00, 0x0A,	0x30,	0x40,	0x04,	0x00,	0x30, 0x00 }, // 0  pga=24dB, AGC off 
+		//	{ 0x40, 0x10,  0x00, 0x0A,	0x40,	0x40,	0x04,	0x00,	0x30, 0x00 }, // 1  pga=32dB, AGC off 
+		//  { 0x40, 0x10,  0x00, 0x0A,	0x70,	0x40,	0x04,	0x00,	0x30, 0x00 }, // 4  pga=56dB, AGC off 
+
+		  { 0x40, 0x10,  0x00, 0x0A,	0x60,	0x40,	0x04,	0x80,	0x50, 0x10 }, // 0  pga=48dB, AGCtarg=-5.5dB maxGain=48dB vol=8dB
+			
+	// pga 1.47:  (0x08=4dB), 0x00=0dB, 0x10=8dB, 0x20=16dB 0x40=32dB 0x50=40dB 0x60=48dB 0x70=56dB
+	//                              pga
+		  { 0x40, 0x10,  0x00, 0x0A,	0x50,	0x40,	0x04,	0x80,	0x50, 0x00 }, // 1  pga=48dB, AGCtarg=-5.5dB maxGain=40dB
+		  { 0x40, 0x10,  0x00, 0x0A,	0x60,	0x40,	0x04,	0x80,	0x50, 0x00 }, // 2  pga=48dB, AGCtarg=-5.5dB maxGain=48dB
+		  { 0x40, 0x10,  0x00, 0x0A,	0x70,	0x40,	0x04,	0x80,	0x50, 0x00 }, // 3  pga=48dB, AGCtarg=-5.5dB maxGain=56dB
+	// vol  0.83: 0x68=-12dB, 0x78=-6dB, 0x00=0dB, 0x10=8dB, 0x20=16dB	0x28=20dB
+	//                                                            vol
+		  { 0x40, 0x10,  0x00, 0x0A,	0x60,	0x40,	0x04,	0x80,	0x50, 0x10 }, // 4  pga=48dB, AGCtarg=-5.5dB maxGain=48dB vol=8dB
+		  { 0x40, 0x10,  0x00, 0x0A,	0x60,	0x40,	0x04,	0x80,	0x50, 0x20 }, // 5  pga=48dB, AGCtarg=-5.5dB maxGain=48dB vol=16dB
+		  { 0x40, 0x10,  0x00, 0x0A,	0x60,	0x40,	0x04,	0x80,	0x50, 0x28 }, // 6  pga=48dB, AGCtarg=-5.5dB maxGain=48dB vol=20dB
+
+		
+	// targ 0.86: 0x00=AGCoff, 0x80=targ -5.5dB, 0xA0=-10dB, 0xC0=-14dB, 0xD0=-17dB, 0xE0=-20dB, 0xF0=-24dB
+	// maxg 0.88: 0x00=0dB, 0x08=4dB, 0x10=8dB, 0x20=16dB, 0x30=24dB, 0x40=32dB, 0x50=40dB			
+		//  { 0x40, 0x10,  0x00, 0x0A,	0x60,	0x40,	0x04,	0x80,	0x20, 0x00 }, // 3  pga=48dB, AGCtarg=-5.5dB maxGain=16dB
+		//  { 0x40, 0x10,  0x00, 0x0A,	0x60,	0x40,	0x04,	0x80,	0x40, 0x00 }, // 4  pga=48dB, AGCtarg=-5.5dB maxGain=32dB
+		//  { 0x40, 0x10,  0x00, 0x0A,	0x60,	0x40,	0x04,	0x80,	0x50, 0x00 }, // 5  pga=48dB, AGCtarg=-5.5dB maxGain=40dB
+
+			//************** RecDBG > 2 --  enable Speaker & route MIC1LP + ADC to it
+		 // in_p, in_m,  in_cm,bias,  pga,  aosr, prb,  targ, maxg, vol			DbgRec    
+		//	{ 0x40, 0x10,  0x00, 0x0a,  0x40, 0x40, 0x04, 0x00, 0x00, 0x00 }, // 3  Marc: AGC off, mic_pga=32dB
+		//	{ 0x40, 0x10,  0x00, 0x0A,	0x40,	0x40,	0x04,	0xC0,	0x30, 0x00 }, // 4  pga=32dB, targ=-14dB, maxg=24dB
+		//	{ 0x40, 0x10,  0x00, 0x0A,	0x40,	0x40,	0x04,	0xE0,	0x30, 0x00 }, // 5  pga=32dB, targ=-20dB, maxg=24dB
+
+	/*		// Test no amplification:  pga=0dB, AGC=off, coarse_vol=-12dB
+	//	{ 0xC0, 0x30,  0x00, 0x0A,	0x00,	0x40,	0x04,	0x00,	0x00, 0x68 }, //0
 			
 		 // in_p, in_m, in_cm, bias,  pga,  aosr, prb,  targ, maxg, vol			DbgRec    
-			{ 0x40, 0x10,  0x00, 0x0A,	0x08,	0x40,	0x04,	0xC0,	0x30, 0x00 }, // 0   defaults
+	//	{ 0x40, 0x10,  0x00, 0x0A,	0x08,	0x40,	0x04,	0xC0,	0x30, 0x00 }, // 0   defaults
 			
-	//	in_p 1.48: 0x40=MIC1LP_10k, 0x80=MIC1LP_20k, 0xC0=MIC1LP_40k
+	//	in_p 1.48: 0x40=MIC1LP_10k, 0x80=MIC1LP_20k, 0xC0=MIC1LP_40k, 0x10=MIC1RP_10k
 	//	in_m 1.49: 0x10=MIC1LM_10k, 0x20=MIC1LM_20k, 0x30=MIC1LM_40k
   //    in_p  in_m 
 			{ 0x80, 0x20,  0x00, 0x0A,	0x08,	0x40,	0x04,	0xC0,	0x30, 0x00 }, // 1   MIC1LP & MIC1LM @ 20kOhm
 			{ 0xC0, 0x30,  0x00, 0x0A,	0x08,	0x40,	0x04,	0xC0,	0x30, 0x00 }, // 2   MIC1LP & MIC1LM @ 40kOhm
-			
+		
 	//  in_cm 1.50: 0x00=no CM, 0x80=MIC1LP to CM, 0x20=MIC1LM to CM, 0xA0 = MIC1LP & MIC1LM to CM
 	//                in_cm
 			{ 0x40, 0x10,  0x80, 0x0A,	0x08,	0x40,	0x04,	0xC0,	0x30, 0x00 }, // 3   MIC1LP to CM
 			{ 0x40, 0x10,  0x20, 0x0A,	0x08,	0x40,	0x04,	0xC0,	0x30, 0x00 }, // 4   MIC1LM to CM
 			{ 0x40, 0x10,  0xA0, 0x0A,	0x08,	0x40,	0x04,	0xC0,	0x30, 0x00 }, // 5   MIC1LP & LM to CM
 
-	// pga 1.47:  (0x08=4dB), 0x00=0dB, 0x10=8dB, 0x20=16dB
+	// pga 1.47:  (0x08=4dB), 0x00=0dB, 0x10=8dB, 0x20=16dB 0x40=32dB
 	//                              pga
 			{ 0xC0, 0x30,  0x00, 0x0A,	0x08,	0x40,	0x04,	0xC0,	0x30, 0x00 }, // 6   MIC1LP & MIC1LM @ 40kOhm, pga 4dB
 			{ 0xC0, 0x30,  0x00, 0x0A,	0x00,	0x40,	0x04,	0xC0,	0x30, 0x00 }, // 7   MIC1LP & MIC1LM @ 40kOhm, pga 0dB
 
+			
 	// targ 0.86: 0x00=AGCoff, 0x80=targ -5.5dB, 0xA0=-10dB, 0xC0=-14dB, 0xD0=-17dB, 0xE0=-20dB, 0xF0=-24dB
 	//                                                targ
-			{ 0xC0, 0x30,  0x00, 0x0A,	0x00,	0x40,	0x04,	0x00,	0x30, 0x00 }, // 8   MIC1LP & MIC1LM @ 40kOhm, pga 0dB, AGC off
-			{ 0xC0, 0x30,  0x00, 0x0A,	0x00,	0x40,	0x04,	0xE0,	0x30, 0x00 }, // 9   MIC1LP & MIC1LM @ 40kOhm, pga 0dB, targ -20dB
-			{ 0xC0, 0x30,  0x00, 0x0A,	0x00,	0x40,	0x04,	0xF0,	0x30, 0x00 }, //10   MIC1LP & MIC1LM @ 40kOhm, pga 0dB, targ -24dB
+			{ 0x40, 0x10,  0x00, 0x0A,	0x40,	0x40,	0x04,	0x00,	0x30, 0x00 }, // 8   pga 32dB, AGC off
+			{ 0x40, 0x10,  0x00, 0x0A,	0x40,	0x40,	0x04,	0xE0,	0x30, 0x00 }, // 9   pga 32dB, targ -20dB
+			{ 0x40, 0x10,  0x00, 0x0A,	0x40,	0x40,	0x04,	0xF0,	0x30, 0x00 }, //10   pga 32dB, targ -24dB
 
 	// maxg 0.88: 0x00=0dB, 0x08=4dB, 0x10=8dB, 0x20=16dB, 0x30=24dB, 0x40=32dB, 0x50=40dB			
 	//                                                      maxg
@@ -1741,18 +908,16 @@ void						cdc_RecordEnable( bool enable ){
 			{ 0xC0, 0x30,  0x00, 0x0A,	0x00,	0x40,	0x04,	0xE0,	0x10, 0x68 }, //14   MIC1LP & MIC1LM @ 40kOhm, pga 0dB, targ -20dB, maxg 8dB, vol -12dB
 			{ 0xC0, 0x30,  0x00, 0x0A,	0x00,	0x40,	0x04,	0xE0,	0x10, 0x78 }, //15   MIC1LP & MIC1LM @ 40kOhm, pga 0dB, targ -20dB, maxg 8dB, vol -6dB
 			{ 0xC0, 0x30,  0x00, 0x0A,	0x00,	0x40,	0x04,	0xE0,	0x10, 0x10 }, //16   MIC1LP & MIC1LM @ 40kOhm, pga 0dB, targ -20dB, maxg 8dB, vol 8dB
+	*/
 		};
 		const int MAX_OPTS = sizeof(opts) / sizeof(recP);
 
 		if ( RecDBG < 0 ) RecDBG = 0;
 		if ( RecDBG >= MAX_OPTS ) RecDBG = MAX_OPTS-1;
 		recP RP = opts[ RecDBG ];
-		
-		
-		//DEBUG-- route MIC to speaker
-		cdc_SpeakerEnable( true );		// turn on DAC to SPKR
-		aicSetReg( P1_R35_LDAC_and_RDAC_Output_Routing, 0x60 );	// P1_R35: D7_6=01 DacL->Mix, D5=1: MIC1LP->mix, R->nowhere: 0 0000
-		//DEBUG
+
+		aicSetReg( P0_R53_DOUT_Pin_Control, 0x02 );  		// because Marc specified it-- enable bus-keeper?
+		aicSetReg( P0_R102_ADC_DC_Measurement1, 0x00 ); // because Marc specified it-- reset value
 		
 		// power-on MIC & ADC, setup MIC PGA -- left channel only
 		// mic settings used for AK4637 --  Differential input, mic gain = +18dB, mic_pwr = 2.4V
@@ -1764,7 +929,7 @@ void						cdc_RecordEnable( bool enable ){
 		
 		aicSetReg( P0_R20_ADC_AOSR_VAL, 			RP.aosr ); //0x40 );	// P0_R20: D7_0=64
 		aicSetReg( P0_R61_ADC_Instr_Set, 			RP.prb ); //0x04 ); // P0_R61: D4_0= 0 0100: ADC signal-processing block PRB_R4 
-		aicSetReg( P0_R62_Prog_Instr_Md_Cntrl,0x00 ); // P0_R62: defaults 
+		aicSetReg( P0_R62_prb_ctl,						0x00 ); // P0_R62: defaults 
 																											  
 		// enable & set up Auto Gain Control -- defaults for now
 		// datasheet  7.3.9.2 Automatic Gain Control  -- pg 30 
@@ -1806,13 +971,30 @@ void						cdc_RecordEnable( bool enable ){
 		// power up ADC (after AGC configured, re: pg. 30)
 		aicSetReg( P0_R81_ADC_Digital_Mic,    0x80 );	// P0_R81: D7= 1: ADC channel is powered up, D1_0 = 00: ADC digital soft-stepping enabled 1 step/sample
 		int8_t agc_gain = aicGetReg( P0_R93_AGC_Gain );	// P0_R93: applied reading of current AGC gain-- -24..63 = -12dB..59.5dB
+		dbgLog( "8 RecEn[%d] \n", RecDBG );
+		showCdcRegs( false, false );
+		
 	}	else {
+	  const int MAX_ADC_PWR_WAIT = 10000;
 		// power down the ADC and the MIC
-		aicSetReg( P0_R81_ADC_Digital_Mic,    0x00 );	// P0_R81: D7= 0: ADC channel is powered down.
-		aicSetReg( P1_R46_MICBIAS,						0x00 ); // P1_R46: MICBIAS output off, Software Power Down disabled
+		aicSetReg( P0_R81_ADC_Digital_Mic,    0x00 );	// P0_R81: Rst  D7= 0: ADC channel is powered down.
+		aicSetReg( P1_R46_MICBIAS,						0x00 ); // P1_R46: Rst  MICBIAS output off, Software Power Down disabled
+		
+		//AIC3100: follow pg 65 rules -- wait till 0.36 ADC_Flag says ADC is off, then pwr down clock dividers 
+		uint8_t pwr = 0x40;
+		int cnt = 0;
+		while ( pwr != 0 && cnt < MAX_ADC_PWR_WAIT ){	// wait till ADC powers down
+			pwr = aicGetReg( P0_R36_ADC_Flag_Register ) & 0x40;  // P0_R36: D6=ADC_powered
+			cnt++;
+		}
+		if ( cnt == MAX_ADC_PWR_WAIT ) dbgLog( "! ADC failed to turn off" );
+	//	aicSetReg( P0_R20_ADC_AOSR_VAL, 0 );
+		aicSetReg( P0_R19_ADC_MADC_VAL, 0x01 );  // Rst -- M=1 off
+		aicSetReg( P0_R18_ADC_NADC_VAL, 0x01 );  // Rst -- N=1 off
+		
 		dbgLog( "8 AIC ADC & MIC off \n");
 	}
-	debugRecordingRegs();
+	showCdcRegs( false, false );
 #endif
 	
 #if defined( AK4637 )
@@ -1919,7 +1101,7 @@ void 						cdc_SpeakerEnable( bool enable ){														// enable/disable spea
 			dbgLog( "2 AIC DAC -> Spkr, Spkr on \n");
 	} else {			
 		  cdc_SetMute( true );		// no noise during transition
-			aicSetReg( P1_R32_ClassD_Drivers, 							0x00 );	// P1_R32: SpkrAmpPwrOn: 0
+			aicSetReg( P1_R32_ClassD_Drivers, 							0x00 );	// P1_R32: Rst SpkrAmpPwrOn: 0
 			dbgLog( "2 AIC Spkr off \n");
 	}
 #endif
@@ -2007,15 +1189,23 @@ void 						cdc_Init( ){ 																								// Init codec & I2C (i2s_stm32f4
 	verifyCodecReg( P0_R29_Codec_Interface_Control2, 0, 29 );
 	verifyCodecReg( P1_R0_Page_Select_Register, 1, 0 );
 	verifyCodecReg( P1_R39_Right_Analog_Vol_to_SPR, 1, 39 );
-	verifyCodecReg( P8_R1_DAC_Coefficient_RAM_Control, 8, 1 );
+	verifyCodecReg( P3_R0_psr, 3, 0 );
+	verifyCodecReg( P4_R0_psr, 4, 0 );
+	verifyCodecReg( P8_R0_psr, 8, 0 );
+	verifyCodecReg( P9_R0_psr, 9, 0 );
+	verifyCodecReg( P12_R0_psr, 12, 0 );
+	verifyCodecReg( P13_R0_psr, 13, 0 );
 	
 //	memset( &akC, 0, sizeof( AK4637_Registers ));
 	cdcSpeakerOn 		= false;
 	cdcMuted			 	= false;
 
-	cdc_PowerUp(); 		// power-up codec
-  i2c_Init();  			// powerup & Initialize the Control interface of the Audio Codec
-
+  if ( !codecIsReady ){
+		cdc_PowerUp(); 		// power-up codec
+		i2c_Init();  			// powerup & Initialize the Control interface of the Audio Codec
+		codecIsReady = true;
+	}
+	
 	uint8_t rst = 1;  // software reset bit -- hardware returns to 0
 	uint32_t st = tbTimeStamp();
 	
@@ -2026,6 +1216,7 @@ void 						cdc_Init( ){ 																								// Init codec & I2C (i2s_stm32f4
 	dbgLog( "2 AIC Sft Reset took %d ms \n", tbTimeStamp()-st );
 	
 	i2c_CheckRegs();		// check all default register values & report
+	dbgLog( "2 AIC Reg defaults\n");
 
 	#if defined( AK4343 )
 		Codec_SetRegBits( AK_Signal_Select_1, AK_SS1_SPPSN, 0 );		// set power-save (mute) ON (==0)  (REDUNDANT, since defaults to 0)
@@ -2045,8 +1236,10 @@ void 						cdc_Init( ){ 																								// Init codec & I2C (i2s_stm32f4
 		akR.R.MdCtr3.DIF1_0 		= 3;							// DIF1_0 = 3   ( audio format = Philips )
 	#endif
 
-	if ( LastVolume == 0 ) // first time-- set to default_volume
+	if ( LastVolume == 0 ){ // first time-- set to default_volume
 		LastVolume = TB_Config.default_volume;
+		if (LastVolume==0) LastVolume = 5;
+	}
 	cdc_SetVolume( LastVolume );						// set to LastVolume used
 
 	// Extra Configuration (of the ALC)  
@@ -2104,14 +1297,14 @@ void 						cdc_Init( ){ 																								// Init codec & I2C (i2s_stm32f4
 
 	cdc_SetMute( true );		// set soft mute on output
 }
-
-
-void 						cdc_PowerDown( void ){																				// power down entire codec (i2s_stm..)
-	dbgEvt( TB_cdcPwrDn, 0,0,0,0);
-	#if defined( AIC3100 )	//to power down DAC channel, wait till P0_R37_Power_Status_d7_d3 == 0, then power down MDAC, then NDAC 
-	  const int MAX_DAC_PWR_WAIT = 10000;
-	//AIC3100: follow pg 65 rules
-		aicSetReg( P0_R63_DAC_Datapath_SETUP, 	0x14 ); // P0_R63: DAC L & R Pwr Off -- pg 65: begins internal sequence
+void 						cdc_ClocksOff( void ){																			// properly shut down ADC, DAC, clock tree, & PLL 
+	#if defined( AIC3100 )	
+  	cdc_RecordEnable( false );  // power down ADC & it's dividers
+	
+	  // shutdown DAC & all clocks, then PLL
+		const int MAX_DAC_PWR_WAIT = 10000;
+		//AIC3100: follow pg 65 rules
+		aicSetReg( P0_R63_DAC_Datapath_SETUP, 	0x14 ); // P0_R63: DAC L & R Pwr Off (reset val) -- pg 65: begins internal sequence
 	
 		uint8_t pwrLR = 0x88;
 		int cnt = 0;
@@ -2121,11 +1314,21 @@ void 						cdc_PowerDown( void ){																				// power down entire codec 
 		}
 		if ( cnt == MAX_DAC_PWR_WAIT ) dbgLog( "! DACs failed to turn off" );
 
-		// now shut down M_DAC & N_DAC dividers and finally, PLL 
-		aicSetReg( P0_R11_DAC_NDAC_VAL, 	0x01 ); 	 // P0_R11: NDAC_PWR: 0 reset val-- powers down NDAC
-		aicSetReg( P0_R12_DAC_MDAC_VAL, 	0x01 ); 	 // P0_R12: NDAC_PWR: 0 reset val-- powers down MDAC
-		aicSetReg( P0_R5_PLL_P_R_VAL, 		0x11 ); 	 // P0_R04: PLL_PWR: 0  PLL_P: 001 PLL_R: 0001 = 0x11   powers down PLL (MUST BE LAST pg 68)
+		// now shut down all clocks from bottom up:  CLKOUT, BCLK, M_DAC & N_DAC dividers
+		aicSetReg( P0_R26_CLKOUT_M_VAL, 	0x01 );		 // R0.26: Rst CLKOUT_M Pwr: D7=0, powered down
+		aicSetReg( P0_R30_BCLK_N_VAL,			0x01 );		 // R0.30: Rst BCLK_Pwr: D7=0 powered down
+		aicSetReg( P0_R12_DAC_MDAC_VAL, 	0x01 ); 	 // P0.12: Rst NDAC_PWR: 0 powers down MDAC
+		aicSetReg( P0_R11_DAC_NDAC_VAL, 	0x01 ); 	 // P0.11: Rst NDAC_PWR: 0 powers down NDAC
+		//  and finally, with nothing depending on it, power down PLL 
+		aicSetReg( P0_R5_PLL_P_R_VAL, 		0x11 ); 	 // P0.04: PLL_PWR: 0  PLL_P: 001 PLL_R: 0001 = 0x11   powers down PLL (MUST BE LAST pg 68)
+		codecClockFreq = 0;
+		dbgLog( "2 ClocksOff \n");
+		showCdcRegs( false, false );
 	#endif
+}
+void 						cdc_PowerDown( void ){																				// power down entire codec (i2s_stm..)
+	dbgEvt( TB_cdcPwrDn, 0,0,0,0);
+	cdc_ClocksOff();	//to power down DAC channel, wait till P0_R37_Power_Status_d7_d3 == 0, then power down MDAC, then NDAC 
 	
 	I2Cdrv->PowerControl( ARM_POWER_OFF );	// power down I2C
 	I2Cdrv->Uninitialize( );								// deconfigures SCL & SDA pins, evt handler
@@ -2138,6 +1341,7 @@ void 						cdc_PowerDown( void ){																				// power down entire codec 
 	gSet( gEN_IOVDD_N, 1 );		// power down codec IOVDD PE4
 	gSet( gEN_AVDD_N, 1 );		// power down codec AVDD & HPVDD PE5 (at least 10ns after DVDD)
 	dbgLog( "2 AIC3100 powered down\n");
+	codecIsReady = false;
 }
 //
 //
@@ -2146,7 +1350,7 @@ void		 				cdc_SetVolume( uint8_t Volume ){														// sets volume 0..10  (
 	uint8_t v = Volume>10? 10 : Volume; 
 
 	LastVolume = v;
-	if ( audGetState()!=Playing ) return;			// just remember for next cdc_Init()
+	if ( !codecIsReady ) return;			// just remember for next cdc_Init()
 
 	#if defined( AIC3100 )
 		const int8_t cdcMUTEVOL = -127, cdcMAXVOL = 48;
@@ -2189,96 +1393,33 @@ void		 				cdc_SetMute( bool muted ){																	// true => enable mute on 
 	
 	#if defined( AIC3100 )
 		if ( muted ){		// enable mute -- both channels
-			aicSetReg( P1_R42_SPK_Driver, 0x00	 ); 			// P1_R42: SpkrAmpGain: 00  SpkrMuteOff: 0
-			aicSetReg( P0_R64_DAC_VOLUME_CONTROL, 0x0C );	// P0_R64: LMuteOn: 1  RMuteOn: 1 LRsep: 00
+			aicSetReg( P1_R42_SPK_Driver, 0x00	 ); 			// P1_R42: Rst SpkrAmpGain: 00  SpkrMuteOff: 0
+			aicSetReg( P0_R64_DAC_VOLUME_CONTROL, 0x0C );	// P0_R64: Rst LMuteOn: 1  RMuteOn: 1 LRsep: 00
 			dbgLog( "2 AIC mute: SpkrAmp, L&R mutes on \n" );
 		} else {	// disable left channel mute
 			aicSetReg( P0_R64_DAC_VOLUME_CONTROL, 0x04 );	// P0_R64: LMuteOn: 0  RMuteOn: 1 LRsep: 00
 			aicSetReg( P1_R42_SPK_Driver, 0x04	 ); 			// P1_R42: SpkrAmpGain: 00  SpkrMuteOff: 1
-			tbDelay_ms( 500 );  // wait to let stabilize? before starting I2S
+			tbDelay_ms( 100 );  // wait to let stabilize? before starting I2S
 			dbgLog( "2 AIC unmute: SpkrAmp & L mutes off, SpkrAmp=6dB \n" );
 		}
 	#endif
 //	akR.R.MdCtr3.SMUTE = (muted? 1 : 0);
 	i2c_Upd();
 }
-void 						debugTimingRegs(){																					// configure ClkOut & report Reg values
-	if ( !dbgEnab( '2' )) 
-		return;
-	
-	uint8_t regList[] = { 
-		P0_R4_ClockGen_Muxing, 	
-		P0_R5_PLL_P_R_VAL, 		
-		P0_R6_PLL_J_VAL, 					
-		P0_R7_PLL_D_VAL_16B, 			
-		P0_R8_PLL_D_VAL_LSB,
-		P0_R11_DAC_NDAC_VAL, 		
-		P0_R12_DAC_MDAC_VAL, 	
-		P0_R13_DAC_DOSR_VAL_16B, 	
-		P0_R14_DAC_DOSR_VAL_LSB, 	
-		P0_R25_CLKOUT_MUX,
-		P0_R26_CLKOUT_M_VAL,		
-		P0_R27_Codec_Interface_Control1,			
-		P0_R29_Codec_Interface_Control2,		
-		P0_R30_BCLK_N_VAL,
-		P0_R33_Codec_Interface_Control3,
-		P0_R37_DAC_Flag_Register, 
-		P0_R53_DOUT_Pin_Control, 											
-		P0_R63_DAC_Datapath_SETUP,  
-		P0_R64_DAC_VOLUME_CONTROL,
-		P0_R65_DAC_Left_Volume_Control,
-		P1_R32_ClassD_Drivers, 
-		P1_R35_LDAC_and_RDAC_Output_Routing,
-		P1_R38_Left_Analog_Vol_to_SPL,
-		P1_R42_SPK_Driver, 
-		P1_R46_MICBIAS
-	};
-	
-	//DEBUG ONLY - configure CLKOUT to DOUT
-	// select ClkOut source: 0=MCLK 3=PLL_CLK  4=DAC_CLK  5=DAC_MOD_CLK
-	tbDelay_ms(20);			// let debug printf catch up
-	if (gGet( gHOME )){  					// HOM => PLL_CLK to ClkOut
-		aicSetReg( P0_R25_CLKOUT_MUX, 			0x03 );		
-		dbgLog( "2 HOM: PLL_Clk => ClkOut \n");
-	} else if (gGet( gCIRCLE)){  	// CIR => DAC_CLK
-		aicSetReg( P0_R25_CLKOUT_MUX, 			0x04 );		
-		dbgLog( "2 CIR: DAC_Clk => ClkOut \n");
-	} else if (gGet( gRHAND)){  	// RH => DAC_MOD_CLK
-		aicSetReg( P0_R25_CLKOUT_MUX, 			0x05 );		
-		dbgLog( "2 RH: DAC_MOD_Clk => ClkOut \n");
-	} else {											// default => MClk
-		aicSetReg( P0_R25_CLKOUT_MUX, 			0x00 );				// select ClkOut source: 000=MCLK 011=PLL_CLK  100=DAC_CLK  101=DAC_MOD_CLK
-		dbgLog( "2 def: MClk => ClkOut \n");
-	}
-	const int ClkOutM = 10;
-	aicSetReg( P0_R26_CLKOUT_M_VAL, 		0x80 + ClkOutM );  // PWR & set divider for ClkOut /ClkOutM
-
-
-	if (gGet( gMINUS )){
-		aicSetReg( P0_R53_DOUT_Pin_Control,	0x04 );			// MINUS: DOUT gets GPout = 0
-		dbgLog( "2 MINUS: DOUT = 0 \n");
-	} else if (gGet( gPLUS )){
-		aicSetReg( P0_R53_DOUT_Pin_Control,	0x05 );			// PLUS: DOUT gets GPout = 1
-		dbgLog( "2 PLUS: DOUT = 1 \n");
-	} else {
-		aicSetReg( 		P0_R53_DOUT_Pin_Control,0x16 );		// default: DOUT gets CLKOUT (from CLKOUT_MUX)
-		dbgLog( "2 def: DOUT = MClk/%d \n", ClkOutM );
-	}
-		
-	for ( int i=0; i < sizeof(regList); i++ ){
-		uint8_t ridx = regList[i];
-		uint8_t val = aicGetReg( ridx );
-		dbgLog( "2 P%dR%02d %12s = %3d 0x%02x \n", codec_regs[ridx].pg, codec_regs[ridx].reg, codec_regs[ridx].nm, val, val );
-	}
-}
 
 void						cdc_SetMasterFreq( int freq ){															// set AK4637 to MasterMode, 12MHz ref input to PLL, audio @ 'freq', start PLL  (i2s_stm32f4xx)
 	#if defined( AIC3100 )
+	  if ( freq != codecClockFreq ){ 
+			cdc_ClocksOff();   // changing frequency-- shut down all clocks & PLL
+			if (freq==0) return;
+		}
+		// start PLL and all DAC clocks at new freq
 		// choose parameters for codec PLL
 		int PLL = 92; // 84=84.672MHz  92=92.160MHz, or 98 = 98.304MHz
 		int MDAC = 90, NDAC = 2;  // 0..128 divisors of PLL_CLK 
 		switch ( freq ){
-				case  8000:	PLL=92; MDAC=90; NDAC= 2; break;
+//				case  8000:	PLL=92; MDAC=90; NDAC= 2; break;
+				case  8000:	PLL=92; MDAC=45; NDAC= 4; break;		// ensure DAC_CLK (and ADC_CLK < 24.576MHz) for recording at 8Khz
 				case 11025:	PLL=84; MDAC= 5; NDAC=24; break;
 				case 12000:	PLL=92; MDAC=40; NDAC= 3; break;
 				case 16000:	PLL=98; MDAC=16; NDAC= 6; break;
@@ -2291,29 +1432,35 @@ void						cdc_SetMasterFreq( int freq ){															// set AK4637 to MasterMo
 		// configure PLL for 12MHz MCLK to generate audio at 'freq'
 		// PLL_CLK = MCLK * R * J.D / P   (R=1 & P=1)
 		int PLL_J, PLL_D;
-		if (PLL == 84)		{  PLL_J = 7;  PLL_D = 0560; }  // J.D = 7.0560 * 12MHz => 84.672MHz
+		if      (PLL==84)	{  PLL_J = 7;  PLL_D =  560; }  // J.D = 7.0560 * 12MHz => 84.672MHz
 		else if (PLL==92)	{  PLL_J = 7;  PLL_D = 6800; }  // J.D = 7.6800 * 12MHz => 92.160MHz
 		else if (PLL==98)	{  PLL_J = 8;  PLL_D = 1920; }  // J.D = 8.1920 * 12MHz => 98.304MHz
-		dbgLog( "2 AIC3100 PLL= 12MHz * %d.%04d \n", PLL_J, PLL_D );
+		dbgLog( "2 PLL= 12MHz * %d.%04d \n", PLL_J, PLL_D );
 		// AIC3100 configuration:
 		//   MClk is fed 12MHz from STM32F412 I2S3_MCLK-- set up by I2S3_ClockEnable() in I2S_stm32F4xx.c
 		//   codec mode I2S 16-bit, output WClk & BClk
 		//   external MClk is input to PLL_ClkIn & PLL_Clk as Codec_ClkIn
 		
 		aicSetReg( 		P0_R27_Codec_Interface_Control1, 0x0C );// P0_R27:  I2S: 00  Wd16: 00 BClkOut: 1 WClkOut: 1  Rx: 0 DOut: 0  = 00001100 = 0x0C;
-		aicSetReg( 		P0_R4_ClockGen_Muxing, 	0x03 ); 				// P0_R04: 0000 PLL=MClk: 00 Codec=PLL: 11 = 0x03
+		aicSetReg( 		P0_R4_ClockGen_Muxing, 	0x03 ); 				// P0_R04: PLL=MClk: 00, Codec=PLL: 11 = 0x03
 		aicSetReg( 		P0_R6_PLL_J_VAL, 				PLL_J 		); 		// P0_R06: PLL_J      ( integer part of PLL multiplier J.D )
 		aicSet16Bits( P0_R7_PLL_D_VAL_16B, 		PLL_D );  			// P0_R07/08: PLL_D    fraction D (0..9999)
 		aicSetReg( 		P0_R5_PLL_P_R_VAL, 			0x91 ); 		 		// P0_R04: PLL_PWR: 1  PLL_P: 001 PLL_R: 0001 = 0x91   powers up PLL with these parameters
+		//set both DAC & ADC clock dividers
 		aicSetReg( 		P0_R11_DAC_NDAC_VAL, 		0x80 + NDAC );	// P0_R11: NDAC_VAL  ( NDAC_PWR + NDAC divider value ) 
 		aicSetReg( 		P0_R12_DAC_MDAC_VAL, 		0x80 + MDAC );	// P0_R12: MDAC_VAL  ( MDAC_PWR + MDAC divider value ) 
+		// for recording!  ADC_N & ADC_M must be active--  ADC doesn't use DAC_MOD_CLK as implied by datasheet pg. 64,65
+		aicSetReg( 		P0_R18_ADC_NADC_VAL, 		0x80 + NDAC );	// P0_R18: NADC_VAL  ( NADC_PWR + NADC divider value ) 
+		aicSetReg( 		P0_R19_ADC_MADC_VAL, 		0x80 + MDAC );	// P0_R12: MDAC_VAL  ( MADC_PWR + MADC divider value ) 
 		aicSet16Bits( P0_R13_DAC_DOSR_VAL_16B, 64 );  				// P0_R13/14: DOSR_VAL = 0x0040   ( for DOSR = 64 )
 		aicSetReg( 		P0_R29_Codec_Interface_Control2, 0x01 );// P0_R29: BDIV_CLKIN = DAC_MOD_CLK, BCLK&WCLK not always active
 		aicSetReg( 		P0_R33_Codec_Interface_Control3, 0x00 ); // P0_R33: pri BCLK: 0 (internal), pri WCLK: 00 (Dac_fs) pri DOUT: 0 codec
 		aicSetReg( 		P0_R30_BCLK_N_VAL, 			0x80 + 2 );  		// P0_R30: BCLK N_VAL = 2  ( with DOSR = 64, BCLK = DAC_FS * 32 )
+		// start DAC & external clocks
+		aicSetReg( 		P0_R63_DAC_Datapath_SETUP, 	0x90 );			// P0_R63: PwrLDAC: 1  PwrRDAC: 0  LDACleft: 01  RDACoff: 00  DACvol1step: 00
 		dbgLog( "2 AIC: BCLK = CLK / %d / %d / %d = 32* %d \n", NDAC, MDAC, 2, freq );
-
-		debugTimingRegs();
+//		showCdcRegs( false, false );
+		codecClockFreq = freq;		// remember current freq
 	#endif
 	#if defined( AK4637 )
 	// set up AK4637 to run in MASTER mode, using PLL to generate audio clock at 'freq'

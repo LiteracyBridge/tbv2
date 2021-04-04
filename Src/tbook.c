@@ -7,7 +7,7 @@
 #include "fs_evr.h"					// FileSys components
 #include "fileOps.h"				// decode & encrypt audio files
 
-const char * 	TBV2_Version 				= "V3.02 of 2-Apr-2021";
+const char * 	TBV2_Version 				= "V3.02 of 3-Apr-2021";
 
 //
 // Thread stack sizes
@@ -139,6 +139,8 @@ void tglDebugMask( int bit ){
 
 
 int ts_recStart = 0;  // timestamp of recording start
+int dbgIdx = 0;				// file index for current value of RecDBG
+
 void CheckRecording(){
 	if ( audGetState()==Recording ){ 
 		int msec = tbTimeStamp()-ts_recStart;
@@ -152,7 +154,7 @@ void CheckRecording(){
 		}
 	}
 }
-void PlayRecCmd( GPIO_ID k, int dbgIdx ){
+void PlayRecCmd( GPIO_ID k ){
 	MsgStats tstStats;
 	char fname[40];
 
@@ -169,7 +171,6 @@ void PlayRecCmd( GPIO_ID k, int dbgIdx ){
 		case gCIRCLE: 
 			if ( audGetState()==Ready ){
 				sprintf( fname, "M0:/REC_%d_%d.WAV", RecDBG, dbgIdx );	
-				dbgIdx++;
 				FILE* outFP = tbOpenWriteBinary( fname ); 
 				if ( outFP != NULL ){
 					resetAudio();			// clean up anything in progress 
@@ -178,6 +179,7 @@ void PlayRecCmd( GPIO_ID k, int dbgIdx ){
 					ts_recStart = tbTimeStamp();
 					audStartRecording( outFP, &tstStats );
 					showCdcRegs( false, true ); 		// regs during record
+					dbgIdx++;
 				}		
 			}
 			break;
@@ -215,8 +217,9 @@ void CodecCmd( GPIO_ID k ){
 			pwrOn = !pwrOn;
 			if (pwrOn){
 				dbgLog( " Tr: codec pwr up \n");
-				cdc_SetVolume(5); 
-				cdc_Init(); 
+				Driver_SAI0.PowerControl( ARM_POWER_FULL );		// power up audio
+				uint32_t ctrl = ARM_SAI_CONFIGURE_TX | ARM_SAI_MODE_SLAVE  | ARM_SAI_ASYNCHRONOUS | ARM_SAI_PROTOCOL_I2S | ARM_SAI_DATA_SIZE(16);
+				Driver_SAI0.Control( ctrl, 0, 8000 );	// set sample rate, init codec clock, power up speaker and unmute
 			} else {
 				dbgLog( " Tr: codec pwr down \n");
 				cdc_PowerDown();		
@@ -257,7 +260,6 @@ void debugLoop( bool autoUSB ){			// called if boot-MINUS, no file system,  auto
 	int ledCntr = 0; //, LEDpauseCnt = 0;
 //	bool inTestSequence = false;
 	RecDBG = 0;			// default recording params
-	int dbgIdx = 0;	// file index for current value of RecDBG
 	
 	initLogger();			// init Event log
 	logEvtNI( "DebugLoop", "NFSys", fsNDevs );
@@ -300,7 +302,7 @@ void debugLoop( bool autoUSB ){			// called if boot-MINUS, no file system,  auto
 			
 			default:		// other keys depend on mode
 				if (iMd==0) {
-					PlayRecCmd( k, dbgIdx );
+					PlayRecCmd( k );
 				}
 				else {
 					CodecCmd( k );

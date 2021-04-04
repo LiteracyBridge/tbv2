@@ -251,8 +251,14 @@ void 										FileSysPower( bool enable ){										// power up/down eMMC & SD 
 		if ( FSysPowered ) return;
 		
 		dbgLog( "5 FSysPwr up \n" );
-		gConfigOut( gEMMC_RSTN );		// 0 to reset? eMMC
 		gConfigOut( g3V3_SW_EN );		// 1 to enable power to SDCard & eMMC
+		gConfigOut( gEMMC_RSTN );		// 0 to reset? eMMC
+		gConfigOut( gSDIO_DAT0 );
+		gConfigOut( gSDIO_DAT1 );
+		gConfigOut( gSDIO_DAT2 );
+		gConfigOut( gSDIO_DAT3 );
+		gConfigOut( gSDIO_CLK );
+		gConfigOut( gSDIO_CMD );
 		gSet( gEMMC_RSTN, 1 );			// enable at power up?
 		gSet( g3V3_SW_EN, 1 );			// enable at start up, for FileSys access
 		
@@ -267,8 +273,16 @@ void 										FileSysPower( bool enable ){										// power up/down eMMC & SD 
 		int st = funinit( "M0:" );
 		if ( st != fsOK ) 
 			errLog("funinit => %d", st );
-	
-		gSet( g3V3_SW_EN, 0 );			// shut off 3V supply to SDIO
+		
+		gUnconfig( gEMMC_RSTN );
+		gUnconfig( gSDIO_DAT0 );
+		gUnconfig( gSDIO_DAT1 );
+		gUnconfig( gSDIO_DAT2 );
+		gUnconfig( gSDIO_DAT3 );
+		gUnconfig( gSDIO_CLK );
+		gUnconfig( gSDIO_CMD );
+
+		gSet( g3V3_SW_EN, 0 );			// shut off 3V supply to SDIO  PD6
 		FSysPowered = false;
 	}
 }

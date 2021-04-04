@@ -1,10 +1,13 @@
 // TBookV2  powermanager.c
 //   Apr 2018
 
-#include "powerMgr.h"
 #include "tbook.h"
+#include "powerMgr.h"
+
 //#include "stm32f4xx_hal_dma.h"
 //#include "stm32f4xx_hal_adc.h"
+
+void 						cdc_PowerDown( void );			// ti_aic3100.c -- power down entire codec, requires re-init
 
 extern fsTime					RTC_initTime;					// time from status.txt 
 extern bool						firstBoot;						// true if 1st run after data loaded
@@ -93,8 +96,16 @@ void											setPowerCheckTimer( int timerMs ){
 	osTimerStart( pwrCheckTimer, timerMs );
 }
 
+extern void ResetHandler( void );
 void 											enableSleep( void ){						// low power mode -- (STM32 Stop) CPU stops till interrupt
 	dbgLog( "5 enSleep \n");
+
+	SCB->SCR |= SCB_SCR_SLEEPDEEP_Msk;	// set DeepSleep
+	PWR->CR |= PWR_CR_MRLVDS;		// main regulator in low voltage when Stop
+	PWR->CR |= PWR_CR_LPLVDS;   // low-power regulator in low voltage when Stop
+	PWR->CR |= PWR_CR_FPDS;   	// flash power-down when Stop
+	PWR->CR |= PWR_CR_LPDS;   	// low-power regulator when Stop
+	
 	for (int i=0; i<3; i++){			// clear all pending ISR
 		uint32_t pend = NVIC->ISPR[i];
 		if ( pend != 0 ) 	// clear any pending interrupts
@@ -104,7 +115,8 @@ void 											enableSleep( void ){						// low power mode -- (STM32 Stop) CPU 
 	
 	__WFI();	// sleep till interrupt
 	
-	osKernelResume( 0 ); // force reboot?
+	SCB->AIRCR |= SCB_AIRCR_SYSRESETREQ_Msk;			// force a system reset
+	// ResetHandler();  // undefined symbol-- not linked to label in startup_stm32f412vx.s
 }
 void 											enableStandby( void ){					// power off-- (STM32 Standby) reboot on wakeup from NRST
 	dbgLog( "5 enStandby \n");
@@ -117,7 +129,9 @@ void 											enableStandby( void ){					// power off-- (STM32 Standby) reboot
 		if ( pend != 0 ) 	// clear any pending interrupts
 			NVIC->ICPR[i] = pend;		
 	}
-	__WFI();	// standby till reboot
+	
+	__WFI();	// standby till reboot -- shouldn't ever return
+	SCB->AIRCR |= SCB_AIRCR_SYSRESETREQ_Msk;			// force a system reset
 }
 void											powerDownTBook( bool sleep ){					// shut down TBook
 //	ledFg( TB_Config.fgPowerDown );
@@ -126,6 +140,15 @@ void											powerDownTBook( bool sleep ){					// shut down TBook
 //	tbDelay_ms( 3500 );	// wait for fgPowerDown to finish
 	ledBg( NULL );
 	ledFg( NULL );
+	FileSysPower( false );		// shut down eMMC supply, unconfig gSDIO_*
+	cdc_PowerDown();					// turn off codec
+	
+	GPIO_ID extGPIO[] = {  // GPIO's to AIC3100
+		gI2S2ext_SD,		gI2S2_SD,		gI2S2_WS,		gI2S2_CK,		gI2S2_MCK,	gI2S3_MCK,	gI2C1_SDA,	gI2C1_SCL
+	};
+	for (int i=0; i<8; i++ )
+		gUnconfig( extGPIO[i] );
+	
 	if (sleep)
 		enableSleep();
 	else

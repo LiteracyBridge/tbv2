@@ -225,7 +225,8 @@ void										tbRenameFile( const char *src, const char *dst ){  // rename path 
 }
 
 fsStatus 								fsMount( char *drv ){		// try to finit() & mount()  drv:   finit() code, fmount() code
-		fsStatus stat = finit( drv );  		// init file system driver for device
+		// gSDIO_DAT0 PB4, gSDIO_DAT1 PA8, gSDIO_DAT2 PC10, gSDIO_DAT3 PB5, gSDIO_CLK PC12, gSDIO_CMD PD2
+		fsStatus stat = finit( drv );  		// init file system driver for device-- configures PA8, PB4,PB5, PC10,PC12, PD2 to (PP+PU)
 	  if ( stat != fsOK ){
 			dbgLog( "3 finit( %s ) got %d \n", drv, stat );
 			return stat;
@@ -253,35 +254,22 @@ void 										FileSysPower( bool enable ){										// power up/down eMMC & SD 
 		dbgLog( "5 FSysPwr up \n" );
 		gConfigOut( g3V3_SW_EN );		// 1 to enable power to SDCard & eMMC
 		gConfigOut( gEMMC_RSTN );		// 0 to reset? eMMC
-		gConfigOut( gSDIO_DAT0 );
-		gConfigOut( gSDIO_DAT1 );
-		gConfigOut( gSDIO_DAT2 );
-		gConfigOut( gSDIO_DAT3 );
-		gConfigOut( gSDIO_CLK );
-		gConfigOut( gSDIO_CMD );
 		gSet( gEMMC_RSTN, 1 );			// enable at power up?
 		gSet( g3V3_SW_EN, 1 );			// enable at start up, for FileSys access
 		
 		tbDelay_ms( 100 );
-		fsStatus st = fsMount( "M0:" );
+		fsStatus st = fsMount( "M0:" );  // finit() & fmount()
 		FSysPowered = true;
 
 	} else {
 		if ( !FSysPowered ) return;
 		
 		dbgLog( "5 FSysPwr dn \n" );
-		int st = funinit( "M0:" );
+		int st = funinit( "M0:" );	// resets PA8, PB4,PB5, PC10,PC12, PD2 to analog
 		if ( st != fsOK ) 
 			errLog("funinit => %d", st );
 		
-		gUnconfig( gEMMC_RSTN );
-		gUnconfig( gSDIO_DAT0 );
-		gUnconfig( gSDIO_DAT1 );
-		gUnconfig( gSDIO_DAT2 );
-		gUnconfig( gSDIO_DAT3 );
-		gUnconfig( gSDIO_CLK );
-		gUnconfig( gSDIO_CMD );
-
+		gUnconfig( gEMMC_RSTN );		// set PE10 to analog
 		gSet( g3V3_SW_EN, 0 );			// shut off 3V supply to SDIO  PD6
 		FSysPowered = false;
 	}

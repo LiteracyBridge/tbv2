@@ -95,8 +95,6 @@ void											setPowerCheckTimer( int timerMs ){
 	osTimerStop( pwrCheckTimer );
 	osTimerStart( pwrCheckTimer, timerMs );
 }
-
-extern void ResetHandler( void );
 void 											enableSleep( void ){						// low power mode -- (STM32 Stop) CPU stops till interrupt
 	dbgLog( "5 enSleep \n");
 
@@ -111,12 +109,11 @@ void 											enableSleep( void ){						// low power mode -- (STM32 Stop) CPU 
 		if ( pend != 0 ) 	// clear any pending interrupts
 			NVIC->ICPR[i] = pend;		
 	}
-	int sleep = osKernelSuspend();
+	int sleep = osKernelSuspend();		// turn off sysTic 
 	
-	__WFI();	// sleep till interrupt
+	__WFI();	// sleep till interrupt -- 10 keyboard EXTI's enabled
 	
-	SCB->AIRCR |= SCB_AIRCR_SYSRESETREQ_Msk;			// force a system reset
-	// ResetHandler();  // undefined symbol-- not linked to label in startup_stm32f412vx.s
+	NVIC_SystemReset();			// soft reboot
 }
 void 											enableStandby( void ){					// power off-- (STM32 Standby) reboot on wakeup from NRST
 	dbgLog( "5 enStandby \n");
@@ -131,11 +128,15 @@ void 											enableStandby( void ){					// power off-- (STM32 Standby) reboot
 	}
 	
 	__WFI();	// standby till reboot -- shouldn't ever return
-	SCB->AIRCR |= SCB_AIRCR_SYSRESETREQ_Msk;			// force a system reset
+	NVIC_SystemReset();			// force a system reset
 }
 void											powerDownTBook( bool sleep ){					// shut down TBook
 //	ledFg( TB_Config.fgPowerDown );
 	logEvt( "PowerDown" );
+//DEBUG*********************************************************
+  sleep = !gGet( gPLUS );   // standby if PLUS held down 
+//*********************************************************DEBUG
+	
 	logPowerDown();		// flush & close logs
 //	tbDelay_ms( 3500 );	// wait for fgPowerDown to finish
 	ledBg( NULL );
@@ -143,13 +144,13 @@ void											powerDownTBook( bool sleep ){					// shut down TBook
 	FileSysPower( false );		// shut down eMMC supply, unconfig gSDIO_*
 	cdc_PowerDown();					// turn off codec
 	
-	GPIO_ID extGPIO[] = {  // GPIO's to AIC3100
-		gI2S2ext_SD,		gI2S2_SD,		gI2S2_WS,		gI2S2_CK,		gI2S2_MCK,	gI2S3_MCK,	gI2C1_SDA,	gI2C1_SCL
+	GPIO_ID extGPIO[] = {  // reset GPIO's to AIC3100 to analog:  PB8, PB9, PB12, PB13, PB14, PB15, PC6, PC7
+		gI2S2ext_SD,		gI2S2_SD,		gI2S2_WS,		gI2S2_CK,		gI2S2_MCK,	gI2S3_MCK,	gI2C1_SDA,	gI2C1_SCL		
 	};
 	for (int i=0; i<8; i++ )
 		gUnconfig( extGPIO[i] );
 	
-	if (sleep)
+	if ( sleep )
 		enableSleep();
 	else
 		enableStandby();		// shut down

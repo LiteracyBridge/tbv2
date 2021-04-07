@@ -100,6 +100,8 @@ extern void				tbShw( const char *s, char **p1, char **p2 );
 extern void 			_Error_Handler( char *, int );
 extern int 				PlayDBG;			// DEBUG flag for DebugLoop & playWave
 extern int 				RecDBG;			// DEBUG flag for DebugLoop & audStartRecord
+extern void 			debugLoop( bool autoUSB );			// dbgLoop.c: called if boot-MINUS, no file system,  autoUSB => usbMode
+
 extern void 			chkDevState( char *loc, bool reset );
 extern void 			stdout_putchar( char );
 extern int				divTst(int lho, int rho); 	// for fault handler testing
@@ -153,8 +155,7 @@ extern const int 	CONTROL_STACK_SIZE;		// opens in/out files
 extern const int 	LED_STACK_SIZE;
 
 // SD card path definitions  
-extern char * TBP[];			// indexed by pCSM_VERS.. pPACKAGE_DIR
-extern const int 	pCSM_VERS;
+extern char * TBP[];			// indexed by 0.. pLAST
 extern const int	pBOOTCNT; 
 extern const int	pCSM_DEF;
 extern const int	pLOG_TXT;
@@ -163,6 +164,7 @@ extern const int	pMSGS_PATH;
 extern const int	pLIST_OF_SUBJS;
 extern const int	pPACKAGE_DIR;
 extern const int	pPKG_VERS;
+extern const int  pLAST;
 
 //TBOOK error codes
 extern const int 	TB_SUCCESS;

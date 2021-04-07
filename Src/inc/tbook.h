@@ -46,7 +46,7 @@ extern bool 			FirstSysBoot;					// defined in logger
 
 extern void 			initIDs( void );
 extern void				loadTBookName( void );													// load TBookName with string matching ID from /system/tbook_names.txt
-extern void 			GPIO_DefineSignals( GPIO_Signal def[] );
+extern void 			GPIO_DefineSignals( const GPIO_Signal def[] );
 extern void 			gSet( GPIO_ID gpio, uint8_t on );								// set the state of a GPIO output pin
 extern bool			 	gOutVal( GPIO_ID gpio );												// => LOGICAL state of a GPIO OUTput, e.g. True if 'PA0_'.ODR==0 or 'PB3'.ODR==1
 extern bool	 			gGet( GPIO_ID gpio );														// => LOGICAL state of a GPIO input pin (TRUE if PA3_==0 or PC2==1)
@@ -245,7 +245,7 @@ typedef struct {			// Dbg -- pointers for easy access to debug info
 	TBConfig_t	* 		TBookConfig;	// TalkingBook configuration block
 	TBH_arr	*					TBookLog;			// TalkingBook event log
 	
-	DbgScr 						Scr;					// dbgLog output 
+//	DbgScr 						Scr;					// dbgLog output 
 	
 } DbgInfo;
 extern  DbgInfo			Dbg;	// in main.c -- visible at start

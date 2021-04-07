@@ -16,23 +16,30 @@ struct StorageStats {
 } TB_StorageStats;
 
 // *********** static storage sizing constants
-//const int 				HASH_SZ 				= 103;						// hashtable size
 const int 				MAX_TKN_LEN 		= 100;						// MAX chars in a single token
 const int 				MAX_CHS_PER_LN 	= 300;						// MAX chars in a single line
-//const int 				MAX_TKNS_PER_LN	= 50;							// MAX tkns per line
-//const int 				MAX_ELS_PER_LST = 50;							// MAX vals in gLst, or n:v in gObj
-//const int 				N_STR_CHS 			= 3000;						// MAX chars in token strings  		// after control.def(29Apr18): 1413
-//const int 				N_TKN_NDS 			= 500;						// MAX tokens in parsed files     	// after control.def(29Apr18): 166
-//const int 				N_LST_NDS 			= 800;						// MAX list nodes in parsed files	// after control.def(29Apr18): 381
-//const int 				N_LISTS 				= 1000;		  			// MAX # of lists in parsed files	// after control.def(29Apr18): 0
-#define N_TKN_NDS 			 500	
-#define N_STR_CHS 			2400
+//      HASH_SZ 								// hashtable size
 #define HASH_SZ 				 103
-#define N_LST_NDS 			 800
-#define NGRPS 						 8
-#define N_LISTS 				1000
+
+//      MAX_ELS_PER_LS					// MAX vals in gLst, or n:v in gObj
 #define MAX_ELS_PER_LST	  50
+
+//      MAX_TKNS_PER_LN					// MAX tkns per line
 #define MAX_TKNS_PER_LN	  50
+
+//      N_STR_CHS 							// MAX chars in token strings  		// 7Apr21: up from 2400
+#define N_STR_CHS 			3400
+
+//      N_TKN_NDS								// MAX tokens in parsed files    	 
+#define N_TKN_NDS 			 500	
+
+//      N_LST_NDS 							// MAX list nodes in parsed files	
+#define N_LST_NDS 			 800
+
+//      N_LISTS 								// MAX # of lists in parsed files	
+#define N_LISTS 				1000
+
+#define NGRPS 						 8
 
 // tknTable typedefs
 typedef struct 		Tkn {								  						// token hashtable node

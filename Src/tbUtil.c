@@ -82,7 +82,7 @@ void 										gDef( GPIO_ID gpid, char *signal ){							// define gpio_signal[ 
 	gpio_def[ gpid ].signal = signal;	// string name of GPIO pin
 	gpio_def[ gpid ].active = active;	// signal when active (for keys, input state when pressed)
 }
-void 										GPIO_DefineSignals( GPIO_Signal def[] ){
+void 										GPIO_DefineSignals( const GPIO_Signal def[] ){
 	for (int i=0; i < 1000; i++ ){
 		if ( def[ i ].id == gINVALID ) return;	// hit end of list
 		gDef( def[ i ].id, def[ i ].name );
@@ -625,7 +625,7 @@ void 										dbgEvtS( int id, const char *d ){ EventRecordData( id, d, strlen(
 const int xMAX = dbgChs; 				// typedef in tbook.h
 const int yMAX = dbgLns;
 // define PRINTF_DBG_SCR to keep local array of recent printf (& dbgLog) ops
-#define PRINTF_DBG_SCR
+// #define PRINTF_DBG_SCR
 #if defined( PRINTF_DBG_SCR )
 static int  cX = 0, cY = 0;
 void 										stdout_putchar( char ch ){

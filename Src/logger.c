@@ -24,8 +24,8 @@ const char *		norEraseFile = "M0:/system/EraseNorLog.txt";			// flag file to for
 const char *		logFilePatt = "M0:/LOG/tbLog_%d.txt";			// file name of previous log on first boot
 
 const int				MAX_EVT_LEN1 = 32, MAX_EVT_LEN2 = 64;
-/*
-TBH_arr 				TBH;	//DEBUG -- accessible log history
+/*  //DEBUG ONLY:  debugger accessible log history
+TBH_arr 				TBH;	
 
 static void			initTBHistory(){
 	for ( int i=0; i < MAX_TB_HIST; i++ ){

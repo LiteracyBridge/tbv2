@@ -74,10 +74,14 @@ static void 					adjSubj( int adj ){								// adjust current Subj # in TBook
 		nS = 0;
 	logEvtNI( "chngSubj", "iSubj", nS );
 	TBook.iSubj = nS;
+	TBook.iMsg = -1; // "next" will yield 0, "prev" -> -2 -> numMessages-1
 }
 
 
 static void 					adjMsg( int adj ){								// adjust current Msg # in TBook
+	// If no subject is selected, do nothing.
+  if (TBook.iSubj < 0 || TBook.iSubj >= TBPkg->nSubjs)
+		return;
 	short nM = TBook.iMsg + adj; 
 	short numM = TBPkg->TBookSubj[ TBook.iSubj ]->NMsgs;
 	if ( nM < 0 ) 
@@ -90,6 +94,9 @@ static void 					adjMsg( int adj ){								// adjust current Msg # in TBook
 
 
 void 					playSubjAudio( char *arg ){				// play current Subject: arg must be 'nm', 'pr', or 'msg'
+	// If no subject is selected, do nothing.
+  if (TBook.iSubj < 0 || TBook.iSubj >= TBPkg->nSubjs)
+		return;
 	tbSubject * tbS = TBPkg->TBookSubj[ TBook.iSubj ];
 	char path[MAX_PATH];
 	char *nm = NULL;
@@ -137,7 +144,7 @@ void 					showPkg( ){										// debug print Package iPkg
 
 void						changePackage(){											// switch to last played package name
 	TBPkg = TBPackage[ iPkg ];
-	TBook.iSubj = 0;
+	TBook.iSubj = -1; // makes "next subject" go to the first subject.
 	TBook.iMsg = 0;
 	logEvtNS( "ChgPkg", "Pkg", TBPkg->packageName );  
 	showPkg();
@@ -433,7 +440,7 @@ void 					executeCSM( void ){								// execute TBook control state machine
 	
 	TBook.volume = TB_Config.default_volume;
 	TBook.speed = TB_Config.default_speed;
-	TBook.iSubj = 0;
+	TBook.iSubj = -1; // makes "next subject" go to the first subject.
 	TBook.iMsg = 0;
 
 	// set initialState & do actions
@@ -539,7 +546,7 @@ void 									initControlManager( void ){				// initialize control manager
 
 		findPackages( );		// sets iPkg & TBPackage to shortest name
 		
-		TBook.iSubj = 0;
+  	TBook.iSubj = -1; // makes "next subject" go to the first subject.
 		TBook.iMsg = 1;
 		
 		// power timer is set to input configuration by 1st 15sec check

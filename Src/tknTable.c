@@ -87,7 +87,7 @@ void 							showTknTable(){										// display stats for tknTable
 	ss->listNodesAllocated	= N_LST_NDS;
 	ss->listIdsAvail 		= N_LISTS - nxtLstID;
 	ss->listIdsAllocated	= N_LISTS;
-	dbgLog( "B showTknTable: tokenCharsAvail=%d/%d\n  tokenNodesAvail=%d/%d\n  listNodesAvail=%d/%d\n  listIdsAvail=%d/%d \n",
+	dbgLog( "! showTknTable: tokenCharsAvail=%d/%d\n  tokenNodesAvail=%d/%d\n  listNodesAvail=%d/%d\n  listIdsAvail=%d/%d \n",
 		ss->tokenCharsAvail, N_STR_CHS, 
 		ss->tokenNodesAvail, N_TKN_NDS, 
 		ss->listNodesAvail, N_LST_NDS, 
@@ -193,8 +193,7 @@ TknID							toTkn( const char *s ){						// => tkn for string, adding if new
 		nd = nd->link;
 	}
 	// not found, add new Nd
-	if ( nxtNd >=N_TKN_NDS )  
-		tbErr( "out of Token nodes" );
+	if ( nxtNd >=N_TKN_NDS )  {	showTknTable(); tbErr( "out of Token nodes" ); }
 
 	nd = &sTknNds[ nxtNd ];
 	nxtNd++;
@@ -202,8 +201,7 @@ TknID							toTkn( const char *s ){						// => tkn for string, adding if new
 	short len = strlen( s );
 	nd->str = &sStor[ nxtStr ];		// pointer to first free storage char
 	nxtStr = nxtStr + len + 1;		// alloc, incl terminator
-	if ( nxtStr >= N_STR_CHS )  
-		tbErr( "out of token String storage" );
+	if ( nxtStr >= N_STR_CHS ) {	showTknTable(); tbErr( "out of token String storage" ); }
 		
 	strcpy( nd->str, s );			// copy string into token store
 	nd->tknid.flds.grp = currGrpID;
@@ -550,8 +548,7 @@ toStr( CurrTkn, currTkn );	//DEBUG
 }
 static TknID			lstID( short lstNdIdx ){				// INTERNAL:  => gLst:lstID or gObj:lstID for list starting with 'lstNdIdx'
 	GrpID grp = asGroup( sLstNds[ lstNdIdx ].Nm );
-	if ( nxtLstID > N_LISTS ) 
-		tbErr( "out of list IDs" );
+	if ( nxtLstID > N_LISTS ){ showTknTable();  tbErr( "out of list IDs" ); }
 	short id = nxtLstID++;
 	lstFirstNd[ id ] = lstNdIdx;
 	return asTknID( grp, id );	

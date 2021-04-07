@@ -580,6 +580,11 @@
               <FileType>1</FileType>
               <FilePath>.\Src\norLog.c</FilePath>
             </File>
+            <File>
+              <FileName>dbgLoop.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\Src\dbgLoop.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>

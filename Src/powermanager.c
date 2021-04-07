@@ -96,7 +96,7 @@ void											setPowerCheckTimer( int timerMs ){
 	osTimerStart( pwrCheckTimer, timerMs );
 }
 void 											enableSleep( void ){						// low power mode -- (STM32 Stop) CPU stops till interrupt
-	dbgLog( "5 enSleep \n");
+	dbgLog( "Stp\n");
 
 	SCB->SCR |= SCB_SCR_SLEEPDEEP_Msk;	// set DeepSleep
 	PWR->CR |= PWR_CR_MRLVDS;		// main regulator in low voltage when Stop
@@ -116,7 +116,7 @@ void 											enableSleep( void ){						// low power mode -- (STM32 Stop) CPU 
 	NVIC_SystemReset();			// soft reboot
 }
 void 											enableStandby( void ){					// power off-- (STM32 Standby) reboot on wakeup from NRST
-	dbgLog( "5 enStandby \n");
+	dbgLog( "NdBy\n");
 	PWR->CR |= PWR_CR_CWUF;							// clear wakeup flag
 	PWR->CR |= PWR_CR_PDDS;							// set power down deepsleep 
 	SCB->SCR |= SCB_SCR_SLEEPDEEP_Msk;	// set DeepSleep
@@ -132,23 +132,49 @@ void 											enableStandby( void ){					// power off-- (STM32 Standby) reboot
 }
 void											powerDownTBook( bool sleep ){					// shut down TBook
 //	ledFg( TB_Config.fgPowerDown );
-	logEvt( "PowerDown" );
 //DEBUG*********************************************************
   sleep = !gGet( gPLUS );   // standby if PLUS held down 
 //*********************************************************DEBUG
-	
-	logPowerDown();		// flush & close logs
-//	tbDelay_ms( 3500 );	// wait for fgPowerDown to finish
+	ledBg( sleep? "G!":"R!" );
+	logEvtNS( "PwrDown", "mode", sleep? "Stop":"Standby" );
+	logPowerDown();		// flush & close logs, copy NorLog to eMMC
 	ledBg( NULL );
 	ledFg( NULL );
 	FileSysPower( false );		// shut down eMMC supply, unconfig gSDIO_*
 	cdc_PowerDown();					// turn off codec
 	
-	GPIO_ID extGPIO[] = {  // reset GPIO's to AIC3100 to analog:  PB8, PB9, PB12, PB13, PB14, PB15, PC6, PC7
-		gI2S2ext_SD,		gI2S2_SD,		gI2S2_WS,		gI2S2_CK,		gI2S2_MCK,	gI2S3_MCK,	gI2C1_SDA,	gI2C1_SCL		
+	GPIO_ID actHi[] = { 
+			gBOOT1_PDN, gBAT_CE, 		gSC_ENABLE, 	gEN_5V, 
+			gEN1V8, 		g3V3_SW_EN,	gADC_ENABLE,
+			gGREEN, 		gRED,				gINVALID
 	};
-	for (int i=0; i<8; i++ )
-		gUnconfig( extGPIO[i] );
+	GPIO_ID actLo[] = { 
+			gBAT_TE_N, 	gEN_IOVDD_N, gEN_AVDD_N,	gINVALID 	//
+	};
+	for (int i=0; actHi[i]!=gINVALID; i++)  gSet( actHi[i], 0 );
+	for (int i=0; actLo[i]!=gINVALID; i++)  gSet( actLo[i], 1 );
+	
+	GPIO_ID extGPIO[] = {  // reconfig all output GPIO's to reset state
+		gI2S2ext_SD,	gI2S2_SD,		gI2S2_WS,			gI2S2_CK,			// PB14, 	PB15, PB12, PB13		
+		gI2S3_MCK,		gI2C1_SDA,	gI2C1_SCL,		gI2S2_MCK,		// PC7, 	PB9, 	PB8, 	PC6
+		gUSB_DM, 			gUSB_DP, 		gUSB_ID,			gUSB_VBUS,		// PA11,	PA12, PA10, PA9
+		gSPI4_SCK, 		gSPI4_MISO, gSPI4_MOSI, 	gSPI4_NSS,		// PE12,	PE13, PE14, PE11
+		gMCO2, 				gBOOT1_PDN, gBAT_CE, 			gSC_ENABLE,		// PC9, 	PB2,	PD0,	PD1
+		gBAT_TE_N,																						// PD13
+		gEN_5V, 			gEN1V8, 		g3V3_SW_EN, 	gBAT_TE_N, 		// PD4,		PD5,	PD6,	PD13
+		gGREEN,  			gRED, 			gEN_IOVDD_N,  gEN_AVDD_N,		// PE0,		PE1,	PE4,	PE5
+		gEMMC_RSTN,		gSDIO_CLK,	gSDIO_CMD,		gADC_ENABLE,	// PE10, 	PC12, PD2, 	PE15			
+		gSDIO_DAT0,		gSDIO_DAT1,	gSDIO_DAT2,		gSDIO_DAT3,		// PB4,		PA8,	PC10,	PB5 
+		gPWR_FAIL_N, 	gBAT_STAT1, gBAT_STAT2,		gBAT_PG_N,		// PE2,		PD8,	PD9,	PD10
+		gBOARD_REV,		// PB0
+		gQSPI_BK1_IO0,	gQSPI_BK1_IO1, gQSPI_BK1_IO2, gQSPI_BK1_IO3,	// PD11, PD12, PC8, PA1
+		gQSPI_CLK_A,	  gQSPI_CLK_B,	 gQSPI_BK1_NCS, gQSPI_BK2_NCS,	// PD3,  PB1,  PB6, PC11
+		gQSPI_BK2_IO0,	gQSPI_BK2_IO1, gQSPI_BK2_IO2, gQSPI_BK2_IO3,	// PA6,  PA7,  PC4, PC5
+		gSWDIO,				gSWCLK,			gSWO,												// PA13,  PA14, PB3
+		gINVALID															 
+	};
+	for (int i=0; extGPIO[i]!=gINVALID; i++) 
+		gConfigADC( extGPIO[i] );		// RESET GPIOs to analog (Mode 3, Pup 0) 
 	
 	if ( sleep )
 		enableSleep();

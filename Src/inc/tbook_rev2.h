@@ -109,7 +109,7 @@ static GPIO_Signal gpioSignals[] = {  	// GPIO signal definitions
 	{ gI2S2ext_SD,	"PB14|6"		},	// AIC3100 DOUT 									(RTE_I2SDevice.h I2S0==SPI2 altFn=6)
 	{ gI2S2_WS,			"PB12|5"		},	// AIC3100 WCLK             			(RTE_I2SDevice.h I2S0==SPI2 altFn=5)
 	{ gI2S2_CK,			"PB13|5"		},	// AIC3100 BCL				 						(RTE_I2SDevice.h I2S0==SPI2 altFn=5) 
-//NoStuff	{ gI2S2_MCK,		"PC6|5"			},	// AIC3100 MCLK   				(RTE_I2SDevice.h I2S0==SPI2 altFn=5)
+	{ gI2S2_MCK,		"PC6|5"			},	// AIC3100 MCLK   								(RTE_I2SDevice.h I2S0==SPI2 altFn=5)
 	{ gI2S3_MCK,		"PC7|6"			},	// AIC3100 MCLK 	 								(RTE_I2SDevice.h I2S3==SPI2 altFn=6)
 
 	//******* SPI4 pins must match definitions in RTE_Device.h: ConfigWizard: SPI4

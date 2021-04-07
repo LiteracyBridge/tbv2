@@ -406,16 +406,23 @@ static uint32_t lastTmStmp = 0;
 static uint32_t lastHalTick = 0, HalSameCnt = 0;
 static uint32_t nDelays = 0, totDelay = 0;
 uint32_t 								tbTimeStamp(){																	// return msecs since boot
-	if ( osKernelGetState()==osKernelRunning )
+	osKernelState_t st = osKernelGetState();
+	if ( st == osKernelRunning )
 		lastTmStmp =  osKernelGetTickCount();
+	else {  // no OS, wait a msec & increment
+		int	ms = SystemCoreClock / 10000;
+		while (ms--) { __nop(); __nop(); __nop(); __nop(); __nop(); __nop(); }
+		lastTmStmp++;
+	}
 	return lastTmStmp;
 }
 int 										delayReq, actualDelay;
 uint32_t 								HAL_GetTick(void){															// OVERRIDE for CMSIS drivers that use HAL
 	int tic = tbTimeStamp();
 	HalSameCnt = tic==lastHalTick? HalSameCnt+1 : 0;
-	if ( HalSameCnt > 200 )
+	if ( HalSameCnt > 200 ){
 		tbErr( "HalTick stopped" );
+	}
 	
 	lastHalTick = tic;
 	return lastHalTick;
@@ -524,7 +531,7 @@ int DebugMask =    // uncomment lines to enable dbgLog() calls starting with 'X'
 	//	0x02 +	// 2 audio codec debugging
 	//	0x04 +	// 3 file sys
 	//	0x08 +	// 4 threads & initialization
-		0x10 +	// 5 power checks
+	//	0x10 +	// 5 power checks
 	//	0x20 +	// 6 logging
 	//	0x40 +	// 6 mp3 decoding
 	//	0x80 +	// 8 recording

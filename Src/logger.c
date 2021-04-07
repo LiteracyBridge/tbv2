@@ -72,7 +72,7 @@ char *					loadLine( char * line, char * fpath, fsTime *tm ){		// => 1st line of
 	fAttr.fileID = 0;
 	fsStatus fStat = ffind( fpath, &fAttr );
 	if ( fStat != fsOK ){
-		dbgLog( "! FFind => %d for %s \n", fStat, TBP[ pCSM_VERS ] );
+		dbgLog( "! FFind => %d for %s \n", fStat, fpath );
 		return txt;
 	}
 	if (tm!=NULL) 
@@ -180,13 +180,13 @@ void						logPowerUp( bool reboot ){											// re-init logger after reboot, U
 	
 	fsFileInfo fAttr;
 	fAttr.fileID = 0;
-	fsStatus fStat = ffind( TBP[ pCSM_VERS ], &fAttr );
+	fsStatus fStat = ffind( TBP[ pCSM_DEF ], &fAttr );
 	if ( fStat != fsOK ){
-		logEvtNS( "TB_CSM", "missing", TBP[ pCSM_VERS ] );
+		logEvtNS( "TB_CSM", "missing", TBP[ pCSM_DEF ] );
 		return;
 	}
 
-	char * status = loadLine( line, TBP[ pCSM_VERS ], &verDt );			// version.txt marker file exists-- when created?
+	char * status = loadLine( line, TBP[ pCSM_DEF ], &verDt );			// control.def file exists-- when created?
 	dateStr( dt, verDt );
 	logEvtNSNS( "TB_CSM", "dt", dt, "ver", status );
 		

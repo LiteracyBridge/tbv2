@@ -577,6 +577,7 @@ void						verifyCodecReg( int idx, int pg, int reg ){				// verify that codec_re
 }
 
 static int 											LastVolume 	= 0;			// retain last setting, so audio restarts at last volume
+int 			RecDBG;		// used by dbgLoop
 
 int RegsCallCnt = 0;			// to detect 1st call
 void						showCdcRegs( bool always, bool nonReset ){  // display changes in codec regs

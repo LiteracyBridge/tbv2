@@ -314,8 +314,10 @@ void						logEvt( const char *evtID ){											// write log entry: 'EVENT, at:
 }
 void						norEvt( const char *s1, const char *s2 ){
 	appendNorLog( s1 );
-	appendNorLog( ", " );
-	appendNorLog( s2 );
+	if ( s2!=NULL && strlen(s2)!=0 ){
+		appendNorLog( ", " );
+		appendNorLog( s2 );
+	}
 	appendNorLog( "\n" );
 }
 void						logEvtS( const char *evtID, const char *args ){		// write log entry: 'm.ss.s: EVENT, ARGS'

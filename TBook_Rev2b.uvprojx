@@ -585,6 +585,11 @@
               <FileType>1</FileType>
               <FilePath>.\Src\dbgLoop.c</FilePath>
             </File>
+            <File>
+              <FileName>tbook_rev2.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\tbook_rev2.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>

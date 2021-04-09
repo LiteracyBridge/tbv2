@@ -3,7 +3,7 @@
 <title>Static Call Graph - [.\Objects\TBookRev2b.axf]</title></head>
 <body><HR>
 <H1>Static Call Graph for image .\Objects\TBookRev2b.axf</H1><HR>
-<BR><P>#&#060CALLGRAPH&#062# ARM Linker, 5060750: Last Updated: Wed Apr 07 13:23:17 2021
+<BR><P>#&#060CALLGRAPH&#062# ARM Linker, 5060750: Last Updated: Fri Apr 09 11:13:14 2021
 <BR><P>
 <H3>Maximum Stack Usage =       7552 bytes + Unknown(Functions without stacksize, Cycles, Untraceable Function Pointers)</H3><H3>
 Call chain for Maximum Stack Depth:</H3>
@@ -1790,6 +1790,7 @@ Global Symbols
 <LI><a href="#[3f6]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;audPlayAudio
 <LI><a href="#[443]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;copyNorLog
 <LI><a href="#[3da]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;appendNorLog
+<LI><a href="#[51a]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;norEvt
 <LI><a href="#[45c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mp3ToWav
 <LI><a href="#[62e]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;scanTree
 <LI><a href="#[471]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;endsWith
@@ -2799,7 +2800,7 @@ Global Symbols
 </UL>
 
 <P><STRONG><a name="[212]"></a>CodecCmd</STRONG> (Thumb, 250 bytes, Stack size 16 bytes, dbgloop.o(i.CodecCmd))
-<BR><BR>[Stack]<UL><LI>Max Depth = 4208 + Unknown Stack Size
+<BR><BR>[Stack]<UL><LI>Max Depth = 4224 + Unknown Stack Size
 <LI>Call Chain = CodecCmd &rArr; setCodecFreq &rArr; cdc_SetMasterFreq &rArr; cdc_ClocksOff &rArr; cdc_RecordEnable &rArr; showCdcRegs &rArr; aicGetReg &rArr; aicSetCurrPage &rArr; i2c_wrReg &rArr;  i2c_wrReg (Cycle)
 </UL>
 <BR>[Calls]<UL><LI><a href="#[20f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;dbgLog
@@ -2953,7 +2954,6 @@ Global Symbols
 <LI><a href="#[399]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__sys_open
 <LI><a href="#[396]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__sys_flen
 <LI><a href="#[38f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__sys_close
-<LI><a href="#[271]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;EvrUSBD_MSC_ReadCapacity
 <LI><a href="#[26f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;EvrUSBD_MSC_OnWriteFailed
 <LI><a href="#[26c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;EvrUSBD_MSC_OnCheckMedia
 <LI><a href="#[26b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;EvrUSBD_MSC_ModeSense
@@ -3034,6 +3034,7 @@ Global Symbols
 <LI><a href="#[274]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;EvrUSBD_MSC_RequestSense
 <LI><a href="#[273]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;EvrUSBD_MSC_ReadFormatCapacities
 <LI><a href="#[272]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;EvrUSBD_MSC_ReadDone
+<LI><a href="#[271]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;EvrUSBD_MSC_ReadCapacity
 </UL>
 
 <P><STRONG><a name="[22f]"></a>EventRecord4</STRONG> (Thumb, 118 bytes, Stack size 40 bytes, eventrecorder.o(i.EventRecord4))
@@ -5491,11 +5492,13 @@ Global Symbols
 <BR>[Called By]<UL><LI><a href="#[431]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;saveRecAudio
 </UL>
 
-<P><STRONG><a name="[40f]"></a>cdc_ClocksOff</STRONG> (Thumb, 124 bytes, Stack size 16 bytes, ti_aic3100.o(i.cdc_ClocksOff))
-<BR><BR>[Stack]<UL><LI>Max Depth = 4104 + Unknown Stack Size
+<P><STRONG><a name="[40f]"></a>cdc_ClocksOff</STRONG> (Thumb, 144 bytes, Stack size 24 bytes, ti_aic3100.o(i.cdc_ClocksOff))
+<BR><BR>[Stack]<UL><LI>Max Depth = 4112 + Unknown Stack Size
 <LI>Call Chain = cdc_ClocksOff &rArr; cdc_RecordEnable &rArr; showCdcRegs &rArr; aicGetReg &rArr; aicSetCurrPage &rArr; i2c_wrReg &rArr;  i2c_wrReg (Cycle)
 </UL>
-<BR>[Calls]<UL><LI><a href="#[20f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;dbgLog
+<BR>[Calls]<UL><LI><a href="#[20d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;tbTimeStamp
+<LI><a href="#[20f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;dbgLog
+<LI><a href="#[3c0]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;logEvtNI
 <LI><a href="#[218]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;showCdcRegs
 <LI><a href="#[217]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;cdc_RecordEnable
 <LI><a href="#[3ca]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;aicSetReg
@@ -5505,13 +5508,14 @@ Global Symbols
 <LI><a href="#[2b1]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;cdc_SetMasterFreq
 </UL>
 
-<P><STRONG><a name="[2b8]"></a>cdc_Init</STRONG> (Thumb, 278 bytes, Stack size 24 bytes, ti_aic3100.o(i.cdc_Init))
+<P><STRONG><a name="[2b8]"></a>cdc_Init</STRONG> (Thumb, 326 bytes, Stack size 24 bytes, ti_aic3100.o(i.cdc_Init))
 <BR><BR>[Stack]<UL><LI>Max Depth = 2544 + Unknown Stack Size
 <LI>Call Chain = cdc_Init &rArr; cdc_SetVolume &rArr; aicSetReg &rArr; aicSetCurrPage &rArr; i2c_wrReg &rArr;  i2c_wrReg (Cycle)
 </UL>
 <BR>[Calls]<UL><LI><a href="#[20d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;tbTimeStamp
 <LI><a href="#[291]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;dbgEvt
 <LI><a href="#[20f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;dbgLog
+<LI><a href="#[3c0]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;logEvtNI
 <LI><a href="#[215]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;cdc_SetMute
 <LI><a href="#[414]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;cdc_SetVolume
 <LI><a href="#[410]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;verifyCodecReg
@@ -5524,26 +5528,29 @@ Global Symbols
 <BR>[Called By]<UL><LI><a href="#[2ab]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;I2S_PowerControl
 </UL>
 
-<P><STRONG><a name="[213]"></a>cdc_PowerDown</STRONG> (Thumb, 102 bytes, Stack size 8 bytes, ti_aic3100.o(i.cdc_PowerDown))
-<BR><BR>[Stack]<UL><LI>Max Depth = 4112 + Unknown Stack Size
+<P><STRONG><a name="[213]"></a>cdc_PowerDown</STRONG> (Thumb, 118 bytes, Stack size 16 bytes, ti_aic3100.o(i.cdc_PowerDown))
+<BR><BR>[Stack]<UL><LI>Max Depth = 4128 + Unknown Stack Size
 <LI>Call Chain = cdc_PowerDown &rArr; cdc_ClocksOff &rArr; cdc_RecordEnable &rArr; showCdcRegs &rArr; aicGetReg &rArr; aicSetCurrPage &rArr; i2c_wrReg &rArr;  i2c_wrReg (Cycle)
 </UL>
-<BR>[Calls]<UL><LI><a href="#[210]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;gSet
+<BR>[Calls]<UL><LI><a href="#[20d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;tbTimeStamp
+<LI><a href="#[210]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;gSet
 <LI><a href="#[291]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;dbgEvt
 <LI><a href="#[20f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;dbgLog
+<LI><a href="#[3c0]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;logEvtNI
 <LI><a href="#[40f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;cdc_ClocksOff
 </UL>
 <BR>[Called By]<UL><LI><a href="#[436]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;powerDownTBook
 <LI><a href="#[212]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;CodecCmd
 </UL>
 
-<P><STRONG><a name="[411]"></a>cdc_PowerUp</STRONG> (Thumb, 88 bytes, Stack size 8 bytes, ti_aic3100.o(i.cdc_PowerUp))
-<BR><BR>[Stack]<UL><LI>Max Depth = 168 + Unknown Stack Size
-<LI>Call Chain = cdc_PowerUp &rArr; dbgLog &rArr; vprintf &rArr; _printf_char_file &rArr; _printf_char_common &rArr; __printf
+<P><STRONG><a name="[411]"></a>cdc_PowerUp</STRONG> (Thumb, 100 bytes, Stack size 8 bytes, ti_aic3100.o(i.cdc_PowerUp))
+<BR><BR>[Stack]<UL><LI>Max Depth = 1352 + Unknown Stack Size
+<LI>Call Chain = cdc_PowerUp &rArr; logEvt &rArr; logEvtS &rArr;  tbErr (Cycle)
 </UL>
 <BR>[Calls]<UL><LI><a href="#[220]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;tbDelay_ms
 <LI><a href="#[210]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;gSet
 <LI><a href="#[20f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;dbgLog
+<LI><a href="#[389]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;logEvt
 </UL>
 <BR>[Called By]<UL><LI><a href="#[2b8]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;cdc_Init
 </UL>
@@ -5563,11 +5570,13 @@ Global Symbols
 <LI><a href="#[40f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;cdc_ClocksOff
 </UL>
 
-<P><STRONG><a name="[2b1]"></a>cdc_SetMasterFreq</STRONG> (Thumb, 412 bytes, Stack size 32 bytes, ti_aic3100.o(i.cdc_SetMasterFreq))
-<BR><BR>[Stack]<UL><LI>Max Depth = 4136 + Unknown Stack Size
+<P><STRONG><a name="[2b1]"></a>cdc_SetMasterFreq</STRONG> (Thumb, 428 bytes, Stack size 40 bytes, ti_aic3100.o(i.cdc_SetMasterFreq))
+<BR><BR>[Stack]<UL><LI>Max Depth = 4152 + Unknown Stack Size
 <LI>Call Chain = cdc_SetMasterFreq &rArr; cdc_ClocksOff &rArr; cdc_RecordEnable &rArr; showCdcRegs &rArr; aicGetReg &rArr; aicSetCurrPage &rArr; i2c_wrReg &rArr;  i2c_wrReg (Cycle)
 </UL>
-<BR>[Calls]<UL><LI><a href="#[20f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;dbgLog
+<BR>[Calls]<UL><LI><a href="#[20d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;tbTimeStamp
+<LI><a href="#[20f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;dbgLog
+<LI><a href="#[3c0]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;logEvtNI
 <LI><a href="#[40f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;cdc_ClocksOff
 <LI><a href="#[3ca]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;aicSetReg
 <LI><a href="#[3c8]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;aicSet16Bits
@@ -5576,13 +5585,15 @@ Global Symbols
 <LI><a href="#[2af]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;I2S_Configure
 </UL>
 
-<P><STRONG><a name="[215]"></a>cdc_SetMute</STRONG> (Thumb, 96 bytes, Stack size 16 bytes, ti_aic3100.o(i.cdc_SetMute))
+<P><STRONG><a name="[215]"></a>cdc_SetMute</STRONG> (Thumb, 112 bytes, Stack size 16 bytes, ti_aic3100.o(i.cdc_SetMute))
 <BR><BR>[Stack]<UL><LI>Max Depth = 2504 + Unknown Stack Size
 <LI>Call Chain = cdc_SetMute &rArr; aicSetReg &rArr; aicSetCurrPage &rArr; i2c_wrReg &rArr;  i2c_wrReg (Cycle)
 </UL>
-<BR>[Calls]<UL><LI><a href="#[220]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;tbDelay_ms
+<BR>[Calls]<UL><LI><a href="#[20d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;tbTimeStamp
+<LI><a href="#[220]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;tbDelay_ms
 <LI><a href="#[291]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;dbgEvt
 <LI><a href="#[20f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;dbgLog
+<LI><a href="#[3c0]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;logEvtNI
 <LI><a href="#[415]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;i2c_Upd
 <LI><a href="#[3ca]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;aicSetReg
 </UL>
@@ -5623,7 +5634,7 @@ Global Symbols
 <LI><a href="#[2ad]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;I2S2only_Send
 </UL>
 
-<P><STRONG><a name="[419]"></a>changePackage</STRONG> (Thumb, 48 bytes, Stack size 8 bytes, controlmanager.o(i.changePackage))
+<P><STRONG><a name="[419]"></a>changePackage</STRONG> (Thumb, 52 bytes, Stack size 8 bytes, controlmanager.o(i.changePackage))
 <BR><BR>[Stack]<UL><LI>Max Depth = 464 + Unknown Stack Size
 <LI>Call Chain = changePackage &rArr; logEvtNS &rArr;  logEvtS (Cycle)
 </UL>
@@ -5702,7 +5713,7 @@ Global Symbols
 </UL>
 
 <P><STRONG><a name="[42b]"></a>controlTest</STRONG> (Thumb, 910 bytes, Stack size 16 bytes, controlmanagertest.o(i.controlTest))
-<BR><BR>[Stack]<UL><LI>Max Depth = 4208 + Unknown Stack Size
+<BR><BR>[Stack]<UL><LI>Max Depth = 4224 + Unknown Stack Size
  + In Cycle
 <LI>Call Chain = controlTest &rArr;  executeCSM (Cycle)
 </UL>
@@ -6025,7 +6036,7 @@ Global Symbols
 </UL>
 
 <P><STRONG><a name="[457]"></a>debugLoop</STRONG> (Thumb, 286 bytes, Stack size 16 bytes, dbgloop.o(i.debugLoop))
-<BR><BR>[Stack]<UL><LI>Max Depth = 4224 + Unknown Stack Size
+<BR><BR>[Stack]<UL><LI>Max Depth = 4240 + Unknown Stack Size
 <LI>Call Chain = debugLoop &rArr; CodecCmd &rArr; setCodecFreq &rArr; cdc_SetMasterFreq &rArr; cdc_ClocksOff &rArr; cdc_RecordEnable &rArr; showCdcRegs &rArr; aicGetReg &rArr; aicSetCurrPage &rArr; i2c_wrReg &rArr;  i2c_wrReg (Cycle)
 </UL>
 <BR>[Calls]<UL><LI><a href="#[210]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;gSet
@@ -6209,7 +6220,7 @@ Global Symbols
 <LI><a href="#[2ea]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;tglUSBmode
 </UL>
 
-<P><STRONG><a name="[466]"></a>enableSleep</STRONG> (Thumb, 98 bytes, Stack size 0 bytes, powermanager.o(i.enableSleep))
+<P><STRONG><a name="[466]"></a>enableSleep</STRONG> (Thumb, 104 bytes, Stack size 0 bytes, powermanager.o(i.enableSleep))
 <BR><BR>[Stack]<UL><LI>Max Depth = 160 + Unknown Stack Size
 <LI>Call Chain = enableSleep &rArr; dbgLog &rArr; vprintf &rArr; _printf_char_file &rArr; _printf_char_common &rArr; __printf
 </UL>
@@ -6293,8 +6304,8 @@ Global Symbols
 <LI><a href="#[43a]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;executeCSM
 </UL>
 
-<P><STRONG><a name="[43a]"></a>executeCSM</STRONG> (Thumb, 254 bytes, Stack size 16 bytes, controlmanager.o(i.executeCSM))
-<BR><BR>[Stack]<UL><LI>Max Depth = 4568 + Unknown Stack Size
+<P><STRONG><a name="[43a]"></a>executeCSM</STRONG> (Thumb, 258 bytes, Stack size 16 bytes, controlmanager.o(i.executeCSM))
+<BR><BR>[Stack]<UL><LI>Max Depth = 4584 + Unknown Stack Size
 <LI>Call Chain = executeCSM &rArr; changeCSMstate &rArr; doAction &rArr; controlTest &rArr;  executeCSM (Cycle)
 </UL>
 <BR>[Calls]<UL><LI><a href="#[416]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;changeCSMstate
@@ -7160,6 +7171,7 @@ Global Symbols
 <LI><a href="#[4d9]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;GPIO_AFConfigure
 </UL>
 <BR>[Called By]<UL><LI><a href="#[429]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;gConfigKey
+<LI><a href="#[436]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;powerDownTBook
 <LI><a href="#[4fd]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;initPwrSignals
 </UL>
 
@@ -7343,7 +7355,7 @@ Global Symbols
 <LI><a href="#[3cf]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;alloc_table_read
 </UL>
 
-<P><STRONG><a name="[21e]"></a>handleInterrupt</STRONG> (Thumb, 184 bytes, Stack size 16 bytes, inputmanager.o(i.handleInterrupt))
+<P><STRONG><a name="[21e]"></a>handleInterrupt</STRONG> (Thumb, 250 bytes, Stack size 16 bytes, inputmanager.o(i.handleInterrupt))
 <BR><BR>[Stack]<UL><LI>Max Depth = 216 + Unknown Stack Size
 <LI>Call Chain = handleInterrupt &rArr; enableInputs &rArr;  handleInterrupt (Cycle)
 </UL>
@@ -7383,12 +7395,11 @@ Global Symbols
 <BR>[Called By]<UL><LI><a href="#[38b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;enableMassStorage
 </UL>
 
-<P><STRONG><a name="[413]"></a>i2c_CheckRegs</STRONG> (Thumb, 114 bytes, Stack size 32 bytes, ti_aic3100.o(i.i2c_CheckRegs))
+<P><STRONG><a name="[413]"></a>i2c_CheckRegs</STRONG> (Thumb, 108 bytes, Stack size 32 bytes, ti_aic3100.o(i.i2c_CheckRegs))
 <BR><BR>[Stack]<UL><LI>Max Depth = 2504 + Unknown Stack Size
 <LI>Call Chain = i2c_CheckRegs &rArr; aicGetReg &rArr; aicSetCurrPage &rArr; i2c_wrReg &rArr;  i2c_wrReg (Cycle)
 </UL>
-<BR>[Calls]<UL><LI><a href="#[220]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;tbDelay_ms
-<LI><a href="#[3c5]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;aicGetReg
+<BR>[Calls]<UL><LI><a href="#[3c5]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;aicGetReg
 <LI><a href="#[4e7]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;i2c_ReportErrors
 <LI><a href="#[427]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;cntErr
 </UL>
@@ -7471,7 +7482,7 @@ Global Symbols
 <LI><a href="#[3c9]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;i2c_wrReg
 </UL>
 
-<P><STRONG><a name="[4ec]"></a>initControlManager</STRONG> (Thumb, 282 bytes, Stack size 8 bytes, controlmanager.o(i.initControlManager))
+<P><STRONG><a name="[4ec]"></a>initControlManager</STRONG> (Thumb, 284 bytes, Stack size 8 bytes, controlmanager.o(i.initControlManager))
 <BR><BR>[Stack]<UL><LI>Max Depth = 4824 + Unknown Stack Size
 <LI>Call Chain = initControlManager &rArr; findPackages &rArr; readContent &rArr; parseFile &rArr; parseValue &rArr; parseLstObj &rArr;  parseValue (Cycle)
 </UL>
@@ -7832,6 +7843,7 @@ Global Symbols
 <LI><a href="#[7d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;powerThreadProc
 <LI><a href="#[3fd]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;audStopAudio
 <LI><a href="#[3e8]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;audPauseResumeAudio
+<LI><a href="#[411]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;cdc_PowerUp
 </UL>
 
 <P><STRONG><a name="[516]"></a>logEvtFmt</STRONG> (Thumb, 76 bytes, Stack size 40 bytes, logger.o(i.logEvtFmt))
@@ -7859,10 +7871,15 @@ Global Symbols
 <LI><a href="#[433]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;showBattCharge
 <LI><a href="#[38d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;logPowerUp
 <LI><a href="#[38a]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;logPowerDown
+<LI><a href="#[215]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;cdc_SetMute
+<LI><a href="#[213]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;cdc_PowerDown
 <LI><a href="#[41c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;checkPower
 <LI><a href="#[3ea]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;audAdjPlaySpeed
 <LI><a href="#[7b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mediaThread
 <LI><a href="#[4b2]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;flushStats
+<LI><a href="#[2b1]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;cdc_SetMasterFreq
+<LI><a href="#[2b8]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;cdc_Init
+<LI><a href="#[40f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;cdc_ClocksOff
 </UL>
 
 <P><STRONG><a name="[3dc]"></a>logEvtNINI</STRONG> (Thumb, 48 bytes, Stack size 336 bytes, logger.o(i.logEvtNINI))
@@ -9865,11 +9882,12 @@ Global Symbols
 <LI><a href="#[2d8]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;NLogReadPage
 </UL>
 
-<P><STRONG><a name="[51a]"></a>norEvt</STRONG> (Thumb, 32 bytes, Stack size 16 bytes, logger.o(i.norEvt))
+<P><STRONG><a name="[51a]"></a>norEvt</STRONG> (Thumb, 42 bytes, Stack size 16 bytes, logger.o(i.norEvt))
 <BR><BR>[Stack]<UL><LI>Max Depth = 1248 + Unknown Stack Size
 <LI>Call Chain = norEvt &rArr; appendNorLog &rArr; eraseNorFlash &rArr; copyNorLog &rArr; CheckNLog &rArr; NLogReadSA &rArr; tbOpenWrite &rArr; fexists &rArr; FileSysPower &rArr; errLog &rArr; logEvtNS &rArr;  logEvtS (Cycle)
 </UL>
 <BR>[Calls]<UL><LI><a href="#[3da]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;appendNorLog
+<LI><a href="#[3bc]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;strlen
 </UL>
 <BR>[Called By]<UL><LI><a href="#[461]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;logEvtS
 </UL>
@@ -10707,7 +10725,7 @@ Global Symbols
 <BR>[Called By]<UL><LI><a href="#[430]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;playRecAudio
 </UL>
 
-<P><STRONG><a name="[434]"></a>playSubjAudio</STRONG> (Thumb, 172 bytes, Stack size 104 bytes, controlmanager.o(i.playSubjAudio))
+<P><STRONG><a name="[434]"></a>playSubjAudio</STRONG> (Thumb, 202 bytes, Stack size 104 bytes, controlmanager.o(i.playSubjAudio))
 <BR><BR>[Stack]<UL><LI>Max Depth = 2664 + Unknown Stack Size
 <LI>Call Chain = playSubjAudio &rArr; resetAudio &rArr; audStopAudio &rArr; haltPlayback &rArr; cdc_SpeakerEnable &rArr; cdc_SetMute &rArr; aicSetReg &rArr; aicSetCurrPage &rArr; i2c_wrReg &rArr;  i2c_wrReg (Cycle)
 </UL>
@@ -10762,12 +10780,13 @@ Global Symbols
 <BR>[Called By]<UL><LI><a href="#[41c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;checkPower
 </UL>
 
-<P><STRONG><a name="[436]"></a>powerDownTBook</STRONG> (Thumb, 176 bytes, Stack size 80 bytes, powermanager.o(i.powerDownTBook))
-<BR><BR>[Stack]<UL><LI>Max Depth = 4192 + Unknown Stack Size
+<P><STRONG><a name="[436]"></a>powerDownTBook</STRONG> (Thumb, 262 bytes, Stack size 80 bytes, powermanager.o(i.powerDownTBook))
+<BR><BR>[Stack]<UL><LI>Max Depth = 4208 + Unknown Stack Size
 <LI>Call Chain = powerDownTBook &rArr; cdc_PowerDown &rArr; cdc_ClocksOff &rArr; cdc_RecordEnable &rArr; showCdcRegs &rArr; aicGetReg &rArr; aicSetCurrPage &rArr; i2c_wrReg &rArr;  i2c_wrReg (Cycle)
 </UL>
 <BR>[Calls]<UL><LI><a href="#[41a]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;logEvtNS
 <LI><a href="#[210]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;gSet
+<LI><a href="#[4da]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;gConfigIn
 <LI><a href="#[4d8]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;gConfigADC
 <LI><a href="#[279]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;FileSysPower
 <LI><a href="#[35a]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;ledFg
@@ -10985,7 +11004,7 @@ Global Symbols
 </UL>
 
 <P><STRONG><a name="[214]"></a>setCodecFreq</STRONG> (Thumb, 76 bytes, Stack size 56 bytes, dbgloop.o(i.setCodecFreq))
-<BR><BR>[Stack]<UL><LI>Max Depth = 4192 + Unknown Stack Size
+<BR><BR>[Stack]<UL><LI>Max Depth = 4208 + Unknown Stack Size
 <LI>Call Chain = setCodecFreq &rArr; cdc_SetMasterFreq &rArr; cdc_ClocksOff &rArr; cdc_RecordEnable &rArr; showCdcRegs &rArr; aicGetReg &rArr; aicSetCurrPage &rArr; i2c_wrReg &rArr;  i2c_wrReg (Cycle)
 </UL>
 <BR>[Calls]<UL><LI><a href="#[20f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;dbgLog
@@ -11302,7 +11321,6 @@ Global Symbols
 <LI><a href="#[4fd]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;initPwrSignals
 <LI><a href="#[21f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;EnableADC
 <LI><a href="#[218]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;showCdcRegs
-<LI><a href="#[413]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;i2c_CheckRegs
 <LI><a href="#[411]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;cdc_PowerUp
 <LI><a href="#[4e9]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;i2c_Reinit
 </UL>
@@ -11457,18 +11475,22 @@ Global Symbols
 <LI><a href="#[4f5]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;initializeInterrupts
 <LI><a href="#[21e]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;handleInterrupt
 <LI><a href="#[42b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;controlTest
+<LI><a href="#[215]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;cdc_SetMute
 <LI><a href="#[74]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;saiEvent
 <LI><a href="#[3eb]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;audInitState
 <LI><a href="#[3f5]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;startRecord
 <LI><a href="#[623]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;startPlayback
 <LI><a href="#[3f3]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;haltRecord
 <LI><a href="#[3f1]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;haltPlayback
+<LI><a href="#[213]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;cdc_PowerDown
 <LI><a href="#[3f2]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;audPlayPct
 <LI><a href="#[3db]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;eraseNorFlash
 <LI><a href="#[443]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;copyNorLog
+<LI><a href="#[2b1]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;cdc_SetMasterFreq
 <LI><a href="#[2e5]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;PlayRecCmd
 <LI><a href="#[20b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;CheckRecording
 <LI><a href="#[2b8]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;cdc_Init
+<LI><a href="#[40f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;cdc_ClocksOff
 </UL>
 
 <P><STRONG><a name="[2e9]"></a>tglDebugMask</STRONG> (Thumb, 56 bytes, Stack size 16 bytes, dbgloop.o(i.tglDebugMask))
@@ -11695,7 +11717,7 @@ Global Symbols
 <H3>
 Local Symbols
 </H3>
-<P><STRONG><a name="[3bf]"></a>adjMsg</STRONG> (Thumb, 66 bytes, Stack size 16 bytes, controlmanager.o(i.adjMsg))
+<P><STRONG><a name="[3bf]"></a>adjMsg</STRONG> (Thumb, 96 bytes, Stack size 16 bytes, controlmanager.o(i.adjMsg))
 <BR><BR>[Stack]<UL><LI>Max Depth = 1672 + Unknown Stack Size
 <LI>Call Chain = adjMsg &rArr; logEvtNI &rArr; logEvtS &rArr;  tbErr (Cycle)
 </UL>
@@ -11704,7 +11726,7 @@ Local Symbols
 <BR>[Called By]<UL><LI><a href="#[418]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;doAction
 </UL>
 
-<P><STRONG><a name="[3c3]"></a>adjSubj</STRONG> (Thumb, 54 bytes, Stack size 16 bytes, controlmanager.o(i.adjSubj))
+<P><STRONG><a name="[3c3]"></a>adjSubj</STRONG> (Thumb, 64 bytes, Stack size 16 bytes, controlmanager.o(i.adjSubj))
 <BR><BR>[Stack]<UL><LI>Max Depth = 1672 + Unknown Stack Size
 <LI>Call Chain = adjSubj &rArr; logEvtNI &rArr; logEvtS &rArr;  tbErr (Cycle)
 </UL>
@@ -11714,7 +11736,7 @@ Local Symbols
 </UL>
 
 <P><STRONG><a name="[416]"></a>changeCSMstate</STRONG> (Thumb, 332 bytes, Stack size 320 bytes, controlmanager.o(i.changeCSMstate))
-<BR><BR>[Stack]<UL><LI>Max Depth = 4552 + Unknown Stack Size
+<BR><BR>[Stack]<UL><LI>Max Depth = 4568 + Unknown Stack Size
 <LI>Call Chain = changeCSMstate &rArr; doAction &rArr; controlTest &rArr;  executeCSM (Cycle)
 </UL>
 <BR>[Calls]<UL><LI><a href="#[418]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;doAction
@@ -11732,7 +11754,7 @@ Local Symbols
 </UL>
 
 <P><STRONG><a name="[418]"></a>doAction</STRONG> (Thumb, 478 bytes, Stack size 24 bytes, controlmanager.o(i.doAction))
-<BR><BR>[Stack]<UL><LI>Max Depth = 4232 + Unknown Stack Size
+<BR><BR>[Stack]<UL><LI>Max Depth = 4248 + Unknown Stack Size
 <LI>Call Chain = doAction &rArr; controlTest &rArr;  executeCSM (Cycle)
 </UL>
 <BR>[Calls]<UL><LI><a href="#[3c3]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;adjSubj
@@ -12449,7 +12471,7 @@ Local Symbols
 </UL>
 
 <P><STRONG><a name="[bd]"></a>I2S2_Control</STRONG> (Thumb, 22 bytes, Stack size 16 bytes, i2s_stm32f4xx.o(i.I2S2_Control))
-<BR><BR>[Stack]<UL><LI>Max Depth = 4232 + Unknown Stack Size
+<BR><BR>[Stack]<UL><LI>Max Depth = 4248 + Unknown Stack Size
 <LI>Call Chain = I2S2_Control &rArr; I2S_Control &rArr; I2S_Configure &rArr; cdc_SetMasterFreq &rArr; cdc_ClocksOff &rArr; cdc_RecordEnable &rArr; showCdcRegs &rArr; aicGetReg &rArr; aicSetCurrPage &rArr; i2c_wrReg &rArr;  i2c_wrReg (Cycle)
 </UL>
 <BR>[Calls]<UL><LI><a href="#[2a5]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;I2S_Control
@@ -12549,7 +12571,7 @@ Local Symbols
 </UL>
 
 <P><STRONG><a name="[2af]"></a>I2S_Configure</STRONG> (Thumb, 94 bytes, Stack size 32 bytes, i2s_stm32f4xx.o(i.I2S_Configure))
-<BR><BR>[Stack]<UL><LI>Max Depth = 4168 + Unknown Stack Size
+<BR><BR>[Stack]<UL><LI>Max Depth = 4184 + Unknown Stack Size
 <LI>Call Chain = I2S_Configure &rArr; cdc_SetMasterFreq &rArr; cdc_ClocksOff &rArr; cdc_RecordEnable &rArr; showCdcRegs &rArr; aicGetReg &rArr; aicSetCurrPage &rArr; i2c_wrReg &rArr;  i2c_wrReg (Cycle)
 </UL>
 <BR>[Calls]<UL><LI><a href="#[2b1]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;cdc_SetMasterFreq
@@ -12559,7 +12581,7 @@ Local Symbols
 </UL>
 
 <P><STRONG><a name="[2a5]"></a>I2S_Control</STRONG> (Thumb, 194 bytes, Stack size 48 bytes, i2s_stm32f4xx.o(i.I2S_Control))
-<BR><BR>[Stack]<UL><LI>Max Depth = 4216 + Unknown Stack Size
+<BR><BR>[Stack]<UL><LI>Max Depth = 4232 + Unknown Stack Size
 <LI>Call Chain = I2S_Control &rArr; I2S_Configure &rArr; cdc_SetMasterFreq &rArr; cdc_ClocksOff &rArr; cdc_RecordEnable &rArr; showCdcRegs &rArr; aicGetReg &rArr; aicSetCurrPage &rArr; i2c_wrReg &rArr;  i2c_wrReg (Cycle)
 </UL>
 <BR>[Calls]<UL><LI><a href="#[291]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;dbgEvt
@@ -14435,8 +14457,8 @@ Local Symbols
 </UL>
 <BR>[Calls]<UL><LI><a href="#[2a4]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_GPIO_DeInit
 </UL>
-<BR>[Called By]<UL><LI><a href="#[112]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SPI4_Uninitialize
-<LI><a href="#[109]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SPI1_Uninitialize
+<BR>[Called By]<UL><LI><a href="#[109]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SPI1_Uninitialize
+<LI><a href="#[112]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SPI4_Uninitialize
 </UL>
 
 <P><STRONG><a name="[11f]"></a>USBD_DeviceConnect</STRONG> (Thumb, 62 bytes, Stack size 8 bytes, usbd_fs_stm32f4xx.o(i.USBD_DeviceConnect))
@@ -15811,12 +15833,12 @@ Local Symbols
 <P><STRONG><a name="[374]"></a>USBD_MSC_ReadCapacity</STRONG> (Thumb, 234 bytes, Stack size 24 bytes, usbd_lib_msc.o(i.USBD_MSC_ReadCapacity))
 <BR><BR>[Stack]<UL><LI>Max Depth = 296<LI>Call Chain = USBD_MSC_ReadCapacity &rArr; USBD_MSC_CheckMediaHW &rArr; USBD_MSC_StatusFailed &rArr; USBD_MSC_SetCSW &rArr; USBD_DriverEndpointTransfer &rArr; USBD_DriverEndpointTransferAbort &rArr; USBD_SemaphoreAcquire &rArr; osKernelGetTickFreq &rArr; svcRtxKernelGetTickFreq &rArr; EvrRtxKernelGetTickFreq &rArr; EventRecord2 &rArr; EventRecordItem
 </UL>
-<BR>[Calls]<UL><LI><a href="#[271]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;EvrUSBD_MSC_ReadCapacity
-<LI><a href="#[26d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;EvrUSBD_MSC_OnGetMediaCapacity
+<BR>[Calls]<UL><LI><a href="#[26d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;EvrUSBD_MSC_OnGetMediaCapacity
 <LI><a href="#[363]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;USBD_MSC_StatusFailed
 <LI><a href="#[367]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;USBD_MSC_DataInTransfer
 <LI><a href="#[366]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;USBD_MSC_CheckMediaHW
 <LI><a href="#[362]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;USBD_MSC_CheckCommandDataIn
+<LI><a href="#[271]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;EvrUSBD_MSC_ReadCapacity
 </UL>
 <BR>[Called By]<UL><LI><a href="#[36c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;USBD_MSC_GetCBW
 </UL>

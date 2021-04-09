@@ -63,6 +63,8 @@ static void 							initPwrSignals( void );					// forward
 
 static int								currPwrTimerMS;
 
+bool 							RebootOnKeyInt = false;
+
 void checkPowerTimer(void *arg);                          // forward for timer callback function
 
 void											initPowerMgr( void ){						// initialize PowerMgr & start thread
@@ -110,6 +112,7 @@ void 											enableSleep( void ){						// low power mode -- (STM32 Stop) CPU 
 			NVIC->ICPR[i] = pend;		
 	}
 	int sleep = osKernelSuspend();		// turn off sysTic 
+	RebootOnKeyInt = true;
 	
 	__WFI();	// sleep till interrupt -- 10 keyboard EXTI's enabled
 	
@@ -158,7 +161,7 @@ void											powerDownTBook( bool sleep ){					// shut down TBook
 		gI2S2ext_SD,	gI2S2_SD,		gI2S2_WS,			gI2S2_CK,			// PB14, 	PB15, PB12, PB13		
 		gI2S3_MCK,		gI2C1_SDA,	gI2C1_SCL,		gI2S2_MCK,		// PC7, 	PB9, 	PB8, 	PC6
 		gUSB_DM, 			gUSB_DP, 		gUSB_ID,			gUSB_VBUS,		// PA11,	PA12, PA10, PA9
-		gSPI4_SCK, 		gSPI4_MISO, gSPI4_MOSI, 	gSPI4_NSS,		// PE12,	PE13, PE14, PE11
+//		gSPI4_SCK, 		gSPI4_MISO, gSPI4_MOSI, 	gSPI4_NSS,		// PE12,	PE13, PE14, PE11
 		gMCO2, 				gBOOT1_PDN, gBAT_CE, 			gSC_ENABLE,		// PC9, 	PB2,	PD0,	PD1
 		gBAT_TE_N,																						// PD13
 		gEN_5V, 			gEN1V8, 		g3V3_SW_EN, 	gBAT_TE_N, 		// PD4,		PD5,	PD6,	PD13
@@ -170,11 +173,28 @@ void											powerDownTBook( bool sleep ){					// shut down TBook
 		gQSPI_BK1_IO0,	gQSPI_BK1_IO1, gQSPI_BK1_IO2, gQSPI_BK1_IO3,	// PD11, PD12, PC8, PA1
 		gQSPI_CLK_A,	  gQSPI_CLK_B,	 gQSPI_BK1_NCS, gQSPI_BK2_NCS,	// PD3,  PB1,  PB6, PC11
 		gQSPI_BK2_IO0,	gQSPI_BK2_IO1, gQSPI_BK2_IO2, gQSPI_BK2_IO3,	// PA6,  PA7,  PC4, PC5
-		gSWDIO,				gSWCLK,			gSWO,												// PA13,  PA14, PB3
+//		gSWDIO,				gSWCLK,			gSWO,												// PA13,  PA14, PB3
 		gINVALID															 
 	};
 	for (int i=0; extGPIO[i]!=gINVALID; i++) 
 		gConfigADC( extGPIO[i] );		// RESET GPIOs to analog (Mode 3, Pup 0) 
+	
+	GPIO_ID spiGPIO[] = {  // reconfig SPI GPIO's to input PU
+		gSPI4_SCK, 		gSPI4_MISO, gSPI4_MOSI, 	gSPI4_NSS,		// PE12,	PE13, PE14, PE11
+		gINVALID };
+	for (int i=0; spiGPIO[i]!=gINVALID; i++) 
+		gConfigIn( spiGPIO[i], false );		// set to Input PU (Mode 0, Pup 1) 
+	
+	RCC->CR &= ~RCC_CR_PLLI2SON_Msk;	// shut off PLLI2S
+	RCC->AHB1ENR = 0;
+	RCC->AHB2ENR = 0;
+	RCC->APB1ENR = 0;
+	RCC->APB2ENR = 0;
+	
+	RCC->AHB1LPENR = 0; 
+	RCC->AHB2LPENR = 0;
+	RCC->APB1LPENR = 0;
+	RCC->APB2LPENR = 0;
 	
 	if ( sleep )
 		enableSleep();
@@ -227,7 +247,7 @@ void 											initPwrSignals( void ){					// configure power GPIO pins, & EXTI
   gSet( gPA_EN, 0 );					// initially audio external amplifier OFF
 #endif
 
-	tbDelay_ms( 5 ); //DEBUG: 3 );		// wait 3 msec to make sure everything is stable
+	tbDelay_ms( 5 ); // pwr start up: 3 );		// wait 3 msec to make sure everything is stable
 }
 void											startADC( int chan ){						// set up ADC for single conversion on 'chan', then start 
 	AdcC->CCR &= ~ADC_CCR_ADCPRE;		// CCR.ADCPRE = 0 => PClk div 2
@@ -274,7 +294,7 @@ static void								EnableADC( bool enable ){				// power up & enable ADC interru
 		NVIC_EnableIRQ( ADC_IRQn );
 		RCC->APB2ENR |= RCC_APB2ENR_ADC1EN;			// enable clock for ADC
 		Adc->CR2 |= ADC_CR2_ADON; 							// power up ADC
-		tbDelay_ms( 1 );
+		tbDelay_ms( 1 );	// ADC pwr up
 		} else {
 		gSet( gADC_ENABLE, 0 );
 		NVIC_DisableIRQ( ADC_IRQn );
@@ -298,7 +318,7 @@ uint16_t									readPVD( void ){								// read PVD level
 	int pvdMV = 2100;							// if < 2200, report 2100 
 	for (int i=0; i< 8; i++){
 		PWR->CR = (PWR->CR & ~PWR_CR_PLS_Msk) | ( i << PWR_CR_PLS_Pos );
-		tbDelay_ms(1);
+		tbDelay_ms(1);  // waiting for Pwr Voltage Detection
 		
 		if ( (PWR->CSR & PWR_CSR_PVDO) != 0 ) break;
 		pvdMV = 2200 + i*100;

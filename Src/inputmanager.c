@@ -98,6 +98,8 @@ bool 					updateKeyState( KEY k ){		// read keypad pin, update keydef[k] if chan
 	return false;
 }
 
+extern bool 	RebootOnKeyInt;		// from powermanager -- reboot if interrupt
+
 void 					handleInterrupt( bool fromThread ){					// called for external interrupt on specified keypad pin
 /* external interrupts for GPIO pins call one of the EXTIx_IRQHandler's below:
 // cycle through the keypad keys, and clear any set EXTI Pending Bits, and their NVIC pending IRQs
@@ -105,6 +107,8 @@ void 					handleInterrupt( bool fromThread ){					// called for external interru
 */
 	KEY k;
 	disableInputs();
+	if (RebootOnKeyInt) 
+		NVIC_SystemReset();			// soft reboot
 	
 	KSt.eventTS = tbTimeStamp();								// record TStamp of this interrupt
 	KSt.msecSince = KSt.eventTS - KSt.lastTS;		// msec between prev & this

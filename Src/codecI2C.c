@@ -71,7 +71,7 @@ void						i2c_Reinit(int lev ){																				// lev&1 SWRST, &2 => RCC res
 	}
 	if ( lev & 2 ){
 		RCC->APB1RSTR |= RCC_APB1RSTR_I2C1RST;		// set device reset bit for I2C1
-		tbDelay_ms( 3 ); //DEBUG  1 );
+		tbDelay_ms( 3 ); // I2C reinit DEBUG  1 );
 		RCC->APB1RSTR = 0;		// TURN OFF device reset bit for I2C1
 /* reset sequence in PowerControl( ARM_POWER_FULL )
         __HAL_RCC_I2C1_FORCE_RESET();
@@ -82,7 +82,7 @@ void						i2c_Reinit(int lev ){																				// lev&1 SWRST, &2 => RCC res
 	if ( lev & 1 ){
 		uint32_t cr1 = I2C1->CR1;
 		I2C1->CR1 = I2C_CR1_SWRST;			// set Software Reset bit
-		tbDelay_ms( 3 ); //DEBUG 1);
+		tbDelay_ms( 3 ); // I2C reinit DEBUG 1);
 		I2C1->CR1 = cr1;			// reset to previous
 	}
 }

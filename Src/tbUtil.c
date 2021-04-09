@@ -166,7 +166,7 @@ void 										flashLED( const char *s ){											// 'GGRR__' in .1sec
 			case 'R': gSet( gRED, 1 ); break;
 			default: break;
 		}
-		tbDelay_ms( 100 );
+		tbDelay_ms( 100 );	// flashLED
 		gSet( gGREEN, 0 );	
 		gSet( gRED, 0 );
 	}
@@ -181,7 +181,6 @@ void										flashInit( ){																		// init keypad GPIOs for debugging
 	LED_Init( gRED );		
 	for ( GPIO_ID id = gHOME; id <= gTABLE;  id++ )
 		gConfigKey( id ); // low speed pulldown input
-	//tbDelay_ms(1000);
 }
 
 // 
@@ -257,7 +256,7 @@ void 										FileSysPower( bool enable ){										// power up/down eMMC & SD 
 		gSet( gEMMC_RSTN, 1 );			// enable at power up?
 		gSet( g3V3_SW_EN, 1 );			// enable at start up, for FileSys access
 		
-		tbDelay_ms( 100 );
+		tbDelay_ms( 100 );		// FileSys pwr up
 		fsStatus st = fsMount( "M0:" );  // finit() & fmount()
 		FSysPowered = true;
 

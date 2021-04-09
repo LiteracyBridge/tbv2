@@ -313,7 +313,7 @@ static int32_t 								I2S_Configure( I2S_RESOURCES *i2s, uint32_t freq, bool mo
 		// make sure the RCC->PLLI2S is running & ready
 		RCC->CR |= RCC_CR_PLLI2SON;					// enable the I2S_clk generator PLLI2S 
 		while ( (RCC->CR & RCC_CR_PLLI2SRDY)== 0 )
-			tbDelay_ms( 1 );
+//			tbDelay_ms( 1 );  // PLLI2S
 
 		int I2S_clk = 48000000;							// PLLI2S clock rate
 		// FS = PLLI2S / ( 256*( 2* I2SDIV + ODD ) 

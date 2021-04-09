@@ -196,7 +196,7 @@ void 					controlTest(  ){									// CSM test procedure
 				case FirmwareUpdate:   // pot table
 					dbgLog( "rebooting to system bootloader for DFU... \n" );
 					ledFg( TB_Config.fgEnterDFU );
-					tbDelay_ms( 3300 );
+					tbDelay_ms( 3300 );  // about to go into DFU
 					RebootToDFU(  );
 					break;
 				default:

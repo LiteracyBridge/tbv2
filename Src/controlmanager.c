@@ -339,8 +339,6 @@ static void 					doAction( Action act, char *arg, int iarg ){	// execute one csm
 			break;
 		case powerDown:		
 			ledBg( NULL );								// turn off background heartbeat
-			//ledFg( TB_Config.fgPowerDown ); 	//  R R R   R R   R
-			//tbDelay_ms( 2000 );					// wait for LED sequence to finish
 			powerDownTBook( true ); //false );
 			break;
 	  case sysTest:

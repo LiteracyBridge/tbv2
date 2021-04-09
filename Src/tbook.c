@@ -7,7 +7,7 @@
 #include "fs_evr.h"					// FileSys components
 #include "fileOps.h"				// decode & encrypt audio files
 
-const char * 	TBV2_Version 				= "V3.02 of 7-Apr-2021";
+const char * 	TBV2_Version 				= "V3.02 of 9-Apr-2021";
 
 //
 // Thread stack sizes

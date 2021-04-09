@@ -94,7 +94,7 @@ void 							showTknTable(){										// display stats for tknTable
 	ss->listNodesAllocated	= N_LST_NDS;
 	ss->listIdsAvail 		= N_LISTS - nxtLstID;
 	ss->listIdsAllocated	= N_LISTS;
-	dbgLog( "! showTknTable: tokenCharsAvail=%d/%d\n  tokenNodesAvail=%d/%d\n  listNodesAvail=%d/%d\n  listIdsAvail=%d/%d \n",
+	dbgLog( "B showTknTable: tokenCharsAvail=%d/%d\n  tokenNodesAvail=%d/%d\n  listNodesAvail=%d/%d\n  listIdsAvail=%d/%d \n",
 		ss->tokenCharsAvail, N_STR_CHS, 
 		ss->tokenNodesAvail, N_TKN_NDS, 
 		ss->listNodesAvail, N_LST_NDS, 

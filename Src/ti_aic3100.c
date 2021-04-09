@@ -561,7 +561,7 @@ void 						i2c_CheckRegs(){																						// Debug -- read codec regs
 			
 			cntErr( Cdc_DefReg, defval, val, i, 9 );	
 			if (defval != val) nErrs++;
-			tbDelay_ms(10);
+//			tbDelay_ms(10);  // dbgLog
 		}
 		WatchReg = svWReg;
 		i2c_ReportErrors();
@@ -795,7 +795,7 @@ void						showCdcRegs( bool always, bool nonReset ){  // display changes in code
 					dbgLog( "R%d.%3d: %12s = 0x%02x = %s %s (0x%02x)\n", regDef.pg, regDef.reg, regDef.nm, val, valnm, rst, regDef.prev_val );
 			}
 			codec_regs[ ridx ].prev_val = val;
-			tbDelay_ms(10);
+			tbDelay_ms(10); // dbgLog, only if DbgMask 2
 		}
 	}
 	RegsCallCnt++;
@@ -1111,7 +1111,7 @@ void 						cdc_SpeakerEnable( bool enable ){														// enable/disable spea
 			Codec_SetRegBits( AK_Power_Management_1, AK_PM1_SPK | AK_PM1_DAC, AK_PM1_SPK | AK_PM1_DAC );	// set spkr & DAC power ON
 			Codec_SetRegBits( AK_Signal_Select_1, AK_SS1_DACS, AK_SS1_DACS );				// 2) DACS=1  set DAC->Spkr 
 			Codec_SetRegBits( AK_Signal_Select_2, AK_SS2_SPKG1 | AK_SS2_SPKG0, AK_SS2_SPKG1 );   // Speaker Gain (SPKG0-1 bits): Gain=+10.65dB(ALC off)/+12.65(ALC on)
-			tbDelay_ms(2); 	// wait at least a mSec -- ak4343 datasheet, fig. 59
+			tbDelay_ms(2); 	// AK wait at least a mSec -- ak4343 datasheet, fig. 59
 			Codec_SetRegBits( AK_Signal_Select_1, AK_SS1_SPPSN, AK_SS1_SPPSN );		// set power-save (mute) OFF (==1)
 	} else {			
 			Codec_SetRegBits( AK_Signal_Select_1, AK_SS1_SPPSN, 0 );						// set power-save (mute) ON (==0)
@@ -1136,7 +1136,7 @@ void 						cdc_SpeakerEnable( bool enable ){														// enable/disable spea
 			akR.R.PwrMgmt1.PMDAC = 1;							// 6) Power up DAC
 		  akR.R.PwrMgmt2.PMSL = 1;							// 7) set spkr power ON
 			akUpd();															// UPDATE all settings
-			tbDelay_ms( 300 ); //DEBUG 30 );											// 7) wait up to 300ms   // MARC 11)
+			tbDelay_ms( 300 ); // AK DEBUG 30 );											// 7) wait up to 300ms   // MARC 11)
 			akR.R.SigSel1.SLPSN = 1;							// 8) exit power-save (mute) mode (==1)
 			akUpd();		
 	} else {	
@@ -1159,22 +1159,24 @@ void 						cdc_SpeakerEnable( bool enable ){														// enable/disable spea
 void						cdc_PowerUp( void ){
   // AIC3100 power up sequence based on sections 7.3.1-4 of Datasheet: https://www.ti.com/lit/ds/symlink/tlv320aic3100.pdf
 	//  delays as recommended by Marc on 12/31/20
+logEvt( "AIC_pwr..." );
 	gSet( gBOOT1_PDN, 0 );			// put codec in reset state PB2
 	
 	gSet( gEN_5V, 1 );					// power up EN_V5 for codec SPKVDD PD4
-	tbDelay_ms( 200 );  		 		// wait for voltage regulators  // Marc: 200ms
+	tbDelay_ms( 200 );  		 		// AIC wait for voltage regulators  // Marc: 200ms
 
 	gSet( gEN_IOVDD_N, 0 );			// power up codec IOVDD PE4
-	tbDelay_ms( 100 );  		 		// wait for voltage regulators  // Marc: 100ms
+	tbDelay_ms( 100 );  		 		// AIC wait for voltage regulators  // Marc: 100ms
 	gSet( gEN1V8, 1 );					// power up EN1V8 for codec DVDD PD5 ("shortly" after IOVDD)
-	tbDelay_ms( 10 );  		 			// wait for voltage regulators
+	tbDelay_ms( 10 );  		 			// AIC wait for voltage regulators
 	
 	gSet( gEN_AVDD_N, 0 );			// power up codec AVDD & HPVDD PE5 (at least 10ns after DVDD)
-	tbDelay_ms( 100 );  		 		//  wait for it to start up  // Marc: 100ms
+	tbDelay_ms( 100 );  		 		// AIC wait for it to start up  // Marc: 100ms
 	
 	gSet( gBOOT1_PDN, 1 );  		// set codec RESET_N inactive to Power on the codec PB2
-	tbDelay_ms( 10 );  		 			//  wait for it to start up
+	tbDelay_ms( 10 );  		 			// AIC wait for it to start up
 	dbgLog( "2 AIC3100 powered up\n");
+logEvt( "AIC_pwrup" );
 }
 // external interface functions
 void 						cdc_Init( ){ 																								// Init codec & I2C (i2s_stm32f4xx.c)
@@ -1201,6 +1203,7 @@ void 						cdc_Init( ){ 																								// Init codec & I2C (i2s_stm32f4
 
   if ( !codecIsReady ){
 		cdc_PowerUp(); 		// power-up codec
+logEvtNI( "I2C_init", "ts", tbTimeStamp() );
 		i2c_Init();  			// powerup & Initialize the Control interface of the Audio Codec
 		codecIsReady = true;
 	}
@@ -1213,9 +1216,11 @@ void 						cdc_Init( ){ 																								// Init codec & I2C (i2s_stm32f4
 		rst = aicGetReg( P0_R1_Software_Reset_Register );
 	}
 	dbgLog( "2 AIC Sft Reset took %d ms \n", tbTimeStamp()-st );
+logEvtNI( "AIC_reset", "ts", tbTimeStamp() );
 	
 	i2c_CheckRegs();		// check all default register values & report
 	dbgLog( "2 AIC Reg defaults\n");
+logEvtNI( "AIC_regs checked", "ts", tbTimeStamp() );
 
 	#if defined( AK4343 )
 		Codec_SetRegBits( AK_Signal_Select_1, AK_SS1_SPPSN, 0 );		// set power-save (mute) ON (==0)  (REDUNDANT, since defaults to 0)
@@ -1323,6 +1328,7 @@ void 						cdc_ClocksOff( void ){																			// properly shut down ADC, D
 		codecClockFreq = 0;
 		dbgLog( "2 ClocksOff \n");
 		showCdcRegs( false, false );
+logEvtNI( "AIC_clksoff", "ts", tbTimeStamp() );
 	#endif
 }
 void 						cdc_PowerDown( void ){																				// power down entire codec (i2s_stm..)
@@ -1341,6 +1347,7 @@ void 						cdc_PowerDown( void ){																				// power down entire codec 
 	gSet( gEN_AVDD_N, 1 );		// PE5 power down codec AVDD & HPVDD PE5 (at least 10ns after DVDD)
 
 	dbgLog( "2 AIC3100 powered down\n");
+logEvtNI( "AIC_pwrdwn", "ts", tbTimeStamp() );
 	codecIsReady = false;
 }
 //
@@ -1396,11 +1403,13 @@ void		 				cdc_SetMute( bool muted ){																	// true => enable mute on 
 			aicSetReg( P1_R42_SPK_Driver, 0x00	 ); 			// P1_R42: Rst SpkrAmpGain: 00  SpkrMuteOff: 0
 			aicSetReg( P0_R64_DAC_VOLUME_CONTROL, 0x0C );	// P0_R64: Rst LMuteOn: 1  RMuteOn: 1 LRsep: 00
 			dbgLog( "2 AIC mute: SpkrAmp, L&R mutes on \n" );
+
 		} else {	// disable left channel mute
 			aicSetReg( P0_R64_DAC_VOLUME_CONTROL, 0x04 );	// P0_R64: LMuteOn: 0  RMuteOn: 1 LRsep: 00
 			aicSetReg( P1_R42_SPK_Driver, 0x04	 ); 			// P1_R42: SpkrAmpGain: 00  SpkrMuteOff: 1
-			tbDelay_ms( 100 );  // wait to let stabilize? before starting I2S
+			tbDelay_ms( 100 );  // AIC wait to let amp stabilize? before starting I2S
 			dbgLog( "2 AIC unmute: SpkrAmp & L mutes off, SpkrAmp=6dB \n" );
+logEvtNI( "AIC_unmute", "ts", tbTimeStamp() );
 		}
 	#endif
 //	akR.R.MdCtr3.SMUTE = (muted? 1 : 0);
@@ -1461,6 +1470,7 @@ void						cdc_SetMasterFreq( int freq ){															// set AK4637 to MasterMo
 		dbgLog( "2 AIC: BCLK = CLK / %d / %d / %d = 32* %d \n", NDAC, MDAC, 2, freq );
 //		showCdcRegs( false, false );
 		codecClockFreq = freq;		// remember current freq
+logEvtNI( "AIC_freq", "ts", tbTimeStamp() );
 	#endif
 	#if defined( AK4637 )
 	// set up AK4637 to run in MASTER mode, using PLL to generate audio clock at 'freq'
@@ -1487,10 +1497,10 @@ void						cdc_SetMasterFreq( int freq ){															// set AK4637 to MasterMo
 		akR.R.PwrMgmt2.M_S 			= 1;					// M/S = 1   WS CLOCK WILL START HERE!
 		akR.R.PwrMgmt1.PMVCM 		= 1;					// set VCOM bit first, then individual blocks (at SpeakerEnable)
 		akUpd();															// update power & M/S
-		tbDelay_ms( 4 ); //DEBUG 2 );											// 2ms for power regulator to stabilize
+		tbDelay_ms( 4 ); // AK DEBUG 2 );											// 2ms for power regulator to stabilize
 		akR.R.PwrMgmt2.PMPLL 		= 1;					// enable PLL 
 		akUpd();															// start PLL 
-		tbDelay_ms( 10 ); //DEBUG 5 );											// 5ms for clocks to stabilize
+		tbDelay_ms( 10 ); // AK DEBUG 5 );											// 5ms for clocks to stabilize
 	#endif
 }
 

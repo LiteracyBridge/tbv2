@@ -176,7 +176,7 @@ void						I2C_Reinit(int lev ){																				// lev&1 SWRST, &2 => RCC res
 	if ( lev & 1 ){
 		uint32_t cr1 = I2C1->CR1;
 		I2C1->CR1 = I2C_CR1_SWRST;			// set Software Reset bit
-		tbDelay_ms( 3 ); //DEBUG 1);
+		tbDelay_ms( 3 ); // I2C reinit DEBUG 1);
 		I2C1->CR1 = cr1;			// reset to previous
 	}
 }
@@ -381,7 +381,7 @@ void 						ak_SpeakerEnable( bool enable ){														// enable/disable speak
 			Codec_SetRegBits( AK_Power_Management_1, AK_PM1_SPK | AK_PM1_DAC, AK_PM1_SPK | AK_PM1_DAC );	// set spkr & DAC power ON
 			Codec_SetRegBits( AK_Signal_Select_1, AK_SS1_DACS, AK_SS1_DACS );				// 2) DACS=1  set DAC->Spkr 
 			Codec_SetRegBits( AK_Signal_Select_2, AK_SS2_SPKG1 | AK_SS2_SPKG0, AK_SS2_SPKG1 );   // Speaker Gain (SPKG0-1 bits): Gain=+10.65dB(ALC off)/+12.65(ALC on)
-			tbDelay_ms(2); 	// wait at least a mSec -- ak4343 datasheet, fig. 59
+			tbDelay_ms(2); 	// AK wait at least a mSec -- ak4343 datasheet, fig. 59
 			Codec_SetRegBits( AK_Signal_Select_1, AK_SS1_SPPSN, AK_SS1_SPPSN );		// set power-save (mute) OFF (==1)
 		#endif
 		#if defined( AK4637 )
@@ -400,7 +400,7 @@ void 						ak_SpeakerEnable( bool enable ){														// enable/disable speak
 			akR.R.PwrMgmt1.PMDAC = 1;							// 6) Power up DAC
 		  akR.R.PwrMgmt2.PMSL = 1;							// 7) set spkr power ON
 			akUpd();															// UPDATE all settings
-			tbDelay_ms( 300 ); //DEBUG 30 );											// 7) wait up to 300ms   // MARC 11)
+			tbDelay_ms( 300 ); // AK  DEBUG 30 );											// 7) wait up to 300ms   // MARC 11)
 			akR.R.SigSel1.SLPSN = 1;							// 8) exit power-save (mute) mode (==1)
 			akUpd();		
 		#endif
@@ -430,10 +430,10 @@ void						ak_PowerUp( void ){
 	gSet( gBOOT1_PDN, 1 );  // OUT: set power_down ACTIVE to so codec doesn't try to PowerUP
 	gSet( gEN_5V, 1 );			// OUT: 1 to supply 5V to codec		AP6714 EN		
 	gSet( gEN1V8, 1 );		  // OUT: 1 to supply 1.8 to codec  TLV74118 EN		
-	tbDelay_ms( 40 ); //DEBUG 20 ); 		 	// wait for voltage regulators
+	tbDelay_ms( 40 ); // AK DEBUG 20 ); 		 	// wait for voltage regulators
 	
 	gSet( gBOOT1_PDN, 0 );  //  set power_down INACTIVE to Power on the codec 
-	tbDelay_ms( 10 ); //DEBUG 5); 		 			//  wait for it to start up
+	tbDelay_ms( 10 ); // AK DEBUG 5); 		 			//  wait for it to start up
 }
 // external interface functions
 void 						ak_Init( ){ 																								// Init codec & I2C (i2s_stm32f4xx.c)
@@ -599,10 +599,10 @@ void						ak_SetMasterFreq( int freq ){															// set AK4637 to MasterMod
 		akR.R.PwrMgmt2.M_S 			= 1;					// M/S = 1   WS CLOCK WILL START HERE!
 		akR.R.PwrMgmt1.PMVCM 		= 1;					// set VCOM bit first, then individual blocks (at SpeakerEnable)
 		akUpd();															// update power & M/S
-		tbDelay_ms( 4 ); //DEBUG 2 );											// 2ms for power regulator to stabilize
+		tbDelay_ms( 4 ); // AK DEBUG 2 );		// 2ms for power regulator to stabilize
 		akR.R.PwrMgmt2.PMPLL 		= 1;					// enable PLL 
 		akUpd();															// start PLL 
-		tbDelay_ms( 10 ); //DEBUG 5 );											// 5ms for clocks to stabilize
+		tbDelay_ms( 10 ); // AK DEBUG 5 );											// 5ms for clocks to stabilize
 	#endif
 }
 

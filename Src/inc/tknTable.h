@@ -9,12 +9,12 @@ typedef enum {	// GrpID -- tknid groups, corresponding to enum types
 
 typedef enum { 	// Event -- TBook event types
 			eNull=0, 
-			Home, 		Circle,		Plus, 		Minus, 		Tree, 		Lhand, 		Rhand, 		Pot,	 Star,		Table,
-			Home__, 	Circle__, 	Plus__, 	Minus__, 	Tree__, 	Lhand__, 	Rhand__, 	Pot__, 	 Star__,	Table__,
-			starHome,	starCircle, starPlus, 	starMinus, 	starTree, 	starLhand, 	starRhand, 	starPot, starStar,	starTable,
+			Home, 		Circle,		Plus, 		Minus, 		Tree, 		Lhand, 		Rhand, 		Pot,	 Star,		Table,  //=10
+			Home__, 	Circle__, 	Plus__, 	Minus__, 	Tree__, 	Lhand__, 	Rhand__, 	Pot__, 	 Star__,	Table__,  //=20
+			starHome,	starCircle, starPlus, 	starMinus, 	starTree, 	starLhand, 	starRhand, 	starPot, starStar,	starTable, //=30
 	    // TODO: move AudioStart to before AudioDone. Requires finding inequality comparisons against AudioDone
-			AudioDone,	AudioStart, ShortIdle,	LongIdle,	LowBattery,	BattCharging, BattCharged,	FirmwareUpdate, Timer, 
-		  ChargeFault, LithiumHot, MpuHot, anyKey, eUNDEF
+			AudioDone,	AudioStart, ShortIdle,	LongIdle,	LowBattery,	BattCharging, BattCharged,	FirmwareUpdate, Timer, //=39
+		  ChargeFault, LithiumHot, MpuHot, anyKey, eUNDEF //=44
 }	Event;
 
 typedef enum { 	// Punct -- JSONish punctuation tokens

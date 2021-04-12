@@ -683,6 +683,8 @@ static TknID			parseLstObj( Punct closeBr, short depth, char *path ){			// INTER
 TknID 						parseFile( const char *fnm ){						// read and parse a JSONish text file
 	char *fnm2, *fnm3; tbShw( fnm, &fnm2, &fnm3 );
 	dbgLog( "B Reading %s...\n", fnm );
+	currTkn.tknID = 0;
+	nLnTkns = 0;
 	inFile = tbOpenReadBinary( fnm ); //fopen( fnm, "rb" );
 	if ( inFile==NULL )
 		tbErr( "parseFile file not found" );

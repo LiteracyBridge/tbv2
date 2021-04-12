@@ -17,7 +17,7 @@ osMemoryPoolId_t					TBEvent_pool 	= NULL;		// memory pool for TBEvents
 
 static osThreadAttr_t 		thread_attr;
 static osEventFlagsId_t		osFlag_InpThr;		// osFlag to signal a keyUp event from ISR
-static uint16_t						KeypadIMR = 0;		// interrupt mask register bits for keypad
+uint16_t						KeypadIMR = 0;					// interrupt mask register bits for keypad (also set in main() for MarcDebug)
 
 // structs defined in tbook.h for Debugging visibility
 KeyPadState_t				KSt;				

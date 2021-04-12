@@ -467,6 +467,8 @@ const int 	P13_R0_psr																	 = 260; // 260=13.0
 #endif /* VERIFY_WRITTENDATA */
 
 bool codecIsReady = false;
+bool codecHasPower = false;
+
 int  codecClockFreq = 0;
 
 void 						aicSetCurrPage( uint8_t page ){
@@ -1157,9 +1159,9 @@ void 						cdc_SpeakerEnable( bool enable ){														// enable/disable spea
 }
 
 void						cdc_PowerUp( void ){
+	if ( codecHasPower ) return;  
   // AIC3100 power up sequence based on sections 7.3.1-4 of Datasheet: https://www.ti.com/lit/ds/symlink/tlv320aic3100.pdf
 	//  delays as recommended by Marc on 12/31/20
-logEvt( "AIC_pwr..." );
 	gSet( gBOOT1_PDN, 0 );			// put codec in reset state PB2
 	
 	gSet( gEN_5V, 1 );					// power up EN_V5 for codec SPKVDD PD4
@@ -1176,6 +1178,7 @@ logEvt( "AIC_pwr..." );
 	gSet( gBOOT1_PDN, 1 );  		// set codec RESET_N inactive to Power on the codec PB2
 	tbDelay_ms( 10 );  		 			// AIC wait for it to start up
 	dbgLog( "2 AIC3100 powered up\n");
+	codecHasPower = true; 
 logEvt( "AIC_pwrup" );
 }
 // external interface functions
@@ -1348,6 +1351,7 @@ void 						cdc_PowerDown( void ){																				// power down entire codec 
 
 	dbgLog( "2 AIC3100 powered down\n");
 logEvtNI( "AIC_pwrdwn", "ts", tbTimeStamp() );
+	codecHasPower = false;
 	codecIsReady = false;
 }
 //

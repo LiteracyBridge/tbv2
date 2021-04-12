@@ -446,6 +446,7 @@ const int ReplHI  = 2700;		// mV at ~75%
 const int HiMpuTemp = 800;
 const int HiLiTemp  = 800;
 
+void											cdc_PowerUp( void );	// from ti_aic3100 -- for early init on pwr thread
 
 void 											checkPower( ){				// check and report power status
 	//  check gPWR_FAIL_N & MCP73871: gBAT_PG_N, gBAT_STAT1, gBAT_STAT2
@@ -644,6 +645,8 @@ void 											wakeup(){												// resume operation after sleep power-down
 }
 static void 							powerThreadProc( void *arg ){		// powerThread -- catches PM_NOPWR from EXTI: NOPWR interrupt
 	dbgLog( "4 pwrThr: 0x%x 0x%x \n", &arg, &arg + POWER_STACK_SIZE );
+	cdc_PowerUp();    // start codec powering up -- this thread won't suffer from the delay
+	
 	while( true ){
 		int flg = osEventFlagsWait( pwrEvents, PM_NOPWR | PM_PWRCHK, osFlagsWaitAny, osWaitForever );	
 		

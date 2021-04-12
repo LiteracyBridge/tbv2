@@ -221,6 +221,7 @@ void 					USBmode( bool start ){						// start (or stop) USB storage mode
 //	return iSt;
 //}
 
+void 						writeCSM( void );			// write current CSM to tbook_csm.c
 
 void assertValidState(int stateIndex) {
 	if ( stateIndex < 0 || stateIndex >= nCSMstates )
@@ -342,7 +343,8 @@ static void 					doAction( Action act, char *arg, int iarg ){	// execute one csm
 			powerDownTBook( true ); //false );
 			break;
 	  case sysTest:
-			controlTest();
+			dbgLog( "writing tbook_csm.c \n" );
+			writeCSM(); //controlTest();
 			break;
 	  case playNxtPkg:
 			playNxtPackage();

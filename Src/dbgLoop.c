@@ -199,7 +199,7 @@ void debugLoop( bool autoUSB ){			// called if boot-MINUS, no file system,  auto
 	dbgLog(" DebugLoop: +/-: Dbg, St:chgMode, Ta: shRegs \n");
 	
 	const int nMDs = 2;
-	char * cmdMd[] = { "Rec/Play: Tr: play, Cir: record, LH: mask, RH: USB", "Codec: Tr: pwr, Cir: freq, LH: mute, Pot: spkrEn, RH: recEn" };
+	char * cmdMd[] = { "Rec/Play= Tr: play, Cir: record, LH: mask, RH: USB", "Codec= Tr: pwr, Cir: freq, LH: mute, Pot: spkrEn, RH: recEn" };
 	int iMd = 0;
 	while ( true ){		// loop processing debug commands
 		CheckRecording();

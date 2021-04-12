@@ -83,11 +83,9 @@ void 										gDef( GPIO_ID gpid, char *signal ){							// define gpio_signal[ 
 	gpio_def[ gpid ].active = active;	// signal when active (for keys, input state when pressed)
 }
 void 										GPIO_DefineSignals( const GPIO_Signal def[] ){
-	for (int i=0; i < 1000; i++ ){
-		if ( def[ i ].id == gINVALID ) return;	// hit end of list
+	for (int i=0; def[i].id != gINVALID; i++ ){
 		gDef( def[ i ].id, def[ i ].name );
 	}
-	tbErr( "too many GPIOs defined" );
 }
 
 
@@ -132,6 +130,21 @@ void										gConfigIn( GPIO_ID key, bool pulldown ){		// configure GPIO as low
 }
 void										gConfigKey( GPIO_ID key ){		// configure GPIO as low speed pulldown input ( keys )
 	gConfigIn( key, true );	  // pulldown
+	
+	// AFIO->EXTICR[0..3] -- set of 4bit fields for pin#0..15
+	int portCode = (gpio_def[ key ].port - GPIOA)>>10;   // GPIOA=0, .. GPIOH=7
+	int pin = gpio_def[ key ].pin;
+	int iWd = pin >> 2, iPos = (pin & 0x3), fbit = iPos<<2;
+	int msk = (0xF << fbit), val = (portCode << fbit);
+	SYSCFG->EXTICR[ iWd ] = ( SYSCFG->EXTICR[ iWd ] & ~msk ) | val;		// replace bits <fbit..fbit+3> with portCode
+	
+	int pinBit = 1 << pin;			// bit mask for EXTI->IMR, RTSR, FTSR
+	EXTI->RTSR |= pinBit; 			// Enable a rising trigger 
+	EXTI->FTSR |= pinBit; 			// Enable a falling trigger 
+	EXTI->IMR  |= pinBit; 			// Configure the interrupt mask 
+	
+	NVIC_ClearPendingIRQ( gpio_def[ key ].intq );
+	NVIC_EnableIRQ( 			gpio_def[ key ].intq );   // enable interrupt on key
 }
 void										gConfigADC( GPIO_ID id ){		// configure GPIO as ANALOG input ( battery voltage levels )
 #if defined( TBOOK_V2 )	

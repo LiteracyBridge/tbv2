@@ -3,7 +3,7 @@
 <title>Static Call Graph - [.\Objects\TBookRev2b.axf]</title></head>
 <body><HR>
 <H1>Static Call Graph for image .\Objects\TBookRev2b.axf</H1><HR>
-<BR><P>#&#060CALLGRAPH&#062# ARM Linker, 5060750: Last Updated: Sat Apr 17 10:31:16 2021
+<BR><P>#&#060CALLGRAPH&#062# ARM Linker, 5060750: Last Updated: Sat Apr 17 10:57:43 2021
 <BR><P>
 <H3>Maximum Stack Usage =       7552 bytes + Unknown(Functions without stacksize, Cycles, Untraceable Function Pointers)</H3><H3>
 Call chain for Maximum Stack Depth:</H3>
@@ -1385,23 +1385,23 @@ Global Symbols
 <P><STRONG><a name="[19a]"></a>_printf_pre_padding</STRONG> (Thumb, 44 bytes, Stack size 16 bytes, _printf_pad.o(.text))
 <BR><BR>[Stack]<UL><LI>Max Depth = 16<LI>Call Chain = _printf_pre_padding
 </UL>
-<BR>[Called By]<UL><LI><a href="#[1e6]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;_printf_fp_dec_real
-<LI><a href="#[19e]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;_printf_int_common
+<BR>[Called By]<UL><LI><a href="#[19e]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;_printf_int_common
 <LI><a href="#[19f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;_printf_wctomb
 <LI><a href="#[199]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;_printf_str
 <LI><a href="#[1e8]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;_printf_fp_infnan
 <LI><a href="#[1e9]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;_printf_fp_hex_real
+<LI><a href="#[1e6]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;_printf_fp_dec_real
 </UL>
 
 <P><STRONG><a name="[19b]"></a>_printf_post_padding</STRONG> (Thumb, 34 bytes, Stack size 16 bytes, _printf_pad.o(.text))
 <BR><BR>[Stack]<UL><LI>Max Depth = 16<LI>Call Chain = _printf_post_padding
 </UL>
-<BR>[Called By]<UL><LI><a href="#[1e6]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;_printf_fp_dec_real
-<LI><a href="#[19e]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;_printf_int_common
+<BR>[Called By]<UL><LI><a href="#[19e]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;_printf_int_common
 <LI><a href="#[19f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;_printf_wctomb
 <LI><a href="#[199]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;_printf_str
 <LI><a href="#[1e8]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;_printf_fp_infnan
 <LI><a href="#[1e9]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;_printf_fp_hex_real
+<LI><a href="#[1e6]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;_printf_fp_dec_real
 </UL>
 
 <P><STRONG><a name="[19c]"></a>_printf_truncate_signed</STRONG> (Thumb, 18 bytes, Stack size 0 bytes, _printf_truncate.o(.text))
@@ -2076,8 +2076,8 @@ Global Symbols
 <BR>[Calls]<UL><LI><a href="#[1cf]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__user_perproc_libspace
 </UL>
 <BR>[Called By]<UL><LI><a href="#[185]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__rt_ctype_table
-<LI><a href="#[1e6]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;_printf_fp_dec_real
 <LI><a href="#[164]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__rt_lib_init_lc_common
+<LI><a href="#[1e6]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;_printf_fp_dec_real
 </UL>
 
 <P><STRONG><a name="[6b3]"></a>__use_no_heap</STRONG> (Thumb, 2 bytes, Stack size 0 bytes, hguard.o(.text), UNUSED)
@@ -2143,25 +2143,25 @@ Global Symbols
 </UL>
 <BR>[Calls]<UL><LI><a href="#[1a3]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__printf
 </UL>
-<BR>[Called By]<UL><LI><a href="#[194]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;vsnprintf
-<LI><a href="#[192]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;vsprintf
+<BR>[Called By]<UL><LI><a href="#[192]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;vsprintf
 <LI><a href="#[198]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__2snprintf
 <LI><a href="#[197]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__2sprintf
+<LI><a href="#[194]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;vsnprintf
 <LI><a href="#[191]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;_printf_char_file
 </UL>
 
 <P><STRONG><a name="[67]"></a>_sputc</STRONG> (Thumb, 10 bytes, Stack size 0 bytes, _sputc.o(.text))
-<BR><BR>[Called By]<UL><LI><a href="#[194]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;vsnprintf
-<LI><a href="#[192]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;vsprintf
+<BR><BR>[Called By]<UL><LI><a href="#[192]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;vsprintf
 <LI><a href="#[198]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__2snprintf
 <LI><a href="#[197]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__2sprintf
+<LI><a href="#[194]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;vsnprintf
 </UL>
-<BR>[Address Reference Count : 2]<UL><LI> vsprintf.o(.text)
-<LI> __2sprintf.o(.text)
+<BR>[Address Reference Count : 2]<UL><LI> __2sprintf.o(.text)
+<LI> vsprintf.o(.text)
 </UL>
 <P><STRONG><a name="[68]"></a>_snputc</STRONG> (Thumb, 16 bytes, Stack size 0 bytes, _snputc.o(.text))
-<BR>[Address Reference Count : 2]<UL><LI> vsnprintf.o(.text)
-<LI> __2snprintf.o(.text)
+<BR>[Address Reference Count : 2]<UL><LI> __2snprintf.o(.text)
+<LI> vsnprintf.o(.text)
 </UL>
 <P><STRONG><a name="[1d4]"></a>_printf_cs_common</STRONG> (Thumb, 20 bytes, Stack size 8 bytes, _printf_char.o(.text))
 <BR><BR>[Stack]<UL><LI>Max Depth = 40<LI>Call Chain = _printf_cs_common &rArr; _printf_str &rArr; _printf_post_padding
@@ -2359,8 +2359,8 @@ Global Symbols
 <P><STRONG><a name="[1d6]"></a>_ll_udiv10</STRONG> (Thumb, 138 bytes, Stack size 12 bytes, lludiv10.o(.text))
 <BR><BR>[Stack]<UL><LI>Max Depth = 12<LI>Call Chain = _ll_udiv10
 </UL>
-<BR>[Called By]<UL><LI><a href="#[1e1]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;_fp_digits
-<LI><a href="#[151]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;_printf_longlong_dec
+<BR>[Called By]<UL><LI><a href="#[151]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;_printf_longlong_dec
+<LI><a href="#[1e1]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;_fp_digits
 </UL>
 
 <P><STRONG><a name="[6d]"></a>isspace</STRONG> (Thumb, 18 bytes, Stack size 8 bytes, isspace.o(.text))
@@ -2375,12 +2375,12 @@ Global Symbols
 <P><STRONG><a name="[1e6]"></a>_printf_fp_dec_real</STRONG> (Thumb, 620 bytes, Stack size 104 bytes, _printf_fp_dec.o(.text))
 <BR><BR>[Stack]<UL><LI>Max Depth = 324<LI>Call Chain = _printf_fp_dec_real &rArr; _fp_digits &rArr; _btod_etento &rArr; _btod_emul &rArr; _e2e
 </UL>
-<BR>[Calls]<UL><LI><a href="#[1e1]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;_fp_digits
-<LI><a href="#[165]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__rt_locale
+<BR>[Calls]<UL><LI><a href="#[165]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__rt_locale
 <LI><a href="#[19b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;_printf_post_padding
 <LI><a href="#[19a]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;_printf_pre_padding
 <LI><a href="#[1e7]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__ARM_fpclassify
 <LI><a href="#[1e8]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;_printf_fp_infnan
+<LI><a href="#[1e1]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;_fp_digits
 </UL>
 <BR>[Called By]<UL><LI><a href="#[143]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;_printf_fp_dec
 </UL>
@@ -2565,8 +2565,8 @@ Global Symbols
 <BR>[Calls]<UL><LI><a href="#[19b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;_printf_post_padding
 <LI><a href="#[19a]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;_printf_pre_padding
 </UL>
-<BR>[Called By]<UL><LI><a href="#[1e6]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;_printf_fp_dec_real
-<LI><a href="#[1e9]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;_printf_fp_hex_real
+<BR>[Called By]<UL><LI><a href="#[1e9]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;_printf_fp_hex_real
+<LI><a href="#[1e6]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;_printf_fp_dec_real
 </UL>
 
 <P><STRONG><a name="[1a7]"></a>__vfscanf_char_file</STRONG> (Thumb, 56 bytes, Stack size 24 bytes, scanf_char_file_locked.o(.text))
@@ -2735,8 +2735,8 @@ Global Symbols
 <BR>[Calls]<UL><LI><a href="#[202]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;_e2e
 <LI><a href="#[201]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__btod_div_common
 </UL>
-<BR>[Called By]<UL><LI><a href="#[1e1]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;_fp_digits
-<LI><a href="#[1e2]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;_btod_etento
+<BR>[Called By]<UL><LI><a href="#[1e2]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;_btod_etento
+<LI><a href="#[1e1]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;_fp_digits
 </UL>
 
 <P><STRONG><a name="[1e5]"></a>_btod_emul</STRONG> (Thumb, 42 bytes, Stack size 28 bytes, btod.o(CL$$btod_emul))
@@ -2745,8 +2745,8 @@ Global Symbols
 <BR>[Calls]<UL><LI><a href="#[203]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__btod_mult_common
 <LI><a href="#[202]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;_e2e
 </UL>
-<BR>[Called By]<UL><LI><a href="#[1e1]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;_fp_digits
-<LI><a href="#[1e2]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;_btod_etento
+<BR>[Called By]<UL><LI><a href="#[1e2]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;_btod_etento
+<LI><a href="#[1e1]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;_fp_digits
 </UL>
 
 <P><STRONG><a name="[203]"></a>__btod_mult_common</STRONG> (Thumb, 580 bytes, Stack size 16 bytes, btod.o(CL$$btod_mult_common))
@@ -2836,16 +2836,16 @@ Global Symbols
 <P><STRONG><a name="[4e]"></a>DMA2_Stream3_IRQHandler</STRONG> (Thumb, 16 bytes, Stack size 8 bytes, mci_stm32f4xx.o(i.DMA2_Stream3_IRQHandler))
 <BR><BR>[Stack]<UL><LI>Max Depth = 32<LI>Call Chain = DMA2_Stream3_IRQHandler &rArr; HAL_DMA_IRQHandler
 </UL>
-<BR>[Calls]<UL><LI><a href="#[21d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_DMA_IRQHandler
-<LI><a href="#[21c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_NVIC_ClearPendingIRQ
+<BR>[Calls]<UL><LI><a href="#[21c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_NVIC_ClearPendingIRQ
+<LI><a href="#[21d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_DMA_IRQHandler
 </UL>
 <BR>[Address Reference Count : 1]<UL><LI> startup_stm32f412vx.o(RESET)
 </UL>
 <P><STRONG><a name="[58]"></a>DMA2_Stream6_IRQHandler</STRONG> (Thumb, 16 bytes, Stack size 8 bytes, mci_stm32f4xx.o(i.DMA2_Stream6_IRQHandler))
 <BR><BR>[Stack]<UL><LI>Max Depth = 32<LI>Call Chain = DMA2_Stream6_IRQHandler &rArr; HAL_DMA_IRQHandler
 </UL>
-<BR>[Calls]<UL><LI><a href="#[21d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_DMA_IRQHandler
-<LI><a href="#[21c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_NVIC_ClearPendingIRQ
+<BR>[Calls]<UL><LI><a href="#[21c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_NVIC_ClearPendingIRQ
+<LI><a href="#[21d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_DMA_IRQHandler
 </UL>
 <BR>[Address Reference Count : 1]<UL><LI> startup_stm32f412vx.o(RESET)
 </UL>
@@ -3592,10 +3592,10 @@ Global Symbols
 <P><STRONG><a name="[21c]"></a>HAL_NVIC_ClearPendingIRQ</STRONG> (Thumb, 30 bytes, Stack size 8 bytes, stm32f4xx_hal_cortex.o(i.HAL_NVIC_ClearPendingIRQ))
 <BR><BR>[Stack]<UL><LI>Max Depth = 8<LI>Call Chain = HAL_NVIC_ClearPendingIRQ
 </UL>
-<BR>[Called By]<UL><LI><a href="#[58]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;DMA2_Stream6_IRQHandler
-<LI><a href="#[4e]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;DMA2_Stream3_IRQHandler
-<LI><a href="#[fc]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;PowerControl
+<BR>[Called By]<UL><LI><a href="#[fc]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;PowerControl
 <LI><a href="#[29b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;I2C_PowerControl
+<LI><a href="#[58]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;DMA2_Stream6_IRQHandler
+<LI><a href="#[4e]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;DMA2_Stream3_IRQHandler
 </UL>
 
 <P><STRONG><a name="[2a2]"></a>HAL_NVIC_DisableIRQ</STRONG> (Thumb, 62 bytes, Stack size 8 bytes, stm32f4xx_hal_cortex.o(i.HAL_NVIC_DisableIRQ))
@@ -4237,7 +4237,6 @@ Global Symbols
 <LI><a href="#[332]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;USBD_DriverEndpointTransferAbort
 </UL>
 <BR>[Called By]<UL><LI><a href="#[354]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;USBD_MSC_EndpointStart
-<LI><a href="#[33c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;USBD_StatusInStage
 <LI><a href="#[326]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;USBD_DataOutStage
 <LI><a href="#[324]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;USBD_DataInStage
 <LI><a href="#[34e]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;USBD_MSC_EndpointClearFeatureStall
@@ -4248,6 +4247,7 @@ Global Symbols
 <LI><a href="#[36f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;USBD_MSC_EpBulkIn
 <LI><a href="#[36e]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;USBD_MSC_DataInTransfer
 <LI><a href="#[33a]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;USBD_StatusOutStage
+<LI><a href="#[33c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;USBD_StatusInStage
 </UL>
 
 <P><STRONG><a name="[332]"></a>USBD_DriverEndpointTransferAbort</STRONG> (Thumb, 198 bytes, Stack size 40 bytes, usbd_lib_drv.o(i.USBD_DriverEndpointTransferAbort))
@@ -4280,8 +4280,8 @@ Global Symbols
 <LI><a href="#[22c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;EventRecord2
 </UL>
 <BR>[Called By]<UL><LI><a href="#[73]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;USBD_MSC_Thread
-<LI><a href="#[33b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;USBD_StatusInStageDone
 <LI><a href="#[341]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;USBD_StatusOutStageDone
+<LI><a href="#[33b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;USBD_StatusInStageDone
 </UL>
 
 <P><STRONG><a name="[335]"></a>USBD_DriverEndpointUnconfigure</STRONG> (Thumb, 200 bytes, Stack size 32 bytes, usbd_lib_drv.o(i.USBD_DriverEndpointUnconfigure))
@@ -4404,11 +4404,11 @@ Global Symbols
 <P><STRONG><a name="[348]"></a>USBD_Endpoint0_Setup_MSC_ReqToIF</STRONG> (Thumb, 168 bytes, Stack size 24 bytes, usbd_lib_core_msc.o(i.USBD_Endpoint0_Setup_MSC_ReqToIF))
 <BR><BR>[Stack]<UL><LI>Max Depth = 256<LI>Call Chain = USBD_Endpoint0_Setup_MSC_ReqToIF &rArr; USBD_DataInStage &rArr; USBD_DriverEndpointTransfer &rArr; USBD_DriverEndpointTransferAbort &rArr; USBD_SemaphoreAcquire &rArr; osKernelGetTickFreq &rArr; svcRtxKernelGetTickFreq &rArr; EvrRtxKernelGetTickFreq &rArr; EventRecord2 &rArr; EventRecordItem
 </UL>
-<BR>[Calls]<UL><LI><a href="#[33c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;USBD_StatusInStage
-<LI><a href="#[324]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;USBD_DataInStage
+<BR>[Calls]<UL><LI><a href="#[324]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;USBD_DataInStage
 <LI><a href="#[350]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;USBD_MSC_GetMaxLUN
 <LI><a href="#[34f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;USBD_MSC_BulkOnlyMassStorageReset
 <LI><a href="#[33a]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;USBD_StatusOutStage
+<LI><a href="#[33c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;USBD_StatusInStage
 </UL>
 <BR>[Called By]<UL><LI><a href="#[31a]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;USBD_Endpoint0
 </UL>
@@ -4826,8 +4826,8 @@ Global Symbols
 <P><STRONG><a name="[1e7]"></a>__ARM_fpclassify</STRONG> (Thumb, 48 bytes, Stack size 8 bytes, fpclassify.o(i.__ARM_fpclassify))
 <BR><BR>[Stack]<UL><LI>Max Depth = 8<LI>Call Chain = __ARM_fpclassify
 </UL>
-<BR>[Called By]<UL><LI><a href="#[1e6]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;_printf_fp_dec_real
-<LI><a href="#[1e9]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;_printf_fp_hex_real
+<BR>[Called By]<UL><LI><a href="#[1e9]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;_printf_fp_hex_real
+<LI><a href="#[1e6]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;_printf_fp_dec_real
 </UL>
 
 <P><STRONG><a name="[396]"></a>__sys_close</STRONG> (Thumb, 114 bytes, Stack size 16 bytes, fs_sys.o(i.__sys_close))
@@ -5746,8 +5746,8 @@ Global Symbols
 <P><STRONG><a name="[432]"></a>convertSeq</STRONG> (Thumb, 144 bytes, Stack size 24 bytes, ledmanager.o(i.convertSeq))
 <BR><BR>[Stack]<UL><LI>Max Depth = 52<LI>Call Chain = convertSeq &rArr; asShade
 </UL>
-<BR>[Calls]<UL><LI><a href="#[434]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;seqAddShade
-<LI><a href="#[433]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;asShade
+<BR>[Calls]<UL><LI><a href="#[433]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;asShade
+<LI><a href="#[434]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;seqAddShade
 <LI><a href="#[185]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__rt_ctype_table
 </UL>
 <BR>[Called By]<UL><LI><a href="#[361]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;ledFg
@@ -5959,7 +5959,6 @@ Global Symbols
 <LI><a href="#[27b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;fsMount
 <LI><a href="#[44c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;debugLoop
 <LI><a href="#[82]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;talking_book
-<LI><a href="#[7a]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;ledThread
 <LI><a href="#[506]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;startKeypadTest
 <LI><a href="#[507]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;keypadTestKey
 <LI><a href="#[79]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;inputThread
@@ -5992,6 +5991,7 @@ Global Symbols
 <LI><a href="#[3e4]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;eraseNorFlash
 <LI><a href="#[438]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;copyNorLog
 <LI><a href="#[42d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;closeLog
+<LI><a href="#[7a]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;ledThread
 <LI><a href="#[218]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;showCdcRegs
 <LI><a href="#[2b1]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;cdc_SetMasterFreq
 <LI><a href="#[217]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;cdc_RecordEnable
@@ -7214,11 +7214,11 @@ Global Symbols
 <LI><a href="#[44c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;debugLoop
 <LI><a href="#[2d6]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;ResetGPIO
 <LI><a href="#[2d3]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;MarcDebug
-<LI><a href="#[512]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;ledSet
 <LI><a href="#[419]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;cdc_PowerUp
 <LI><a href="#[213]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;cdc_PowerDown
 <LI><a href="#[4ff]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;initPwrSignals
 <LI><a href="#[21f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;EnableADC
+<LI><a href="#[512]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;ledSet
 <LI><a href="#[2ef]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;tglUSBmode
 <LI><a href="#[2ea]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;PlayRecCmd
 <LI><a href="#[20b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;CheckRecording
@@ -7545,9 +7545,9 @@ Global Symbols
 <BR>[Calls]<UL><LI><a href="#[206]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;tbErr
 <LI><a href="#[20f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;dbgLog
 <LI><a href="#[389]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;osThreadNew
-<LI><a href="#[4e7]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;handlePowerEvent
 <LI><a href="#[4f4]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;osEventFlagsNew
 <LI><a href="#[456]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;ledBg
+<LI><a href="#[4e7]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;handlePowerEvent
 </UL>
 <BR>[Called By]<UL><LI><a href="#[82]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;talking_book
 </UL>
@@ -7759,8 +7759,8 @@ Global Symbols
 <LI>Call Chain = ledThread &rArr; dbgLog &rArr; vprintf &rArr; _printf_char_file &rArr; _printf_char_common &rArr; __printf
 </UL>
 <BR>[Calls]<UL><LI><a href="#[20f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;dbgLog
-<LI><a href="#[512]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;ledSet
 <LI><a href="#[4ad]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;osEventFlagsWait
+<LI><a href="#[512]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;ledSet
 </UL>
 <BR>[Address Reference Count : 1]<UL><LI> ledmanager.o(i.initLedManager)
 </UL>
@@ -7833,9 +7833,9 @@ Global Symbols
 <LI>Call Chain = logEvtFmt &rArr; logEvtS &rArr;  tbErr (Cycle)
 </UL>
 <BR>[Calls]<UL><LI><a href="#[45d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;logEvtS
-<LI><a href="#[194]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;vsnprintf
 <LI><a href="#[a]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;free
 <LI><a href="#[188]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;malloc
+<LI><a href="#[194]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;vsnprintf
 </UL>
 <BR>[Called By]<UL><LI><a href="#[394]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;logPowerUp
 </UL>
@@ -8079,11 +8079,11 @@ Global Symbols
 
 <P><STRONG><a name="[52c]"></a>mad_bit_init</STRONG> (Thumb, 12 bytes, Stack size 0 bytes, bit.o(i.mad_bit_init))
 <BR><BR>[Called By]<UL><LI><a href="#[505]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mad_stream_buffer
-<LI><a href="#[534]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mad_stream_init
 <LI><a href="#[4c9]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mad_stream_sync
 <LI><a href="#[52b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mad_header_decode
 <LI><a href="#[52a]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mad_frame_decode
 <LI><a href="#[cc]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mad_layer_III
+<LI><a href="#[534]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mad_stream_init
 </UL>
 
 <P><STRONG><a name="[2ca]"></a>mad_bit_length</STRONG> (Thumb, 30 bytes, Stack size 8 bytes, bit.o(i.mad_bit_length))
@@ -9813,8 +9813,8 @@ Global Symbols
 <BR>[Calls]<UL><LI><a href="#[a]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;free
 </UL>
 <BR>[Called By]<UL><LI><a href="#[527]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mad_decoder_run
-<LI><a href="#[533]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mad_stream_finish
 <LI><a href="#[52d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mad_frame_finish
+<LI><a href="#[533]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mad_stream_finish
 </UL>
 
 <P><STRONG><a name="[528]"></a>mp3_malloc</STRONG> (Thumb, 14 bytes, Stack size 8 bytes, tbutil.o(i.mp3_malloc))
@@ -9933,11 +9933,11 @@ Global Symbols
 <LI><a href="#[5e4]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;IsIrqMasked
 <LI><a href="#[223]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;EventFlagsCheck
 </UL>
-<BR>[Called By]<UL><LI><a href="#[7a]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;ledThread
-<LI><a href="#[79]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;inputThread
+<BR>[Called By]<UL><LI><a href="#[79]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;inputThread
 <LI><a href="#[426]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;readADC
 <LI><a href="#[7d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;powerThreadProc
 <LI><a href="#[7b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mediaThread
+<LI><a href="#[7a]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;ledThread
 <LI><a href="#[78]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;fileOpThread
 </UL>
 
@@ -12995,14 +12995,14 @@ Local Symbols
 <BR><BR>[Stack]<UL><LI>Max Depth = 304 + Unknown Stack Size
 <LI>Call Chain = run_sync &rArr; mad_frame_decode &rArr; mad_header_decode &rArr; free_bitrate &rArr; decode_header &rArr; mad_bit_crc &rArr; mad_bit_read
 </UL>
-<BR>[Calls]<UL><LI><a href="#[534]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mad_stream_init
-<LI><a href="#[533]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mad_stream_finish
-<LI><a href="#[52b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mad_header_decode
+<BR>[Calls]<UL><LI><a href="#[52b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mad_header_decode
 <LI><a href="#[52e]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mad_frame_init
 <LI><a href="#[52d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mad_frame_finish
 <LI><a href="#[52a]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mad_frame_decode
 <LI><a href="#[535]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mad_synth_init
 <LI><a href="#[630]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mad_synth_frame
+<LI><a href="#[534]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mad_stream_init
+<LI><a href="#[533]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mad_stream_finish
 </UL>
 <BR>[Address Reference Count : 1]<UL><LI> decoder.o(i.mad_decoder_run)
 </UL>
@@ -14152,10 +14152,10 @@ Local Symbols
 <P><STRONG><a name="[fc]"></a>PowerControl</STRONG> (Thumb, 398 bytes, Stack size 16 bytes, mci_stm32f4xx.o(i.PowerControl))
 <BR><BR>[Stack]<UL><LI>Max Depth = 32<LI>Call Chain = PowerControl &rArr; HAL_DMA_DeInit
 </UL>
-<BR>[Calls]<UL><LI><a href="#[288]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_DMA_DeInit
-<LI><a href="#[2a3]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_NVIC_EnableIRQ
+<BR>[Calls]<UL><LI><a href="#[2a3]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_NVIC_EnableIRQ
 <LI><a href="#[2a2]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_NVIC_DisableIRQ
 <LI><a href="#[21c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_NVIC_ClearPendingIRQ
+<LI><a href="#[288]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_DMA_DeInit
 </UL>
 <BR>[Address Reference Count : 1]<UL><LI> mci_stm32f4xx.o(.constdata)
 </UL>
@@ -14622,8 +14622,8 @@ Local Symbols
 </UL>
 
 <P><STRONG><a name="[289]"></a>DMA_CalcBaseAndBitshift</STRONG> (Thumb, 46 bytes, Stack size 0 bytes, stm32f4xx_hal_dma.o(i.DMA_CalcBaseAndBitshift))
-<BR><BR>[Called By]<UL><LI><a href="#[288]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_DMA_DeInit
-<LI><a href="#[28a]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_DMA_Init
+<BR><BR>[Called By]<UL><LI><a href="#[28a]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_DMA_Init
+<LI><a href="#[288]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_DMA_DeInit
 </UL>
 
 <P><STRONG><a name="[28b]"></a>DMA_CheckFifoParam</STRONG> (Thumb, 170 bytes, Stack size 0 bytes, stm32f4xx_hal_dma.o(i.DMA_CheckFifoParam))
@@ -15369,8 +15369,6 @@ Local Symbols
 <LI><a href="#[33e]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;USBD_Endpoint0_Out_ADC_ReqToIF
 <LI><a href="#[340]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;USBD_Endpoint0_Out_ADC_ReqToEP
 <LI><a href="#[22c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;EventRecord2
-<LI><a href="#[33b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;USBD_StatusInStageDone
-<LI><a href="#[33c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;USBD_StatusInStage
 <LI><a href="#[326]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;USBD_DataOutStage
 <LI><a href="#[324]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;USBD_DataInStage
 <LI><a href="#[346]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;USBD_ReqSetInterface
@@ -15389,6 +15387,8 @@ Local Symbols
 <LI><a href="#[31b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;USBD_Core_Endpoint0_InDataSent
 <LI><a href="#[341]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;USBD_StatusOutStageDone
 <LI><a href="#[33a]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;USBD_StatusOutStage
+<LI><a href="#[33b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;USBD_StatusInStageDone
+<LI><a href="#[33c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;USBD_StatusInStage
 </UL>
 <BR>[Called By]<UL><LI><a href="#[317]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;USBD_Core
 </UL>

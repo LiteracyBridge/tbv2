@@ -216,7 +216,7 @@ char * padStr( char *sv, const char *s ){
 }
 void writeCSM(){			// write current CSM to tbook_csm.c
 	char sv[ padLEN+4 ]; 
-	FILE * f = tbOpenWrite( "tbook_csm.def" );
+	FILE * f = tbOpenWrite( "tbook_csm_def.h" );
 	const char *aNms[] = {
 		"aNull", "LED", "bgLED", "playSys", "playSubj", "pausePlay", "resumePlay", "stopPlay", "volAdj", "spdAdj", "posAdj",
 		"startRec", "pauseRec", "resumeRec", "finishRec", "playRec", "saveRec", "writeMsg",

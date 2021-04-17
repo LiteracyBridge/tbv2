@@ -129,10 +129,15 @@ void										gConfigIn( GPIO_ID key, bool pulldown ){		// configure GPIO as low
 #endif
 }
 void										gConfigKey( GPIO_ID key ){		// configure GPIO as low speed pulldown input ( keys )
+	extern uint16_t						KeypadIMR;		// from inputmanager.c
+
 	gConfigIn( key, true );	  // pulldown
 	
+	RCC->APB2ENR |= RCC_APB2ENR_SYSCFGEN_Msk;			// enable SysCfg for SYSCFG->EXTICR[]
+
 	// AFIO->EXTICR[0..3] -- set of 4bit fields for pin#0..15
-	int portCode = (gpio_def[ key ].port - GPIOA)>>10;   // GPIOA=0, .. GPIOH=7
+	int port = (int) gpio_def[ key ].port;  // GPIOA .. GPIOE
+	int portCode = (port - (int)GPIOA)>>10;   // GPIOA=0, .. GPIOH=7
 	int pin = gpio_def[ key ].pin;
 	int iWd = pin >> 2, iPos = (pin & 0x3), fbit = iPos<<2;
 	int msk = (0xF << fbit), val = (portCode << fbit);
@@ -141,7 +146,8 @@ void										gConfigKey( GPIO_ID key ){		// configure GPIO as low speed pulldow
 	int pinBit = 1 << pin;			// bit mask for EXTI->IMR, RTSR, FTSR
 	EXTI->RTSR |= pinBit; 			// Enable a rising trigger 
 	EXTI->FTSR |= pinBit; 			// Enable a falling trigger 
-	EXTI->IMR  |= pinBit; 			// Configure the interrupt mask 
+//DONT ENABLE-- 	EXTI->IMR  |= pinBit; 			// Configure the interrupt mask 
+	KeypadIMR  |= pinBit;
 	
 	NVIC_ClearPendingIRQ( gpio_def[ key ].intq );
 	NVIC_EnableIRQ( 			gpio_def[ key ].intq );   // enable interrupt on key
@@ -550,7 +556,7 @@ int DebugMask =    // uncomment lines to enable dbgLog() calls starting with 'X'
 	//	0x100 +	// 9 led
 	//	0x200 +	// A keyboard
 	//	0x400 +	// B token table
-		0x800 +	// C CSM
+	//	0x800 +	// C CSM
 	//	0x1000 + // D audio playback
 0;
 bool										dbgEnab( char ch ){

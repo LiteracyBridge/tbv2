@@ -147,14 +147,15 @@ TBPackage_t * readContent( const char * pkgPath, int pkgIdx ){		// parse list_of
 }
 static short	asStIdx( TknID stNm ){			// => idx of csmState with this 'stNm', or alloc
 	for( short i=0; i<nCSMstates; i++ ){
-		if ( TBookCSM[i]->nmTknID.tknID == stNm.tknID ) 
+		if ( TBookCSM[i]->nmTknID == stNm.tknID ) 
+//		if ( TBookCSM[i]->nmTknID.tknID == stNm.tknID ) 
 			return i;
 	}
 	short stIdx = nCSMstates;
 	if ( nCSMstates > MAX_CSM_STATES ) 
 		tbErr( "too many CSM states" );
 	csmState * cst = tbAlloc( sizeof( csmState ), "csmStates"); 
-	cst->nmTknID = stNm;
+	cst->nmTknID = stNm.tknID;
 	cst->nm = tknStr( stNm );
 	cst->nActions = 0;
 	for ( int e = (int)eNull; e < (int)eUNDEF; e++ ){ 
@@ -173,6 +174,13 @@ static void 	setCGrp( void *vcst, TknID cgrpLst ){	// set cst->evtNxtState[ x ] 
 	csmState * cst = (csmState *) vcst;
 	for ( short iE = 0; iE < lstCnt(cgrpLst); iE++ )
 		cst->evtNxtState[ asEvent( getLstNm(cgrpLst, iE)) ] = asStIdx( getLstVal(cgrpLst, iE));
+}
+void 					addPlaySys( char *nm ){
+	char path[MAX_PATH];
+	buildPath( path, TB_Config.systemAudio, nm, ".wav" ); 
+	SysAudio[ nPlaySys ].sysNm = nm;
+  SysAudio[ nPlaySys ].sysPath = allocStr( path );
+	nPlaySys++;
 }
 void 					readControlDef( void ){				// parse control.def => Config & TBookCSM[]
 	TknID cdef = parseFile( TBP[ pCSM_DEF ] );
@@ -238,6 +246,8 @@ void 					readControlDef( void ){				// parse control.def => Config & TBookCSM[]
 						argV = getLstVal( actdefn, 1 );		toStr( Nm, argV );	//DEBUG
 						cst->Actions[ iA ].act = asAction( actV );	// Action
 						cst->Actions[ iA ].arg = tknStr( argV );	// arg
+						if ( cst->Actions[ iA ].act == playSys ) 
+							addPlaySys( cst->Actions[ iA ].arg );  // add to list of prompts in use
 					} else {
 						actV = actdefn;		toStr( Val, actV );	//DEBUG
 						cst->Actions[ iA ].act = asAction( actV );	// Action

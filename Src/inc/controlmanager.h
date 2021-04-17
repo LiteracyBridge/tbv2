@@ -15,15 +15,21 @@ typedef struct {
 #define		MAX_ACTIONS					6		// max # actions per state -- allocs (array of csmAction)
 #define		MAX_CSM_STATES		120		// max # csm states -- (allocs array of ptrs)
 #define   MAX_PKGS						4		// max # of content packages on a device
+#define		MAX_PLAY_SYS			 30		// max # of distince PlaySys() prompts in use
 
 // ---------TBook Control State Machine
 typedef struct {	// csmState
-	TknID 							nmTknID;										// TknID for name of this state
+	short 							nmTknID;										// TknID for name of this state
 	char *							nm;													// str name of this state
 	short 							evtNxtState[ eUNDEF ];			// nxtState for each incoming event (as idx in TBookCSM[])
 	short								nActions;
 	csmAction 					Actions[ MAX_ACTIONS ];
 } csmState;
+
+typedef	struct {		// paths for all playSys() prompts used in CSM
+		char * sysNm;
+		char * sysPath;
+}	SysAudio_t;
 
 //  ------------  TBook Content
 typedef struct { 	// tbSubject										// info for one subject
@@ -50,8 +56,11 @@ extern int						iPkg;
 extern TBPackage_t 	* TBPkg;											// TBook content in use
 
 // TBook ControlStateMachine
-extern int			nCSMstates;																	// #states defined				
-extern csmState *	TBookCSM[ MAX_CSM_STATES ];								// TBook state machine definition
+extern int						nCSMstates;										// #states defined				
+extern csmState *			TBookCSM[ MAX_CSM_STATES ];		// TBook state machine definition
+
+extern int						nPlaySys;			// # prompts used
+extern SysAudio_t 		SysAudio[];		// defined in tbook_csm.c
 
 extern void						initControlManager( void );						// initialize & run TBook Control State Machine
 extern void						buildPath( char *dstpath, const char *dir, const char *nm, const char *ext ); // dstpath[] <= "dir/nm.ext"

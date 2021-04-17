@@ -23,9 +23,12 @@ const char *				fgUSBconnect		= "G5g5!";
 const char *  			fgPowerDown			= "G_3G_3G_9G_3G_9G_3";  // length: 3.5sec
 const char *  			fgDFU						= "O3_5O3_3O3_2O3_1O3";  // length: 2.6sec
 
+// TBook configuration variables
+extern TBConfig_t 					TB_Config;			// defined in tbook_csm.c
+
 // TBook Control State Machine
-int 	 								nCSMstates = 0;
-csmState *						TBookCSM[ MAX_CSM_STATES ];		// TBook state machine definition
+extern int 	 								nCSMstates;			// defined in tbook_csm.c
+extern csmState *						TBookCSM[ MAX_CSM_STATES ];		// TBook state machine definition -- defined in tbook_csm.c
 
 // TBook content packages
 int										nPackages = 0;								// number of packages found
@@ -33,8 +36,6 @@ TBPackage_t *					TBPackage[ MAX_PKGS ];				// package info
 int										iPkg = 0;											// package index 
 TBPackage_t * 				TBPkg;												// content package in use
 
-// TBook configuration variales
-TBConfig_t 						TB_Config;
 
 
 /*
@@ -152,11 +153,16 @@ void						changePackage(){											// switch to last played package name
 
 
 void 					playSysAudio( char *arg ){				// play system file 'arg'
-	char path[MAX_PATH];
+//	char path[MAX_PATH];
 	resetAudio();
-	buildPath( path, TB_Config.systemAudio, arg, ".wav" ); //".ogg" );
-	playAudio( path, NULL );
-	logEvtNS( "PlaySys", "file", arg );
+	for (int i=0; i<nPlaySys; i++)
+		if ( strcmp( SysAudio[i].sysNm, arg )==0 ){
+//	buildPath( path, TB_Config.systemAudio, arg, ".wav" ); //".ogg" );
+			playAudio( SysAudio[i].sysPath, NULL );
+			logEvtNS( "PlaySys", "file", arg );
+			return;
+		}
+	tbErr("playSys %s not found", arg);
 }
 
 
@@ -511,37 +517,41 @@ static void 					eventTest(  ){										// report Events until DFU (pot table)
 }
 
 void 									initControlManager( void ){				// initialize control manager 	
-	// init to odd values so changes are visible
-	TB_Config.default_volume = 5; 		// lower for TB_V2_R3
-	TB_Config.default_speed = 3;
-	TB_Config.powerCheckMS = 10000;				// set by setPowerCheckTimer()
-	TB_Config.shortIdleMS = 3000;
-	TB_Config.longIdleMS = 11000;
-	TB_Config.systemAudio = "M0:/system/audio/";			// path to system audio files
-	TB_Config.minShortPressMS = 30;				// used by inputmanager.c
-	TB_Config.minLongPressMS = 900;				// used by inputmanager.c
-	TB_Config.bgPulse 				= (char *) bgPulse;
-	TB_Config.fgPlaying 			= (char *) fgPlaying;
-	TB_Config.fgPlayPaused		= (char *) fgPlayPaused;
-	TB_Config.fgRecording			= (char *) fgRecording;
-	TB_Config.fgRecordPaused	= (char *) fgRecordPaused;
-	TB_Config.fgSavingRec			= (char *) fgSavingRec;
-	TB_Config.fgSaveRec				= (char *) fgSaveRec;
-	TB_Config.fgCancelRec			= (char *) fgCancelRec;
-	TB_Config.fgUSB_MSC				= (char *) fgUSB_MSC;
-	TB_Config.fgUSBconnect		= (char *) fgUSBconnect;
-	TB_Config.fgTB_Error			= (char *) fgTB_Error;
-	TB_Config.fgNoUSBcable		= (char *) fgNoUSBcable;
-	TB_Config.fgPowerDown			= (char *) fgPowerDown;
-	TB_Config.fgEnterDFU			= (char *) fgDFU;
-
 	EventRecorderEnable(  evrEA, 	  		TB_no, TBsai_no ); 	// TB, TBaud, TBsai  
 	EventRecorderDisable( evrAOD, 			EvtFsCore_No,   EvtFsMcSPI_No );  //FileSys library 
 	EventRecorderDisable( evrAOD, 	 		EvtUsbdCore_No, EvtUsbdEnd_No ); 	//USB library 
 	
-	initTknTable();
-	if ( TBDataOK ) {
-		readControlDef( );						// reads TB_Config settings
+	if ( nCSMstates==0 ){
+		// init to odd values so changes are visible
+		TB_Config.default_volume = 5; 		// lower for TB_V2_R3
+		TB_Config.default_speed = 3;
+		TB_Config.powerCheckMS = 10000;				// set by setPowerCheckTimer()
+		TB_Config.shortIdleMS = 3000;
+		TB_Config.longIdleMS = 11000;
+		TB_Config.systemAudio = "M0:/system/audio/";			// path to system audio files
+		TB_Config.minShortPressMS = 30;				// used by inputmanager.c
+		TB_Config.minLongPressMS = 900;				// used by inputmanager.c
+		TB_Config.bgPulse 				= (char *) bgPulse;
+		TB_Config.fgPlaying 			= (char *) fgPlaying;
+		TB_Config.fgPlayPaused		= (char *) fgPlayPaused;
+		TB_Config.fgRecording			= (char *) fgRecording;
+		TB_Config.fgRecordPaused	= (char *) fgRecordPaused;
+		TB_Config.fgSavingRec			= (char *) fgSavingRec;
+		TB_Config.fgSaveRec				= (char *) fgSaveRec;
+		TB_Config.fgCancelRec			= (char *) fgCancelRec;
+		TB_Config.fgUSB_MSC				= (char *) fgUSB_MSC;
+		TB_Config.fgUSBconnect		= (char *) fgUSBconnect;
+		TB_Config.fgTB_Error			= (char *) fgTB_Error;
+		TB_Config.fgNoUSBcable		= (char *) fgNoUSBcable;
+		TB_Config.fgPowerDown			= (char *) fgPowerDown;
+		TB_Config.fgEnterDFU			= (char *) fgDFU;
+		
+		initTknTable();
+		if ( TBDataOK )		// control.def exists
+			readControlDef( );						// reads TB_Config settings
+	}
+
+	if ( nCSMstates > 0 ) {    // have a CSM definition
 		ledBg( TB_Config.bgPulse );		// reset background pulse according to TB_Config
 
 		findPackages( );		// sets iPkg & TBPackage to shortest name
@@ -558,7 +568,6 @@ void 									initControlManager( void ){				// initialize control manager
 			if ( timers[it] == NULL ) 
 				tbErr( "timer not alloc'd" );
 		}
-		//controlTest();  //DEBUG
 		executeCSM();	
 		
 	} else if ( FileSysOK ) {		// FS but no data, go into USB mode

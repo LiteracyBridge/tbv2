@@ -17,7 +17,7 @@ osMemoryPoolId_t					TBEvent_pool 	= NULL;		// memory pool for TBEvents
 
 static osThreadAttr_t 		thread_attr;
 static osEventFlagsId_t		osFlag_InpThr;		// osFlag to signal a keyUp event from ISR
-uint16_t						KeypadIMR = 0;					// interrupt mask register bits for keypad (also set in main() for MarcDebug)
+uint16_t									KeypadIMR = 0;					// interrupt mask register bits for keypad (also set in main() for MarcDebug)
 
 // structs defined in tbook.h for Debugging visibility
 KeyPadState_t				KSt;				
@@ -29,6 +29,27 @@ const char *				keyTestGood = "GgGg_";
 const char *				keyTestBad = "RrRr_"; 
 const char *				keyTestReset = "R8_3 R8_3 R8_3";	// 3 long red pulses
 const char *				keyTestSuccess = "G8R_3 G8R_3 G8R_3";	 // 3 long green then red pulses
+
+
+/*  External interrupts used by the TBook keypad, and corresponding Interrupt Mask Bits
+exti0     PA0   gHOME     0001
+exti1     PC1   gPOT      0002
+exti2   
+exti3     PE3   gTABLE -- 0008
+exti4     PA4   gPLUS     0010
+exti5_9   PA5   gMINUS    0020
+exti5_9 
+exti5_9   PB7   gLHAND -- 0080
+exti5_9   PE8   gSTAR --  0100
+exti5_9   PE9   gCIRCLE --0200
+exti10_15 PB10  gRHAND -- 0400
+exti10_15 
+exti10_15 
+exti10_15 
+exti10_15 
+exti10_15 PA15  gTREE     8000
+EXTI_IMR                  87BB
+*/
 
 KeyPadKey_arr 			keydef = {  // keypad GPIO in order: kHOME, kCIRCLE, kPLUS, kMINUS, kTREE, kLHAND, kPOT, kRHAND, kSTAR, kTABLE
 // static placeholders, filled in by initializeInterrupts
@@ -52,6 +73,9 @@ void 					disableInputs(){						// disable all keypad GPIO interrupts
 }
 void 					enableInputs( bool fromThread ){							// check for any unprocessed Interrupt Mask Register from 'imr'
 	
+	// I think the following problem occurs when a key change triggers an interrupt, but then the key changes back before 
+	// the ISR has finished -- so the 2nd transition never triggers an interrupt.
+	//
 	//BUG CHECK-- sometimes this is called when the keydef[].down state doesn't match the IDR state, which shouldn't happen
 	// e.g. handleInterrupts is called & doesn't set detectedUpKey, with key[x].down==1, but IDR[x]==0
 	for ( KEY k = kHOME; k < kINVALID; k++ ){		// process key transitions
@@ -107,8 +131,10 @@ void 					handleInterrupt( bool fromThread ){					// called for external interru
 */
 	KEY k;
 	disableInputs();
-	if (RebootOnKeyInt) 
+	if (RebootOnKeyInt){
+		EXTI->PR = EXTI->PR;		// clear all Int Pending bits (by setting them to 1)
 		NVIC_SystemReset();			// soft reboot
+	}
 	
 	KSt.eventTS = tbTimeStamp();								// record TStamp of this interrupt
 	KSt.msecSince = KSt.eventTS - KSt.lastTS;		// msec between prev & this

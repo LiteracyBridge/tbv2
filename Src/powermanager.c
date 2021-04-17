@@ -63,7 +63,8 @@ static void 							initPwrSignals( void );					// forward
 
 static int								currPwrTimerMS;
 
-bool 							RebootOnKeyInt = false;
+bool 											RebootOnKeyInt = false;					// tell inputmanager.c to reboot on key interrupt
+
 
 void checkPowerTimer(void *arg);                          // forward for timer callback function
 
@@ -98,7 +99,8 @@ void											setPowerCheckTimer( int timerMs ){
 	osTimerStart( pwrCheckTimer, timerMs );
 }
 void 											enableSleep( void ){						// low power mode -- (STM32 Stop) CPU stops till interrupt
-	dbgLog( "Stp\n");
+	//dbgLog( "Stp\n");
+	extern uint16_t					KeypadIMR;				// inputmanager.c -- keyboard IMR flags
 
 	SCB->SCR |= SCB_SCR_SLEEPDEEP_Msk;	// set DeepSleep
 	PWR->CR |= PWR_CR_MRLVDS;		// main regulator in low voltage when Stop
@@ -113,6 +115,7 @@ void 											enableSleep( void ){						// low power mode -- (STM32 Stop) CPU 
 	}
 	int sleep = osKernelSuspend();		// turn off sysTic 
 	RebootOnKeyInt = true;
+	EXTI->IMR |= KeypadIMR;					// enable keypad EXTI interrupts
 	
 	__WFI();	// sleep till interrupt -- 10 keyboard EXTI's enabled
 	
@@ -133,6 +136,59 @@ void 											enableStandby( void ){					// power off-- (STM32 Standby) reboot
 	__WFI();	// standby till reboot -- shouldn't ever return
 	NVIC_SystemReset();			// force a system reset
 }
+void											ResetGPIO( void ){
+	GPIO_ID actHi[] = { 
+			gBOOT1_PDN, gBAT_CE, 		gSC_ENABLE, 	gEN_5V, 
+			gEN1V8, 		g3V3_SW_EN,	gADC_ENABLE,
+			gGREEN, 		gRED, 			gEMMC_RSTN,   gINVALID
+	};
+	GPIO_ID actLo[] = { 
+			gBAT_TE_N, 	gEN_IOVDD_N, gEN_AVDD_N,  gSPI4_NSS,	gINVALID 	// PD13, PE4, PE5, PE11
+	};
+	for (int i=0; actHi[i]!=gINVALID; i++)  gSet( actHi[i], 0 );		// only works if configured as output (Mode1)
+	for (int i=0; actLo[i]!=gINVALID; i++)  gSet( actLo[i], 1 );		// only works if configured as output (Mode1)
+	
+	GPIO_ID extGPIO[] = {  // reconfig all output GPIO's to reset state
+		gI2S2ext_SD,	gI2S2_SD,		gI2S2_WS,			gI2S2_CK,			// PB14, 	PB15, PB12, PB13		
+		gI2S3_MCK,		gI2C1_SDA,	gI2C1_SCL,		gI2S2_MCK,		// PC7, 	PB9, 	PB8, 	PC6
+		gUSB_DM, 			gUSB_DP, 		gUSB_ID,			gUSB_VBUS,		// PA11,	PA12, PA10, PA9
+		gMCO2, 				gBOOT1_PDN, gBAT_CE, 			gSC_ENABLE,		// PC9, 	PB2,	PD0,	PD1
+		gBAT_TE_N,																						// PD13
+		gEN_5V, 			gEN1V8, 		g3V3_SW_EN, 	gBAT_TE_N, 		// PD4,		PD5,	PD6,	PD13
+		gGREEN,  			gRED, 			gEN_IOVDD_N,  gEN_AVDD_N,		// PE0,		PE1,	PE4,	PE5
+		gEMMC_RSTN,		gSDIO_CLK,	gSDIO_CMD,		gADC_ENABLE,	// PE10, 	PC12, PD2, 	PE15			
+		gSDIO_DAT0,		gSDIO_DAT1,	gSDIO_DAT2,		gSDIO_DAT3,		// PB4,		PA8,	PC10,	PB5 
+		gPWR_FAIL_N, 	gBAT_STAT1, gBAT_STAT2,		gBAT_PG_N,		// PE2,		PD8,	PD9,	PD10
+		gBOARD_REV,		// PB0
+		gQSPI_BK1_IO0,	gQSPI_BK1_IO1, gQSPI_BK1_IO2, gQSPI_BK1_IO3,	// PD11, PD12, PC8, PA1
+		gQSPI_CLK_A,	  gQSPI_CLK_B,	 gQSPI_BK1_NCS, gQSPI_BK2_NCS,	// PD3,  PB1,  PB6, PC11
+		gQSPI_BK2_IO0,	gQSPI_BK2_IO1, gQSPI_BK2_IO2, gQSPI_BK2_IO3,	// PA6,  PA7,  PC4, PC5
+//		gSWDIO,				gSWCLK,			gSWO,												// PA13,  PA14, PB3  -- JTAG DEBUGGER 
+		gINVALID	};
+	for (int i=0; extGPIO[i]!=gINVALID; i++) 
+		gConfigADC( extGPIO[i] );		// RESET GPIOs to analog (Mode 3, Pup 0) 
+	
+	GPIO_ID spiGPIO[] = {  // reconfig SPI GPIO's to input PU
+		gSPI4_SCK, 		gSPI4_MISO, gSPI4_MOSI, 	gSPI4_NSS,		// PE12,	PE13, PE14, PE11
+		gINVALID };
+	for (int i=0; spiGPIO[i]!=gINVALID; i++) 
+		gConfigIn( spiGPIO[i], false );		// set to Input PU (Mode 0, Pup 1) 
+	
+	RCC->CR &= ~RCC_CR_PLLI2SON_Msk;	// shut off PLLI2S
+	FLASH->ACR = 0;			// disable Data, Instruction, & Prefetch caches
+	SYSCFG->CMPCR = 0;	// power down I/O compensation cell
+
+	// turn off all the clocks we can
+	RCC->AHB1ENR = 0;
+	RCC->AHB2ENR = 0;
+	RCC->APB1ENR = 0x00000400; // reset value -- RTCAPB=1
+	RCC->APB2ENR = 0x00008000; // reset value -- D15=1 (reserved, must be 1) == RCC_APB2ENR_EXTITEN_Msk
+	
+	RCC->AHB1LPENR = 0; 
+	RCC->AHB2LPENR = 0;
+	RCC->APB1LPENR = 0;
+	RCC->APB2LPENR = 0;	
+}
 void											powerDownTBook( bool sleep ){					// shut down TBook
 //	ledFg( TB_Config.fgPowerDown );
 //DEBUG*********************************************************
@@ -146,55 +202,7 @@ void											powerDownTBook( bool sleep ){					// shut down TBook
 	FileSysPower( false );		// shut down eMMC supply, unconfig gSDIO_*
 	cdc_PowerDown();					// turn off codec
 	
-	GPIO_ID actHi[] = { 
-			gBOOT1_PDN, gBAT_CE, 		gSC_ENABLE, 	gEN_5V, 
-			gEN1V8, 		g3V3_SW_EN,	gADC_ENABLE,
-			gGREEN, 		gRED,				gINVALID
-	};
-	GPIO_ID actLo[] = { 
-			gBAT_TE_N, 	gEN_IOVDD_N, gEN_AVDD_N,	gINVALID 	//
-	};
-	for (int i=0; actHi[i]!=gINVALID; i++)  gSet( actHi[i], 0 );
-	for (int i=0; actLo[i]!=gINVALID; i++)  gSet( actLo[i], 1 );
-	
-	GPIO_ID extGPIO[] = {  // reconfig all output GPIO's to reset state
-		gI2S2ext_SD,	gI2S2_SD,		gI2S2_WS,			gI2S2_CK,			// PB14, 	PB15, PB12, PB13		
-		gI2S3_MCK,		gI2C1_SDA,	gI2C1_SCL,		gI2S2_MCK,		// PC7, 	PB9, 	PB8, 	PC6
-		gUSB_DM, 			gUSB_DP, 		gUSB_ID,			gUSB_VBUS,		// PA11,	PA12, PA10, PA9
-//		gSPI4_SCK, 		gSPI4_MISO, gSPI4_MOSI, 	gSPI4_NSS,		// PE12,	PE13, PE14, PE11
-		gMCO2, 				gBOOT1_PDN, gBAT_CE, 			gSC_ENABLE,		// PC9, 	PB2,	PD0,	PD1
-		gBAT_TE_N,																						// PD13
-		gEN_5V, 			gEN1V8, 		g3V3_SW_EN, 	gBAT_TE_N, 		// PD4,		PD5,	PD6,	PD13
-		gGREEN,  			gRED, 			gEN_IOVDD_N,  gEN_AVDD_N,		// PE0,		PE1,	PE4,	PE5
-		gEMMC_RSTN,		gSDIO_CLK,	gSDIO_CMD,		gADC_ENABLE,	// PE10, 	PC12, PD2, 	PE15			
-		gSDIO_DAT0,		gSDIO_DAT1,	gSDIO_DAT2,		gSDIO_DAT3,		// PB4,		PA8,	PC10,	PB5 
-		gPWR_FAIL_N, 	gBAT_STAT1, gBAT_STAT2,		gBAT_PG_N,		// PE2,		PD8,	PD9,	PD10
-		gBOARD_REV,		// PB0
-		gQSPI_BK1_IO0,	gQSPI_BK1_IO1, gQSPI_BK1_IO2, gQSPI_BK1_IO3,	// PD11, PD12, PC8, PA1
-		gQSPI_CLK_A,	  gQSPI_CLK_B,	 gQSPI_BK1_NCS, gQSPI_BK2_NCS,	// PD3,  PB1,  PB6, PC11
-		gQSPI_BK2_IO0,	gQSPI_BK2_IO1, gQSPI_BK2_IO2, gQSPI_BK2_IO3,	// PA6,  PA7,  PC4, PC5
-//		gSWDIO,				gSWCLK,			gSWO,												// PA13,  PA14, PB3
-		gINVALID															 
-	};
-	for (int i=0; extGPIO[i]!=gINVALID; i++) 
-		gConfigADC( extGPIO[i] );		// RESET GPIOs to analog (Mode 3, Pup 0) 
-	
-	GPIO_ID spiGPIO[] = {  // reconfig SPI GPIO's to input PU
-		gSPI4_SCK, 		gSPI4_MISO, gSPI4_MOSI, 	gSPI4_NSS,		// PE12,	PE13, PE14, PE11
-		gINVALID };
-	for (int i=0; spiGPIO[i]!=gINVALID; i++) 
-		gConfigIn( spiGPIO[i], false );		// set to Input PU (Mode 0, Pup 1) 
-	
-	RCC->CR &= ~RCC_CR_PLLI2SON_Msk;	// shut off PLLI2S
-	RCC->AHB1ENR = 0;
-	RCC->AHB2ENR = 0;
-	RCC->APB1ENR = 0;
-	RCC->APB2ENR = 0;
-	
-	RCC->AHB1LPENR = 0; 
-	RCC->AHB2LPENR = 0;
-	RCC->APB1LPENR = 0;
-	RCC->APB2LPENR = 0;
+	ResetGPIO();
 	
 	if ( sleep )
 		enableSleep();

@@ -1084,7 +1084,12 @@ RecordTestCnt++;
 	}
 #endif
 }
+
+extern bool FakeCodec; // DEBUG**********************************
+extern bool CdcNoPower; // DEBUG**********************************
+
 void 						cdc_SpeakerEnable( bool enable ){														// enable/disable speaker -- using mute to minimize pop
+	if ( FakeCodec ) return;  // DEBUG*************************
 	if ( cdcSpeakerOn==enable )   // no change?
 		return;
 	
@@ -1099,11 +1104,11 @@ void 						cdc_SpeakerEnable( bool enable ){														// enable/disable spea
 			aicSetReg( P1_R32_ClassD_Drivers, 							0x80 );	// P1_R32: SpkrAmpPwrOn: 1
 			aicSetReg( P1_R38_Left_Analog_Vol_to_SPL, 			0x80 );	// R1_38: LchanOutToSpkr: 1  SPKgain: 000 0000 (0dB)
 			aicSetReg( P0_R63_DAC_Datapath_SETUP, 					0x90 );	// P0_R63: PwrLDAC: 1  PwrRDAC: 0  LDACleft: 01  RDACoff: 00  DACvol1step: 00
-			dbgLog( "2 AIC DAC -> Spkr, Spkr on \n");
+			dbgLog( "2 AIC DAC -> Spkr, On %d \n", tbTimeStamp());
 	} else {			
 		  cdc_SetMute( true );		// no noise during transition
 			aicSetReg( P1_R32_ClassD_Drivers, 							0x00 );	// P1_R32: Rst SpkrAmpPwrOn: 0
-			dbgLog( "2 AIC Spkr off \n");
+			dbgLog( "2 AIC Spkr off %d \n", tbTimeStamp());
 	}
 #endif
 #if defined( AK4343 )
@@ -1160,6 +1165,7 @@ void 						cdc_SpeakerEnable( bool enable ){														// enable/disable spea
 
 void						cdc_PowerUp( void ){
 	if ( codecHasPower ) return;  
+	if ( CdcNoPower ) return;
   // AIC3100 power up sequence based on sections 7.3.1-4 of Datasheet: https://www.ti.com/lit/ds/symlink/tlv320aic3100.pdf
 	//  delays as recommended by Marc on 12/31/20
 	gSet( gBOOT1_PDN, 0 );			// put codec in reset state PB2
@@ -1177,12 +1183,14 @@ void						cdc_PowerUp( void ){
 	
 	gSet( gBOOT1_PDN, 1 );  		// set codec RESET_N inactive to Power on the codec PB2
 	tbDelay_ms( 10 );  		 			// AIC wait for it to start up
-	dbgLog( "2 AIC3100 powered up\n");
 	codecHasPower = true; 
-logEvt( "AIC_pwrup" );
+	dbgLog( "2 AIC_pwrup %d \n", tbTimeStamp() );
 }
 // external interface functions
+
+
 void 						cdc_Init( ){ 																								// Init codec & I2C (i2s_stm32f4xx.c)
+  if ( FakeCodec )  return; // DEBUG**********************************
 	dbgEvt( TB_cdcInit, 0,0,0,0);
 
 	// make sure aic index constats match codec_regs[] entries
@@ -1206,7 +1214,7 @@ void 						cdc_Init( ){ 																								// Init codec & I2C (i2s_stm32f4
 
   if ( !codecIsReady ){
 		cdc_PowerUp(); 		// power-up codec
-logEvtNI( "I2C_init", "ts", tbTimeStamp() );
+		dbgLog( "2 I2C_init %d \n", tbTimeStamp() );
 		i2c_Init();  			// powerup & Initialize the Control interface of the Audio Codec
 		codecIsReady = true;
 	}
@@ -1218,12 +1226,10 @@ logEvtNI( "I2C_init", "ts", tbTimeStamp() );
 	while ( rst != 0 ){
 		rst = aicGetReg( P0_R1_Software_Reset_Register );
 	}
-	dbgLog( "2 AIC Sft Reset took %d ms \n", tbTimeStamp()-st );
-logEvtNI( "AIC_reset", "ts", tbTimeStamp() );
+	dbgLog( "2 AIC SftReset %d..%d \n", st, tbTimeStamp() );
 	
 	i2c_CheckRegs();		// check all default register values & report
-	dbgLog( "2 AIC Reg defaults\n");
-logEvtNI( "AIC_regs checked", "ts", tbTimeStamp() );
+	dbgLog( "2 AIC Regs  %d \n", tbTimeStamp() );
 
 	#if defined( AK4343 )
 		Codec_SetRegBits( AK_Signal_Select_1, AK_SS1_SPPSN, 0 );		// set power-save (mute) ON (==0)  (REDUNDANT, since defaults to 0)
@@ -1305,6 +1311,7 @@ logEvtNI( "AIC_regs checked", "ts", tbTimeStamp() );
 	cdc_SetMute( true );		// set soft mute on output
 }
 void 						cdc_ClocksOff( void ){																			// properly shut down ADC, DAC, clock tree, & PLL 
+	if ( FakeCodec ) return;  // DEBUG*************************
 	#if defined( AIC3100 )	
   	cdc_RecordEnable( false );  // power down ADC & it's dividers
 	
@@ -1331,7 +1338,7 @@ void 						cdc_ClocksOff( void ){																			// properly shut down ADC, D
 		codecClockFreq = 0;
 		dbgLog( "2 ClocksOff \n");
 		showCdcRegs( false, false );
-logEvtNI( "AIC_clksoff", "ts", tbTimeStamp() );
+dbgLog( "2 AIC_clksoff %d \n", tbTimeStamp() );
 	#endif
 }
 void 						cdc_PowerDown( void ){																				// power down entire codec (i2s_stm..)
@@ -1349,8 +1356,7 @@ void 						cdc_PowerDown( void ){																				// power down entire codec 
 	gSet( gEN_IOVDD_N, 1 );		// PE4 power down codec IOVDD PE4
 	gSet( gEN_AVDD_N, 1 );		// PE5 power down codec AVDD & HPVDD PE5 (at least 10ns after DVDD)
 
-	dbgLog( "2 AIC3100 powered down\n");
-logEvtNI( "AIC_pwrdwn", "ts", tbTimeStamp() );
+	dbgLog( "2 AIC3100 pwr down %d \n", tbTimeStamp() );
 	codecHasPower = false;
 	codecIsReady = false;
 }
@@ -1358,6 +1364,7 @@ logEvtNI( "AIC_pwrdwn", "ts", tbTimeStamp() );
 //
 static uint8_t testVol = 0x19;			// DEBUG
 void		 				cdc_SetVolume( uint8_t Volume ){														// sets volume 0..10  ( mediaplayer )
+  if ( FakeCodec )  return; // DEBUG**********************************
 	uint8_t v = Volume>10? 10 : Volume; 
 
 	LastVolume = v;
@@ -1398,6 +1405,7 @@ void		 				cdc_SetVolume( uint8_t Volume ){														// sets volume 0..10  (
 }
 
 void		 				cdc_SetMute( bool muted ){																	// true => enable mute on codec  (audio)
+  if ( FakeCodec )  return; // DEBUG**********************************
 	if ( cdcMuted==muted ) return;
 	dbgEvt( TB_cdcSetMute, muted,0,0,0);
 	cdcMuted = muted;
@@ -1413,7 +1421,7 @@ void		 				cdc_SetMute( bool muted ){																	// true => enable mute on 
 			aicSetReg( P1_R42_SPK_Driver, 0x04	 ); 			// P1_R42: SpkrAmpGain: 00  SpkrMuteOff: 1
 			tbDelay_ms( 100 );  // AIC wait to let amp stabilize? before starting I2S
 			dbgLog( "2 AIC unmute: SpkrAmp & L mutes off, SpkrAmp=6dB \n" );
-logEvtNI( "AIC_unmute", "ts", tbTimeStamp() );
+dbgLog( "2 AIC_unmute %d \n", tbTimeStamp() );
 		}
 	#endif
 //	akR.R.MdCtr3.SMUTE = (muted? 1 : 0);
@@ -1421,6 +1429,7 @@ logEvtNI( "AIC_unmute", "ts", tbTimeStamp() );
 }
 
 void						cdc_SetMasterFreq( int freq ){															// set AK4637 to MasterMode, 12MHz ref input to PLL, audio @ 'freq', start PLL  (i2s_stm32f4xx)
+  if ( FakeCodec )  return; // DEBUG**********************************
 	#if defined( AIC3100 )
 	  if ( freq != codecClockFreq ){ 
 			cdc_ClocksOff();   // changing frequency-- shut down all clocks & PLL
@@ -1474,7 +1483,7 @@ void						cdc_SetMasterFreq( int freq ){															// set AK4637 to MasterMo
 		dbgLog( "2 AIC: BCLK = CLK / %d / %d / %d = 32* %d \n", NDAC, MDAC, 2, freq );
 //		showCdcRegs( false, false );
 		codecClockFreq = freq;		// remember current freq
-logEvtNI( "AIC_freq", "ts", tbTimeStamp() );
+		dbgLog( "2 AIC_freq %d \n", tbTimeStamp() );
 	#endif
 	#if defined( AK4637 )
 	// set up AK4637 to run in MASTER mode, using PLL to generate audio clock at 'freq'

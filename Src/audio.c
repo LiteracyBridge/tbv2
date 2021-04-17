@@ -402,8 +402,16 @@ void 								audSaveBuffs(){																// called on mediaThread to save ful
 
 void								audLoadBuffs(){																// called on mediaThread to preload audio data
 		for ( int i=0; i < nPlyBuffs; i++)	// pre-load any empty audio buffers
-			if ( pSt.Buff[i]==NULL )
+			if ( pSt.Buff[i]==NULL ){
 				pSt.Buff[i] = loadBuff();	
+//DEBUG****************************
+				extern bool FakeCodec; 
+				if ( FakeCodec && i==nPlyBuffs-1 ){  //DEBUG**************************** fake completion of previous
+					tbDelay_ms(100);
+					saiEvent( ARM_SAI_EVENT_SEND_COMPLETE );
+				}
+//DEBUG****************************
+			}
 }
 
 
@@ -503,9 +511,6 @@ static void 				startPlayback( void ){												// preload buffers & start pla
 	cdc_SetMute( false );		// unmute
 
 	Driver_SAI0.Send( pSt.Buff[0]->data, BuffWds );		// start first buffer 
-	//BUG! -- on 2nd playback rh_for_subj:  apparently saiEvent() IS GETTING CALLED BETWEEN THESE TWO Send()'s
-	//  it calls send with Buff[2], then shifts [2] to [1], so the next line calls with the same value!
-	//CAUSE? DMA TXDN interrupt immediately after starting transfer?
 	Driver_SAI0.Send( pSt.Buff[1]->data, BuffWds );		// & set up next buffer 
 
   // buffer complete for cBuff calls saiEvent, which:
@@ -736,8 +741,6 @@ extern void 				playWave( const char *fname ){ 								// play the WAV file -- (
 	startPlayback();
 }
 
-
-
 extern void 				saiEvent( uint32_t event ){										// called by ISR on buffer complete or error -- chain next, or report error -- also DebugLoop
 				 // calls: Driver_SAI0.Send .Receive .Control haltRecord releaseBuff  freeBuffs
 				 //  dbgEvt, osEventFlagsSet, tbTimestamp
@@ -756,7 +759,6 @@ extern void 				saiEvent( uint32_t event ){										// called by ISR on buffer 
 			// signal mediaThread to call audLoadBuffs() to preload empty buffer slots
 			dbgEvt( TB_saiTXDN, 0, 0, 0, 0 );
 			osEventFlagsSet( mMediaEventId, CODEC_DATA_TX_DN );
-
 		} else if ( pSt.audioEOF ){  // done, close up shop
 			pSt.state = pbDone;
 			pSt.tsPause = tbTimeStamp();		// timestamp end of playback

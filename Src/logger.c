@@ -143,6 +143,7 @@ void						logPowerUp( bool reboot ){											// re-init logger after reboot, U
 	//checkLog();	//DEBUG
 	//if ( !openLog(false) ) return;
 	
+  // "M0:/system/bootcount.txt"
 	char * boot = loadLine( line, TBP[ pBOOTCNT ], &bootDt ); 
 	int bootcnt = 1;		// if file not there-- first boot
 	if ( boot!=NULL ) sscanf( boot, " %d", &bootcnt );
@@ -186,6 +187,9 @@ void						logPowerUp( bool reboot ){											// re-init logger after reboot, U
 		return;
 	}
 
+  // Read some bytes from "M0:/system/control.def"; as a side effect, query the timestamp of "control.def"
+  // and use that to set the RTC clock.
+  // TODO: use a file that is only used to set the clock.
 	char * status = loadLine( line, TBP[ pCSM_DEF ], &verDt );			// control.def file exists-- when created?
 	dateStr( dt, verDt );
 	logEvtNSNS( "TB_CSM", "dt", dt, "ver", status );

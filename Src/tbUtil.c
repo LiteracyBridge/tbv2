@@ -357,6 +357,7 @@ void 										initIDs(){																		// initialize CPU_ID & TB_ID strings
 //	loadTBookName();
 }
 
+
 //
 // timestamps & RTC, allocation, fexists
 struct {
@@ -370,6 +371,31 @@ struct {
 	uint8_t		tenths;
 	uint8_t		pm;
 } lastRTC, firstRTC;
+
+
+/// \brief Gets the current time from RTC into a fsTime structure.
+/// \param[out] fsTime      fsTime structure to be filled in.
+void getRTC(struct _fsTime *fsTime) {
+    int pDt=0,Dt=1, pTm=0,Tm=1;
+    while (pDt != Dt || pTm != Tm){
+        pDt = Dt;
+        pTm = Tm;
+        Dt = RTC->DR;
+        Tm = RTC->TR;
+    }
+
+    // This is going suck in the year 2100. But it would break in 2107 anyway.
+    // The time format allows years 1980 to 2107. The RTC only allows years % 100.
+    fsTime->year = ((Dt>>20) & 0xF)*10 + ((Dt>>16) & 0xF) + 2000;
+    fsTime->mon = ((Dt>>12) & 0x1)*10 + ((Dt>>8) & 0xF);
+    fsTime->day =((Dt>> 4) & 0x3)*10 + (Dt & 0xF);
+
+    fsTime->hr = ((Tm>>20) & 0x3)*10 + ((Tm>>16) & 0xF);
+    fsTime->min = ((Tm>>12) & 0x7)*10 + ((Tm>>8) & 0xF);
+    fsTime->sec = ((Tm>> 4) & 0x7)*10 + (Tm & 0xF);
+}
+
+
 void 										showRTC( ){
 	int pDt=0,Dt=1, pTm=0,Tm=1;
 	while (pDt != Dt || pTm != Tm){
@@ -397,6 +423,8 @@ void 										showRTC( ){
 	sprintf(dttm, "%s %d-%s-%d %d:%02d:%02d", wkdy[day], date, month[mon], yr, hr,min,sec );
 	logEvtNS( "RTC", "DtTm", dttm );
 }
+
+
 void 										measureSystick(){
 	const int NTS = 6;
 	int msTS[ NTS ], minTS = 1000000, maxTS=0, sumTS=0;

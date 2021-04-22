@@ -98,44 +98,6 @@ void											setPowerCheckTimer( int timerMs ){
 	osTimerStop( pwrCheckTimer );
 	osTimerStart( pwrCheckTimer, timerMs );
 }
-void 											enableSleep( void ){						// low power mode -- (STM32 Stop) CPU stops till interrupt
-	//dbgLog( "Stp\n");
-	extern uint16_t					KeypadIMR;				// inputmanager.c -- keyboard IMR flags
-
-	SCB->SCR |= SCB_SCR_SLEEPDEEP_Msk;	// set DeepSleep
-	PWR->CR |= PWR_CR_MRLVDS;		// main regulator in low voltage when Stop
-	PWR->CR |= PWR_CR_LPLVDS;   // low-power regulator in low voltage when Stop
-	PWR->CR |= PWR_CR_FPDS;   	// flash power-down when Stop
-	PWR->CR |= PWR_CR_LPDS;   	// low-power regulator when Stop
-	
-	for (int i=0; i<3; i++){			// clear all pending ISR
-		uint32_t pend = NVIC->ISPR[i];
-		if ( pend != 0 ) 	// clear any pending interrupts
-			NVIC->ICPR[i] = pend;		
-	}
-	int sleep = osKernelSuspend();		// turn off sysTic 
-	RebootOnKeyInt = true;
-	EXTI->IMR |= KeypadIMR;					// enable keypad EXTI interrupts
-	
-	__WFI();	// sleep till interrupt -- 10 keyboard EXTI's enabled
-	
-	NVIC_SystemReset();			// soft reboot
-}
-void 											enableStandby( void ){					// power off-- (STM32 Standby) reboot on wakeup from NRST
-	dbgLog( "NdBy\n");
-	PWR->CR |= PWR_CR_CWUF;							// clear wakeup flag
-	PWR->CR |= PWR_CR_PDDS;							// set power down deepsleep 
-	SCB->SCR |= SCB_SCR_SLEEPDEEP_Msk;	// set DeepSleep
-	
-	for (int i=0; i<3; i++){			// clear all pending ISR
-		uint32_t pend = NVIC->ISPR[i];
-		if ( pend != 0 ) 	// clear any pending interrupts
-			NVIC->ICPR[i] = pend;		
-	}
-	
-	__WFI();	// standby till reboot -- shouldn't ever return
-	NVIC_SystemReset();			// force a system reset
-}
 void											ResetGPIO( void ){
 	GPIO_ID actHi[] = { 
 			gBOOT1_PDN, gBAT_CE, 		gSC_ENABLE, 	gEN_5V, 
@@ -178,6 +140,16 @@ void											ResetGPIO( void ){
 	FLASH->ACR = 0;			// disable Data, Instruction, & Prefetch caches
 	SYSCFG->CMPCR = 0;	// power down I/O compensation cell
 
+	// switch to 16MHz HSI as Sysclock source
+	int cnt = 0;
+	RCC->CR &= RCC_CR_HSION_Msk;		// enable HSI
+	while ( (RCC->CR & RCC_CR_HSIRDY) == 0 ) cnt++;		// wait till ready 
+	RCC->CFGR &= ~RCC_CFGR_SW_Msk;		// set RCC.CFGR.SW[1:0] = 00: HSI as system clock
+		
+	// now can turn off PLL & HSE
+	RCC->CR &= ~RCC_CR_PLLON_Msk;	// shut off PLL
+	RCC->CR &= ~RCC_CR_HSEON_Msk;	// shut off HSE
+		
 	// turn off all the clocks we can
 	RCC->AHB1ENR = 0;
 	RCC->AHB2ENR = 0;
@@ -189,27 +161,49 @@ void											ResetGPIO( void ){
 	RCC->APB1LPENR = 0;
 	RCC->APB2LPENR = 0;	
 }
-void											powerDownTBook( bool sleep ){					// shut down TBook
-//	ledFg( TB_Config.fgPowerDown );
-//DEBUG*********************************************************
-  sleep = !gGet( gPLUS );   // standby if PLUS held down 
-//*********************************************************DEBUG
-	ledBg( sleep? "G!":"R!" );
-	logEvtNS( "PwrDown", "mode", sleep? "Stop":"Standby" );
+/*void											DbgPowerDown( int code ){				// STOP TBook if DbgPwrDn==code
+	extern int DbgPwrDn;			// defined in main.c
+
+	if (code != DbgPwrDn ) return;
+	
+	flashCode( DbgPwrDn );
+	FileSysPower( false );		// shut down eMMC supply, unconfig gSDIO_*
+	cdc_PowerDown();					// turn off codec
+	ResetGPIO();
+	enableSleep();
+} */
+void											powerDownTBook( void ){					// shut down TBook
+	logEvt( "PwrDown" );
 	logPowerDown();		// flush & close logs, copy NorLog to eMMC
 	ledBg( NULL );
 	ledFg( NULL );
+
 	FileSysPower( false );		// shut down eMMC supply, unconfig gSDIO_*
 	cdc_PowerDown();					// turn off codec
 	
 	ResetGPIO();
-	
-	if ( sleep )
-		enableSleep();
-	else
-		enableStandby();		// shut down
-}
 
+	extern uint16_t					KeypadIMR;				// inputmanager.c -- keyboard IMR flags
+
+	SCB->SCR |= SCB_SCR_SLEEPDEEP_Msk;	// set DeepSleep
+	PWR->CR |= PWR_CR_MRLVDS;		// main regulator in low voltage when Stop
+	PWR->CR |= PWR_CR_LPLVDS;   // low-power regulator in low voltage when Stop
+	PWR->CR |= PWR_CR_FPDS;   	// flash power-down when Stop
+	PWR->CR |= PWR_CR_LPDS;   	// low-power regulator when Stop
+	
+	for (int i=0; i<3; i++){			// clear all pending ISR
+		uint32_t pend = NVIC->ISPR[i];
+		if ( pend != 0 ) 	// clear any pending interrupts
+			NVIC->ICPR[i] = pend;		
+	}
+	int sleep = osKernelSuspend();		// turn off sysTic 
+	RebootOnKeyInt = true;
+	EXTI->IMR |= KeypadIMR;					// enable keypad EXTI interrupts
+	
+	__WFI();	// sleep till interrupt -- 10 keyboard EXTI's enabled
+	
+	NVIC_SystemReset();			// soft reboot
+}
 void 											initPwrSignals( void ){					// configure power GPIO pins, & EXTI on NOPWR 	
 	// power supply signals
 	gConfigOut( gADC_ENABLE );	// 1 to enable battery voltage levels
@@ -262,7 +256,6 @@ void											startADC( int chan ){						// set up ADC for single conversion on
 
 	// Reset ADC.CR1  		//  0==>  Res=12bit, no watchdogs, no discontinuous, 
 	Adc->CR1 = 0;  				//        no auto inject, watchdog, scanning, or interrupts
-
 	// Reset ADC.CR2      					//  no external triggers, injections,
 	Adc->CR2 = ADC_CR2_ADON;				//  DMA, or continuous conversion -- only power on
 	
@@ -281,42 +274,65 @@ short											readADC( int chan, int enableBit ){	// readADC channel 'chan' va
 		AdcC->CCR |= enableBit;										// enable this channel
 
   startADC( chan );
-
 	// wait for signal from ADC_IRQ on EOC interrupt
 	if ( osEventFlagsWait( pwrEvents, PM_ADCDONE, osFlagsWaitAny, 10000 ) != PM_ADCDONE )
 			logEvt( "ADC timed out" );
 
 	Adc->CR1 &= ~ADC_CR1_EOCIE;  								// Disable ADC end of conversion interrupt for regular group 
-	
 	uint32_t adcRaw = Adc->DR;  								// read converted value (also clears SR.EOC)
-	
 	if ( enableBit != 0 )
 		AdcC->CCR &= ~enableBit;									// disable channel again
-		
 	return adcRaw;
 } 
-
-static void								EnableADC( bool enable ){				// power up & enable ADC interrupts
-	if ( enable ){
-		gSet( gADC_ENABLE, 1 );									// power up the external analog sampling circuitry
-		NVIC_EnableIRQ( ADC_IRQn );
-		RCC->APB2ENR |= RCC_APB2ENR_ADC1EN;			// enable clock for ADC
-		Adc->CR2 |= ADC_CR2_ADON; 							// power up ADC
-		tbDelay_ms( 1 );	// ADC pwr up
-		} else {
-		gSet( gADC_ENABLE, 0 );
-		NVIC_DisableIRQ( ADC_IRQn );
-		RCC->APB2ENR &= ~RCC_APB2ENR_ADC1EN;			// disable clock for ADC
-		Adc->CR2 &= ~ADC_CR2_ADON; 								// power down ADC
-	} 
-}
 void 											ADC_IRQHandler( void ){ 				// ISR for ADC end of conversion interrupts
   if ( (Adc->SR & ADC_SR_EOC)==0 ) tbErr("ADC no EOC");
 	
-	osEventFlagsSet( pwrEvents, PM_ADCDONE );					// wakeup powerThread
-	Adc->SR = ~(ADC_SR_STRT | ADC_SR_EOC);    // Clear regular group conversion flag 
+	osEventFlagsSet( pwrEvents, PM_ADCDONE );		// wakeup powerThread
+	Adc->SR = ~(ADC_SR_STRT | ADC_SR_EOC);    	// Clear regular group conversion flag 
 }
+static void								EnableADC( bool enable ){				// power up & enable ADC interrupts
+	if ( enable ){
+		gSet( gADC_ENABLE, 1 );									// PE15: power up the external analog sampling circuitry
+		NVIC_EnableIRQ( ADC_IRQn );							// ADC_IRQn = 18 = 0x12  ADC1,2,3   NVIC->ISER[ 0x12>>5 ] = (1 << (0x12 & 0x1F));  ISER[0]=0x00040000
+		RCC->APB2ENR |= RCC_APB2ENR_ADC1EN;			// enable clock for ADC
+		Adc->CR2 |= ADC_CR2_ADON; 							// power up ADC
+		tbDelay_ms( 1 );	// ADC pwr up
+	} 
+	else 
+	{
+		gSet( gADC_ENABLE, 0 );
+		NVIC_DisableIRQ( ADC_IRQn );
+		//BUG FIX 21-Apr-2021 == must reset ADON, *before* turning off ADC1 clock!
+		Adc->CR2 &= ~ADC_CR2_ADON; 								// power down ADC
+		RCC->APB2ENR &= ~RCC_APB2ENR_ADC1EN;			// disable clock for ADC
+	} 
+}
+void 											readAllADC( void ){
+	EnableADC( true );			// enable AnalogEN power & ADC clock & power, & ADC INTQ 
 
+	const int MAXCNT 	= 4096;		// max 12-bit ADC count
+	const int VREF 		= 3300;		// mV of VREF input pin
+	
+	int VRefIntCnt = readADC( ADC_VREFINT_chan, ADC_CCR_TSVREFE );	// enable RefInt on channel 17 -- typically 1.21V (1.18..1.24V)
+  pS.VRefMV = VRefIntCnt * VREF/MAXCNT;			// should be 1200
+	
+	int MpuTempCnt = readADC( ADC_TEMP_chan, ADC_CCR_TSVREFE ); // ADC_CHANNEL_TEMPSENSOR in ADC_IN18 
+  pS.MpuTempMV = MpuTempCnt * VREF/MAXCNT;			
+
+	int VBatCnt = readADC( ADC_VBAT_chan, ADC_CCR_VBATE ); 		// enable VBAT on channel 18
+  pS.VBatMV = VBatCnt * 4 * VREF/MAXCNT;		
+
+	int LiThermCnt = readADC( gADC_THERM_chan, 0 );	
+  pS.LiThermMV = LiThermCnt * VREF/MAXCNT;		
+	
+	int LiCnt = readADC( ADC_LI_ION_chan, 0 );	
+  pS.LiMV = LiCnt * 2 * VREF/MAXCNT;			
+
+	int PrimaryCnt = readADC( ADC_PRIMARY_chan, 0 );
+  pS.PrimaryMV = PrimaryCnt * 2 * VREF/MAXCNT;	
+	
+	EnableADC( false );		// turn ADC off	
+}
 uint16_t									readPVD( void ){								// read PVD level 
 	RCC->APB1ENR |= RCC_APB1ENR_PWREN;						// start clocking power control 
 	
@@ -395,7 +411,6 @@ void											setupRTC( fsTime time ){				// init RTC & set based on fsTime
 	RTC->ISR 	&= ~RTC_ISR_INIT;												// leave RTC init mode
 	
 	PWR->CR 	&= ~PWR_CR_DBP;													// disable access to Backup Domain 
-
 }
 void											checkPowerTimer( void *arg ){		// timer to signal periodic power status check
 	osEventFlagsSet( pwrEvents, PM_PWRCHK );						// wakeup powerThread for power status check
@@ -458,9 +473,9 @@ void											cdc_PowerUp( void );	// from ti_aic3100 -- for early init on pwr 
 
 void 											checkPower( ){				// check and report power status
 	//  check gPWR_FAIL_N & MCP73871: gBAT_PG_N, gBAT_STAT1, gBAT_STAT2
-	bool PwrFail 			= gGet( gPWR_FAIL_N );	// PD0 -- input power fail signal
-  if ( PwrFail && false ) 
-		powerDownTBook( false );
+	bool PwrFail 			= gGet( gPWR_FAIL_N );	// PE2 -- input power fail signal
+  if ( PwrFail==0 ) 
+		powerDownTBook( );
 	
 	//  check MCP73871: gBAT_PG_N, gBAT_STAT1, gBAT_STAT2
 	bool PwrGood_N 	  = gGet( gBAT_PG_N );	 // MCP73871 PG_:  0 => power is good   			MCP73871 PG_    (powermanager.c)
@@ -480,30 +495,7 @@ void 											checkPower( ){				// check and report power status
 	enum PwrStat pstat = (enum PwrStat) ((BatStat1? 4:0) + (BatStat2? 2:0) + (PwrGood_N? 1:0));
 	startPowerCheck( pstat );
 	
-	EnableADC( true );			// enable AnalogEN power & ADC clock & power, & ADC INTQ 
-
-	const int MAXCNT 	= 4096;		// max 12-bit ADC count
-	const int VREF 		= 3300;		// mV of VREF input pin
-	
-	int VRefIntCnt = readADC( ADC_VREFINT_chan, ADC_CCR_TSVREFE );	// enable RefInt on channel 17 -- typically 1.21V (1.18..1.24V)
-  pS.VRefMV = VRefIntCnt * VREF/MAXCNT;			// should be 1200
-	
-	int MpuTempCnt = readADC( ADC_TEMP_chan, ADC_CCR_TSVREFE ); // ADC_CHANNEL_TEMPSENSOR in ADC_IN18 
-  pS.MpuTempMV = MpuTempCnt * VREF/MAXCNT;			
-
-	int VBatCnt = readADC( ADC_VBAT_chan, ADC_CCR_VBATE ); 		// enable VBAT on channel 18
-  pS.VBatMV = VBatCnt * 4 * VREF/MAXCNT;		
-
-	int LiThermCnt = readADC( gADC_THERM_chan, 0 );	
-  pS.LiThermMV = LiThermCnt * VREF/MAXCNT;		
-	
-	int LiCnt = readADC( ADC_LI_ION_chan, 0 );	
-  pS.LiMV = LiCnt * 2 * VREF/MAXCNT;			
-
-	int PrimaryCnt = readADC( ADC_PRIMARY_chan, 0 );
-  pS.PrimaryMV = PrimaryCnt * 2 * VREF/MAXCNT;	
-	
-	EnableADC( false );		// turn ADC off
+	readAllADC();
 	
 	if ( powerChanged() ){	// update pS state & => true if significant change
 		char sUsb = PwrGood_N==0? 'U' : 'u';
@@ -661,7 +653,7 @@ static void 							powerThreadProc( void *arg ){		// powerThread -- catches PM_N
 		switch ( flg ){
 			case PM_NOPWR:
 				logEvt( "Powering Down");
-				enableStandby();			// shutdown-- reboot on wakeup keys
+				powerDownTBook();			// shutdown-- reboot on wakeup keys
 				// never come back  -- just restarts at main()
 				break;
 

@@ -130,6 +130,7 @@ void 					resetAudio(){ 											// stop any playback/recording in progress
 	audStopAudio();
 }
 
+int playCnt = 0;  // DEBUG**********************************
 /* **************  mediaThread -- start audio play & record operations, handle completion signals
 // 		MEDIA_PLAY_EVENT 	=> play mPlaybackFilename
 //		CODEC_DATA_TX_DN  => buffer xmt done, call audLoadBuffs outside ISR
@@ -145,15 +146,17 @@ static void 	mediaThread( void *arg ){						// communicates with audio codec for
 		uint32_t flags = osEventFlagsWait( mMediaEventId, MEDIA_EVENTS,  osFlagsWaitAny, osWaitForever );
 		
 		dbgEvt( TB_mediaEvt, flags, 0,0,0);
-		if ( (flags & CODEC_DATA_TX_DN) != 0 )		// buffer transmission complete from SAI_event
+		if ( (flags & CODEC_DATA_TX_DN) != 0 ){		// buffer transmission complete from SAI_event
 			audLoadBuffs();															// preload any empty audio buffers
+		}
 			
 		if ( (flags & CODEC_DATA_RX_DN) != 0 )		// buffer reception complete from SAI_event
 			audSaveBuffs();
 			
-		if ( (flags & CODEC_PLAYBACK_DN) != 0 )		// playback complete
+		if ( (flags & CODEC_PLAYBACK_DN) != 0 ){		// playback complete
 			audPlaybackComplete();
-			
+		}
+		
 		if ( (flags & CODEC_RECORD_DN) != 0 ){			// recording complete
 			audRecordComplete();
 		}

@@ -404,13 +404,6 @@ void								audLoadBuffs(){																// called on mediaThread to preload a
 		for ( int i=0; i < nPlyBuffs; i++)	// pre-load any empty audio buffers
 			if ( pSt.Buff[i]==NULL ){
 				pSt.Buff[i] = loadBuff();	
-//DEBUG****************************
-				extern bool FakeCodec; 
-				if ( FakeCodec && i==nPlyBuffs-1 ){  //DEBUG**************************** fake completion of previous
-					tbDelay_ms(100);
-					saiEvent( ARM_SAI_EVENT_SEND_COMPLETE );
-				}
-//DEBUG****************************
 			}
 }
 
@@ -750,6 +743,7 @@ extern void 				saiEvent( uint32_t event ){										// called by ISR on buffer 
 		if ( pSt.Buff[2] != NULL ){		// have more data to send
 			pSt.nPlayed += pSt.nPerBuff;   // num samples actually completed
 			Driver_SAI0.Send( pSt.Buff[2]->data, BuffWds );		// set up next buffer 
+
 			dbgEvt( TB_audSent, pSt.Buff[2]->firstSample, (int)pSt.Buff[2],0,0);
 			releaseBuff( pSt.Buff[0] );		// buff 0 completed, so free it
 			

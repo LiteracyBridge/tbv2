@@ -149,7 +149,7 @@ void 					controlTest(  ){									// CSM test procedure
 					break;
 				
 				case starRhand:
-					powerDownTBook( true );
+					powerDownTBook();
 					osTimerStart( timers[1], TB_Config.longIdleMS );
 					playSysAudio( "faster" );
 					break;
@@ -185,7 +185,7 @@ void 					controlTest(  ){									// CSM test procedure
 					
 				case starCircle:
 					saveWriteMsg( "Clean power down" );
-					powerDownTBook( false );
+					powerDownTBook();
 				  break;
 				
 				case starHome:
@@ -195,7 +195,6 @@ void 					controlTest(  ){									// CSM test procedure
 				
 				case FirmwareUpdate:   // pot table
 					dbgLog( "rebooting to system bootloader for DFU... \n" );
-					ledFg( TB_Config.fgEnterDFU );
 					tbDelay_ms( 3300 );  // about to go into DFU
 					RebootToDFU(  );
 					break;
@@ -230,14 +229,13 @@ void writeCSM(){			// write current CSM to tbook_csm.c
 	
 	fprintf( f, "TBConfig_t  TB_Config = { \n  " );
 	fprintf( f, "%22d,   // %s \n  ", 		TB_Config.default_volume, 	"default_volume" );
-	fprintf( f, "%22d,   // %s \n  ", 		TB_Config.default_speed, 		"default_speed" );
 	fprintf( f, "%22d,   // %s \n  ", 		TB_Config.powerCheckMS, 		"powerCheckMS" );
 	fprintf( f, "%22d,   // %s \n  ", 		TB_Config.shortIdleMS, 			"shortIdleMS" );
 	fprintf( f, "%22d,   // %s \n  ", 		TB_Config.longIdleMS, 			"longIdleMS" );
-	fprintf( f, "%s,   // %s \n  ", 			padStr(sv, TB_Config.systemAudio), 			"systemAudio" );
 	fprintf( f, "%22d,   // %s \n  ", 		TB_Config.minShortPressMS,	"minShortPressMS" );
 	fprintf( f, "%22d,   // %s \n  ", 		TB_Config.minLongPressMS, 	"minLongPressMS" );
 	fprintf( f, "%22d,   // %s \n  ", 		TB_Config.initState, 				"initState" );
+	fprintf( f, "%s,   // %s \n  ", 			padStr(sv, TB_Config.systemAudio), 			"systemAudio" );
 	fprintf( f, "%s,   // %s \n  ", 			padStr(sv, TB_Config.bgPulse ), 				"bgPulse" );
 	fprintf( f, "%s,   // %s \n  ", 			padStr(sv, TB_Config.fgPlaying ), 			"fgPlaying" );
 	fprintf( f, "%s,   // %s \n  ", 			padStr(sv, TB_Config.fgPlayPaused ), 		"fgPlayPaused" );
@@ -251,7 +249,6 @@ void writeCSM(){			// write current CSM to tbook_csm.c
 	fprintf( f, "%s,   // %s \n  ", 			padStr(sv, TB_Config.fgNoUSBcable ), 		"fgNoUSBcable" );
 	fprintf( f, "%s,   // %s \n  ", 			padStr(sv, TB_Config.fgUSBconnect ), 		"fgUSBconnect" );
 	fprintf( f, "%s,   // %s \n  ", 			padStr(sv, TB_Config.fgPowerDown ), 		"fgPowerDown" );
-	fprintf( f, "%s    // %s \n", 			  padStr(sv, TB_Config.fgEnterDFU ), 			"fgEnterDFU" );
   fprintf( f, "};  // TB_Config \n\n" );
 	
 	fprintf( f, "int   nPlaySys = %d;  // PlaySys prompts used by CSM \n", nPlaySys );

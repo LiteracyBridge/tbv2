@@ -7,6 +7,8 @@
 
 #ifdef LOAD_CSM_DYNAMICALLY
   // declare variables to be loaded by controlParser
+	char CSM_Version[ MAX_VERSION_LEN ];
+
 	int						nCSMstates = 0;
 	TBConfig_t		TB_Config;
 	csmState *		TBookCSM[ MAX_CSM_STATES ];		// TBook state machine definition

@@ -17,6 +17,9 @@ typedef struct {
 #define   MAX_PKGS						4		// max # of content packages on a device
 #define		MAX_PLAY_SYS			 30		// max # of distince PlaySys() prompts in use
 
+#define		MAX_VERSION_LEN		100		// max length of contol.def 1st line -- version string
+extern char CSM_Version[ ];
+
 // ---------TBook Control State Machine
 typedef struct {	// csmState
 	short 							nmTknID;										// TknID for name of this state

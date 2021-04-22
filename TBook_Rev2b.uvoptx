@@ -159,7 +159,7 @@
           <Type>0</Type>
           <LineNumber>142</LineNumber>
           <EnabledFlag>0</EnabledFlag>
-          <Address>134427316</Address>
+          <Address>134427180</Address>
           <ByteObject>0</ByteObject>
           <HtxType>0</HtxType>
           <ManyObjects>0</ManyObjects>
@@ -175,7 +175,7 @@
           <Type>0</Type>
           <LineNumber>97</LineNumber>
           <EnabledFlag>0</EnabledFlag>
-          <Address>134259856</Address>
+          <Address>134259868</Address>
           <ByteObject>0</ByteObject>
           <HtxType>0</HtxType>
           <ManyObjects>0</ManyObjects>
@@ -191,7 +191,7 @@
           <Type>0</Type>
           <LineNumber>94</LineNumber>
           <EnabledFlag>0</EnabledFlag>
-          <Address>134340554</Address>
+          <Address>134339954</Address>
           <ByteObject>0</ByteObject>
           <HtxType>0</HtxType>
           <ManyObjects>0</ManyObjects>
@@ -207,7 +207,7 @@
           <Type>0</Type>
           <LineNumber>95</LineNumber>
           <EnabledFlag>0</EnabledFlag>
-          <Address>134340566</Address>
+          <Address>134339966</Address>
           <ByteObject>0</ByteObject>
           <HtxType>0</HtxType>
           <ManyObjects>0</ManyObjects>
@@ -223,7 +223,7 @@
           <Type>0</Type>
           <LineNumber>72</LineNumber>
           <EnabledFlag>1</EnabledFlag>
-          <Address>134334792</Address>
+          <Address>134334196</Address>
           <ByteObject>0</ByteObject>
           <HtxType>0</HtxType>
           <ManyObjects>0</ManyObjects>
@@ -461,6 +461,21 @@
           <WinNumber>1</WinNumber>
           <ItemText>cdcFmtVolume</ItemText>
         </Ww>
+        <Ww>
+          <count>45</count>
+          <WinNumber>1</WinNumber>
+          <ItemText>CdcNoPower</ItemText>
+        </Ww>
+        <Ww>
+          <count>46</count>
+          <WinNumber>1</WinNumber>
+          <ItemText>PDwnAfterMClock</ItemText>
+        </Ww>
+        <Ww>
+          <count>47</count>
+          <WinNumber>1</WinNumber>
+          <ItemText>PDwnAfterBuffCmplt</ItemText>
+        </Ww>
       </WatchWindow1>
       <WatchWindow2>
         <Ww>
@@ -529,7 +544,7 @@
         <viewmode>1</viewmode>
         <vrSel>5</vrSel>
         <aSym>0</aSym>
-        <aTbox>1</aTbox>
+        <aTbox>0</aTbox>
         <AscS1>0</AscS1>
         <AscS2>0</AscS2>
         <AscS3>0</AscS3>
@@ -559,16 +574,8 @@
       <pMultCmdsp></pMultCmdsp>
       <SystemViewers>
         <Entry>
-          <Name>System Viewer\DMA1</Name>
-          <WinId>35901</WinId>
-        </Entry>
-        <Entry>
           <Name>System Viewer\EXTI</Name>
           <WinId>35904</WinId>
-        </Entry>
-        <Entry>
-          <Name>System Viewer\FLASH</Name>
-          <WinId>35900</WinId>
         </Entry>
         <Entry>
           <Name>System Viewer\GPIOA</Name>
@@ -587,10 +594,6 @@
           <WinId>35898</WinId>
         </Entry>
         <Entry>
-          <Name>System Viewer\GPIOE</Name>
-          <WinId>35905</WinId>
-        </Entry>
-        <Entry>
           <Name>System Viewer\I2S2ext</Name>
           <WinId>35889</WinId>
         </Entry>
@@ -599,40 +602,12 @@
           <WinId>35888</WinId>
         </Entry>
         <Entry>
-          <Name>System Viewer\NVIC</Name>
-          <WinId>35896</WinId>
-        </Entry>
-        <Entry>
-          <Name>System Viewer\OTG_FS_DEVICE</Name>
-          <WinId>35886</WinId>
-        </Entry>
-        <Entry>
-          <Name>System Viewer\OTG_FS_GLOBAL</Name>
-          <WinId>35885</WinId>
-        </Entry>
-        <Entry>
           <Name>System Viewer\PWR</Name>
           <WinId>35890</WinId>
         </Entry>
         <Entry>
-          <Name>System Viewer\QUADSPI</Name>
-          <WinId>35895</WinId>
-        </Entry>
-        <Entry>
-          <Name>System Viewer\RCC</Name>
-          <WinId>35893</WinId>
-        </Entry>
-        <Entry>
-          <Name>System Viewer\RNG</Name>
-          <WinId>35894</WinId>
-        </Entry>
-        <Entry>
           <Name>System Viewer\RTC</Name>
           <WinId>35892</WinId>
-        </Entry>
-        <Entry>
-          <Name>System Viewer\SDIO</Name>
-          <WinId>35891</WinId>
         </Entry>
         <Entry>
           <Name>System Viewer\SYSCFG</Name>

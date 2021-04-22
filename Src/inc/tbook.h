@@ -37,7 +37,7 @@
 
 // global utilities
 // tbutil.c
-
+extern void				EnableLedMngr( bool enable );  // DEBUG allow disabling LED manager for debugging
 #define count(x) sizeof(x)/sizeof(x[0])
 
 extern char 			CPU_ID[20], TB_ID[20], TBookName[20];
@@ -78,7 +78,8 @@ extern fsStatus 	fsMount( char *drv );														// try to finit() & mount() 
 extern osMutexId_t		logLock;																		// mutex for access to NorFlash
 
 extern void 			talking_book ( void *argument );
-extern void 			showRTC( void );
+extern void 			getRTC( struct _fsTime *fsTime );							// load current RTC into fsTime
+extern bool 			showRTC( void );
 extern uint32_t 	tbTimeStamp( void );
 extern void 			tbDelay_ms( int ms ); 					//  Delay execution for a specified number of milliseconds
 extern void *			tbAlloc( int nbytes, const char *msg );
@@ -178,15 +179,15 @@ extern const int 	MEDIA_ALREADY_IN_USE;
 
 typedef struct TBConfig {			// TBConfig
 	short 	default_volume;
-	short 	default_speed;
 	int 		powerCheckMS;				// used by powermanager.c
 	int			shortIdleMS;
 	int			longIdleMS;
-	char *	systemAudio;				// path to system audio files
 	int			minShortPressMS;			// used by inputmanager.c
 	int			minLongPressMS;				// used by inputmanager.c
 	int			initState;	
-	char *	bgPulse;
+	
+	char *	systemAudio;				// path to system audio files
+	char *	bgPulse;						// LED sequences used in Firmware
 	char *	fgPlaying;
 	char *	fgPlayPaused;
 	char *	fgRecording;
@@ -199,9 +200,8 @@ typedef struct TBConfig {			// TBConfig
 	char *	fgNoUSBcable;
 	char *	fgUSBconnect;
 	char *	fgPowerDown;
-	char *	fgEnterDFU;
-	
 }	TBConfig_t;
+
 extern TBConfig_t 	TB_Config;		// global TBook configuration
 
 // for tbUtil.c

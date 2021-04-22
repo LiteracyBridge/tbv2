@@ -149,43 +149,49 @@ void 								handlePowerEvent( int powerEvent ){
 //
 //******** ledThread -- update LEDs according to current sequence
 volatile static uint32_t wkup = 0;
+static  bool enableLedManager;
 void								ledThread( void *arg ){	
+	int delay;
 	dbgLog( "4 inThr: 0x%x 0x%x \n", &arg, &arg + LED_STACK_SIZE );
 	while ( true ){
-		ledSeq *c = currSeq;		// get consistent copy & use it
+		if ( enableLedManager ){  // just sleep again if not enabled
+			ledSeq *c = currSeq;		// get consistent copy & use it
 
-		if ( c->delayLeft <= 0 ){		// move to next shade
-			if ( c->nextStep >= c->nSteps ){
-				if ( c->repeat ){
-					c->nextStep = 0;
-					c->repeatCnt++;
-				} else {
-					currSeq = bgSeq;	// finished fgSeq, switch to bg
-					continue;			// loop back to start that seq
+			if ( c->delayLeft <= 0 ){		// move to next shade
+				if ( c->nextStep >= c->nSteps ){
+					if ( c->repeat ){
+						c->nextStep = 0;
+						c->repeatCnt++;
+					} else {
+						currSeq = bgSeq;	// finished fgSeq, switch to bg
+						continue;			// loop back to start that seq
+					}
+				}
+				c->currShade = c->shade[ c->nextStep ];
+				c->shadeStep = 0;
+				c->delayLeft = c->msec[ c->nextStep ];
+				c->nextStep++;
+			}
+			delay = 0;
+			int step = c->shadeStep;
+			LEDcolor color;
+			if ( c->currShade.dly[3] == 255 && c->currShade.dly[0]==0 && c->currShade.dly[1]==0 && c->currShade.dly[2]==0 ){ // == OffShd?
+				color = LED_OFF;
+				delay = c->delayLeft;		// no need to do time multiplexing
+			} else {
+				while ( delay==0 ){  // get next non-zero color in this shade
+					color = (LEDcolor) step;
+					delay = c->currShade.dly[ step ];
+					step++;
+					if ( step>3 ) step = 0;
 				}
 			}
-			c->currShade = c->shade[ c->nextStep ];
-			c->shadeStep = 0;
-			c->delayLeft = c->msec[ c->nextStep ];
-			c->nextStep++;
-		}
-		int delay = 0, step = c->shadeStep;
-		LEDcolor color;
-		if ( c->currShade.dly[3] == 255 && c->currShade.dly[0]==0 && c->currShade.dly[1]==0 && c->currShade.dly[2]==0 ){ // == OffShd?
-			color = LED_OFF;
-			delay = c->delayLeft;		// no need to do time multiplexing
-		} else {
-			while ( delay==0 ){  // get next non-zero color in this shade
-				color = (LEDcolor) step;
-				delay = c->currShade.dly[ step ];
-				step++;
-				if ( step>3 ) step = 0;
-			}
-		}
-		ledSet( color );
-		c->shadeStep = step;
-		if ( delay > c->delayLeft ) delay = c->delayLeft;
-		c->delayLeft -= delay;		// amount of this shade to go
+			ledSet( color );
+			c->shadeStep = step;
+			if ( delay > c->delayLeft ) delay = c->delayLeft;
+			c->delayLeft -= delay;		// amount of this shade to go
+		} else
+		  delay = 100;		// check every 100 ms
 		wkup = osEventFlagsWait( osFlag_LedThr, LED_EVT, osFlagsWaitAny, delay );  // wait for delay or ledFg/ledBg wakeup
 	}
 }
@@ -220,10 +226,14 @@ void								ledBg( const char *def ){						// install 'def' as background patter
 		osEventFlagsSet( osFlag_LedThr, LED_EVT );		// wakeup ledThread
 	}
 }
+void								EnableLedMngr( bool enable ){
+	enableLedManager = enable;
+}
 void 								initLedManager(){				// initialize & spawn LED thread
 	handlePowerEvent( POWER_UP );
 //	registerPowerEventHandler( handlePowerEvent );
 
+	enableLedManager = true;
 	ledBg( "_49G" );  // 0.1sec G flash every 5 sec
 	
 	osFlag_LedThr = osEventFlagsNew(NULL);	// os flag ID -- used so ledFg & ledBg can wakeup LedThread

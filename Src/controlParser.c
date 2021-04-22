@@ -188,7 +188,6 @@ void 					readControlDef( void ){				// parse control.def => Config & TBookCSM[]
 	
 	TB_Config.systemAudio = loadPath( getField( cfg, "systemAudio" ));
 	TB_Config.default_volume = getIntFld( cfg, "default_volume", 5 );
-	TB_Config.default_speed = getIntFld( cfg, "default_speed", 5 );
 	TB_Config.powerCheckMS = getIntFld( cfg, "powerCheckMS", 60000 );	// once/min
 	TB_Config.shortIdleMS = getIntFld( cfg, "shortIdleMS", 2000 );		// 2 sec
 	TB_Config.longIdleMS = getIntFld( cfg, "longIdleMS", 30000 );		// 30 sec
@@ -206,7 +205,6 @@ void 					readControlDef( void ){				// parse control.def => Config & TBookCSM[]
 	TB_Config.fgNoUSBcable 		= getStrFld( cfg, "fgNoUSBcable", TB_Config.fgNoUSBcable );
 	TB_Config.fgUSBconnect 		= getStrFld( cfg, "fgUSBconnect", TB_Config.fgUSBconnect );
 	TB_Config.fgPowerDown 		= getStrFld( cfg, "fgPowerDown", 	TB_Config.fgPowerDown );
-	TB_Config.fgEnterDFU 			= getStrFld( cfg, "fgEnterDFU", 	TB_Config.fgEnterDFU );
 
 	TB_Config.minShortPressMS = getIntFld( cfg, "minShortPressMS", 50 );	// extern from inputmanager.c
 	TB_Config.minLongPressMS = getIntFld( cfg, "minLongPressMS", 600 );	// extern from inputmanager.c

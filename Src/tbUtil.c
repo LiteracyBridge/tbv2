@@ -181,19 +181,21 @@ bool			 							gOutVal( GPIO_ID gpio ){												// => LOGICAL state of a GPIO
 void 										flashLED( const char *s ){											// 'GGRR__' in .1sec
 	for ( int i=0; i<strlen(s); i++ ){
 		switch ( s[i] ){
-			case 'G': gSet( gGREEN, 1 ); break;
-			case 'R': gSet( gRED, 1 ); break;
-			default: break;
+			case 'G': gSet( gGREEN, 1 ); gSet( gRED, 0 ); break;
+			case 'R': gSet( gGREEN, 0 ); gSet( gRED, 1 ); break;
+			default:  gSet( gGREEN, 0 ); gSet( gRED, 0 ); break;
 		}
 		tbDelay_ms( 100 );	// flashLED
-		gSet( gGREEN, 0 );	
-		gSet( gRED, 0 );
 	}
+	gSet( gGREEN, 0 );	gSet( gRED, 0 );
 }
 void 										flashCode( int v ){															// e.g. 9 => "RR__GG__GG__RR______"
+  EnableLedMngr( false );
+  flashLED("___");
 	for ( int i=0; i<4; i++ )
-		flashLED( ((v & (1<<i))==0)? "GGG__":"RRR__" );
-	flashLED("__");
+		flashLED( ((v & (1<<i))==0)? "GGGG___":"RRRR___" );
+	flashLED("_____");
+	EnableLedMngr( true );
 }
 void										flashInit( ){																		// init keypad GPIOs for debugging	
 	LED_Init( gGREEN );	
@@ -396,7 +398,7 @@ void getRTC(struct _fsTime *fsTime) {
 }
 
 
-void 										showRTC( ){
+bool 										showRTC( ){
 	int pDt=0,Dt=1, pTm=0,Tm=1;
 	while (pDt != Dt || pTm != Tm){
 		pDt = Dt;
@@ -404,6 +406,7 @@ void 										showRTC( ){
 		Dt = RTC->DR;
 		Tm = RTC->TR;
 	}
+	if ( Dt == 0x02101 ) return false;
 	
 	uint8_t yr, mon, date, day, hr, min, sec;
 	yr =  ((Dt>>20) & 0xF)*10 + ((Dt>>16) & 0xF);
@@ -422,6 +425,7 @@ void 										showRTC( ){
 	char dttm[50];
 	sprintf(dttm, "%s %d-%s-%d %d:%02d:%02d", wkdy[day], date, month[mon], yr, hr,min,sec );
 	logEvtNS( "RTC", "DtTm", dttm );
+	return true;
 }
 
 

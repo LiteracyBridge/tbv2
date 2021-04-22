@@ -21,6 +21,9 @@ static short		touched[ MAX_STATS_CACHED ];
 static MsgStats	sStats[ MAX_STATS_CACHED ];
 const int				STAT_SIZ = sizeof( MsgStats );
 const char *		norEraseFile = "M0:/system/EraseNorLog.txt";			// flag file to force full erase of NOR flash
+char *					rtcSetFile = "M0:/system/SetRTC.txt";							// flag file to force setting RTC to last modification time of SetRTC.txt
+char *					rtcDontSetFile = "dontSetRTC.txt";  							// renamed version of SetRTC.txt
+char *					lastRtcFile = "M0:/system/lastRTC.txt";						// written at powerdown-- modification date used to reset clock
 const char *		logFilePatt = "M0:/LOG/tbLog_%d.txt";			// file name of previous log on first boot
 
 const int				MAX_EVT_LEN1 = 32, MAX_EVT_LEN2 = 64;
@@ -54,7 +57,7 @@ static void			addHist( const char * s1, const char * s2 ){			// DEBUG:  prepend 
 */
 
 char *					loadLine( char * line, char * fpath, fsTime *tm ){		// => 1st line of 'fpath'
-	const fsTime nullTm = { 0,0,0,1,1, 2020 };
+	const fsTime nullTm = { 0,0,0,1,1, 2020 };  // midnight 1-Jan-2020
 	if (tm!=NULL)  *tm = nullTm;
 	strcpy(line, "---");
 	FILE *stF = tbOpenReadBinary( fpath ); //fopen( fpath, "rb" );
@@ -137,7 +140,7 @@ void 						dateStr( char *s, fsTime dttm ){
 void						logPowerUp( bool reboot ){											// re-init logger after reboot, USB or sleeping
 	char line[200];
 	char dt[30];
-	fsTime verDt, bootDt;
+	fsTime verDt, bootDt, rtcDt;
 
 	logF = NULL;
 	//checkLog();	//DEBUG
@@ -165,7 +168,7 @@ void						logPowerUp( bool reboot ){											// re-init logger after reboot, U
 		if (logF!=NULL) fprintf( logF, "\n" );
 		logEvt(   "REBOOT--------" );
 		logEvtNS( "TB_V2", "Firmware", TBV2_Version );
-		logEvtFmt( "BUILT", "On %s at %s", __DATE__, __TIME__);
+		logEvtFmt( "BUILT", "On %s at %s", __DATE__, __TIME__);  // date & time LOGGER.C last compiled -- link date?
 		logEvtS(  "CPU",  CPU_ID );
 		logEvtS(  "TB_ID",  TB_ID );
 		loadTBookName();
@@ -181,24 +184,37 @@ void						logPowerUp( bool reboot ){											// re-init logger after reboot, U
 	
 	fsFileInfo fAttr;
 	fAttr.fileID = 0;
-	fsStatus fStat = ffind( TBP[ pCSM_DEF ], &fAttr );
-	if ( fStat != fsOK ){
-		logEvtNS( "TB_CSM", "missing", TBP[ pCSM_DEF ] );
-		return;
+	if ( nCSMstates == 0 ){  // will need to parse control.def to define CSM
+		fsStatus fStat = ffind( TBP[ pCSM_DEF ], &fAttr );
+		if ( fStat != fsOK ){
+			logEvtNS( "TB_CSM", "missing", TBP[ pCSM_DEF ] );
+			return;
+		} else {	// Read 1st line (latest version comment) from "M0:/system/control.def" & log it
+			char * status = loadLine( line, TBP[ pCSM_DEF ], &verDt );			// control.def file exists-- when created
+			int slen = strlen( status );
+			if ( slen >= MAX_VERSION_LEN ) 
+				status[MAX_VERSION_LEN-1] = 0;   // truncate if too long
+			strcpy( CSM_Version, status );
+		}
 	}
+	logEvtNS( "TB_CSM", "ver", CSM_Version );		// log CSM version comment
 
-  // Read some bytes from "M0:/system/control.def"; as a side effect, query the timestamp of "control.def"
-  // and use that to set the RTC clock.
-  // TODO: use a file that is only used to set the clock.
-	char * status = loadLine( line, TBP[ pCSM_DEF ], &verDt );			// control.def file exists-- when created?
-	dateStr( dt, verDt );
-	logEvtNSNS( "TB_CSM", "dt", dt, "ver", status );
-		
-	if ( FirstSysBoot ){  // FirstBoot after install
+	if ( fexists( rtcSetFile )){ // if setRTC.txt exists-- use mod date to set clock
+		char * status = loadLine( line, rtcSetFile, &rtcDt );	
+		dateStr( dt, rtcDt );
 		logEvtNS( "setRTC", "DtTm", dt );
-		setupRTC( verDt );			// init RTC and set to date/time from version.txt
-	} else 					// read & report RTC value
-		showRTC();
+		setupRTC( rtcDt );			// init RTC and set to modified date/time from SetRTC.txt
+		uint32_t stat = frename( rtcSetFile, rtcDontSetFile );		// rename setRTC.txt to dontSetRTC.txt
+		if (stat != fsOK) 
+			errLog( "frename %s to %s => %d \n", rtcSetFile, rtcDontSetFile, stat );
+	}
+	if ( !showRTC() ){	// show current RTC time, or false if unset
+		// RTC unset after hard power down (e.g. battery change)
+		char * status = loadLine( line, lastRtcFile, &rtcDt );	
+		dateStr( dt, rtcDt );
+		logEvtNS( "resetRTC", "DtTm", dt );
+		setupRTC( rtcDt );			// init RTC and set to modified date/time from SetRTC.txt
+ 	}
 	
 	//boot complete!  count it
 	bootcnt++;
@@ -206,7 +222,14 @@ void						logPowerUp( bool reboot ){											// re-init logger after reboot, U
 	writeLine( line,  TBP[ pBOOTCNT ] );
 }
 void						logPowerDown( void ){															// save & shut down logger for USB or sleeping
-	flushStats();	
+	flushStats();
+	
+	fsTime rtcTm;
+	getRTC( &rtcTm );  // current RTC
+
+	if ( !fexists( lastRtcFile )) writeLine( "---", lastRtcFile );  // make sure it's there
+	ftime_set( lastRtcFile, &rtcTm, &rtcTm, &rtcTm );  // set create,access,write times to RTC 
+	
 	copyNorLog( "" );		// auto log name
 	
 	if ( logF==NULL ) return;

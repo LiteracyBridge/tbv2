@@ -234,7 +234,22 @@ void assertValidState(int stateIndex) {
 		tbErr("invalid state index");
 }	
 
-
+char * 								ledStr( char * s ){			// lookup TBConfig LED sequences
+	if ( strcasecmp( s, "bgPulse" )==0 ) 				return TB_Config.bgPulse;					// set by CSM (background while navigating)						default: _49G
+	if ( strcasecmp( s, "fgPlaying" )==0 ) 			return TB_Config.fgPlaying;				// set by startPlayback() 					 									default: G!
+	if ( strcasecmp( s, "fgPlayPaused" )==0 ) 	return TB_Config.fgPlayPaused;		// set by audPauseResumeAudio() when playback paused  default: G2_3!
+	if ( strcasecmp( s, "fgRecording" )==0 ) 		return TB_Config.fgRecording;			// set by startRecord() while recording user feedback default: R!
+	if ( strcasecmp( s, "fgRecordPaused" )==0 ) return TB_Config.fgRecordPaused;	// set by audPauseResumeAudio() when recording paused default: R2_3!
+	if ( strcasecmp( s, "fgSavingRec" )==0 ) 		return TB_Config.fgSavingRec;			// set by haltRecord while saving recording  					default: O!
+	if ( strcasecmp( s, "fgSaveRec" )==0 ) 			return TB_Config.fgSaveRec;				// set by saveRecording() while encrypting recording  default: G3_3G3
+	if ( strcasecmp( s, "fgCancelRec" )==0 ) 		return TB_Config.fgCancelRec;			// set by media.cancelRecording()  										default: R3_3R3
+	if ( strcasecmp( s, "fgUSB_MSC" )==0 ) 			return TB_Config.fgUSB_MSC;				// set by USBD_MSC0_Init() when USB host connects  		default: O5o5!
+	if ( strcasecmp( s, "fgUSBconnect" )==0 ) 	return TB_Config.fgUSBconnect;		// set by enableMassStorage() when starting USB		  	default: G5g5!
+	if ( strcasecmp( s, "fgTB_Error" )==0 ) 		return TB_Config.fgTB_Error;			// set by TBErr() to signal software error  					default: R8_2R8_2R8_20!
+	if ( strcasecmp( s, "fgNoUSBcable" )==0 ) 	return TB_Config.fgNoUSBcable;		// set by enableMassStorage() if noUSBpower  					default: _3R3_3R3_3R3_5!
+	if ( strcasecmp( s, "fgPowerDown" )==0 ) 		return TB_Config.fgPowerDown;			// set??  powerDownTBook() G_3G_3G_9G_3G_9G_3
+  return s;
+}
 static void 					doAction( Action act, char *arg, int iarg ){	// execute one csmAction
 	dbgEvt( TB_csmDoAct, act, arg[0],arg[1],iarg );
 	logEvtNSNS( "Action", "nm", actionNm(act), "arg", arg ); //DEBUG
@@ -345,8 +360,7 @@ static void 					doAction( Action act, char *arg, int iarg ){	// execute one csm
 			showBattCharge();
 			break;
 		case powerDown:		
-			ledBg( NULL );								// turn off background heartbeat
-			powerDownTBook( true ); //false );
+			powerDownTBook();
 			break;
 	  case sysTest:
 			dbgLog( "writing tbook_csm.c \n" );
@@ -445,7 +459,6 @@ void 					executeCSM( void ){								// execute TBook control state machine
 	osStatus_t status;
 	
 	TBook.volume = TB_Config.default_volume;
-	TBook.speed = TB_Config.default_speed;
 	TBook.iSubj = -1; // makes "next subject" go to the first subject.
 	TBook.iMsg = 0;
 
@@ -524,7 +537,6 @@ void 									initControlManager( void ){				// initialize control manager
 	if ( nCSMstates==0 ){
 		// init to odd values so changes are visible
 		TB_Config.default_volume = 5; 		// lower for TB_V2_R3
-		TB_Config.default_speed = 3;
 		TB_Config.powerCheckMS = 10000;				// set by setPowerCheckTimer()
 		TB_Config.shortIdleMS = 3000;
 		TB_Config.longIdleMS = 11000;
@@ -544,7 +556,6 @@ void 									initControlManager( void ){				// initialize control manager
 		TB_Config.fgTB_Error			= (char *) fgTB_Error;
 		TB_Config.fgNoUSBcable		= (char *) fgNoUSBcable;
 		TB_Config.fgPowerDown			= (char *) fgPowerDown;
-		TB_Config.fgEnterDFU			= (char *) fgDFU;
 		
 		initTknTable();
 		if ( TBDataOK )		// control.def exists

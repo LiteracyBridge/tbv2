@@ -1,3 +1,4 @@
+// 2021-04-22: fix anyKey, remove noDevUpdate, stFbOptions: rh_things_to_do
 // 2021-04-16: Add interstitial states to allow skipping through prompts
 // TB CSM -- 9-Apr-21 merged into Bill's version
 // TB CSM -- 7-Apr-21 starPot: nxtPkg, starRH: chgPkg
@@ -27,8 +28,6 @@
     whenUSB:       { starPlus:   stCloseUSB },
     whenPlaying:   { Plus:       stPlayLouder,
                      Minus:      stPlaySofter,
-//                     Plus__:     stPlayFaster,
-//                     Minus__:    stPlaySlower,
                      Pot:        stPlayPause,
                      Lhand__:    stPlayJumpBack,
                      Rhand__:    stPlayJumpFwd },
@@ -48,33 +47,28 @@
                      Table:      stCancelRec,
                      Star:       stSaveRec },
     whenIdle:      { LowBattery: stLowBatt,
-                     DevUpdate:  stGoFWU,
                      starPlus:   stUSBmode,
                      Plus:       stIdleLouder,
                      Minus:      stIdleSofter,
-//                     Plus__:     stIdleFaster,
-//                     Minus__:    stIdleSlower,
                      starTable:  stTest,
                      starMinus:  stOnUpdate,
                      starPot:    stNxtPkg,
                      starRhand:  stChgPkg },
   },
   CStates: {
-    stWakeup:       { Actions: [ LED(_), bgLED(G_29), changePkg, playSys(welcome) ], CGroups:[ whenAwake, whenPlaying, whenNav ], AudioStart: stWelcoming },
+    stWakeup:       { Actions: [ LED(_), bgLED(bgPulse), changePkg, playSys(welcome) ], CGroups:[ whenAwake, whenPlaying, whenNav ], AudioStart: stWelcoming },
     stWelcoming:    {                                                           CGroups:[ whenAwake, whenPlaying, whenNav ], AudioDone: stPromptSubj },
     stPromptSubj:   { Actions: [ playSys(rh_for_subj) ],                        CGroups:[ whenAwake, whenPlaying, whenNav ], AudioStart: stPromptingSub },
     stPromptingSub: {                                                           CGroups:[ whenAwake, whenPlaying, whenNav ], AudioDone: stWait },
 
     stWait:         {                                                           CGroups:[ whenAwake, whenNav, whenIdle ] },
-    stSleepy:       { Actions: [ bgLED(O_9),  saveSt(1),  setTimer(10000) ],    CGroups:[ whenAwake ], allKeys: stUnSleepy, Timer: stGoSleep },
-    stUnSleepy:     { Actions: [ bgLED(G_29), goSavedSt(1) ],                   CGroups:[ whenAwake ] },
-    stGoSleep:      { Actions: [ bgLED(R_4),  setTimer(2000) ],                 CGroups:[ whenSleeping ], Timer: stFallAsleep },
+    stSleepy:       { Actions: [ bgLED(O_9),  saveSt(1),  setTimer(5000) ],     CGroups:[ whenAwake ], anyKey: stUnSleepy, Timer: stGoSleep },
+    stUnSleepy:     { Actions: [ bgLED(bgPulse), goSavedSt(1) ],                CGroups:[ whenAwake ] },
+    stGoSleep:      { Actions: [ bgLED(R_3),  setTimer(1000) ],                 CGroups:[ whenSleeping ], Timer: stFallAsleep },
     stFallAsleep:   { Actions: [ powerDown ],                                   CGroups:[ whenSleeping ] },
 
     stPlayLouder:   { Actions: [ volAdj( 1),  goPrevSt ],                       CGroups:[ whenAwake, whenPlaying ] },
     stPlaySofter:   { Actions: [ volAdj(-1),  goPrevSt ],                       CGroups:[ whenAwake, whenPlaying ] },
-//    stPlayFaster:   { Actions: [ spdAdj( 1),  goPrevSt ],                     CGroups:[ whenAwake, whenPlaying ] },
-//    stPlaySlower:   { Actions: [ spdAdj(-1),  goPrevSt ],                     CGroups:[ whenAwake, whenPlaying ] },
     stPlayPause:    { Actions: [ saveSt( 2),  pausePlay ],                      CGroups:[ whenAwake, whenPlaying, whenNav, whenPlayPaused ] },
     stPlayResume:   { Actions: [ resumePlay,  goSavedSt(2) ],                   CGroups:[ whenAwake, whenPlaying, whenNav ] },
     stPlayJumpBack: { Actions: [ posAdj(-7) ],                                  CGroups:[ whenAwake, whenPlaying, whenNav ] },
@@ -90,7 +84,7 @@
     stPlaying:      {                                                           CGroups:[ whenAwake, whenPlaying, whenNav ] },
 
     stOnFeedback:   { Actions: [ playSys(cir_record_ideas) ],                   CGroups:[ whenAwake, whenFeedback ] },
-    stOnOptions:    { Actions: [ playSys() ],                                   CGroups:[ whenAwake ] },
+    stFbOptions:    { Actions: [ playSys(rh_things_to_do) ],                    CGroups:[ whenAwake ] },
 
     stStartRec:     { Actions: [ startRec ],                                    CGroups:[ whenAwake, whenRecording ] },
     stPauseRec:     { Actions: [ saveSt( 2),  pauseRec ],                       CGroups:[ whenAwake, whenRecording ] },
@@ -103,8 +97,6 @@
     stOnUpdate:     { Actions: [ sysBoot ],                                     CGroups:[ whenAwake ] },
     stIdleLouder:   { Actions: [ volAdj( 1),  playSys(louder),  goPrevSt ],     CGroups:[ whenAwake, whenPlaying ] },
     stIdleSofter:   { Actions: [ volAdj(-1),  playSys(softer),  goPrevSt ],     CGroups:[ whenAwake, whenPlaying ] },
-//    stIdleFaster:   { Actions: [ spdAdj( 1),  playSys(faster),  goPrevSt ],     CGroups:[ whenAwake, whenPlaying ] },
-//    stIdleSlower:   { Actions: [ spdAdj(-1),  playSys(slower),  goPrevSt ],     CGroups:[ whenAwake, whenPlaying ] },
     stUSBmode:      { Actions: [ bgLED(O2_8), startUSB ],                       CGroups:[ whenUSB ] },
     stCloseUSB:     { Actions: [ endUSB,      bgLED(G_29), setTimer(1000) ],    Timer: stWakeup },
     stOnCharging:   { Actions: [ showCharge,  goPrevSt ],                       CGroups:[ whenAwake, whenIdle ] },

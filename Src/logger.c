@@ -1,3 +1,6 @@
+
+
+
 // TBook Rev2  logger.c  --  event logging module
 //   Gene Ball  Apr2018
 
@@ -82,6 +85,26 @@ char *					loadLine( char * line, char * fpath, fsTime *tm ){		// => 1st line of
 		*tm = fAttr.time;
 	return txt;
 }
+
+// Read the timestamp of a file.
+//   char   *path   - The path to the file for which to get the timestamp
+//   fsTime *time   - Where to store the time, if possible.
+// return true if the time was obtained, false otherwise.
+bool getFileTime(char *path, fsTime *time) {
+  fsFileInfo fAttr;
+  fAttr.fileID = 0;
+  fsStatus fStat = ffind( path, &fAttr );
+  if ( fStat != fsOK ){
+    dbgLog( "! FFind => %d for %s \n", fStat, path );
+    return false;
+  }
+  if (time!=NULL) { 
+    *time = fAttr.time;
+    return true; 
+  }
+  return false;
+}
+
 void 						writeLine( char * line, char * fpath ){
 	FILE *stF = tbOpenWriteBinary( fpath ); //fopen( fpath, "wb" );
 	if ( stF!=NULL ){
@@ -199,22 +222,33 @@ void						logPowerUp( bool reboot ){											// re-init logger after reboot, U
 	}
 	logEvtNS( "TB_CSM", "ver", CSM_Version );		// log CSM version comment
 
-	if ( fexists( rtcSetFile )){ // if setRTC.txt exists-- use mod date to set clock
-		char * status = loadLine( line, rtcSetFile, &rtcDt );	
-		dateStr( dt, rtcDt );
-		logEvtNS( "setRTC", "DtTm", dt );
-		setupRTC( rtcDt );			// init RTC and set to modified date/time from SetRTC.txt
-		uint32_t stat = frename( rtcSetFile, rtcDontSetFile );		// rename setRTC.txt to dontSetRTC.txt
-		if (stat != fsOK) 
-			errLog( "frename %s to %s => %d \n", rtcSetFile, rtcDontSetFile, stat );
-	}
-	if ( !showRTC() ){	// show current RTC time, or false if unset
-		// RTC unset after hard power down (e.g. battery change)
-		char * status = loadLine( line, lastRtcFile, &rtcDt );	
-		dateStr( dt, rtcDt );
-		logEvtNS( "resetRTC", "DtTm", dt );
-		setupRTC( rtcDt );			// init RTC and set to modified date/time from SetRTC.txt
- 	}
+  // IF a file SetRTC.txt exists, use it's timestamp to set the RTC. The timestamp will likely be at least
+  // several seconds in the past, but should be "good enough".`
+  if ( fexists( rtcSetFile )) { 
+    bool haveTime = getFileTime(rtcSetFile, &rtcDt);
+    if (haveTime) {
+      dateStr( dt, rtcDt );
+      logEvtNS( "setRTC", "DtTm", dt );
+      setupRTC( rtcDt );      
+      // rename setRTC.txt to dontSetRTC.txt 
+      // TODO: why not simply remove it?
+      uint32_t stat = frename( rtcSetFile, rtcDontSetFile );    
+      if (stat != fsOK) {
+        errLog( "frename %s to %s => %d \n", rtcSetFile, rtcDontSetFile, stat );
+      }
+    }
+  }
+  
+  if ( !showRTC() ){  // show current RTC time, or false if unset
+    // RTC unset after hard power down (e.g. battery change). Reset from the last time we knew. Certainly
+    // the wrong time, possibly by a huge amount, but at least time increases monotonically.
+    bool haveTime = getFileTime(lastRtcFile, &rtcDt);
+    if (haveTime) {
+      dateStr( dt, rtcDt );
+      logEvtNS( "resetRTC", "DtTm", dt );
+      setupRTC( rtcDt );      
+    }
+  }
 	
 	//boot complete!  count it
 	bootcnt++;

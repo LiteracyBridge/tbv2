@@ -217,6 +217,7 @@ void 								audPlayAudio( const char* audioFileName, MsgStats *stats ){ // star
 	pSt.stats = stats;
 	stats->Start++;
 	
+	pSt.SqrWAVE = false;
 	if ( strcasecmp( &audioFileName[ strlen( audioFileName )-4 ], ".wav" ) == 0 ){
 		pSt.audType = audWave;
 		playWave( audioFileName );

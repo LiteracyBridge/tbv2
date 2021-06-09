@@ -228,6 +228,8 @@ FILE * 									tbOpenWriteBinary( const char * nm ){						// repower if necessa
 	return fopen( nm, "wb" );
 }
 void										tbCloseFile( FILE * f ){												// close file errLog if error
+	if (f==NULL) 
+		tbErr("fclose null");
 	int st = fclose( f );
 	if ( st != fsOK ) errLog("fclose => %d", st );
 }

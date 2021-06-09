@@ -64,6 +64,7 @@ struct {							// CSM state variables
 TBook_t TBook;
 
 osTimerId_t  	timers[3]; 	// ShortIdle, LongIdle, Timer
+void									setCSMcurrState( short iSt );  // set TBook.iCurrSt & dependent fields
 	
 // ------------  CSM Action execution
 static void 					adjSubj( int adj ){								// adjust current Subj # in TBook
@@ -94,7 +95,7 @@ static void 					adjMsg( int adj ){								// adjust current Msg # in TBook
 }
 
 
-void 					playSubjAudio( char *arg ){				// play current Subject: arg must be 'nm', 'pr', or 'msg'
+void 									playSubjAudio( char *arg ){				// play current Subject: arg must be 'nm', 'pr', or 'msg'
 	// If no subject is selected, do nothing.
   if (TBook.iSubj < 0 || TBook.iSubj >= TBPkg->nSubjs)
 		return;
@@ -119,7 +120,7 @@ void 					playSubjAudio( char *arg ){				// play current Subject: arg must be 'n
 }
 
 
-void 					playNxtPackage( ){										// play name of next available Package 
+void 									playNxtPackage( ){										// play name of next available Package 
 	iPkg++;
 	if ( iPkg >= nPackages ) iPkg = 0;
 	
@@ -129,7 +130,7 @@ void 					playNxtPackage( ){										// play name of next available Package
 }
 
 
-void 					showPkg( ){										// debug print Package iPkg
+void 									showPkg( ){										// debug print Package iPkg
 	TBPackage_t * pkg = TBPackage[ iPkg]; 
 	printf( "iPkg=%d nm=%s nSubjs=%d \n", pkg->idx, pkg->packageName, pkg->nSubjs );
 	printf( " path=%s \n", pkg->path );
@@ -143,7 +144,7 @@ void 					showPkg( ){										// debug print Package iPkg
 }
 
 
-void						changePackage(){											// switch to last played package name
+void									changePackage(){											// switch to last played package name
 	TBPkg = TBPackage[ iPkg ];
 	TBook.iSubj = -1; // makes "next subject" go to the first subject.
 	TBook.iMsg = 0;
@@ -152,7 +153,7 @@ void						changePackage(){											// switch to last played package name
 }
 
 
-void 					playSysAudio( char *arg ){				// play system file 'arg'
+void 									playSysAudio( char *arg ){				// play system file 'arg'
 //	char path[MAX_PATH];
 	resetAudio();
 	for (int i=0; i<nPlaySys; i++)
@@ -166,7 +167,7 @@ void 					playSysAudio( char *arg ){				// play system file 'arg'
 }
 
 
-void						startRecAudio( char *arg ){
+void									startRecAudio( char *arg ){
 	resetAudio();
 	tbSubject * tbS = TBPkg->TBookSubj[ TBook.iSubj ];
 	char path[MAX_PATH];
@@ -178,12 +179,12 @@ void						startRecAudio( char *arg ){
 }
 
 
-void   				playRecAudio(){
+void   								playRecAudio(){
 	playRecording();
 }
 
 
-void						saveRecAudio( char *arg ){
+void									saveRecAudio( char *arg ){
 	if ( strcasecmp( arg, "sv" )==0 ){
 		saveRecording();
 	} else if ( strcasecmp( arg, "del" )==0 ){
@@ -192,7 +193,7 @@ void						saveRecAudio( char *arg ){
 }
 
 
-void						saveWriteMsg( char *txt ){				// save 'txt' in Msg file
+void									saveWriteMsg( char *txt ){				// save 'txt' in Msg file
 	tbSubject * tbS = TBPkg->TBookSubj[ TBook.iSubj ];
 	char path[MAX_PATH];
 	int mCnt = 0;
@@ -205,7 +206,7 @@ void						saveWriteMsg( char *txt ){				// save 'txt' in Msg file
 }
 
 
-void 					USBmode( bool start ){						// start (or stop) USB storage mode
+void 									USBmode( bool start ){						// start (or stop) USB storage mode
 	if ( start ){
 		logEvt( "enterUSB" );
 		logPowerDown();				// flush & shut down logs
@@ -334,7 +335,8 @@ static void 					doAction( Action act, char *arg, int iarg ){	// execute one csm
 			break;
 		case goPrevSt:
 			assertValidState(TBook.iPrevSt);
-			TBook.iCurrSt = TBook.iNextSt = TBook.iPrevSt;		// return to prevSt without transition
+		  setCSMcurrState( TBook.iPrevSt );		// return to prevSt without transition
+//			TBook.iCurrSt = TBook.iNextSt = TBook.iPrevSt;
 			break;
 		case saveSt:
 			if ( iarg > 4 ) iarg = 4;
@@ -343,12 +345,13 @@ static void 					doAction( Action act, char *arg, int iarg ){	// execute one csm
 			break;
 		case goSavedSt:
 			if ( iarg > 4 ) iarg = 4;
-		  assertValidState(TBook.iSavedSt[ iarg ]);
-			TBook.iNextSt = TBook.iSavedSt[ iarg ];
+		  assertValidState( TBook.iSavedSt[ iarg ] );
+		  setCSMcurrState( TBook.iSavedSt[ iarg ] );		// return to previously saved state without traansition
+//			TBook.iNextSt = TBook.iSavedSt[ iarg ];
 		  // BE: I'm not sure this is right, but it has the side effect of ending the while loop in changeCSMstate.
 		  // In general, when we return to a saved state, I don't think we want to execute the entrance
 		  // actions for that state.
-		  TBook.iCurrSt = TBook.iNextSt;
+//		  TBook.iCurrSt = TBook.iNextSt;
 			break;
 		case setTimer:
 			osTimerStart( timers[2], iarg );
@@ -381,6 +384,24 @@ static void 					doAction( Action act, char *arg, int iarg ){	// execute one csm
 
 
 // ------------- interpret TBook CSM 
+void									setCSMcurrState( short iSt ){  // set TBook.iCurrSt & dependent fields
+	assertValidState( iSt );
+	TBook.iCurrSt = iSt;
+	csmState *stateDef = TBookCSM[ TBook.iCurrSt ];
+	TBook.cSt = stateDef;
+	TBook.currStateName = stateDef->nm;	//DEBUG -- update currSt string
+	TBook.iNextSt = TBook.iCurrSt;  // default is to stay in this state\
+	
+	// Update status strings inside TBook -- solely for visibility in the debugger
+	for ( Event e=eNull; e<eUNDEF; e++ ){	//DEBUG -- update nextSt strings
+		// Aren't these names the same each and every time?
+		TBook.evtNms[ e ] = eventNm( e );
+		// What is the next state (index) for the event in the current state
+		short iState = stateDef->evtNxtState[ e ];
+		// If we get the event, what is the name of the next state?
+		TBook.nxtEvtSt[ e ] = TBookCSM[ iState ]->nm;
+	}
+}
 static void						changeCSMstate( short nSt, short lastEvtTyp ){
 	dbgEvt( TB_csmChSt, nSt, 0,0,0 );
 	assertValidState(nSt);
@@ -392,25 +413,9 @@ static void						changeCSMstate( short nSt, short lastEvtTyp ){
 		assertValidState(TBook.iCurrSt);
 		assertValidState(nSt);
 		TBook.iPrevSt = TBook.iCurrSt;
-		TBook.iCurrSt = nSt;
+		setCSMcurrState( nSt );			// set currState & debugging fields
 		
-		// The state definition for the "current" state (it's really the next state).
-		csmState *stateDef = TBookCSM[ TBook.iCurrSt ];
-		TBook.cSt = stateDef;
-		TBook.currStateName = stateDef->nm;	//DEBUG -- update currSt string
-		
-		// Update status strings inside TBook -- solely for visibility in the debugger
-		for ( Event e=eNull; e<eUNDEF; e++ ){	//DEBUG -- update nextSt strings
-			// Aren't these names the same each and every time?
-			TBook.evtNms[ e ] = eventNm( e );
-			// What is the next state (index) for the event in the current state
-			short iState = stateDef->evtNxtState[ e ];
-			// If we get the event, what is the name of the next state?
-			TBook.nxtEvtSt[ e ] = TBookCSM[ iState ]->nm;
-		}
-		
-		// By default the next state is the current state. 
-		TBook.iNextSt = TBook.iCurrSt;   // stay here unless something happens
+		csmState *stateDef = TBook.cSt;
 		
 		// Build a list of actions, for debugging and logging. Hope the buffer is big enough.
 		// The actions are what we do when we enter a state.
@@ -429,7 +434,7 @@ static void						changeCSMstate( short nSt, short lastEvtTyp ){
 			// Parse the argument if it looks like it might be numberic.
 			int iarg = arg[0]=='-' || isdigit( arg[0] )? atoi( arg ) : 0;
 			// And invoke the action.
-			doAction( act, arg, iarg );
+			doAction( act, arg, iarg );   // can change iCurrSt
 		}
 		// Log the list of actions.
 		// TODO: how is this useful in the log? If we're to do anything with the actions, they should
@@ -454,7 +459,7 @@ static void						tbTimer( void * eNum ){
 }
 
 
-void 					executeCSM( void ){								// execute TBook control state machine
+void 									executeCSM( void ){								// execute TBook control state machine
 	TB_Event *evt;
 	osStatus_t status;
 	

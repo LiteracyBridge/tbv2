@@ -3,55 +3,33 @@
 <pre>
 <h1>µVision Build Log</h1>
 <h2>Tool Versions:</h2>
-IDE-Version: µVision V5.31.0.0
-Copyright (C) 2020 ARM Ltd and ARM Germany GmbH. All rights reserved.
-License Information: Gene Ball, Amplio, LIC=Z3CQC-RVJ0Z-NX1ZU-Q27HQ-GT95F-MZ3I9
+IDE-Version: µVision V5.34.0.0
+Copyright (C) 2021 ARM Ltd and ARM Germany GmbH. All rights reserved.
+License Information: Gene Ball, Amplio, LIC=GE7X5-GRFZ7-NZ9W2-7TPQH-IEFBD-8XHKB
  
 Tool Versions:
-Toolchain:       MDK-ARM Professional  Version: 5.31.0.0
+Toolchain:       MDK-ARM Professional  Version: 5.34.0.0
 Toolchain Path:  C:\Keil_v5\ARM\ARMCC\Bin
-C Compiler:      Armcc.exe V5.06 update 6 (build 750)
-Assembler:       Armasm.exe V5.06 update 6 (build 750)
-Linker/Locator:  ArmLink.exe V5.06 update 6 (build 750)
-Library Manager: ArmAr.exe V5.06 update 6 (build 750)
-Hex Converter:   FromElf.exe V5.06 update 6 (build 750)
-CPU DLL:         SARMCM3.DLL V5.31.0.0
+C Compiler:      Armcc.exe V5.06 update 7 (build 960)
+Assembler:       Armasm.exe V5.06 update 7 (build 960)
+Linker/Locator:  ArmLink.exe V5.06 update 7 (build 960)
+Library Manager: ArmAr.exe V5.06 update 7 (build 960)
+Hex Converter:   FromElf.exe V5.06 update 7 (build 960)
+CPU DLL:         SARMCM3.DLL V5.34.0.0
 Dialog DLL:      DCM.DLL V1.17.3.0
-Target DLL:      STLink\ST-LINKIII-KEIL_SWO.dll V3.0.7.0
-Dialog DLL:      TCM.DLL V1.46.0.0
+Target DLL:      STLink\ST-LINKIII-KEIL_SWO.dll V3.0.8.0
+Dialog DLL:      TCM.DLL V1.48.0.0
  
 <h2>Project:</h2>
 C:\Silver6TB\AmplioSTM\TBook\tbv2\TBook_Rev2b.uvprojx
-Project File Date:  04/19/2021
+Project File Date:  06/09/2021
 
 <h2>Output:</h2>
-*** Using Compiler 'V5.06 update 6 (build 750)', folder: 'C:\Keil_v5\ARM\ARMCC\Bin'
+*** Using Compiler 'V5.06 update 7 (build 960)', folder: 'C:\Keil_v5\ARM\ARMCC\Bin'
 Build target 'TBv2b'
-compiling main.c...
-compiling tbUtil.c...
 compiling tbook.c...
-compiling controlParser.c...
-compiling controlmanager.c...
-compiling controlmanagertest.c...
-compiling ledmanager.c...
-compiling tknTable.c...
-compiling inputmanager.c...
-compiling logger.c...
-compiling mediaplayer.c...
-compiling powermanager.c...
-compiling encAudio.c...
-compiling audio.c...
-compiling USBD_User_Device_MSC_LUN.c...
-compiling mp3.c...
-compiling norLog.c...
-compiling fileOps.c...
-compiling tbook_csm.c...
-compiling dbgLoop.c...
-compiling I2S_stm32F4xx.c...
-compiling codecI2C.c...
-compiling ti_aic3100.c...
 linking...
-Program Size: Code=215144 RO-data=62168 RW-data=38412 ZI-data=217296  
+Program Size: Code=215268 RO-data=62168 RW-data=38412 ZI-data=217296  
 FromELF: creating hex file...
 ".\Objects\TBookRev2b.axf" - 0 Error(s), 0 Warning(s).
 
@@ -139,104 +117,104 @@ Package Vendor: Keil
    * Component: ARM::CMSIS:CORE:5.4.0
 
    * Component: ARM::CMSIS:RTOS2:Keil RTX5:Source:5.5.2
-      Source file:   CMSIS\RTOS2\RTX\Template\Semaphore.c
-      Source file:   CMSIS\RTOS2\RTX\Template\Thread.c
-      Source file:   CMSIS\RTOS2\RTX\Template\Timer.c
-      Source file:   CMSIS\RTOS2\RTX\Template\svc_user.c
-      Source file:   CMSIS\RTOS2\RTX\Source\rtx_kernel.c
-      Source file:   CMSIS\RTOS2\RTX\Source\rtx_thread.c
-      Source file:   CMSIS\RTOS2\RTX\Source\rtx_mempool.c
-      Source file:   CMSIS\RTOS2\RTX\Source\rtx_timer.c
-      Include file:  CMSIS\RTOS2\RTX\Config\RTX_Config.h
-      Source file:   CMSIS\RTOS2\RTX\Source\rtx_evflags.c
-      Source file:   CMSIS\RTOS2\RTX\Source\rtx_delay.c
-      Source file:   CMSIS\RTOS2\RTX\Config\RTX_Config.c
-      Source file:   CMSIS\RTOS2\RTX\Source\rtx_semaphore.c
-      Source file:   CMSIS\RTOS2\RTX\Source\rtx_mutex.c
-      Source file:   CMSIS\RTOS2\RTX\Source\rtx_memory.c
       Include file:  CMSIS\RTOS2\RTX\Include\rtx_os.h
+      Include file:  CMSIS\RTOS2\RTX\Config\RTX_Config.h
+      Source file:   CMSIS\RTOS2\RTX\Config\RTX_Config.c
       Source file:   CMSIS\RTOS2\RTX\Template\main.c
       Source file:   CMSIS\RTOS2\RTX\Template\Events.c
       Source file:   CMSIS\RTOS2\RTX\Template\MemPool.c
+      Source file:   CMSIS\RTOS2\RTX\Template\svc_user.c
+      Source file:   CMSIS\RTOS2\RTX\Template\Thread.c
       Source file:   CMSIS\RTOS2\RTX\Template\MsgQueue.c
       Source file:   CMSIS\RTOS2\RTX\Template\Mutex.c
-      Source file:   CMSIS\RTOS2\RTX\Source\rtx_system.c
-      Source file:   CMSIS\RTOS2\RTX\Source\rtx_lib.c
+      Source file:   CMSIS\RTOS2\RTX\Source\rtx_kernel.c
+      Source file:   CMSIS\RTOS2\RTX\Template\Semaphore.c
+      Source file:   CMSIS\RTOS2\RTX\Source\rtx_timer.c
+      Source file:   CMSIS\RTOS2\RTX\Source\rtx_evflags.c
+      Source file:   CMSIS\RTOS2\RTX\Source\rtx_semaphore.c
+      Source file:   CMSIS\RTOS2\RTX\Template\Timer.c
+      Source file:   CMSIS\RTOS2\RTX\Source\rtx_memory.c
+      Source file:   CMSIS\RTOS2\RTX\Source\rtx_delay.c
+      Source file:   CMSIS\RTOS2\RTX\Source\rtx_mempool.c
       Source file:   CMSIS\RTOS2\RTX\Source\rtx_msgqueue.c
+      Source file:   CMSIS\RTOS2\RTX\Source\rtx_thread.c
       Source file:   CMSIS\RTOS2\RTX\Source\rtx_evr.c
       Source file:   CMSIS\RTOS2\RTX\Source\ARM\irq_cm4f.s
+      Source file:   CMSIS\RTOS2\RTX\Source\rtx_mutex.c
+      Source file:   CMSIS\RTOS2\RTX\Source\rtx_lib.c
+      Source file:   CMSIS\RTOS2\RTX\Source\rtx_system.c
       Source file:   CMSIS\RTOS2\Source\os_systick.c
 
    * Component: ARM::Security:mbed Crypto:3.0.1
-      Source file:   library\arc4.c
-      Source file:   library\ecp_curves.c
-      Source file:   library\cmac.c
-      Source file:   library\chachapoly.c
-      Source file:   library\ctr_drbg.c
-      Source file:   library\ecjpake.c
-      Source file:   library\ccm.c
-      Source file:   library\chacha20.c
       Source file:   library\cipher_wrap.c
-      Source file:   library\aes.c
-      Source file:   library\cipher.c
-      Source file:   library\asn1write.c
-      Source file:   library\base64.c
-      Source file:   library\dhm.c
-      Source file:   library\ecdh.c
-      Source file:   library\ecdsa.c
-      Source file:   library\aria.c
-      Source file:   library\bignum.c
-      Source file:   library\des.c
-      Source file:   library\ecp.c
-      Include file:  configs\mbedTLS_config.h
-      Source file:   library\asn1parse.c
       Source file:   library\blowfish.c
+      Source file:   library\des.c
+      Source file:   library\ecdh.c
+      Source file:   library\asn1parse.c
+      Source file:   library\aria.c
+      Source file:   library\ccm.c
+      Source file:   library\cmac.c
+      Source file:   library\ecdsa.c
+      Include file:  configs\mbedTLS_config.h
+      Source file:   library\bignum.c
       Source file:   library\camellia.c
+      Source file:   library\asn1write.c
+      Source file:   library\chacha20.c
+      Source file:   library\ctr_drbg.c
+      Source file:   library\arc4.c
+      Source file:   library\dhm.c
+      Source file:   library\aes.c
+      Source file:   library\base64.c
+      Source file:   library\chachapoly.c
+      Source file:   library\cipher.c
+      Source file:   library\psa_crypto_se.c
+      Source file:   library\psa_crypto_slot_management.c
+      Source file:   library\psa_crypto_storage.c
+      Source file:   library\psa_its_file.c
+      Source file:   library\pkcs12.c
+      Source file:   library\ecp_curves.c
       Source file:   library\entropy.c
       Source file:   library\md2.c
-      Source file:   library\rsa.c
-      Source file:   library\pkwrite.c
-      Source file:   library\platform.c
-      Source file:   library\psa_its_file.c
-      Source file:   library\psa_crypto_se.c
-      Source file:   library\memory_buffer_alloc.c
-      Source file:   library\rsa_internal.c
-      Source file:   library\gcm.c
-      Source file:   library\sha1.c
-      Source file:   library\md.c
-      Source file:   library\pkparse.c
-      Source file:   library\psa_crypto_storage.c
       Source file:   library\nist_kw.c
-      Source file:   library\pem.c
-      Source file:   library\platform_util.c
-      Source file:   library\havege.c
-      Source file:   library\poly1305.c
-      Source file:   library\pk.c
-      Source file:   library\psa_crypto.c
-      Source file:   library\hmac_drbg.c
-      Source file:   library\md4.c
+      Source file:   library\md.c
       Source file:   library\oid.c
-      Source file:   library\hkdf.c
-      Source file:   library\pk_wrap.c
-      Source file:   library\pkcs5.c
-      Source file:   library\entropy_poll.c
-      Source file:   library\md5.c
       Source file:   library\error.c
-      Source file:   library\pkcs12.c
-      Source file:   library\psa_crypto_slot_management.c
-      Source file:   library\ripemd160.c
+      Source file:   library\ecjpake.c
+      Source file:   library\md5.c
+      Source file:   library\entropy_poll.c
+      Source file:   library\pem.c
+      Source file:   library\pk.c
+      Source file:   library\memory_buffer_alloc.c
+      Source file:   library\pk_wrap.c
+      Source file:   library\gcm.c
+      Source file:   library\hkdf.c
+      Source file:   library\pkparse.c
+      Source file:   library\platform.c
+      Source file:   library\platform_util.c
+      Source file:   library\hmac_drbg.c
+      Source file:   library\poly1305.c
+      Source file:   library\havege.c
+      Source file:   library\psa_crypto.c
+      Source file:   library\ecp.c
+      Source file:   library\pkcs5.c
+      Source file:   library\md4.c
+      Source file:   library\pkwrite.c
       Source file:   library\timing.c
+      Source file:   library\xtea.c
+      Source file:   library\ripemd160.c
+      Source file:   library\threading.c
+      Source file:   library\sha1.c
+      Source file:   library\rsa_internal.c
+      Source file:   library\version.c
+      Source file:   library\rsa.c
       Source file:   library\version_features.c
       Source file:   library\sha512.c
-      Source file:   library\threading.c
-      Source file:   library\xtea.c
       Source file:   library\sha256.c
-      Source file:   library\version.c
 
    * Component: Keil.ARM Compiler::Compiler:Event Recorder:DAP:1.4.0
       Include file:  Config\EventRecorderConf.h
-      Source file:   Source\EventRecorder.c
       Include file:  Include\EventRecorder.h
+      Source file:   Source\EventRecorder.c
 
    * Component: Keil.ARM Compiler::Compiler:I/O:File:File System:1.2.0
       Source file:   Source\retarget_io.c
@@ -248,10 +226,10 @@ Package Vendor: Keil
       Source file:   Source\retarget_io.c
 
    * Component: Keil.MDK-Plus::File System:CORE:LFN Debug:6.13.8
-      Source file:   FileSystem\Config\FS_Config.c
-      Source file:   FileSystem\Config\FS_Debug.c
-      Include file:  FileSystem\Include\rl_fs.h
       Library file:  FileSystem\Lib\ARM\FS_Dbg_LFN_CM3_L.lib
+      Include file:  FileSystem\Include\rl_fs.h
+      Source file:   FileSystem\Config\FS_Debug.c
+      Source file:   FileSystem\Config\FS_Config.c
 
    * Component: Keil.MDK-Plus::File System:Drive:Memory Card:6.13.8
       Include file:  FileSystem\Config\FS_Config_MC.h
@@ -262,15 +240,15 @@ Package Vendor: Keil
       Library file:  USB\Lib\ARM\USB_Dbg_CM3_L.lib
 
    * Component: Keil.MDK-Plus::USB:Device:6.14.1
+      Source file:   USB\Config\USBD_Config.c
       Source file:   USB\Template\USBD_User_Device_SerNum.c
       Source file:   USB\Template\USBD_User_Device.c
-      Source file:   USB\Config\USBD_Config.c
 
    * Component: Keil.MDK-Plus::USB:Device:MSC:6.14.1
-      Source file:   USB\Template\USBD_MSC.c
-      Source file:   USB\Template\USBD_User_MSC_LUN.c
       Include file:  USB\Config\USBD_Config_MSC.h
+      Source file:   USB\Template\USBD_MSC.c
       Source file:   USB\Template\USBD_User_MSC.c
+      Source file:   USB\Template\USBD_User_MSC_LUN.c
       Source file:   USB\Template\USBD_MSC.h
 
    * Component: Keil::CMSIS Driver:Flash:AT45DB641E:1.3.0
@@ -296,30 +274,30 @@ Package Vendor: Keil
       Source file:   CMSIS\Driver\USBD_FS_STM32F4xx.c
 
    * Component: Keil::Device:STM32Cube Framework:Classic:1.7.6
-      Include file:  MDK\Templates\Inc\stm32f4xx_hal_conf.h
       Include file:  CMSIS\Driver\Config\RTE_Device.h
       Source file:   MDK\Templates\Src\stm32f4xx_hal_msp.c
-      Source file:   MDK\Templates\Src\main.c
-      Source file:   MDK\Templates\Src\stm32f4xx_it.c
       Include file:  MDK\Templates\Inc\stm32f4xx_it.h
-      Source file:   MDK\Templates_LL\Src\main.c
-      Include file:  MDK\Templates_LL\Inc\main.h
       Include file:  MDK\Templates\Inc\main.h
+      Source file:   MDK\Templates\Src\main.c
+      Include file:  MDK\Templates\Inc\stm32f4xx_hal_conf.h
+      Source file:   MDK\Templates\Src\stm32f4xx_it.c
+      Include file:  MDK\Templates_LL\Inc\main.h
+      Source file:   MDK\Templates_LL\Src\main.c
 
    * Component: Keil::Device:STM32Cube HAL:ADC:1.7.6
-      Source file:   Drivers\STM32F4xx_HAL_Driver\Src\stm32f4xx_hal_adc_ex.c
       Source file:   Drivers\STM32F4xx_HAL_Driver\Src\stm32f4xx_hal_adc.c
+      Source file:   Drivers\STM32F4xx_HAL_Driver\Src\stm32f4xx_hal_adc_ex.c
 
    * Component: Keil::Device:STM32Cube HAL:Common:1.7.6
-      Include file:  Drivers\STM32F4xx_HAL_Driver\Inc\stm32f4xx_hal.h
       Source file:   Drivers\STM32F4xx_HAL_Driver\Src\stm32f4xx_hal.c
+      Include file:  Drivers\STM32F4xx_HAL_Driver\Inc\stm32f4xx_hal.h
 
    * Component: Keil::Device:STM32Cube HAL:Cortex:1.7.6
       Source file:   Drivers\STM32F4xx_HAL_Driver\Src\stm32f4xx_hal_cortex.c
 
    * Component: Keil::Device:STM32Cube HAL:DMA:1.7.6
-      Source file:   Drivers\STM32F4xx_HAL_Driver\Src\stm32f4xx_hal_dma_ex.c
       Source file:   Drivers\STM32F4xx_HAL_Driver\Src\stm32f4xx_hal_dma.c
+      Source file:   Drivers\STM32F4xx_HAL_Driver\Src\stm32f4xx_hal_dma_ex.c
 
    * Component: Keil::Device:STM32Cube HAL:Flash:1.7.6
       Source file:   Drivers\STM32F4xx_HAL_Driver\Src\stm32f4xx_hal_flash_ex.c
@@ -345,19 +323,19 @@ Package Vendor: Keil
       Source file:   Drivers\STM32F4xx_HAL_Driver\Src\stm32f4xx_hal_qspi.c
 
    * Component: Keil::Device:STM32Cube HAL:RCC:1.7.6
-      Source file:   Drivers\STM32F4xx_HAL_Driver\Src\stm32f4xx_hal_rcc.c
       Source file:   Drivers\STM32F4xx_HAL_Driver\Src\stm32f4xx_hal_rcc_ex.c
+      Source file:   Drivers\STM32F4xx_HAL_Driver\Src\stm32f4xx_hal_rcc.c
 
    * Component: Keil::Device:STM32Cube HAL:SPI:1.7.6
       Source file:   Drivers\STM32F4xx_HAL_Driver\Src\stm32f4xx_hal_spi.c
 
    * Component: Keil::Device:Startup:2.6.3
-      Include file:  Drivers\CMSIS\Device\ST\STM32F4xx\Include\stm32f4xx.h
-      Source file:   Drivers\CMSIS\Device\ST\STM32F4xx\Source\Templates\arm\startup_stm32f412vx.s
-      Source file:   MDK\Device\Source\ARM\STM32F410xx_412xx_OPT.s
       Source file:   MDK\Device\Source\ARM\STM32F4xx_OTP.s
+      Include file:  Drivers\CMSIS\Device\ST\STM32F4xx\Include\stm32f4xx.h
+      Source file:   MDK\Device\Source\ARM\STM32F410xx_412xx_OPT.s
+      Source file:   Drivers\CMSIS\Device\ST\STM32F4xx\Source\Templates\arm\startup_stm32f412vx.s
       Source file:   Drivers\CMSIS\Device\ST\STM32F4xx\Source\Templates\system_stm32f4xx.c
-Build Time Elapsed:  00:00:18
+Build Time Elapsed:  00:00:02
 </pre>
 </body>
 </html>

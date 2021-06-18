@@ -58,6 +58,7 @@ typedef struct {
 static PwrState 					pS;				// state of powermanager
 
 extern void 							ADC_IRQHandler( void );					// override default (weak) ADC_Handler
+extern void               EXTI2_IRQHandler( void );       // override default (weak) EXTI2 handler for PowerFail
 static void 							powerThreadProc( void *arg );		// forward
 static void 							initPwrSignals( void );					// forward
 
@@ -68,8 +69,9 @@ bool 											RebootOnKeyInt = false;					// tell inputmanager.c to reboot on 
 
 void checkPowerTimer(void *arg);                          // forward for timer callback function
 
-void											initPowerMgr( void ){						// initialize PowerMgr & start thread
-	pwrEvents = osEventFlagsNew(NULL);
+// ========================================================
+//   POWER initialization  -- create osTimer to call powerCheck, start powerThreadProc()
+void                      initPowerMgr( void ){           // initialize PowerMgr & start powerThreadProc	pwrEvents = osEventFlagsNew(NULL);
 	if ( pwrEvents == NULL )
 		tbErr( "pwrEvents not alloc'd" );
 	
@@ -94,11 +96,59 @@ void											initPowerMgr( void ){						// initialize PowerMgr & start thread
 	osTimerStart( pwrCheckTimer, currPwrTimerMS );
 	dbgLog( "4 PowerMgr OK \n" );
 }
-void											setPowerCheckTimer( int timerMs ){
-	osTimerStop( pwrCheckTimer );
+void                      setPowerCheckTimer( int timerMs ){ // set msec between powerChecks	osTimerStop( pwrCheckTimer );
 	osTimerStart( pwrCheckTimer, timerMs );
 }
-void											ResetGPIO( void ){
+void 											initPwrSignals( void ){					// configure power GPIO pins, & EXTI on NOPWR 	
+	// power supply signals
+	gConfigOut( gADC_ENABLE );	// 1 to enable battery voltage levels
+	gSet( gADC_ENABLE, 0 );
+	gConfigOut( gSC_ENABLE );		// 1 to enable SuperCap
+	gSet( gSC_ENABLE, 0 );
+	
+	gConfigADC( gADC_LI_ION );	// rechargable battery voltage level
+	gConfigADC( gADC_PRIMARY );	// disposable battery voltage level
+	gConfigADC( gADC_THERM );	  // thermistor (R54) by LiIon battery
+	
+	gConfigIn( gPWR_FAIL_N, false );	// PD0 -- input power fail signal, with pullup
+	
+	gConfigIn( gBAT_PG_N,   false );	// MCP73871 PG_    IN:  0 => power is good  (configured active high)
+	gConfigIn( gBAT_STAT1,  false );  // MCP73871 STAT1  IN:  open collector with pullup
+	gConfigIn( gBAT_STAT2,  false );  // MCP73871 STAT2  IN:  open collector with pullup
+
+	gConfigOut( gBAT_CE );  	// OUT: 1 to enable charging 			MCP73871 CE 	  (powermanager.c)
+	gSet( gBAT_CE, 1 );				// always enable?
+	gConfigOut( gBAT_TE_N );  // OUT: 0 to enable safety timer 	MCP73871 TE_	  (powermanager.c)
+	gSet( gBAT_TE_N, 0 );			// disable?
+	
+	// enable power & signals to EMMC & SDIO devices
+	FileSysPower( true );				// power up eMMC & SD 3V supply
+	
+  // Configure audio power control 
+	gConfigOut( gEN_5V );				// 1 to supply 5V to codec-- enable AP6714 regulator  -- powers AIC3100 SPKVDD
+	gConfigOut( gEN1V8 );				// 1 to supply 1.8 to codec-- enable TLV74118 regulator	-- powers AIC3100 DVDD
+  gConfigOut( gBOOT1_PDN );		// 0 to reset codec -- RESET_N on AIC3100 (boot1_pdn on AK4637)
+	gSet( gEN_5V, 0 );					// initially codec SPKVDD unpowered PD4
+	gSet( gEN1V8, 0 );					// initially codec DVDD unpowered PD5
+	gSet( gBOOT1_PDN, 0 );			// initially codec in reset state  PB2
+	
+#if defined(TBook_V2_Rev3)
+	gConfigOut( gEN_IOVDD_N );	// 0 to supply 3V to AIC3100 IOVDD	
+	gConfigOut( gEN_AVDD_N );		// 0 to supply 3V to AIC3100 AVDD & HPVDD
+	gSet( gEN_IOVDD_N, 1 );			// initially codec IOVDD unpowered  PE4
+	gSet( gEN_AVDD_N, 1 );			// initially codec AVDD & HPVDD unpowered PE5
+#endif
+	
+#if defined(TBook_V2_Rev1)
+	gConfigOut( gPA_EN );				// 1 to power headphone jack
+  gSet( gPA_EN, 0 );					// initially audio external amplifier OFF
+#endif
+
+	tbDelay_ms( 5 ); // pwr start up: 3 );		// wait 3 msec to make sure everything is stable
+}
+// ========================================================
+//    POWER shutdown routines
+void											ResetGPIO( void ){		// turn off all possible GPIO signals & device clocks
 	GPIO_ID actHi[] = { 
 			gBOOT1_PDN, gBAT_CE, 		gSC_ENABLE, 	gEN_5V, 
 			gEN1V8, 		g3V3_SW_EN,	gADC_ENABLE,
@@ -172,14 +222,13 @@ void											ResetGPIO( void ){
 	ResetGPIO();
 	enableSleep();
 } */
-void											powerDownTBook( void ){					// shut down TBook
-	logEvt( "PwrDown" );
-	logPowerDown();		// flush & close logs, copy NorLog to eMMC
-	ledBg( NULL );
-	ledFg( NULL );
-
+void                      enterStopMode( void ){                    // put STM32F4 into Stop mode
 	FileSysPower( false );		// shut down eMMC supply, unconfig gSDIO_*
 	cdc_PowerDown();					// turn off codec
+	
+  // disable power Fail interrupt
+  int pin = gpio_def[ gPWR_FAIL_N ].pin;
+  EXTI->IMR  &= ~( 1 << pin );             // disable the interrupt	
 	
 	ResetGPIO();
 
@@ -204,53 +253,18 @@ void											powerDownTBook( void ){					// shut down TBook
 	
 	NVIC_SystemReset();			// soft reboot
 }
-void 											initPwrSignals( void ){					// configure power GPIO pins, & EXTI on NOPWR 	
-	// power supply signals
-	gConfigOut( gADC_ENABLE );	// 1 to enable battery voltage levels
-	gSet( gADC_ENABLE, 0 );
-	gConfigOut( gSC_ENABLE );		// 1 to enable SuperCap
-	gSet( gSC_ENABLE, 0 );
-	
-	gConfigADC( gADC_LI_ION );	// rechargable battery voltage level
-	gConfigADC( gADC_PRIMARY );	// disposable battery voltage level
-	gConfigADC( gADC_THERM );	  // thermistor (R54) by LiIon battery
-	
-	gConfigIn( gPWR_FAIL_N, false );	// PD0 -- input power fail signal, with pullup
-	
-	gConfigIn( gBAT_PG_N,   false );	// MCP73871 PG_    IN:  0 => power is good  (configured active high)
-	gConfigIn( gBAT_STAT1,  false );  // MCP73871 STAT1  IN:  open collector with pullup
-	gConfigIn( gBAT_STAT2,  false );  // MCP73871 STAT2  IN:  open collector with pullup
+void                      powerDownTBook( void ){                   // TBook orderly shut down -- copy NLog to disk
+	logEvt( "PwrDown" );
+	logPowerDown();        // flush & close logs, copy NorLog to eMMC
+	ledBg( NULL );
+	ledFg( NULL );
 
-	gConfigOut( gBAT_CE );  	// OUT: 1 to enable charging 			MCP73871 CE 	  (powermanager.c)
-	gSet( gBAT_CE, 1 );				// always enable?
-	gConfigOut( gBAT_TE_N );  // OUT: 0 to enable safety timer 	MCP73871 TE_	  (powermanager.c)
-	gSet( gBAT_TE_N, 0 );			// disable?
-	
-	// enable power & signals to EMMC & SDIO devices
-	FileSysPower( true );				// power up eMMC & SD 3V supply
-	
-  // Configure audio power control 
-	gConfigOut( gEN_5V );				// 1 to supply 5V to codec-- enable AP6714 regulator  -- powers AIC3100 SPKVDD
-	gConfigOut( gEN1V8 );				// 1 to supply 1.8 to codec-- enable TLV74118 regulator	-- powers AIC3100 DVDD
-  gConfigOut( gBOOT1_PDN );		// 0 to reset codec -- RESET_N on AIC3100 (boot1_pdn on AK4637)
-	gSet( gEN_5V, 0 );					// initially codec SPKVDD unpowered PD4
-	gSet( gEN1V8, 0 );					// initially codec DVDD unpowered PD5
-	gSet( gBOOT1_PDN, 0 );			// initially codec in reset state  PB2
-	
-#if defined(TBook_V2_Rev3)
-	gConfigOut( gEN_IOVDD_N );	// 0 to supply 3V to AIC3100 IOVDD	
-	gConfigOut( gEN_AVDD_N );		// 0 to supply 3V to AIC3100 AVDD & HPVDD
-	gSet( gEN_IOVDD_N, 1 );			// initially codec IOVDD unpowered  PE4
-	gSet( gEN_AVDD_N, 1 );			// initially codec AVDD & HPVDD unpowered PE5
-#endif
-	
-#if defined(TBook_V2_Rev1)
-	gConfigOut( gPA_EN );				// 1 to power headphone jack
-  gSet( gPA_EN, 0 );					// initially audio external amplifier OFF
-#endif
-
-	tbDelay_ms( 5 ); // pwr start up: 3 );		// wait 3 msec to make sure everything is stable
+	tbDelay_ms( 5 ); // pwr start up: 3 );        // wait 3 msec to make sure everything is stable
+	enterStopMode();
 }
+
+// ========================================================
+//    ADC routines
 void											startADC( int chan ){						// set up ADC for single conversion on 'chan', then start 
 	AdcC->CCR &= ~ADC_CCR_ADCPRE;		// CCR.ADCPRE = 0 => PClk div 2
 
@@ -333,7 +347,7 @@ void 											readAllADC( void ){
 	
 	EnableADC( false );		// turn ADC off	
 }
-uint16_t									readPVD( void ){								// read PVD level 
+/*NOT USED: uint16_t									readPVD( void ){								// read PVD level 
 	RCC->APB1ENR |= RCC_APB1ENR_PWREN;						// start clocking power control 
 	
 	PWR->CR |= ( 0 << PWR_CR_PLS_Pos );						// set initial PVD threshold to 2.2V
@@ -348,7 +362,10 @@ uint16_t									readPVD( void ){								// read PVD level
 		pvdMV = 2200 + i*100;
 	}
 	return pvdMV;
-}
+} */
+
+// ========================================================
+//    RTC setup
 uint8_t										Bcd2( int v ){									// return v as 8 bits-- bcdTens : bcdUnits
 	if ( v > 99 ) v = v % 100;
 	int vt = v / 10, vu = v % 10;
@@ -412,6 +429,9 @@ void											setupRTC( fsTime time ){				// init RTC & set based on fsTime
 	
 	PWR->CR 	&= ~PWR_CR_DBP;													// disable access to Backup Domain 
 }
+
+// ========================================================
+//    periodic power checks --  osTimer calls checkPowerTimer(), which signals powerThread() to call powerCheck()
 void											checkPowerTimer( void *arg ){		// timer to signal periodic power status check
 	osEventFlagsSet( pwrEvents, PM_PWRCHK );						// wakeup powerThread for power status check
 	if ( currPwrTimerMS != TB_Config.powerCheckMS ){		// update delay (after initial check)
@@ -426,10 +446,7 @@ char 											RngChar( int lo, int hi, int val ){   // => '-', '0', ... '9', '
 	return ( (val-lo)/stp + '0' );
 }
 
-//bool HaveUsbPower = false, HaveLithium = false, HavePrimary = false, HaveBackup = false, firstCheck = true, pwrChanged;
-//enum PwrStat oldState;
-void											startPowerCheck( enum PwrStat pstat ){
-	// save previous values
+void                      startPowerCheck( enum PwrStat pstat ){  // remember previous values-- only report if changed	// save previous values
 	pS.prvStat		= pS.Stat;
 	pS.hadLi 			= pS.LiMV > 2000;
 	pS.hadPrimary = pS.PrimaryMV > 2000;
@@ -439,8 +456,8 @@ void											startPowerCheck( enum PwrStat pstat ){
 	pS.Stat = pstat;
 	pS.haveUSB = (pstat & 1) == 0;
 }
-bool											powerChanged(){
-	bool changed = pS.chkCnt==1;
+bool                      powerChanged(){    // compare previous power status with current value-- need to report change?	bool changed = pS.chkCnt==1;
+  bool changed = pS.chkCnt==1;
 	if ( pS.prvStat != pS.Stat ){ 
 		dbgLog( "5 pwrStat %d => %d \n", pS.prvStat, pS.Stat );
 		changed = true;
@@ -469,7 +486,7 @@ const int ReplHI  = 2700;		// mV at ~75%
 const int HiMpuTemp = 800;
 const int HiLiTemp  = 800;
 
-void											cdc_PowerUp( void );	// from ti_aic3100 -- for early init on pwr thread
+void                      cdc_PowerUp( void );   // extern from ti_aic3100 -- for early init on pwr thread
 
 void 											checkPower( ){				// check and report power status
 	//  check gPWR_FAIL_N & MCP73871: gBAT_PG_N, gBAT_STAT1, gBAT_STAT2
@@ -625,24 +642,17 @@ void 											showBattCharge(){			// generate ledFG to signal power state
 	logEvtS("battChg", fg );
 }
 
-/*   // *************  Handler for PowerFail interrupt
-void 											EXTI4_IRQHandler(void){  				// NOPWR ISR
-  	if ( __HAL_GPIO_EXTI_GET_IT( NOPWR_pin ) != RESET ){
-		__HAL_GPIO_EXTI_CLEAR_IT( NOPWR_pin );  // clear EXTI Pending register
-		HAL_NVIC_DisableIRQ( NOPWR_EXTI );		// don't keep getting them
 
-		bool NoPower = HAL_GPIO_ReadPin( NOPWR_port, NOPWR_pin ) == RESET;	// LOW if no power
-		if ( NoPower )
-			osEventFlagsSet( pwrEvents, PM_NOPWR );		// wakeup powerThread
-		else
-			HAL_NVIC_EnableIRQ( NOPWR_EXTI );
-	}
+// ========================================================
+//    powerFail ISR
+void                     EXTI2_IRQHandler(void){          // PWR_FAIL_N interrupt-- PE2==0 => power failure, shut down
+    if ( gGet( gPWR_FAIL_N )==0 ){ 
+        enterStopMode();
+    }
 }
-*/
 
-
-void 											wakeup(){												// resume operation after sleep power-down
-}
+// ========================================================
+//    POWER thread -- handle signals from  powerCheckTimer & powerFail ISR's
 static void 							powerThreadProc( void *arg ){		// powerThread -- catches PM_NOPWR from EXTI: NOPWR interrupt
 	dbgLog( "4 pwrThr: 0x%x 0x%x \n", &arg, &arg + POWER_STACK_SIZE );
 	cdc_PowerUp();    // start codec powering up -- this thread won't suffer from the delay
@@ -652,7 +662,6 @@ static void 							powerThreadProc( void *arg ){		// powerThread -- catches PM_N
 		
 		switch ( flg ){
 			case PM_NOPWR:
-				logEvt( "Powering Down");
 				powerDownTBook();			// shutdown-- reboot on wakeup keys
 				// never come back  -- just restarts at main()
 				break;

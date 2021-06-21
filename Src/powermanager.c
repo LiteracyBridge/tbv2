@@ -72,6 +72,7 @@ void checkPowerTimer(void *arg);                          // forward for timer c
 // ========================================================
 //   POWER initialization  -- create osTimer to call powerCheck, start powerThreadProc()
 void                      initPowerMgr( void ){           // initialize PowerMgr & start powerThreadProc	pwrEvents = osEventFlagsNew(NULL);
+  pwrEvents = osEventFlagsNew(NULL);
 	if ( pwrEvents == NULL )
 		tbErr( "pwrEvents not alloc'd" );
 	

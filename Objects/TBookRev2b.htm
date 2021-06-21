@@ -3,7 +3,7 @@
 <title>Static Call Graph - [.\Objects\TBookRev2b.axf]</title></head>
 <body><HR>
 <H1>Static Call Graph for image .\Objects\TBookRev2b.axf</H1><HR>
-<BR><P>#&#060CALLGRAPH&#062# ARM Linker, 5060960: Last Updated: Fri Jun 18 11:29:59 2021
+<BR><P>#&#060CALLGRAPH&#062# ARM Linker, 5060960: Last Updated: Mon Jun 21 13:11:13 2021
 <BR><P>
 <H3>Maximum Stack Usage =       7552 bytes + Unknown(Functions without stacksize, Cycles, Untraceable Function Pointers)</H3><H3>
 Call chain for Maximum Stack Depth:</H3>
@@ -7644,13 +7644,14 @@ Global Symbols
 <LI><a href="#[393]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;logPowerUp
 </UL>
 
-<P><STRONG><a name="[502]"></a>initPowerMgr</STRONG> (Thumb, 124 bytes, Stack size 24 bytes, powermanager.o(i.initPowerMgr))
+<P><STRONG><a name="[502]"></a>initPowerMgr</STRONG> (Thumb, 134 bytes, Stack size 24 bytes, powermanager.o(i.initPowerMgr))
 <BR><BR>[Stack]<UL><LI>Max Depth = 2432 + Unknown Stack Size
 <LI>Call Chain = initPowerMgr &rArr; tbErr &rArr; USBmode &rArr; logPowerUp &rArr; NLogShowStatus &rArr; logEvtNININI &rArr; logEvtS &rArr;  tbErr (Cycle)
 </UL>
 <BR>[Calls]<UL><LI><a href="#[206]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;tbErr
 <LI><a href="#[20f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;dbgLog
 <LI><a href="#[388]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;osThreadNew
+<LI><a href="#[4f8]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;osEventFlagsNew
 <LI><a href="#[462]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;osTimerStart
 <LI><a href="#[4f6]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;osTimerNew
 <LI><a href="#[503]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;initPwrSignals
@@ -9949,7 +9950,8 @@ Global Symbols
 <BR>[Calls]<UL><LI><a href="#[5e7]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;IsIrqMode
 <LI><a href="#[5e8]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;IsIrqMasked
 </UL>
-<BR>[Called By]<UL><LI><a href="#[501]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;initMediaPlayer
+<BR>[Called By]<UL><LI><a href="#[502]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;initPowerMgr
+<LI><a href="#[501]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;initMediaPlayer
 <LI><a href="#[4ff]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;initLedManager
 <LI><a href="#[4fa]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;initInputManager
 <LI><a href="#[4f7]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;initFileOps

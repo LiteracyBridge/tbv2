@@ -139,7 +139,7 @@ static void 				fileOpThread( void *arg ){
 		uint32_t flags = osEventFlagsWait( mFileOpEventId, FILEOP_EVENTS,  osFlagsWaitAny, osWaitForever );
 		
 		if ( (flags & FILE_ENCRYPT_REQ) != 0 ){
-			encryptCopy();
+		//	encryptCopy();
 		}
 		
 		if ( (flags & FILE_DECODE_REQ) != 0 ){

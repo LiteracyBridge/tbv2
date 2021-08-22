@@ -408,25 +408,23 @@ bool 										showRTC( ){
 		Dt = RTC->DR;
 		Tm = RTC->TR;
 	}
+  // The magic number must mean some flavor of "uninitialized".
 	if ( Dt == 0x02101 ) return false;
 	
-	uint8_t yr, mon, date, day, hr, min, sec;
-	yr =  ((Dt>>20) & 0xF)*10 + ((Dt>>16) & 0xF);
-	day = ((Dt>>13) & 0x7);
-	mon = ((Dt>>12) & 0x1)*10 + ((Dt>>8) & 0xF);
-	date =((Dt>> 4) & 0x3)*10 + (Dt & 0xF);
+	uint8_t year, month, day, hour, minute, second, dayOfWeek;
+	year =  ((Dt>>20) & 0xF)*10 + ((Dt>>16) & 0xF);
+	dayOfWeek = ((Dt>>13) & 0x7);
+	month = ((Dt>>12) & 0x1)*10 + ((Dt>>8) & 0xF);
+	day =((Dt>> 4) & 0x3)*10 + (Dt & 0xF);
 	
-	hr =  ((Tm>>20) & 0x3)*10 + ((Tm>>16) & 0xF);
-	min = ((Tm>>12) & 0x7)*10 + ((Tm>>8) & 0xF);
-	sec  = ((Tm>> 4) & 0x7)*10 + (Tm & 0xF);
+	hour =  ((Tm>>20) & 0x3)*10 + ((Tm>>16) & 0xF);
+	minute = ((Tm>>12) & 0x7)*10 + ((Tm>>8) & 0xF);
+	second  = ((Tm>> 4) & 0x7)*10 + (Tm & 0xF);
 
-	if ((Tm>>22) & 0x1) hr += 12;
+	if ((Tm>>22) & 0x1) hour += 12;
 
 	char * wkdy[] = { "", "Mon","Tue","Wed","Thu","Fri","Sat","Sun" };
-	char * month[] = { "", "Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec" };
-	char dttm[50];
-	sprintf(dttm, "%s %d-%s-%d %d:%02d:%02d", wkdy[day], date, month[mon], yr, hr,min,sec );
-	logEvtNS( "RTC", "DtTm", dttm );
+	logEvtFmt( "RTC", "20%02d-%02d-%02d %02d:%02d:%02d (%s)", year, month, day, hour, minute, second, wkdy[dayOfWeek]  );
 	return true;
 }
 

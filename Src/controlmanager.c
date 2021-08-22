@@ -107,13 +107,16 @@ void 									playSubjAudio( char *arg ){				// play current Subject: arg must b
 	if ( strcasecmp( arg, "nm" )==0 ){
 		nm = tbS->audioName;
 		logEvtNSNS( "PlayNm", "Subj", tbS->name, "nm", nm ); 
+    LOG_AUDIO_PLAY_SPROMPT(tbS->name, nm);
 	} else if ( strcasecmp( arg, "pr" )==0 ){
 		nm = tbS->audioPrompt;
 		logEvtNSNS( "Play", "Subj", tbS->name, "pr", nm ); 
+    LOG_AUDIO_PLAY_LPROMPT(tbS->name, nm);
 	} else if ( strcasecmp( arg, "msg" )==0 ){
 		nm = tbS->msgAudio[ TBook.iMsg ];
 		logEvtNSNI( "Play", "Subj", tbS->name, "iM", TBook.iMsg ); //, "aud", nm ); 
-		stats = loadStats( tbS->name, TBook.iSubj, TBook.iMsg );	// load stats for message
+	  LOG_AUDIO_PLAY_MESSAGE(TBook.iSubj, tbS->name, nm);
+  	stats = loadStats( tbS->name, TBook.iSubj, TBook.iMsg );	// load stats for message
 	}
 	buildPath( path, tbS->path, nm, ".wav" ); //".ogg" );
 	playAudio( path, stats );
@@ -161,6 +164,8 @@ void 									playSysAudio( char *arg ){				// play system file 'arg'
 //	buildPath( path, TB_Config.systemAudio, arg, ".wav" ); //".ogg" );
 			playAudio( SysAudio[i].sysPath, NULL );
 			logEvtNS( "PlaySys", "file", arg );
+      logEvtFmt("PlayAudio", "start, system: '%s', file: '%s'", arg, SysAudio[i].sysPath);
+      LOG_AUDIO_PLAY_SYSTEM(arg, SysAudio[i].sysPath);
 			return;
 		}
 	tbErr("playSys %s not found", arg);

@@ -18,120 +18,78 @@ extern const int 						CODEC_RECORD_DN; 	  // signal sent by SAI callback when r
 extern const int 						MEDIA_PLAY_EVENT;
 extern const int 						MEDIA_RECORD_START;
 
-typedef struct{				// WAV file header
-  uint32_t   ChunkID;       // 0  == 'RIFF'		RIFF_ID = 0x46464952;
-  uint32_t   FileSize;      // 4  
-  uint32_t   FileFormat;    // 8  == 'WAVE'		WAVE_ID = 0x45564157;
-  uint32_t   SubChunk1ID;   // 12 == 'fmt ' 	FMT_ID  = 0x20746D66;
-  uint32_t   SubChunk1Size; // 16 == 16
-  uint16_t   AudioFormat;   // 20 == 16?
-  uint16_t   NbrChannels;   // 22 == 1  
-  uint32_t   SampleRate;    // 24 
-  
-  uint32_t   ByteRate;      // 28  
-  uint16_t   BlockAlign;    // 32   
-  uint16_t   BitPerSample;  // 34    
-  uint32_t   SubChunk2ID;   // 36 == 'data'  DATA_ID = 0x61746164;  
-  uint32_t   SubChunk2Size; // 40     
-	uint8_t    Data;					// @44
+// The header for a .riff file, of which .wav is one.
+typedef struct {
+  uint32_t    riffId;       // 'RIFF'
+  uint32_t    waveSize;     // Size of 'WAVE' and chunks and data that follow
+  uint32_t    waveId;       // 'WAVE'
+} WavHeader_t;
 
-} WAVE_FormatTypeDef;
+// Header for "chunks" inside a .riff file. Each header is followed by
+// chunkSize bytes of chunk-specific data.
+typedef struct {
+  uint32_t    chunkId;      // "fmt ", "data", "LIST", and so forth
+  uint32_t    chunkSize;    // Size of the data starting with the next byte.
+} RiffChunk_t;
 
+// The data layout for a PCM "fmt " chunk. Describes a PCM recording.
+typedef struct {
+  uint16_t    formatCode;   // format code; we only support '1', WAVE_FORMAT_PCM
+  uint16_t    numChannels;  // Number of interleaved channels
+  uint32_t    samplesPerSecond;
+  uint32_t    bytesPerSecond;
+  uint16_t    blockSize;    // Block size in bytes (16-bits mono -> 2, 32-bit stereo -> 8, etc)
+  uint16_t    bitsPerSample;
+  // non-PCM formats can have extension data here.
+} WavFmtData_t;
+
+
+// Audio encoding formats
 typedef enum {				// audType
   audUNDEF,
-	audWave,
-	audMP3,
-	audOGG
+  audWave,
+  audMP3,
+  audOGG
 } audType_t;
 
 typedef enum {  			// pnRes_t  					-- return codes from PlayNext
-	pnDone,
-	pnPaused,
-	pnPlaying
+  pnDone,
+  pnPaused,
+  pnPlaying
 } pnRes_t;
 typedef enum {				// BuffState					-- audio buffer states
-	bFree, bAlloc, bEmpty, bFull, bDecoding, bPlaying, bRecording, bRecorded
+  bFree, bAlloc, bEmpty, bFull, bDecoding, bPlaying, bRecording, bRecorded
 } BuffState;
 
 typedef struct { 			// Buffer_t						-- audio buffer
-	BuffState state;
-	uint32_t 		firstSample;
-	uint32_t 		cntBytes;			// or timestamp for bRecorded
-	uint16_t 	* data;					// buffer of 16bit samples
+  BuffState state;
+  uint32_t 		firstSample;
+  uint32_t 		cntBytes;			// or timestamp for bRecorded
+  uint16_t 	* data;					// buffer of 16bit samples
 } Buffer_t;
 
 #define N_AUDIO_BUFFS			8
 typedef enum {				// playback_state_t		-- audio playback state codes
-	pbIdle, 		// not playing anything
-	pbOpening,	// calling fopen 
-	pbLdHdr,		// fread header
-	pbGotHdr,		// fread hdr done
-	pbFilling,	// fread 1st data
-	pbFull, 		// fread data done
-	pbPlaying, 	// I2S transfer started
-	pbPlayFill,	// fread data under I2S transfer
-	pbLastPlay,	// fread data got 0
-	pbFullPlay,	// fread data under I2S transfer done
-	pbDone,			// I2S transfer of audio done
-	pbPaused,
-	
-	pbWroteHdr,	// recording, wrote header
-	pbRecording,	// started recording
-	pbRecStop,		// record stop requested
-	pbRecPaused		// recording paused -- NYI
-	
+  pbIdle, 		// not playing anything
+  pbOpening,	// calling fopen
+  pbLdHdr,		// fread header
+  pbGotHdr,		// fread hdr done
+  pbFilling,	// fread 1st data
+  pbFull, 		// fread data done
+  pbPlaying, 	// I2S transfer started
+  pbPlayFill,	// fread data under I2S transfer
+  pbLastPlay,	// fread data got 0
+  pbFullPlay,	// fread data under I2S transfer done
+  pbDone,			// I2S transfer of audio done
+  pbPaused,
+
+  pbWroteHdr,	// recording, wrote header
+  pbRecording,	// started recording
+  pbRecStop,		// record stop requested
+  pbRecPaused		// recording paused -- NYI
+
 } playback_state_t;
 
-typedef struct { 			// PlaybackFile_t			-- audio state block
-	audType_t 						audType;				// file type to playback
-	WAVE_FormatTypeDef* 	wavHdr;					// WAVE specific info
-	
-  FILE * 								audF;						// stream for data
-	
-	uint32_t 							samplesPerSec;	// sample frequency 
-	uint32_t 							bytesPerSample;	// eg. 4 for 16bit stereo
-	uint32_t 							nSamples;				// total samples in file
-	uint32_t							msecLength;			// length of file in msec
-
-	uint32_t 							tsOpen;					// timestamp at start of fopen
-	uint32_t 							tsPlay;					// timestamp at start of curr playback or resume
-	uint32_t 							tsPause;				// timestamp at pause
-	uint32_t 							tsResume;				// timestamp at resume (or start)
-	uint32_t							tsRecord;				// timestamp at recording start
-	
-	playback_state_t  		state;					// current (overly detailed) playback state
-	bool 									monoMode;				// true if data is 1 channel (duplicate on send)
-	uint32_t 							nPerBuff;				// samples per buffer (always stereo)
-	uint32_t 							LastError;			// last audio error code
-	uint32_t 							ErrCnt;					// # of audio errors
-	MsgStats *						stats;					// statistics to go to logger
-
-	Buffer_t *						Buff[ N_AUDIO_BUFFS ];			// pointers to playback/record buffers (for double buffering)
-	Buffer_t *						SvBuff[ N_AUDIO_BUFFS ];		// pointers to save buffers (waiting to write to file)
-	
-	// playback 
-	int32_t								buffNum;				// idx in file of buffer currently playing
-	uint32_t 							nLoaded;				// samples loaded from file so far
-	uint32_t 							nPlayed;				// # samples in completed buffers
-	uint32_t 							msPlayed;				// elapsed msec playing file
-	bool 									audioEOF;				// true if all sample data has been read
-//	uint32_t 							msPos;					// msec position in file
-	
-	// recording
-	uint32_t 							samplesPerBuff;	// number of mono samples in BuffLen (stereo) buffer
-	uint32_t 							msRecorded;			// elapsed msec recording file
-	uint32_t							nRecorded;			// n samples in filled record buffers
-	uint32_t 							nSaved;					// recorded samples sent to file so far
-
-	// simulated square wave data
-	bool 									SqrWAVE;				// T => wavHdr pre-filled to generate square wave
-	int32_t								sqrSamples;			// samples still to send
-	uint32_t 							sqrHfLen;				// samples per half wave
-	int32_t 							sqrWvPh;				// position in wave form: HfLen..0:HI 0..-HfLen: LO
-	uint16_t 							sqrHi;					//  = 0x9090;
-	uint16_t 							sqrLo;					//  = 0x1010;
-	
-} PlaybackFile_t;
 
 
 // functions called from mediaplayer.c
@@ -148,7 +106,9 @@ extern void 				audStartRecording( FILE *outFP, MsgStats *stats );	// start reco
 extern void 				audRequestRecStop( void );										// signal record loop to stop
 extern void 				audPauseResumeAudio( void );								// signal playback loop to request Pause or Resume
 extern void 				audPlaybackDn( void );											// handle end of buffer event
+#ifdef _SQUARE_WAVE_SIMULATOR
 extern void 				audSquareWav( int nsecs, int hz );				  // square: 'nsecs' seconds of 'hz' squareWave
+#endif
 extern void					audLoadBuffs( void );												// pre-load playback data (from mediaThread)
 extern void 				audSaveBuffs( void );												// save recorded buffers (called from mediaThread)
 extern void 				audPlaybackComplete( void );								// playback complete (from mediaThread)

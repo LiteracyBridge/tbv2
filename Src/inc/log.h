@@ -66,4 +66,41 @@ extern void			eraseNorFlash( bool svCurrLog );					// erase entire chip & re-ini
 extern void			NLogShowStatus( void );
 extern int			NLogIdx( void );
 
+// User-level event logging
+#define AUDIO_EVENT "PlayAudio"
+#define LOG_AUDIO_PLAY_ERRORS(errorCount, lastError) \
+          logEvtFmt(AUDIO_EVENT, "errors, count: %d, last: %x")
+
+#define LOG_AUDIO_PLAY_SPROMPT(playlist, filename) \
+          logEvtFmt(AUDIO_EVENT, "sprompt: '%s', file: '%s'", playlist, filename)
+
+#define LOG_AUDIO_PLAY_LPROMPT(playlist, filename) \
+          logEvtFmt(AUDIO_EVENT, "lprompt: '%s', file: '%s'", playlist, filename)
+
+#define LOG_AUDIO_PLAY_MESSAGE(position,playlist, filename) \
+          logEvtFmt(AUDIO_EVENT, "message#: %d, playlist: '%s', file: '%s'", position, playlist, filename)
+
+#define LOG_AUDIO_PLAY_SYSTEM(prompt, filename) \
+          logEvtFmt(AUDIO_EVENT, "system: '%s', file: '%s'", prompt, filename)
+
+#define LOG_AUDIO_PLAY_WAVE(filename, lenMs, lenBytes, samplesPerSec, isMono) \
+          logEvtFmt(AUDIO_EVENT, "wave file: '%s', length: %d ms, size: %d, samples/sec: %d, isMono: %s", \
+              filename, lenMs, lenBytes, samplesPerSec, isMono?"t":"f")
+
+#define LOG_AUDIO_PLAY_STOP(lenMs, playedMs, playedPct) \
+          logEvtFmt(AUDIO_EVENT, "stop, length: %d ms, played: %d ms, completion%%: %d", lenMs, playedMs, playedPct)
+
+#define LOG_AUDIO_PLAY_PAUSE(lenMs, playedMs, playedPct) \
+          logEvtFmt(AUDIO_EVENT, "pause, length: %d ms, played: %d ms, completion%%: %d", lenMs, playedMs, playedPct)
+
+#define LOG_AUDIO_PLAY_RESUME(lenMs, playedMs, playedPct) \
+          logEvtFmt(AUDIO_EVENT, "resume, length: %d ms, played: %d ms, completion%%: %d", lenMs, playedMs, playedPct)
+
+#define LOG_AUDIO_PLAY_DONE(lenMs, playedMs, playedPct) \
+          logEvtFmt(AUDIO_EVENT, "done, length: %d ms, played: %d ms, completion%%: %d", lenMs, playedMs, playedPct)
+
+#define LOG_AUDIO_PLAY_JUMP(lenMs, playedMs, adjustMs) \
+          logEvtFmt(AUDIO_EVENT, "jump: %s, length: %d ms, played: %d ms, skip: %d ms", adjustMs<0?"back":"ahead", lenMs, playedMs, adjustMs)
+
+
 #endif  // log.h

@@ -186,10 +186,12 @@ void						logPowerUp( bool reboot ){											// re-init logger after reboot, U
 		}
 	}
 	
+  bool gotRtc = false;
 	if ( reboot ){
 		totLogCh = 0;			// tot chars appended
 		if (logF!=NULL) fprintf( logF, "\n" );
 		logEvt(   "REBOOT--------" );
+    gotRtc = showRTC();
 		logEvtNS( "TB_V2", "Firmware", TBV2_Version );
 		logEvtFmt( "BUILT", "On %s at %s", __DATE__, __TIME__);  // date & time LOGGER.C last compiled -- link date?
 		logEvtS(  "CPU",  CPU_ID );
@@ -239,7 +241,7 @@ void						logPowerUp( bool reboot ){											// re-init logger after reboot, U
     }
   }
   
-  if ( !showRTC() ){  // show current RTC time, or false if unset
+  if ( !gotRtc ){  // show current RTC time, or false if unset
     // RTC unset after hard power down (e.g. battery change). Reset from the last time we knew. Certainly
     // the wrong time, possibly by a huge amount, but at least time increases monotonically.
     bool haveTime = getFileTime(lastRtcFile, &rtcDt);

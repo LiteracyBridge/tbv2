@@ -287,7 +287,7 @@ void						initLogger( void ){																// init tbLog file on bootup
 	dbgLog( "4 Logger initialized \n" );
 }
 static char *		statFNm( const char * nm, short iS, short iM ){		// INTERNAL: fill statFileNm for  subj 'nm', iSubj, iMsg
-	sprintf( statFileNm, "P%s_%d%s_S%d_M%d.stat", TBP[ pSTATS_PATH ], iPkg, nm, iS, iM );
+	sprintf( statFileNm, "%sP%d_%s_S%d_M%d.stat", TBP[ pSTATS_PATH ], iPkg, nm, iS, iM );
 	return statFileNm;
 }
 int							fileMatchNext( const char *fnPatt ){			// return next unused value for file pattern of form "xxxx_*.xxx"

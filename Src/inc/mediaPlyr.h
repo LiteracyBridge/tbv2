@@ -9,6 +9,7 @@ extern 	osEventFlagsId_t			mMediaEventId;		// event channel for signals to media
 extern void			initMediaPlayer( void );			// init mediaPlayer & spawn thread to handle  playback & record requests
 extern void			mediaPowerDown( void );
 extern void 		playAudio( const char *fileName, MsgStats *stats );
+extern void			playNotes( char *notes );			// play square tones for 1/4 sec per 'notes' 
 extern void 		pauseResume( void );
 extern void 		stopPlayback( void );
 extern int			playPosition( void );

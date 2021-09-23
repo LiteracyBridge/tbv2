@@ -192,12 +192,6 @@ void 					controlTest(  ){									// CSM test procedure
 					dbgLog( "going to USB mass-storage mode \n");
 					USBmode( true );
 					break;
-				
-				case FirmwareUpdate:   // pot table
-					dbgLog( "rebooting to system bootloader for DFU... \n" );
-					tbDelay_ms( 3300 );  // about to go into DFU
-					RebootToDFU(  );
-					break;
 				default:
 					dbgLog( "evt: %d %s \n", evt->typ, eventNm( evt->typ ) );
 			}
@@ -220,7 +214,7 @@ void writeCSM(){			// write current CSM to tbook_csm.c
 		"aNull", "LED", "bgLED", "playSys", "playSubj", "pausePlay", "resumePlay", "stopPlay", "volAdj", "spdAdj", "posAdj",
 		"startRec", "pauseRec", "resumeRec", "finishRec", "playRec", "saveRec", "writeMsg",
 		"goPrevSt", "saveSt", "goSavedSt", "subjAdj", "msgAdj", "setTimer", "resetTimer", "showCharge",
-		"startUSB", "endUSB", "powerDown", "sysBoot", "sysTest", "playNxtPkg", "changePkg" 
+		"startUSB", "endUSB", "powerDown", "sysBoot", "sysTest", "playNxtPkg", "changePkg", "playTune" 
 	};
 	
 	fprintf( f, "//TBook Control State Machine definition--   tbook_csm.def \n" );
@@ -234,6 +228,7 @@ void writeCSM(){			// write current CSM to tbook_csm.c
 	fprintf( f, "%22d,   // %s \n  ", 		TB_Config.longIdleMS, 			"longIdleMS" );
 	fprintf( f, "%22d,   // %s \n  ", 		TB_Config.minShortPressMS,	"minShortPressMS" );
 	fprintf( f, "%22d,   // %s \n  ", 		TB_Config.minLongPressMS, 	"minLongPressMS" );
+	fprintf( f, "%22d,   // %s \n  ", 		TB_Config.qcTestState, 				"qcTestState" );
 	fprintf( f, "%22d,   // %s \n  ", 		TB_Config.initState, 				"initState" );
 	fprintf( f, "%s,   // %s \n  ", 			padStr(sv, TB_Config.systemAudio), 			"systemAudio" );
 	fprintf( f, "%s,   // %s \n  ", 			padStr(sv, TB_Config.bgPulse ), 				"bgPulse" );

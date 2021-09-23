@@ -16,8 +16,9 @@ const int										MEDIA_SET_VOL 		 =  0x100;
 const int										MEDIA_PLAY_RECORD	 =	0x200;
 const int										MEDIA_SAVE_RECORD	 =	0x400;
 const int										MEDIA_DEL_RECORD	 =	0x800;
+const int										MEDIA_PLAY_TUNE		 =  0x1000;
 
-const int 									MEDIA_EVENTS 			 =  0xFFF;		// mask for all events
+const int 									MEDIA_EVENTS 			 =  0x1FFF;		// mask for all events
 
 static 	osThreadAttr_t 				thread_attr;
 
@@ -26,6 +27,12 @@ osEventFlagsId_t							mMediaEventId;			// for signals to mediaThread
 // communication variables shared with mediaThread
 static volatile int 					mAudioVolume		= 7;			// current volume, overwritten from CSM config (setVolume)
 static volatile int 					mAudioSpeed			= 5;			// current speed, NYI
+
+const int MAX_NOTE_CNT = 80;
+static volatile int						mNoteCnt = 0;
+static volatile int						mNxtNote;
+static volatile int						mNoteFreq[ MAX_NOTE_CNT ];
+static volatile int						mNoteDur [ MAX_NOTE_CNT ];  // duration in buffers (~1/8 sec)
 
 static volatile int 					mAdjPosSec;
 static volatile char					mPlaybackFilePath[ MAX_PATH ];
@@ -66,6 +73,45 @@ void 					playAudio( const char * fileName, MsgStats *stats ){ // start playback
 	strcpy( (char *)mPlaybackFilePath, fileName );
 	mPlaybackStats = stats==NULL? sysStats : stats;
 	osEventFlagsSet( mMediaEventId, MEDIA_PLAY_EVENT );
+}
+void					playNotes( char *notes ){			// play square tones for 1/4 sec per 'notes' 
+	mNoteCnt = 0;
+	int nSyms = strlen( notes );
+	mNxtNote = 0;
+	int i = 0;
+	while( i < nSyms ){ 
+		int fr = 2, dur = 2;
+		switch ( notes[i] ){  // C scale:  C5..C6
+				case 'C': case 'c':   fr = 523; break;	// C5
+				case 'D': case 'd':   fr = 587; break;	// D5
+				case 'E': case 'e':   fr = 659; break;	// E5
+				case 'F': case 'f':   fr = 698; break;	// F5
+				case 'G': case 'g':   fr = 784; break;	// G5
+				case 'A': case 'a':   fr = 880; break;	// A6
+				case 'B': case 'b':   fr = 988; break;	// B6
+				case 'H': case 'h':   fr = 1047; break; // C6  also could use C+
+			default:
+				case '_':   					fr = 2; 	break;  // rest
+		}
+		
+		i++;  // next Sym, suck up any modifiers ( . extend, + up oct, - down oct )
+		while ( i < nSyms ){
+			if 			( notes[i]=='.' ) dur++; 
+			else if ( notes[i]=='*' ) dur *= 2;
+			else if ( notes[i]=='/' ) dur /= 2;
+			else if ( notes[i]=='+' ) fr *= 2;
+			else if ( notes[i]=='-' ) fr /= 2;
+			else 
+				break;
+			i++;
+		}
+		
+		mNoteFreq[ mNoteCnt ] = fr;		// add (fr,dur) to note list
+		mNoteDur[ mNoteCnt ] = dur;
+		mNoteCnt++; 
+		if ( mNoteCnt > MAX_NOTE_CNT ) tbErr("playNotes: %d notes");
+	}
+	osEventFlagsSet( mMediaEventId, MEDIA_PLAY_TUNE );
 }
 void					recordAudio( const char * fileName, MsgStats *stats ){	// start recording into fileName
 	strcpy( (char *)mRecordFilePath, fileName );
@@ -150,14 +196,24 @@ static void 	mediaThread( void *arg ){						// communicates with audio codec for
 			audLoadBuffs();															// preload any empty audio buffers
 		}
 			
-		if ( (flags & CODEC_DATA_RX_DN) != 0 )		// buffer reception complete from SAI_event
+		if ( (flags & CODEC_DATA_RX_DN) != 0 )		// R2) recording buffer complete from SAI_event
 			audSaveBuffs();
 			
 		if ( (flags & CODEC_PLAYBACK_DN) != 0 ){		// playback complete
-			audPlaybackComplete();
+			if ( mNoteCnt==0 ){  											
+				audPlaybackComplete();											// 3a)  wav file or complete tune
+			} else 
+			{																							// 3b)  playNotes
+				int fr = mNoteFreq[ mNxtNote ];
+				int dur = mNoteDur[ mNxtNote ];
+				mNxtNote++;
+				audPlayTone( mNxtNote, fr, dur );
+				if ( mNxtNote >= mNoteCnt )
+					mNoteCnt = 0;			// done with tune next time
+			}
 		}
 		
-		if ( (flags & CODEC_RECORD_DN) != 0 ){			// recording complete
+		if ( (flags & CODEC_RECORD_DN) != 0 ){			// R3) recording complete
 			audRecordComplete();
 		}
 
@@ -166,8 +222,15 @@ static void 	mediaThread( void *arg ){						// communicates with audio codec for
 			resetAudio();
 			audPlayAudio( (const char *)mPlaybackFilePath, (MsgStats *) mPlaybackStats );
 		} 
+		if ( (flags & MEDIA_PLAY_TUNE) != 0 ){					// 1b) request to start tune-- playNotes()
+			resetAudio();
+			audPlayTone( 0, mNoteFreq[0], mNoteDur[0] ); 
+			mNxtNote = 1;
+			if ( mNoteCnt==1 ) mNoteCnt = 0;		// 1 and done
+		} 
 		
-		if ( (flags & MEDIA_RECORD_START) != 0 ){	// request to start recording
+		//******* record wav file:  R1) start, R2) bufferDone, R3) rec done, R4) play rec, R5) save, or R5a) delete
+		if ( (flags & MEDIA_RECORD_START) != 0 ){		// R1) request to start recording
 			resetAudio();			// clean up anything in progress 
 			FILE* outFP = tbOpenWriteBinary( (const char *)mRecordFilePath ); //fopen( (const char *)mRecordFilePath, "wb" );
 			if ( outFP != NULL ){
@@ -178,30 +241,32 @@ static void 	mediaThread( void *arg ){						// communicates with audio codec for
 			}
 		} 
 		
-		if ( (flags & MEDIA_PLAY_RECORD) != 0 ){	// request to play recording
+		if ( (flags & MEDIA_PLAY_RECORD) != 0 ){	// R4) request to play recording
 			resetAudio();
 			audPlayAudio( (const char *)mRecordFilePath, (MsgStats *) sysStats );
 		}
 		
-		if ( (flags & MEDIA_SAVE_RECORD) != 0 ){	// request to save recording
+		if ( (flags & MEDIA_SAVE_RECORD) != 0 ){	// R5) request to save recording
 			copyEncrypted( (char *) mRecordFilePath );
 			mRecordFilePath[0] = 0;
 		}
 		
-		if ( (flags & MEDIA_DEL_RECORD) != 0 ){	// request to delete recording
+		if ( (flags & MEDIA_DEL_RECORD) != 0 ){	    // R5a) request to delete recording
 			int res = fdelete( (char *) mRecordFilePath, "" );
 			mRecordFilePath[0] = 0;
 			FileSysPower( false );			// power down SDIO after finished with recording
 		}
 		
-		if ( (flags & MEDIA_SET_VOL) != 0 ){			// request to set volume
+	    //******* set volume
+	    if ( (flags & MEDIA_SET_VOL) != 0 ){			// request to set volume
 			logEvtNI( "setVol", "vol", mAudioVolume );
 			cdc_SetVolume( mAudioVolume );
 		}
 		
-		if ( (flags & MEDIA_SET_SPD) != 0 )				// request to set speed (NYI)
-			audAdjPlaySpeed( mAudioSpeed );
+//		if ( (flags & MEDIA_SET_SPD) != 0 )				// request to set speed (NYI)
+//			audAdjPlaySpeed( mAudioSpeed );
 
+        //******* set playback position
 		if ( (flags & MEDIA_ADJ_POS) != 0 )				// request to adjust playback position
 			audAdjPlayPos( mAdjPosSec );
 	}

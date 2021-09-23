@@ -4,6 +4,13 @@
 #define CONTROL_MGR_H
 #include "tbook.h"
 
+// define LOAD_CSM_DYNAMICALLY to load CSM from system/control.def
+//  #define LOAD_CSM_DYNAMICALLY
+
+//  ifdef LOAD_CSM_DYNAMICALLY controls:
+//    in tbook_csm.c  --  allocation of space for: CSM_Version, nCSMstates,	TB_Config, TBookCSM[],	nPlaySys, &	SysAudio[]
+//    in tknTable.c -- code & storage tables for parsing:  
+
 typedef struct {
 	Action	act;
 	char *	arg;
@@ -60,7 +67,7 @@ extern TBPackage_t 	* TBPkg;											// TBook content in use
 
 // TBook ControlStateMachine
 extern int						nCSMstates;										// #states defined				
-extern csmState *			TBookCSM[ MAX_CSM_STATES ];		// TBook state machine definition
+extern csmState *			TBookCSM[ ];		    // TBook state machine definition
 
 extern int						nPlaySys;			// # prompts used
 extern SysAudio_t 		SysAudio[];		// defined in tbook_csm.c
@@ -70,27 +77,34 @@ extern void						buildPath( char *dstpath, const char *dir, const char *nm, cons
 extern void						findPackages( void );									// scan for M0:/package*/  directories
 TBPackage_t * 				readContent( const char * pkgPath, int pkgIdx );		// parse list_of_subjects.txt & messages.txt for each Subj => Content
 extern void 					readControlDef( void );								// parse control.def => Config & TBookCSM[]
+extern void 					writeCSM( void );			                        // controlmanagertest.c -- write current CSM to tbook_csm.c
 
-typedef struct {							// CSM state variables
-	short 		iCurrSt;	// index of current csmState
-	char * 		currStateName;	// str nm of current state
-	Event		lastEvent;		// str nm of last event
-	char *		lastEventName;	// str nm of last event
-	char *		evtNms[ eUNDEF ];
-	char *		nxtEvtSt[ eUNDEF ];
+typedef struct { 		                //DBG:  Evt -> NxtSt  (both numbers & names)
+	Event    evt;
+	char *   evtNm;
+	short    nxtSt;
+	char *   nstStNm;
+} StTrans;
+
+typedef struct {						// CSM state variables
+	short 		iCurrSt;				// index of current csmState
+	short		iPrevSt;				// idx of previous state
+	short		iSavedSt[5];			// possible saved states
+
+	Event		lastEvent;				//DBG: id of last event
+	char *		lastEventName;			//DBG: str nm of last event
+	char * 		currStateName;			//DBG: str nm of current state
+	StTrans  	evtNxtSt[ eUNDEF ];	    //DBG: expanded transitions for current state
+	char *      prevStateName;			//DBG: name of prev
+    char *		saveStName[5];			//DBG: names of remembered states
 	
-	short		iPrevSt;	// idx of previous state
-	short		iNextSt;	// nextSt from state machine table ( can be overridden by goBack, etc )
-	short		iSavedSt[5];	// possible saved states
-  
 	short		volume;
 	short		speed;
   
-	short		iSubj;		// index of current Subj
-	short		iMsg;		// index of current Msg within Subj
+	short		iSubj;					// index of current Subj
+	short		iMsg;					// index of current Msg within Subj
 
-	csmState *  cSt;		// -> TBookCSM[ iCurrSt ]
-	
+	csmState *  cSt;					// -> TBookCSM[ iCurrSt ]	
 }	TBook_t;
 
 extern TBook_t TBook;

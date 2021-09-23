@@ -43,6 +43,9 @@ extern void				EnableLedMngr( bool enable );  // DEBUG allow disabling LED manag
 extern char 			CPU_ID[20], TB_ID[20], TBookName[20];
 extern bool 			NO_OS_DEBUG;					// set in main.c, used in tbook.c
 extern bool 			FirstSysBoot;					// defined in logger
+extern bool 			RunQCTest;						// defined in tbook.c -- if no /system/QC_PASS.txt  or Circle boot
+extern bool 			PrecompiledCSM;				    // defined in tbook.c
+extern char             BootKey;                        // set in main.c, used in tbook.c
 
 extern void 			initIDs( void );
 extern void				loadTBookName( void );													// load TBookName with string matching ID from /system/tbook_names.txt
@@ -59,7 +62,9 @@ extern void				gConfigI2S( GPIO_ID id );												// configure GPIO for high s
 extern void				gConfigADC( GPIO_ID led );											// configure GPIO as ANALOG input ( battery voltage levels )
 extern void				gConfigIn( GPIO_ID key, bool pulldown );				// configure GPIO as low speed input, either pulldown or pullup (pwr fail, battery indicators)
 extern void				gConfigKey( GPIO_ID key );											// configure GPIO as low speed pulldown input ( keys )
-extern void 			RebootToDFU( void );														// reboot into SystemMemory -- Device Firmware Update bootloader
+extern void 			enableEXTI( GPIO_ID key, bool asKey );					// configure EXTI for key or pwrFail
+
+//extern void 			RebootToDFU( void );														// reboot into SystemMemory -- Device Firmware Update bootloader
 extern uint32_t 	AHB_clock;																			// freq in MHz of AHB == CPU == HCLK
 extern uint32_t 	APB2_clock;																			// freq in MHz of APB2 (fast) peripheral bus
 extern uint32_t 	APB1_clock;																			// freq in MHz of APB1 (slow) peripheral bus
@@ -77,12 +82,14 @@ extern void 			FileSysPower( bool enable );										// power up/down eMMC & SD 
 extern fsStatus 	fsMount( char *drv );														// try to finit() & mount()  drv:   finit() code, fmount() code
 extern osMutexId_t		logLock;																		// mutex for access to NorFlash
 
-extern void 			talking_book ( void *argument );
+extern void 			talking_book( void *tbAttr );			// talking book initialization & control manager thread 
 extern void 			getRTC( struct _fsTime *fsTime );							// load current RTC into fsTime
 extern bool 			showRTC( void );
 extern uint32_t 	tbTimeStamp( void );
 extern void 			tbDelay_ms( int ms ); 					//  Delay execution for a specified number of milliseconds
 extern void *			tbAlloc( int nbytes, const char *msg );
+extern void             checkMem( void );
+extern void             showMem( void );
 extern bool 			fexists( const char *fname );		// return true if file path exists
 extern char *			findOnPathList( char * destpath, const char *search_path, const char * nm );	// store path to 1st 'nm' on 'search_path' in 'destpath'
 
@@ -99,8 +106,8 @@ extern void 			errLog( const char * fmt, ... );
 extern void 			tbErr( const char * fmt, ... );							// report fatal error
 extern void				tbShw( const char *s, char **p1, char **p2 );
 extern void 			_Error_Handler( char *, int );
-extern int 				PlayDBG;			// DEBUG flag for DebugLoop & playWave
-extern int 				RecDBG;			// DEBUG flag for DebugLoop & audStartRecord
+extern int  			BootMode;		// defined in main.c -- set by booting with a key:  none=0 STAR=1 LHAND=2 MINUS=3  PLUS=4  RHAND=5 CIRCLE=6 HOME=7
+extern char             BootKey;        // char for BootMode tests:  'S'tar, 'L'hand, 'M'inus, 'P'lus, 'R'hand, 'C'ircle, 'H'ome
 extern void 			debugLoop( bool autoUSB );			// dbgLoop.c: called if boot-MINUS, no file system,  autoUSB => usbMode
 
 extern void 			chkDevState( char *loc, bool reset );
@@ -109,6 +116,8 @@ extern int				divTst(int lho, int rho); 	// for fault handler testing
 extern void 			enableLCD( void );
 extern void 			disableLCD( void );
 extern void 			printAudSt( void ); // print audio state
+extern void 			setDbgFlag( char ch, bool enab );
+extern void 		    tglDebugFlag( int idx );   // toggle debug flag: "0123456789ABCDEFGHIJK"[idx]
 
 extern void 			USBmode( bool start );						// start (or stop) USB storage mode
 
@@ -165,7 +174,13 @@ extern const int	pMSGS_PATH;
 extern const int	pLIST_OF_SUBJS;
 extern const int	pPACKAGE_DIR;
 extern const int	pPKG_VERS;
-extern const int  pLAST;
+extern const int    pQC_PASS;
+extern const int    pERASE_NOR;
+extern const int    pSET_RTC;
+extern const int    pLAST_RTC;
+extern const int    pPKG_DAT;
+extern const int    pAUDIO;		// DEBUG
+extern const int    pLAST;
 
 //TBOOK error codes
 extern const int 	TB_SUCCESS;
@@ -184,6 +199,7 @@ typedef struct TBConfig {			// TBConfig
 	int			longIdleMS;
 	int			minShortPressMS;			// used by inputmanager.c
 	int			minLongPressMS;				// used by inputmanager.c
+    int         qcTestState;                // first state if running QC acceptance test
 	int			initState;	
 	
 	char *	systemAudio;				// path to system audio files
@@ -241,7 +257,7 @@ typedef struct {			// Dbg -- pointers for easy access to debug info
 	KeyPadKey_arr * 	KeyPadDef;		// definitions & per/key state of keypad
 	char							keypad[11];		// keypad keys as string
 	
-	osRtxThread_t *		thread[5];		// ptrs to osRtxThread
+	osRtxThread_t *		thread[6];		// ptrs to osRtxThread
 	TBConfig_t	* 		TBookConfig;	// TalkingBook configuration block
 	TBH_arr	*					TBookLog;			// TalkingBook event log
 	

@@ -39,6 +39,7 @@ extern void			initLogger( void );												// init tbLog file on bootup
 extern void			logPowerUp( bool reboot );								// re-init logger after USB or sleeping
 extern char *		loadLine( char * line, char * fpath, fsTime *tm );		// => 1st 200 chars of 'fpath' & *tm to lastAccessed
 extern void			logPowerDown( void );											// save & shut down logger for USB or sleeping
+extern void         writeLine( char * line, char * fpath );                         // write one line to file
 extern void			saveStats( MsgStats *st ); 										// save statistics block to file
 extern char *		logMsgName( char *path, const char * sNm, short iSubj, short iMsg, const char *ext, int *pcnt );	// build & => file path for next msg for Msg_<sNm>_S<iS>_M<iM>.<ext>
 extern void			flushStats( void );												// save all cached stats files

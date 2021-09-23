@@ -392,7 +392,7 @@ void						logEvtS( const char *evtID, const char *args ){		// write log entry: '
 	else
 		sprintf( evtBuff,  "%d_%02d.%d: %8s", min %60, sec % 60, tsec % 10, evtID );
 //	addHist( evtBuff, args );
-	dbgLog( "%s %s\n", evtBuff, args );
+	dbgLog( " %s %s\n", evtBuff, args );
 	
 	if ( osMutexAcquire( logLock, osWaitForever )!=osOK ){
 		dbgLog( "! logLock lost %s \n", evtID );

@@ -28,7 +28,7 @@ extern TBConfig_t 					TB_Config;			// defined in tbook_csm.c
 
 // TBook Control State Machine
 extern int 	 								nCSMstates;			// defined in tbook_csm.c
-extern csmState *						TBookCSM[ MAX_CSM_STATES ];		// TBook state machine definition -- defined in tbook_csm.c
+extern csmState *						TBookCSM[ ];		// TBook state machine definition -- defined in tbook_csm.c
 
 // TBook content packages
 int										nPackages = 0;								// number of packages found
@@ -36,31 +36,6 @@ TBPackage_t *					TBPackage[ MAX_PKGS ];				// package info
 int										iPkg = 0;											// package index 
 TBPackage_t * 				TBPkg;												// content package in use
 
-
-
-/*
-struct {							// CSM state variables
-	short 		iCurrSt;	// index of current csmState
-	char * 		currStateName;	// str nm of current state
-	Event		lastEvent;		// str nm of last event
-	char *		lastEventName;	// str nm of last event
-	char *		evtNms[ eUNDEF ];
-	char *		nxtEvtSt[ eUNDEF ];
-	
-	short		iPrevSt;	// idx of previous state
-	short		iNextSt;	// nextSt from state machine table ( can be overridden by goBack, etc )
-	short		iSavedSt[5];	// possible saved states
-  
-	short		volume;
-	short		speed;
-  
-	short		iSubj;		// index of current Subj
-	short		iMsg;		// index of current Msg within Subj
-
-	csmState *  cSt;		// -> TBookCSM[ iCurrSt ]
-	
-}	TBook;
-*/
 TBook_t TBook;
 
 osTimerId_t  	timers[3]; 	// ShortIdle, LongIdle, Timer
@@ -132,6 +107,9 @@ void 									playNxtPackage( ){										// play name of next available Package
 	playAudio( pkg->packageName, NULL );
 }
 
+void									playSqrTune( char *notes ){				// play seq of notes as sqrwaves
+	playNotes( notes );		// mediaPlayer op -- switch threads
+}
 
 void 									showPkg( ){										// debug print Package iPkg
 	TBPackage_t * pkg = TBPackage[ iPkg]; 
@@ -163,7 +141,7 @@ void 									playSysAudio( char *arg ){				// play system file 'arg'
 		if ( strcmp( SysAudio[i].sysNm, arg )==0 ){
 //	buildPath( path, TB_Config.systemAudio, arg, ".wav" ); //".ogg" );
 			playAudio( SysAudio[i].sysPath, NULL );
-			logEvtNS( "PlaySys", "file", arg );
+		//	logEvtNS( "PlaySys", "file", arg );
       logEvtFmt("PlayAudio", "start, system: '%s', file: '%s'", arg, SysAudio[i].sysPath);
       LOG_AUDIO_PLAY_SYSTEM(arg, SysAudio[i].sysPath);
 			return;
@@ -172,10 +150,14 @@ void 									playSysAudio( char *arg ){				// play system file 'arg'
 }
 
 
-void									startRecAudio( char *arg ){
+void									startRecAudio( char *arg ){         	// record user message into temporary .wav file
 	resetAudio();
-	tbSubject * tbS = TBPkg->TBookSubj[ TBook.iSubj ];
+	if ( RunQCTest ){
+		recordAudio( "/system/qcAudio.wav", NULL );
+		return;
+	} 
 	char path[MAX_PATH];
+	tbSubject * tbS = TBPkg->TBookSubj[ TBook.iSubj ];
 	int mCnt = 0;
 	char * fNm = logMsgName( path, tbS->name, TBook.iSubj, TBook.iMsg, ".wav", &mCnt ); //".ogg" );		// build file path for next audio msg for S<iS>M<iM>
 	logEvtNSNINI( "Record", "Subj", tbS->name, "iM", TBook.iMsg, "cnt", mCnt );
@@ -184,19 +166,18 @@ void									startRecAudio( char *arg ){
 }
 
 
-void   								playRecAudio(){
+void   								playRecAudio(){                             // play back recorded temp .wav
 	playRecording();
 }
 
 
-void									saveRecAudio( char *arg ){
+void									saveRecAudio( char *arg ){              // encrypt user message .wav => .key & .dat
 	if ( strcasecmp( arg, "sv" )==0 ){
 		saveRecording();
 	} else if ( strcasecmp( arg, "del" )==0 ){
 		cancelRecording();
 	} 
 }
-
 
 void									saveWriteMsg( char *txt ){				// save 'txt' in Msg file
 	tbSubject * tbS = TBPkg->TBookSubj[ TBook.iSubj ];
@@ -210,30 +191,55 @@ void									saveWriteMsg( char *txt ){				// save 'txt' in Msg file
 	logEvtNSNININS( "writeMsg", "Subj", tbS->name, "iM", TBook.iMsg, "cnt", mCnt, "msg", txt );
 }
 
+void 									QCfilesTest( char * arg ){					// write & re-read system/qc_test.txt -- gen Event FilesSuccess if identical, or FilesFail if not
+	char * testNm = "/system/QC_Test.txt";
+	char qcmsg[50], qcres[50];
+	fsTime ftime;
+	strcpy( qcres, "------------------" );
+	strcpy( qcmsg, "QC filesTest" );
+	
+	writeLine( qcmsg, testNm );   
+	loadLine( qcres, testNm, &ftime );  // and read it back
+	fdelete( testNm, NULL );
+	
+	char *nl = strchr( qcres, '\n' );
+	if (nl != NULL) *nl = 0;		// truncate newline
+	if ( strcmp( qcmsg, qcres )== 0 ) 
+		sendEvent( FilesSuccess, 0 );
+	else
+		sendEvent( FilesFail, 0 );
+}
+void									svQCresult( char * arg ){  					// save 'arg' to system/QC_PASS.txt if starts with "QC_OK", or as QC_FAIL.txt
+	const char * passNm = "/system/QC_PASS.txt";
+	const char * failNm = "/system/QC_FAIL.txt";
+  checkMem();
+	
+	if ( fexists( passNm )) fdelete( passNm, NULL );
+	if ( fexists( failNm )) fdelete( failNm, NULL );
+	if ( strncmp( arg, "QC_OK", 5 )==0 )
+		writeLine( arg, "/system/QC_PASS.txt" );  
+	else 
+		writeLine( arg, "/system/QC_FAIL.txt" );   
+}
 
 void 									USBmode( bool start ){						// start (or stop) USB storage mode
 	if ( start ){
+		playSqrTune( "CEGG" );
 		logEvt( "enterUSB" );
 		logPowerDown();				// flush & shut down logs
+		setDbgFlag('F', false);
 		enableMassStorage( "M0:", NULL, NULL, NULL );
 	} else {	
-		disableMassStorage();
-		logEvt( "exitUSB" );
+		disableMassStorage();      //TODO?  just reboot?
 		ledFg( "_" );
+		playSqrTune( "GECC" );
+		logEvt( "exitUSB" );
+//	    NVIC_SystemReset();			// soft reboot?
 		logPowerUp( false );
 		if ( FirstSysBoot )  // should run in background
 			decodeAudio();
 	} 
 }
-
-
-//int						stIdx( int iSt ){
-//	if ( iSt < 0 || iSt >= nCSMstates )
-//		tbErr("invalid iSt");
-//	return iSt;
-//}
-
-void 						writeCSM( void );			// write current CSM to tbook_csm.c
 
 void assertValidState(int stateIndex) {
 	if ( stateIndex < 0 || stateIndex >= nCSMstates )
@@ -256,6 +262,20 @@ char * 								ledStr( char * s ){			// lookup TBConfig LED sequences
 	if ( strcasecmp( s, "fgPowerDown" )==0 ) 		return TB_Config.fgPowerDown;			// set??  powerDownTBook() G_3G_3G_9G_3G_9G_3
   return s;
 }
+void 									setCurrState( short iSt ){				// set iCurrSt & iPrevSt (& DBG strings)
+	if ( iSt == TBook.iCurrSt )
+		return;
+	assertValidState( iSt );
+	TBook.iPrevSt = TBook.iCurrSt;
+	TBook.prevStateName = TBook.currStateName;					//DEBUG -- update prevSt string
+	
+	TBook.iCurrSt = iSt;												// now 'in' (executing) state nSt
+	TBook.cSt = TBookCSM[ TBook.iCurrSt ];			// state definition for current state
+
+	TBook.currStateName = TBookCSM[ TBook.iCurrSt ]->nm;					//DEBUG -- update currSt string
+	//dbgLog( "C %s(%d) => %s(%d) \n",  TBook.prevStateName, TBook.iPrevSt, TBook.currStateName, TBook.iCurrSt );
+}
+
 static void 					doAction( Action act, char *arg, int iarg ){	// execute one csmAction
 	dbgEvt( TB_csmDoAct, act, arg[0],arg[1],iarg );
 	logEvtNSNS( "Action", "nm", actionNm(act), "arg", arg ); //DEBUG
@@ -300,22 +320,28 @@ static void 					doAction( Action act, char *arg, int iarg ){	// execute one csm
 			break;
 		case playRec:
 			playRecAudio();
-			logEvt( "playRec" );
+//			logEvt( "playRec" );
 			break;
 		case saveRec:
 			saveRecAudio( arg );
-			logEvtS( "saveRec", arg );
+//			logEvtS( "saveRec", arg );
 			break;
 		case finishRec:
 			stopRecording(); 
-			logEvt( "stopRec" );
+//			logEvt( "stopRec" );
 			break;
 		case writeMsg:
-			saveWriteMsg( arg );
+			if ( RunQCTest )
+				svQCresult( arg );		// saves 'arg' to system/QC_PASS.txt if it starts with "QC_OK", or as QC_FAIL.txt otherwise
+			else
+				saveWriteMsg( arg );
+			break;
+		case filesTest:
+			QCfilesTest( arg );		// generates event FilesSuccess or FilesFail
 			break;
 		case stopPlay:
 			stopPlayback(); 
-			logEvt( "stopPlay" );
+//			logEvt( "stopPlay" );
 			break;
 		case volAdj:			
 			adjVolume( iarg );	
@@ -339,19 +365,19 @@ static void 					doAction( Action act, char *arg, int iarg ){	// execute one csm
 			adjMsg( iarg );		
 			break;
 		case goPrevSt:
-			assertValidState(TBook.iPrevSt);
-		  setCSMcurrState( TBook.iPrevSt );		// return to prevSt without transition
-//			TBook.iCurrSt = TBook.iNextSt = TBook.iPrevSt;
+			setCurrState( TBook.iPrevSt );		// return to prevSt without transition
+		  // remembers this state as 'prevState' -- does that matter?
 			break;
-		case saveSt:
+		case saveSt:   		// remember state that preceded this one (for possible future return)
 			if ( iarg > 4 ) iarg = 4;
 		  assertValidState( TBook.iPrevSt );
 			TBook.iSavedSt[ iarg ] = TBook.iPrevSt;
+			dbgLog( "C svSt[%d] = %s(%d) \n", iarg, TBook.prevStateName, TBook.iPrevSt );
 			break;
 		case goSavedSt:
 			if ( iarg > 4 ) iarg = 4;
 		  assertValidState( TBook.iSavedSt[ iarg ] );
-		  setCSMcurrState( TBook.iSavedSt[ iarg ] );		// return to previously saved state without traansition
+		  setCurrState( TBook.iSavedSt[ iarg ] );		// return to savedSt without transition (updates prevSt)
 //			TBook.iNextSt = TBook.iSavedSt[ iarg ];
 		  // BE: I'm not sure this is right, but it has the side effect of ending the while loop in changeCSMstate.
 		  // In general, when we return to a saved state, I don't think we want to execute the entrance
@@ -371,6 +397,7 @@ static void 					doAction( Action act, char *arg, int iarg ){	// execute one csm
 			powerDownTBook();
 			break;
 	  case sysTest:
+            playSqrTune("CDEF_**C*D*E*F*_**C*D*E*F*_***C**G**FDEH**G**");
 			dbgLog( "writing tbook_csm.c \n" );
 			writeCSM(); //controlTest();
 			break;
@@ -380,80 +407,47 @@ static void 					doAction( Action act, char *arg, int iarg ){	// execute one csm
 	  case changePkg:
 			changePackage();
 			break;
+	  case playTune:
+			playSqrTune( arg );
+			break;
 	  case sysBoot:
-			
+			NVIC_SystemReset();			// soft reboot
 			break;
 		default:				break; 
 	}
 }
 
-
 // ------------- interpret TBook CSM 
-void									setCSMcurrState( short iSt ){  // set TBook.iCurrSt & dependent fields
-	assertValidState( iSt );
-	TBook.iCurrSt = iSt;
-	csmState *stateDef = TBookCSM[ TBook.iCurrSt ];
-	TBook.cSt = stateDef;
-	TBook.currStateName = stateDef->nm;	//DEBUG -- update currSt string
-	TBook.iNextSt = TBook.iCurrSt;  // default is to stay in this state\
-	
-	// Update status strings inside TBook -- solely for visibility in the debugger
-	for ( Event e=eNull; e<eUNDEF; e++ ){	//DEBUG -- update nextSt strings
-		// Aren't these names the same each and every time?
-		TBook.evtNms[ e ] = eventNm( e );
-		// What is the next state (index) for the event in the current state
-		short iState = stateDef->evtNxtState[ e ];
-		// If we get the event, what is the name of the next state?
-		TBook.nxtEvtSt[ e ] = TBookCSM[ iState ]->nm;
-	}
-}
 static void						changeCSMstate( short nSt, short lastEvtTyp ){
 	dbgEvt( TB_csmChSt, nSt, 0,0,0 );
-	assertValidState(nSt);
-	if (nSt==TBook.iCurrSt) dbgLog( "C %s(%d): %s => %s \n", TBook.cSt->nm, TBook.iCurrSt, eventNm( (Event)lastEvtTyp), TBookCSM[nSt]->nm );
+	if (nSt==TBook.iCurrSt){  // no-op transition -- (default for events that weren't defined in control.def) 
+		//dbgLog( "C %s(%d): %s => %s \n", TBook.cSt->nm, TBook.iCurrSt, eventNm( (Event)lastEvtTyp), TBookCSM[nSt]->nm );
 		//logEvtNSNS( "Noop_evt", "state",TBook.cSt->nm, "evt", eventNm( (Event)lastEvtTyp) ); //DEBUG
-	
-	// We twiddle with nSt and with iCurrSt in various ways. 
-	while ( nSt != TBook.iCurrSt ){
-		assertValidState(TBook.iCurrSt);
-		assertValidState(nSt);
-		TBook.iPrevSt = TBook.iCurrSt;
-		setCSMcurrState( nSt );			// set currState & debugging fields
-		
-		csmState *stateDef = TBook.cSt;
-		
-		// Build a list of actions, for debugging and logging. Hope the buffer is big enough.
-		// The actions are what we do when we enter a state.
-		char Actions[200]; Actions[0] = '\0';
-		char Act[80];
-		int nActs = stateDef->nActions;
-		// For each action defined on the state...
-		for ( short i=0; i<nActs; i++ ){
-			// What is the action, and any arguments.
-			Action act = stateDef->Actions[i].act;
-			char * arg = stateDef->Actions[i].arg;
-			// Next three lines build a string for debugging.
-			if (arg==NULL) arg = "";
-			sprintf(Act, " %s:%s", actionNm(act), arg );
-			strcat(Actions, Act);
-			// Parse the argument if it looks like it might be numberic.
-			int iarg = arg[0]=='-' || isdigit( arg[0] )? atoi( arg ) : 0;
-			// And invoke the action.
-			doAction( act, arg, iarg );   // can change iCurrSt
-		}
-		// Log the list of actions.
-		// TODO: how is this useful in the log? If we're to do anything with the actions, they should
-		// be logged individually.
-	//	logEvtNSNSNS( "CSM_st", "ev", eventNm((Event)lastEvtTyp), "nm", stateDef->nm, "act", Actions );
-		
-		// If one of the actions was goSavedSt, TBook.iNextSt was changed as a side effect of doAction()
-		// If one of the actions was goPrevSt, TBook.iCurrSt was also changed as a side effect.
-    //   - we set nSt to iNextSt here, if iCurrSt is also set, we will exit the loop that's looking for states.		
-		nSt = TBook.iNextSt;		// in case Action set it
+		return;
 	}
 
-}
+	setCurrState( nSt );    // .iPrevSt = .iCurrSt, .iCurrSt = nSt, .cSt=TBookCSM[nSt]
+	// now 'in' (executing) state nSt
 
+	/*DEBUG*/  // Update status strings inside TBook -- solely for visibility in the debugger
+	for (int e=eNull; e < eUNDEF; e++){  				//DBG: fill in dynamic parts of transition table for current state
+		short iState = TBook.cSt->evtNxtState[ e ];//DBG:
+		TBook.evtNxtSt[e].nxtSt = iState;
+		TBook.evtNxtSt[e].nstStNm = TBookCSM[ iState ]->nm;
+	}
+	/*END DEBUG*/
+	
+	int nActs = TBook.cSt->nActions;
+	for ( short i=0; i<nActs; i++ ){					// For each action defined on the state...
+		Action act = TBook.cSt->Actions[i].act;  // unpack action, and arg
+		char * arg = TBook.cSt->Actions[i].arg;
+		if (arg==NULL) arg = ""; 								// make sure its a string for digit test
+		int iarg = arg[0]=='-' || isdigit( arg[0] )? atoi( arg ) : 0;		// Parse the argument if it looks like it might be numeric.
+
+		doAction( act, arg, iarg );		// And invoke the action.
+	  // NB: actions goPrevSt & goSavedSt change TBook.iCurrSt
+	}
+}
 
 static void						tbTimer( void * eNum ){
 	switch ((int)eNum){
@@ -473,19 +467,24 @@ void 									executeCSM( void ){								// execute TBook control state machine
 	TBook.iMsg = 0;
 
 	// set initialState & do actions
-	TBook.iCurrSt = 1;		// so initState (which has been assigned to 0) will be different
-	changeCSMstate( TB_Config.initState, 0 );
+	TBook.iCurrSt = -1;		// so initState (which has been assigned to 0) will be different
+	TBook.currStateName = "<start>";
+	
+	if ( RunQCTest )
+		changeCSMstate( TB_Config.qcTestState, 0 );
+	else
+		changeCSMstate( TB_Config.initState, 0 );
+    int asCnt = 0;
 	
 	while (true){
 		evt = NULL;
 	    status = osMessageQueueGet( osMsg_TBEvents, &evt, NULL, osWaitForever );  // wait for next TB_Event
 		if (status != osOK) 
 			tbErr(" EvtQGet error");
-		char * eNm = eventNm( evt->typ );
-		logEvtNSNI( "csmEvent", "typ", eNm, "dnMS", evt->arg );
-		TBook.lastEvent = evt->typ;
-		TBook.lastEventName = eNm;
- 
+		TBook.lastEvent = evt->typ;  // has to be copied, used after 'evt' is freed
+		TBook.lastEventName = eventNm( TBook.lastEvent );
+		
+//		logEvtNSNI( "csmEvent", "typ", TBook.lastEventName, "dnMS", evt->arg );
 		switch ( evt->typ ){
 			case AudioDone:
 				osTimerStart( timers[0], TB_Config.shortIdleMS );
@@ -495,20 +494,24 @@ void 									executeCSM( void ){								// execute TBook control state machine
 			case LowBattery:
 			case BattCharging:
 			case BattCharged:
+			case FilesSuccess:
+			case FilesFail:
+				break;
+			case AudioStart:
+				asCnt++;
 				break;
 			default:
 				osTimerStop( timers[0] );
 				osTimerStop( timers[1] );
 				break;
-//			case starPlus:  
-//				USBmode( true );
-//				break;
 		}
-		short lastEvtTyp = evt->typ;
-		assertValidState( TBook.cSt->evtNxtState[ evt->typ ]);
-		short nSt = TBook.cSt->evtNxtState[ evt->typ ];
+		short nSt = TBook.cSt->evtNxtState[ TBook.lastEvent ];
+		assertValidState( nSt );
+		if ( nSt != TBook.iCurrSt ) // state is changing (unless goPrevSt or goSavedSt undoes it)
+			logEvtNSNSNS( "csmEvt", "st", TBook.cSt->nm, "evt", TBook.lastEventName, "nSt", TBookCSM[ nSt ]->nm );
+
 		osMemoryPoolFree( TBEvent_pool, evt );
-		changeCSMstate( nSt, lastEvtTyp );	// only changes if different
+		changeCSMstate( nSt, TBook.lastEvent );	// only changes if different
 	}
 }
 
@@ -544,8 +547,7 @@ void 									initControlManager( void ){				// initialize control manager
 	EventRecorderDisable( evrAOD, 			EvtFsCore_No,   EvtFsMcSPI_No );  //FileSys library 
 	EventRecorderDisable( evrAOD, 	 		EvtUsbdCore_No, EvtUsbdEnd_No ); 	//USB library 
 	
-	if ( nCSMstates==0 ){
-		// init to odd values so changes are visible
+	if ( !PrecompiledCSM ){
 		TB_Config.default_volume = 5; 		// lower for TB_V2_R3
 		TB_Config.powerCheckMS = 10000;				// set by setPowerCheckTimer()
 		TB_Config.shortIdleMS = 3000;
@@ -575,13 +577,19 @@ void 									initControlManager( void ){				// initialize control manager
 	if ( nCSMstates > 0 ) {    // have a CSM definition
 		ledBg( TB_Config.bgPulse );		// reset background pulse according to TB_Config
 
-		findPackages( );		// sets iPkg & TBPackage to shortest name
+		iPkg = 0;
+		if ( RunQCTest ){
+			nPackages = 0;
+		} else {			// don't load package for qcTest
+			findPackages( );		// sets iPkg & TBPackage to shortest name
+		}
 		
   	TBook.iSubj = -1; // makes "next subject" go to the first subject.
 		TBook.iMsg = 1;
 		
-		// power timer is set to input configuration by 1st 15sec check
+		// don't init power timer-- it is set to do 1st check at 15sec, then resets from TB_Config
 		//setPowerCheckTimer( TB_Config.powerCheckMS );		
+        
 		setVolume( TB_Config.default_volume );					// set initial volume
 		
 		for ( int it=0; it<3; it++ ){
@@ -589,9 +597,14 @@ void 									initControlManager( void ){				// initialize control manager
 			if ( timers[it] == NULL ) 
 				tbErr( "timer not alloc'd" );
 		}
+		for (Event e=eNull; e < eUNDEF; e++){  //DBG fill in static parts of debug transition table
+			TBook.evtNxtSt[e].evt = e;
+			TBook.evtNxtSt[e].evtNm = eventNm( e );
+		}
+		TBook.prevStateName = "<start>";
 		executeCSM();	
 		
-	} else if ( FileSysOK ) {		// FS but no data, go into USB mode
+	} else if ( FileSysOK ) {		// FS but no CSM, go into USB mode
 		logEvt( "NoFS USBmode" );
 		USBmode( true );
 	} else {  // no FileSystem

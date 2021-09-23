@@ -3,31 +3,43 @@
 #ifndef TKN_TABLE_H
 #define TKN_TABLE_H
 
+#include "stdbool.h"
+
 typedef enum {	// GrpID -- tknid groups, corresponding to enum types
 			gNull=0, gGroup, gPunct, gEvent, gAction, gTkn, gLst, gObj 
 }	GrpID;
 
+// MUST MATCH:  char * ENms[] ^ shENms[] defined in tknTable.c
 typedef enum { 	// Event -- TBook event types
 			eNull=0, 
-			Home, 		Circle,		Plus, 		Minus, 		Tree, 		Lhand, 		Rhand, 		Pot,	 Star,		Table,  //=10
-			Home__, 	Circle__, 	Plus__, 	Minus__, 	Tree__, 	Lhand__, 	Rhand__, 	Pot__, 	 Star__,	Table__,  //=20
-			starHome,	starCircle, starPlus, 	starMinus, 	starTree, 	starLhand, 	starRhand, 	starPot, starStar,	starTable, //=30
-	    // TODO: move AudioStart to before AudioDone. Requires finding inequality comparisons against AudioDone
-			AudioDone,	AudioStart, ShortIdle,	LongIdle,	LowBattery,	BattCharging, BattCharged,	FirmwareUpdate, Timer, //=39
-		  ChargeFault, LithiumHot, MpuHot, anyKey, eUNDEF //=44
+			Home, 	  Circle,	  Plus, 	Minus, 	   Tree, 	 Lhand, 	Rhand, 	   Pot,	    Star,	  Table,     //=10
+			Home__,   Circle__,   Plus__, 	Minus__,   Tree__, 	 Lhand__, 	Rhand__,   Pot__,   Star__,	  Table__,   //=20
+			starHome, starCircle, starPlus, starMinus, starTree, starLhand, starRhand, starPot, starStar, starTable, //=30
+			AudioStart,           AudioDone,	       ShortIdle,	        LongIdle,	        LowBattery,          //=35
+  	        BattCharging,         BattCharged,	       FirmwareUpdate,      Timer,              ChargeFault,         //=40
+            LithiumHot,           MpuHot,              FilesSuccess,        FilesFail,          anyKey,              //=45
+            eUNDEF //=46
 }	Event;
 
 typedef enum { 	// Punct -- JSONish punctuation tokens
 				pNull=0, Comma, Semi, Colon, LBrace, RBrace, LBracket, RBracket, LParen, RParen, DQuote 
 }	Punct;
 
+// MUST MATCH:  char * ANms[] names defined in tknTable.c
 typedef enum { 	// Action -- TBook actions
-				aNull=0, 	LED,		bgLED,		
-				playSys, 	playSubj,	pausePlay,	resumePlay,		stopPlay,	volAdj,		spdAdj,		posAdj,
-				startRec,	pauseRec,	resumeRec,	finishRec, playRec,	saveRec, writeMsg,
-				goPrevSt,	saveSt,		goSavedSt,
-				subjAdj, 	msgAdj,		setTimer,	resetTimer, showCharge,
-				startUSB,	endUSB,		powerDown,	sysBoot, sysTest, playNxtPkg, changePkg
+				aNull=0, 	
+                LED,		bgLED,		playSys, 	
+                playSubj,	pausePlay,	resumePlay,		 
+                stopPlay,	volAdj,		spdAdj,		
+                posAdj,     startRec,	pauseRec,
+                resumeRec,	finishRec,  playRec,	
+                saveRec,    writeMsg, 	goPrevSt,	
+                saveSt,		goSavedSt,  subjAdj, 	
+                msgAdj,		setTimer,	resetTimer, 
+                showCharge, startUSB,	endUSB,		
+                powerDown,	sysBoot,    sysTest, 
+                playNxtPkg, changePkg,  playTune, 
+                filesTest
 }	Action;
 
 typedef union { 
@@ -37,6 +49,7 @@ typedef union {
 	} flds;
 	short tknID;
 } TknID;
+
 //typedef short 	TknID;												// reference to a token or list
 extern void 	initTknTable( void );								// initialize tknTable-- (self inits on first call to toTkn)
 extern TknID	toTkn( const char *s );								// => tkn for string, adding if new
@@ -52,6 +65,7 @@ extern Punct	asPunct( TknID tknid );								// => Punct or pNull
 extern Event	asEvent( TknID tknid );								// => Event or eNull
 extern Action	asAction( TknID tknid );							// => Action or aNull
 extern char *	eventNm( Event e );									// => string for enum Event 
+extern char *	shEvntNm( Event e );								// => 2-char for enum Event 
 extern char *	actionNm( Action a );								// => string for enum Action 
 extern short	lstCnt( TknID tknid );								// => # els in lst 'tknid' 
 extern TknID	getLstNm( TknID listObj, short idx );				// => nm of listObj[idx] as TknID 

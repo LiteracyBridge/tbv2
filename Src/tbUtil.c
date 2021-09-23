@@ -129,11 +129,13 @@ void										gConfigIn( GPIO_ID key, bool pulldown ){		// configure GPIO as low
 #endif
 }
 void										gConfigKey( GPIO_ID key ){		// configure GPIO as low speed pulldown input ( keys )
+	gConfigIn( key, true );	  // pulldown
+	enableEXTI( key, true );
+}
+void enableEXTI( GPIO_ID key, bool asKey ){		// configure EXTI for key or pwrFail
 	extern uint16_t						KeypadIMR;		// from inputmanager.c
 
-	gConfigIn( key, true );	  // pulldown
-	
-	RCC->APB2ENR |= RCC_APB2ENR_SYSCFGEN_Msk;			// enable SysCfg for SYSCFG->EXTICR[]
+	RCC->APB2ENR |= RCC_APB2ENR_SYSCFGEN_Msk;			// make sure enabled SysCfg for SYSCFG->EXTICR[]
 
 	// AFIO->EXTICR[0..3] -- set of 4bit fields for pin#0..15
 	int port = (int) gpio_def[ key ].port;  // GPIOA .. GPIOE
@@ -144,10 +146,15 @@ void										gConfigKey( GPIO_ID key ){		// configure GPIO as low speed pulldow
 	SYSCFG->EXTICR[ iWd ] = ( SYSCFG->EXTICR[ iWd ] & ~msk ) | val;		// replace bits <fbit..fbit+3> with portCode
 	
 	int pinBit = 1 << pin;			// bit mask for EXTI->IMR, RTSR, FTSR
-	EXTI->RTSR |= pinBit; 			// Enable a rising trigger 
-	EXTI->FTSR |= pinBit; 			// Enable a falling trigger 
+	if ( asKey ){  // keys enable both rise & fall
+		EXTI->RTSR |= pinBit; 			// Enable a rising trigger 
+		EXTI->FTSR |= pinBit; 			// Enable a falling trigger 
 //DONT ENABLE-- 	EXTI->IMR  |= pinBit; 			// Configure the interrupt mask 
-	KeypadIMR  |= pinBit;
+		KeypadIMR  |= pinBit;
+	} else {  // PWR_FAIL_N -- 
+		EXTI->FTSR |= pinBit; 			// PWR_FAIL_N -- enable falling trigger only
+		EXTI->IMR  |= pinBit; 			// enable the interrupt
+	}
 	
 	NVIC_ClearPendingIRQ( gpio_def[ key ].intq );
 	NVIC_EnableIRQ( 			gpio_def[ key ].intq );   // enable interrupt on key
@@ -211,25 +218,28 @@ bool FSysPowerAlways = false;
 bool SleepWhenIdle = true;
 FILE * 									tbOpenRead( const char * nm ){									// repower if necessary, & open file
 	FileSysPower( true );
+	dbgLog( "F tbOpenRd( %s )\n", nm );
 	return fopen( nm, "r" );
 }
 FILE * 									tbOpenReadBinary( const char * nm ){						// repower if necessary, & open file
 	FileSysPower( true );
+	dbgLog( "F tbOpenRdBin( %s )\n", nm );
 	return fopen( nm, "rb" );
 }
 FILE *									tbOpenWrite( const char * nm ){									// repower if necessary, & open file (delete if already exists)
 	FileSysPower( true );
+	dbgLog( "F tbOpenWr( %s )\n", nm );
 	if ( fexists( nm )) 
 		fdelete( nm, NULL );
 	return fopen( nm, "w" );
 }
 FILE * 									tbOpenWriteBinary( const char * nm ){						// repower if necessary, & open file
 	FileSysPower( true );
+	dbgLog( "F tbOpenWrBin( %s )\n", nm );
 	return fopen( nm, "wb" );
 }
 void										tbCloseFile( FILE * f ){												// close file errLog if error
-	if (f==NULL) 
-		tbErr("fclose null");
+	if (f==NULL) tbErr( "closing NULL file" );
 	int st = fclose( f );
 	if ( st != fsOK ) errLog("fclose => %d", st );
 }
@@ -296,6 +306,42 @@ void 										FileSysPower( bool enable ){										// power up/down eMMC & SD 
 		FSysPowered = false;
 	}
 }
+
+// FSys deep debug -- if dbgRdSect & dbgWrSect calls are added to mc0_RdSect() &  mc0_WrSect() in fs_config.h
+int MINSECT = 2500;
+int rdSectCnt = 0, wrSectCnt = 0;
+void 										shBuff( char * str, const uint8_t *buf ){
+	str[0] = 0;
+	char ch[3] = { 'x', 'x', 0 };
+	for (int i=0; i<8; i++){
+		if (buf[i] >= ' ' && buf[i] <= '~')
+			sprintf(ch, "'%c", buf[i] );
+		else
+			sprintf(ch, "%02x", buf[i] );
+		strcat( str, ch );
+	}
+}
+void 	  								dbgRdSect( uint32_t sect, const uint8_t *buf, uint32_t cnt, uint32_t res ){
+	if (!dbgEnab('F')) return;
+	if ( sect > MINSECT && cnt<8 ){
+		char data[20];
+		shBuff( data, buf );
+	  dbgLog( "F %d + rdSect( %d, 0x%x[%s], cnt:%d ) => %d \n",	rdSectCnt, sect, data, data,  cnt, res );
+		rdSectCnt = 0;
+	} else 
+		rdSectCnt += cnt;
+}
+void 	  								dbgWrSect( uint32_t sect, const uint8_t *buf, uint32_t cnt ){
+	if (!dbgEnab('F')) return;
+	if ( sect > MINSECT && cnt<8 ){
+		char data[20];
+		shBuff( data, buf );
+		dbgLog( "F %d => WrSect( %d, 0x%x[%s], cnt:%d ) \n", wrSectCnt, sect, data, data,  cnt );
+		wrSectCnt = 0;
+	} else 
+		wrSectCnt += cnt;
+}
+//*********** OS IDLE
 void 										osRtxIdleThread (void *argument) {
   (void)argument;
   // The idle demon is a system thread, running when no other thread is ready to run. 
@@ -409,7 +455,7 @@ bool 										showRTC( ){
 		Tm = RTC->TR;
 	}
   // The magic number must mean some flavor of "uninitialized".
-	if ( Dt == 0x02101 ) return false;
+	if ( Dt == 0x02101 ) return false;        //TODO: should be 0x0c101 ??
 	
 	uint8_t year, month, day, hour, minute, second, dayOfWeek;
 	year =  ((Dt>>20) & 0xF)*10 + ((Dt>>16) & 0xF);
@@ -493,17 +539,60 @@ void 										tbDelay_ms( int ms ) {  												// Delay execution for a spec
 		while (ms--) { __nop(); __nop(); __nop(); __nop(); __nop(); __nop(); }
 	}
 }
+
+/******** DEBUG tbAlloc ****/
+const int ALLOC_OPS = 30;
+struct {
+	short sz;
+	void * blk;
+	char * msg;
+} tbLastOps[ ALLOC_OPS ];
 static int 							tbAllocTotal = 0;																// track total heap allocations
+static int 							tbAllocCnt = 0;																	// track total # of heap allocations
+
+void										checkMem(){
+	if ( !dbgEnab('E') ) return;
+	if ( !__heapvalid((__heapprt)fprintf, stdout, 0 )){
+		dbgLog( "! heap error\n" );
+		__heapvalid((__heapprt)fprintf, stdout, true );
+		tbDelay_ms(500);
+	}
+}
+void 										showMem( void ){
+	if ( !dbgEnab('E') ) return;
+	for (int i=0; i<6; i++){
+		osRtxThread_t * t = Dbg.thread[i];
+		if ( t!=NULL ){
+			uint8_t *wmark = (uint8_t *) t->stack_mem+4;
+			while ( *wmark == 0xCC ) wmark++; 	// scan for first non 'CC' byte
+			dbgLog( "E %14s: sL=0x%x wmk: 0x%x sp=0x%x sB=0x%x \n", t->name, t->stack_mem, wmark, t->sp, (int)t->stack_mem + t->stack_size );
+		}
+	}
+	
+	dbgLog( "E Heap: %d blks, total %d \n", tbAllocCnt, tbAllocTotal );
+	int oldest = tbAllocCnt > ALLOC_OPS? tbAllocCnt-ALLOC_OPS : 0;
+	for ( int j=oldest; j<tbAllocCnt; j++ ){
+		int i = j % ALLOC_OPS;
+		dbgLog( "E Op %d: 0x%x (%d) %s \n", j, tbLastOps[i].blk, tbLastOps[i].sz, tbLastOps[i].msg  );
+	}
+}
 void *									tbAlloc( int nbytes, const char *msg ){					// malloc() & check for error
 	tbAllocTotal += nbytes;
+	int i = tbAllocCnt % ALLOC_OPS;
+	tbLastOps[ i ].sz = nbytes;
+	tbLastOps[ i ].msg = (char *) msg;
 	void *mem = (void *) malloc( nbytes );
+	tbLastOps[ i ].blk = mem;
+	tbAllocCnt++;
+	
 	dbgEvt( TB_Alloc, nbytes, (int)mem, tbAllocTotal, 0 );
 	if ( mem==NULL ){
-		  errLog( "out of heap, %s, rq=%d, Tot=%d \n", msg, nbytes, tbAllocTotal );
-		//	tbErr( "no heap %s: rq=%d Tot=%d \n", msg, nbytes, tbAllocTotal);
+		showMem();
+		errLog( "! out of heap, %s, rq=%d, Tot=%d \n", msg, nbytes, tbAllocTotal );
 	}
 	return mem;
 }
+
 void *									mp3_malloc( int size ){
 	return tbAlloc( size, "mp3" );
 }
@@ -521,6 +610,7 @@ bool 										fexists( const char *fname ){										// return true if file pat
 	FileSysPower( true );
 	fsFileInfo info;
 	info.fileID = 0;
+	dbgLog( "F fexists( %s )\n", fname );
 	fsStatus stat = ffind( fname, &info );
 	return ( stat==fsOK );
 }
@@ -576,41 +666,45 @@ void 										usrLog( const char * fmt, ... ){
 	disableLCD();
 }
 
-int DebugMask =    // uncomment lines to enable dbgLog() calls starting with 'X'
-	//  0x01 +	// 1 system clock
-	//	0x02 +	// 2 audio codec debugging
-	//	0x04 +	// 3 file sys
-	//	0x08 +	// 4 threads & initialization
-	//	0x10 +	// 5 power checks
-	//	0x20 +	// 6 logging
-	//	0x40 +	// 6 mp3 decoding
-	//	0x80 +	// 8 recording
-	//	0x100 +	// 9 led
-	//	0x200 +	// A keyboard
-	//	0x400 +	// B token table
-	//	0x800 +	// C CSM
-	//	0x1000 + // D audio playback
-0;
-bool										dbgEnab( char ch ){
-	switch( ch ){
-		case '1': return (DebugMask & 0x01)!=0; 		// system clock
-		case '2': return (DebugMask & 0x02)!=0; 		// audio debugging
-		case '3': return (DebugMask & 0x04)!=0; 		// file sys
-		case '4': return (DebugMask & 0x08)!=0; 		// threads & initialization
-		case '5': return (DebugMask & 0x10)!=0; 	// power checks
-		case '6': return (DebugMask & 0x20)!=0; 	// logging
-		case '7': return (DebugMask & 0x40)!=0; 	// mp3 decoding
-		case '8': return (DebugMask & 0x80)!=0; 	// recording
-		case '9': return (DebugMask & 0x100)!=0; 	// led
-		case 'A': return (DebugMask & 0x200)!=0; 	// keyboard
-		case 'B': return (DebugMask & 0x400)!=0; 	// token table
-		case 'C': return (DebugMask & 0x800)!=0; 	// CSM
-		case 'D': return (DebugMask & 0x1000)!=0; 	// audio playback/record
-		default:
-			return true; 	// no digit => always show
-	}
+const char *DbgFlags = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";  // flags 0..35
+char DebugMask[40] =  "! C";  // add 'X' to enable dbgLog() calls starting with 'X'
+/* DEFINED DEBUG FLAGS:
+    //  '1' system clock
+	//	'2' audio codec debugging
+	//	'3' file sys
+    //	'4' initialization
+	//	'5' power checks
+	//	'6' logging
+	//	'7' mp3 decoding
+	//	'8' recording
+	//	'9' led
+	//	'A' keyboard
+	//	'B' token table
+    //	'C' CSM
+	//	'D' audio playback
+    //  'E' memory allocation
+    //  'F' file ops
+*/
+bool										dbgEnab( char ch ){		// => true, if 'ch' is in DebugMask
+	return strchr(DebugMask, ch)!=NULL;
 }
-
+void setDbgFlag( char ch, bool enab ){
+	if ( enab ){
+		if ( dbgEnab(ch) ) return; //already on
+		int ln = strlen( DebugMask );
+		DebugMask[ ln+1 ] = 0;
+		DebugMask[ ln ] = ch;
+	} else {
+		if ( !dbgEnab(ch) ) return; //already off
+		char *p = strchr( DebugMask, ch );
+		*p = ' ';
+	}		
+}
+void tglDebugFlag( int idx ){   // toggle debug flag: "0123456789ABCDEFGHIJK"[idx]
+	char ch = DbgFlags[idx];
+	setDbgFlag( ch, !dbgEnab( ch ));
+	dbgLog("! Tgl %d=%c DbgFlags='%s' \n", idx, ch, DebugMask );
+}
 void 										dbgLog( const char * fmt, ... ){
 	va_list arg_ptr;
 	va_start( arg_ptr, fmt );
@@ -620,6 +714,7 @@ void 										dbgLog( const char * fmt, ... ){
 	if (show){
 		vprintf( fmt, arg_ptr );
 		va_end( arg_ptr );
+		tbDelay_ms(100);            // add delay to reduce debugLog buffer overrun
 	}
 	disableLCD();
 }
@@ -699,8 +794,8 @@ void 										initPrintf( const char *hdr ){
 	cX = 0; 
 	cY = 0;
 	InitLCD( hdr );					// eval_LCD if STM3210E
-	printf( "%s\n", hdr );
 #endif
+	printf( "\n\n" );
 }
 
 //

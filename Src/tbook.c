@@ -7,7 +7,7 @@
 #include "fs_evr.h"					// FileSys components
 #include "fileOps.h"				// decode & encrypt audio files
 
-const char * 	TBV2_Version 				= "V3.03 of 14-Sep-2021";
+const char * 	TBV2_Version 				= "V3.04 of 23-Sep-2021";
 
 //
 // Thread stack sizes
@@ -18,16 +18,21 @@ const int 		MEDIA_STACK_SIZE 		= 4096;		// opens in/out files
 const int 		FILEOP_STACK_SIZE 	= 6144;		// opens in/out files, mp3 decode
 const int 		LED_STACK_SIZE 			= 512;
 
-const int	pBOOTCNT 				= 0; 
-const int	pCSM_DEF 				= 1;
-const int	pLOG_TXT 				= 2;
+const int	pBOOTCNT 			= 0; 
+const int	pCSM_DEF 			= 1;
+const int	pLOG_TXT 			= 2;
 const int	pSTATS_PATH 		= 3;
 const int	pMSGS_PATH 			= 4;
-const int	pLIST_OF_SUBJS 	= 5;
+const int	pLIST_OF_SUBJS 	    = 5;
 const int	pPACKAGE_DIR		= 6;
-const int pPKG_VERS  		  = 7;
-const int pAUDIO = 8;		// DEBUG
-const int pLAST = 8;
+const int   pPKG_VERS  		    = 7;
+const int   pQC_PASS  		    = 8;
+const int   pERASE_NOR          = 9;
+const int   pSET_RTC	        =10;
+const int   pLAST_RTC           =11;
+const int   pPKG_DAT            =12;
+const int   pAUDIO 				=13;		// DEBUG
+const int   pLAST = 12;
 
 char * TBP[] = {			// as static array, so they can be switched to a different device if necessary
 		"M0:/system/bootcount.txt",						//	pBOOTCNT 				= 0;
@@ -38,7 +43,12 @@ char * TBP[] = {			// as static array, so they can be switched to a different de
 		"M0:/package/list_of_subjects.txt",		//	pLIST_OF_SUBJS 	= 5;
 		"M0:/package/",												//	pPACKAGE_DIR		= 6;
 		"M0:/package/version.txt",						//	pPKG_VERS  		  = 7;
-		"M0:/audio.wav"												//	pAUDIO = 8;		// DEBUG
+		"M0:/system/QC_PASS.txt",							//	pQC_PASS  		  = 8;
+		"M0:/system/EraseNorLog.txt",					//  pERASE_NOR      = 9;
+		"M0:/system/SetRTC.txt",							//  pSET_RTC	      =10;
+		"M0:/system/lastRTC.txt",						  //  pLAST_RTC       =11;
+	  "M0:/packages_data.txt",							//  pPKG_DAT        =12;
+		"M0:/audio.wav"												//	pAUDIO = 13;		// DEBUG
 };
 
 
@@ -53,6 +63,8 @@ const int 		MALLOC_HEAP_SIZE 			=	20000;
 char 					MallocHeap[ 20000 ];    // MALLOC_HEAP_SIZE ];
 bool					FileSysOK 						= false;
 bool					TBDataOK 							= true;			// false if no TB config found
+bool 					RunQCTest 					= false;	
+bool 					PrecompiledCSM 				= false;	
 
 
 void setDev( char *fname, const char *dev ){  // replace front of fname with dev
@@ -80,8 +92,7 @@ void copyFile( const char *src, const char * dst ){
 
 //
 //  TBook main thread
-void talking_book( void *arg ) {
-	dbgLog( "4 tbThr: 0x%x 0x%x \n", &arg, &arg + TBOOK_STACK_SIZE );
+void talking_book( void  *tbAttr ) {		// talking book initialization & control manager thread 
 	
 	EventRecorderInitialize( EventRecordNone, 1 );  // start EventRecorder
 	EventRecorderEnable( evrE, 			EvtFsCore_No, EvtFsMcSPI_No );  	//FileSys library 
@@ -115,7 +126,7 @@ void talking_book( void *arg ) {
 
 	initMediaPlayer( );
 	
-	if ( fsNDevs == 0 )
+	if ( fsNDevs == 0 )		// no storage device found-- go to debugLoop()
 		debugLoop( false );
 	else {
 		if ( strcmp( fsDevs[0], "M0:" )!=0 ){ 	// not M0: !
@@ -125,17 +136,14 @@ void talking_book( void *arg ) {
 		for ( int i = 0; i <= pLAST; i++ ){		// change paths to fsDevs[0]
 			setDev( TBP[ i ], fsDevs[0] );
 		}
-		if ( fsNDevs > 1 ){
-			if ( fexists( TBP[pAUDIO] )){	// audio.wav exists on device fsDevs[0] --- copy it to fsDevs[1]
-				char dst[40];
-				strcpy( dst, TBP[pAUDIO] );
-				setDev( dst, fsDevs[1] );
-				copyFile( TBP[pAUDIO], dst );
-			}
+		PrecompiledCSM = ( nCSMstates > 0 );   // CSM definition compiled in, don't load "control.def"
+		
+		if ( BootKey=='C' || !fexists( TBP[ pQC_PASS ] )){
+			RunQCTest = true;
 		}
-
-		if ( gGet( gMINUS ) || !fexists( TBP[pCSM_DEF] ))	
-			debugLoop( !fexists( TBP[pCSM_DEF] ) );	// if no version.txt -- go straight to USB mode
+		
+		if ( BootKey=='M' || !fexists( TBP[pLIST_OF_SUBJS] ))			// better file to detect TBook system not present?
+			debugLoop( true );	// if no TBook system (or Minus boot) -- go straight to USB mode
 	}
 
 

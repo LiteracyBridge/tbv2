@@ -101,6 +101,7 @@ extern int32_t 			audPlayPct( void );													// => current playback pct of 
 extern void 				audAdjPlayPos( int32_t adj );								// shift current playback position +/- by 'adj' seconds
 extern void 				audAdjPlaySpeed( int16_t adj );							// change playback speed by 'adj' * 10%
 extern void 				audPlayAudio( const char* audioFileName, MsgStats *stats ); // start playing from file
+extern void					audPlayTone( int i, int freq, int nEighths );		// play 'i'th note: 'freq' sqr wave tone for 'nEighths' 128 msec buffers
 extern void 				audStopAudio( void );												// signal playback loop to stop
 extern void 				audStartRecording( FILE *outFP, MsgStats *stats );	// start recording into file -- TBV2_REV1 version
 extern void 				audRequestRecStop( void );										// signal record loop to stop
@@ -115,6 +116,6 @@ extern void 				audPlaybackComplete( void );								// playback complete (from m
 extern void 				audRecordComplete( void );									// last buff recorded, finish save
 
 //DEBUG
-extern void 				playWave( const char *fname ); // start playing from file
+extern bool 				playWave( const char *fname ); // play WAV file, true if started
 
 #endif /* AUDIO_H */

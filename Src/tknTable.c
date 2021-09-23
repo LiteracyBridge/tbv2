@@ -1,7 +1,9 @@
 // TBook Rev2  tknTable.c  --  tokenizer & JSONish parser
 //   Gene Ball  Apr2018
 
-#include "tbook.h"					
+#include "tbook.h"		
+#include "controlmanager.h"
+
 struct StorageStats {
 	short maxHashBucketCnt;
 	short tokenCharsAvail;
@@ -14,6 +16,93 @@ struct StorageStats {
 	short listIdsAllocated; 	// N_LISTS
 
 } TB_StorageStats;
+
+// tknTable typedefs
+typedef struct 		Tkn {				// token hashtable node
+	char *		str;
+	struct Tkn *link;
+	TknID		tknid;
+//	short		grp:6;					// idx of grp nd
+//	short 		val:10;
+} Tkn;
+typedef struct 		TknLstNd {			// node in a 'TknList' 
+	TknID 		Nm;		// tknid of name
+	TknID		Val;	// tknid of value, or a TknList
+} TknLstNd;
+
+
+// MUST MATCH:  typedef Action in tknTable.h 
+// MUST MATCH:  CsmToken.java -- enum TknAction 
+char *  ANms[] = { "aNull",
+		"LED", 				"bgLED", 		"playSys", 		
+		"playSubj", 		"pausePlay", 	"resumePlay", 
+		"stopPlay", 		"volAdj", 		"spdAdj", 
+		"posAdj",			"startRec", 	"pauseRec", 
+		"resumeRec", 		"finishRec", 	"playRec", 		
+		"saveRec", 			"writeMsg",		"goPrevSt", 
+		"saveSt", 			"goSavedSt", 	"subjAdj", 		
+		"msgAdj", 			"setTimer", 	"resetTimer", 
+		"showCharge",		"startUSB", 	"endUSB", 	
+		"powerDown", 		"sysBoot", 		"sysTest", 		
+		"playNxtPkg", 	    "changePkg",	"playTune",
+        "filesTest",
+    NULL
+};
+char *	actionNm( Action a ){ return ANms[ (int)a ]; }
+
+// MUST MATCH:  typedef Event in tknTable.h  
+// MUST MATCH:  CsmToken.java -- enum TknEvent 
+char *  ENms[] = { 
+		"eNull", 
+        "Home",     "Circle",     "Plus",     "Minus",     "Tree",     "Lhand",     "Rhand",     "Pot",     "Star",     "Table",     //=10
+        "Home__",   "Circle__",   "Plus__",   "Minus__",   "Tree__",   "Lhand__",   "Rhand__",   "Pot__",   "Star__",   "Table__",   //=20
+		"starHome", "starCircle", "starPlus", "starMinus", "starTree", "starLhand", "starRhand", "starPot", "starStar", "starTable", //=30
+		"AudioStart",             "AudioDone",             "ShortIdle",             "LongIdle",             "LowBattery",            //=35 
+        "BattCharging",           "BattCharged",           "FirmwareUpdate",        "Timer",                "ChargeFault",           //=40
+        "LithiumHot",             "MpuHot",                "FilesSuccess",          "FilesFail",            "anyKey",                //=45
+        "eUNDEF", //=46
+    NULL    // end of list marker
+};
+// MUST MATCH:  typedef Event in tknTable.h
+char *  shENms[] = { "eN",
+	"Ho", "Ci", "Pl", "Mi", "Tr", "Lh", "Rh", "po", "St", "ta",
+	"H_", "C_", "P_", "M_", "T_", "L_", "R_", "p_", "S_", "t_",
+	"sH", "sC", "sP", "sM", "sT", "sL", "sR", "sp", "sS", "st",
+	"aS", "aD", "sI", "lI", "bL", "bc", "bC", "fU", "Ti", "cF", 
+	"LH", "MH", "fS", "fF", "aK", "eU",
+    NULL
+};
+char *	eventNm( Event e )	{ return ENms[ (int)e ];; }
+char *	shEvntNm( Event e )	{ return shENms[ (int)e ];; }
+
+/*
+#ifndef LOAD_CSM_DYNAMICALLY
+// if controlmanager.h  defined  LOAD_CSM_DYNAMICALLY
+
+// declare DUMMY bodies for extern functions -- refs from controlmanager.c & controlparser.c 
+TknID nullID = { 0 };
+
+void 		initTknTable( void ){}
+TknID		toTkn( const char *s ){ return nullID; }
+short		tokenize( TknID *tkns, short tsiz, char *line ){ return 0; }
+void 		showTknTable( void ){}
+bool		isLst( TknID tknid ){ return true; }
+char *	tknStr( TknID tknid ){ return ""; }
+void		toVStr( char *buff, int bufflen, char**b2, char**b3, TknID tknid ){}
+char *	toStr( char *buff, TknID tknid ){ return ""; }
+GrpID		tknGrp( TknID tknid ){ return gNull; }
+Punct		asPunct( TknID tknid ){ return pNull; }
+Event		asEvent( TknID tknid ){ return eNull; }
+Action	asAction( TknID tknid ){ return aNull; }
+short		lstCnt( TknID tknid ){ return 0; }
+TknID		getLstNm( TknID listObj, short idx ){ return nullID; }
+TknID		getLstVal( TknID listObj, short idx ){ return nullID; }
+TknID		getField( TknID listObj, const char *nm ){ return nullID; }
+int			getIntFld( TknID listObj, const char *nm, int defVal ){ return 0; }
+TknID		lookup( TknID listObj, const char *path ){ return nullID; }
+TknID		parseFile( const char *fnm ){ return nullID; }
+
+#else  */
 
 // *********** static storage sizing constants
 const int 				MAX_TKN_LEN 		= 100;						// MAX chars in a single token
@@ -41,19 +130,6 @@ const int 				MAX_CHS_PER_LN 	= 300;						// MAX chars in a single line
 
 #define NGRPS 						 8
 
-// tknTable typedefs
-typedef struct 		Tkn {								  						// token hashtable node
-	char *		str;
-	struct Tkn *link;
-	TknID		tknid;
-//	short		grp:6;					// idx of grp nd
-//	short 		val:10;
-} Tkn;
-typedef struct 		TknLstNd {					  						// node in a 'TknList' 
-	TknID 		Nm;		// tknid of name
-	TknID		Val;	// tknid of value, or a TknList
-} TknLstNd;
-
 //const int 				NGRPS = 8;					  						// # of elements in enum GrpID
 //
 /* STATIC tknTable storage 
@@ -77,7 +153,8 @@ static short			nxtLstID = 0;											// ID for next Lst or Obj
 static short			lstFirstNd[ N_LISTS ];  					// index of 1st list node for each TknList
 static TknID			NULL_TknID;
 
-static void				addGroup( char *grpNm, char *vals1, char *vals2, char *vals3, char *vals4, char *vals5  ); 	// forward
+static void				addGroup( char *grpNm, char *vals  ); 	// forward
+static void				addGroupNms( char *grpNm, char **valnms  ); // forward
 // token & list operations
 void 							showTknTable(){										// display stats for tknTable
 	struct StorageStats * ss = &TB_StorageStats;
@@ -108,7 +185,7 @@ static TknID			asTknID( GrpID g, short id ){
 	return res;
 	//return ( (( g & 0x3F ) << 10 ) | ( id & 0x3FF ));
 }
-static void 			verifyEnum( char *firstEl, short lastEl ){// INTERNAL: verify enum matches tkn group
+static void 			verifyEnum( char *firstEl, short lastEl, const char *grpnm ){// INTERNAL: verify enum matches tkn group
 	TknID fEl = toTkn( firstEl );
 	GrpID grp = tknGrp( fEl );
 	for( short v=0; v<= lastEl; v++ ){
@@ -116,7 +193,7 @@ static void 			verifyEnum( char *firstEl, short lastEl ){// INTERNAL: verify enu
 		char *nm = tknStr( tid );	// convert <grp:v> to string
 		TknID tknid = toTkn( nm );			// and get tknid for that string
 		if ( tknid.flds.grp != grp ||  tknid.flds.val != v ) 
-			tbErr( "group assignments problem" );
+			tbErr( "verify G%d.V%d %s.%s failed", grp, v, grpnm, nm );
 	}
 }
 void 							initTknTable(){										// initialize tknTable-- (self inits on first call to toTkn)
@@ -135,44 +212,40 @@ void 							initTknTable(){										// initialize tknTable-- (self inits on fir
 	toTkn( "gNull" );		// 'gNull' == <g1:0>
 	toTkn( "gGroup" );		// 'gGroup' == <g1:1>
 	addGroup( "gGroup", 		// Groups:  grp: 1, val: gNull=0,gGroup..gTkn=NGRPS-1  matches enum GrpID
-		"gNull gGroup gPunct gEvent gAction gTkn gLst gObj", "", "", "", "" );
-	verifyEnum( "gNull", gObj );
+		"gNull gGroup gPunct gEvent gAction gTkn gLst gObj" );
+	verifyEnum( "gNull", gObj, "gGroup" );
 	if ( gObj >= NGRPS ) 
 		tbErr( "NGRPS too small" );
 	
 	addGroup( "gPunct", 		// predefine Punct:  grp: 2, val: Comma=0..DQuote  -- matches enum Punct
-		"pNull , ; : { } [ ] ( ) ", "", "", "", "" );
+		"pNull , ; : { } [ ] ( ) " );
 	toTkn( "\"" );  // special case to tokenize " and add to gPunct without trying to scan string
-	verifyEnum( "pNull", DQuote );
+	verifyEnum( "pNull", DQuote, "gPunct" );
 	
+    addGroupNms( "gEvent",  ENms );
+/*	// MUST MATCH:  typedef Event in tknTable.h
+	// TODO: should be rewritten to use ENms[]
 	addGroup( "gEvent", 		// predefine Events:  grp: 1, val: Home=0..None  -- matches enum Events
 		"eNull Home Circle Plus Minus Tree Lhand Rhand Pot Star Table",
-//			eNull=0, 
-//			Home, 		Circle,		Plus, 		Minus, 		Tree, 		Lhand, 		Rhand, 		Pot,	 Star,		Table,
 		"Home__ Circle__ Plus__ Minus__ Tree__ Lhand__ Rhand__ Pot__ Star__ Table__", 
-//			Home__, 	Circle__, 	Plus__, 	Minus__, 	Tree__, 	Lhand__, 	Rhand__, 	Pot__, 	 Star__,	Table__,
 		"starHome starCircle starPlus starMinus starTree starLhand starRhand starPot starStar starTable", 
-//			starHome,	starCircle, starPlus, 	starMinus, 	starTree, 	starLhand, 	starRhand, 	starPot, starStar,	starTable,
 		"AudioDone AudioStart ShortIdle LongIdle LowBattery BattCharging BattCharged FirmwareUpdate Timer", 
-//			AudioDone,	AudioStart, ShortIdle,	LongIdle,	LowBattery,	BattCharging, BattCharged,	FirmwareUpdate, Timer, 
 		" ChargeFault, LithiumHot, MpuHot, anyKey, eUNDEF" );
-//	anyKey, eUNDEF
-	verifyEnum( "eNull", eUNDEF );
+*/
+	verifyEnum( "eNull", eUNDEF, "gEvent" );
 	
+    addGroupNms( "gAction",  ANms );
+/*	// MUST MATCH:  typedef Action in tknTable.h  
+	// TODO: should be rewritten to use ANms[]
 	addGroup( "gAction", 		// predefine Actions:  grp: 3, val: prevSubj=0..next  -- matches enum Actions
 		"aNull LED bgLED playSys playSubj pausePlay resumePlay stopPlay volAdj spdAdj posAdj",
-//				aNull=0, 	LED,		bgLED,		
-//				playSys, 	playSubj,	pausePlay,	resumePlay,		stopPlay,	volAdj,		spdAdj,		posAdj,
 		"startRec pauseRec resumeRec finishRec playRec saveRec writeMsg",
-//				startRec,	pauseRec,	resumeRec,	finishRec, playRec,	saveRec, writeMsg,
 		"goPrevSt saveSt goSavedSt subjAdj msgAdj setTimer resetTimer showCharge",
-//				goPrevSt,	saveSt,		goSavedSt,
-//				subjAdj, 	msgAdj,		setTimer,	resetTimer, showCharge,
 		"startUSB endUSB powerDown sysBoot sysTest", "playNxtPkg changePkg" );
-//				startUSB,	endUSB,		powerDown,	sysBoot, sysTest, playNxtPkg, changePkg
-	verifyEnum( "aNull", sysBoot );
+*/
+verifyEnum( "aNull", filesTest, "gAction" );
 
-	addGroup( "gTkn", "tNull", "","","","" );	// predefine one value in group gTkns: subsequent non-predefined strings get allocated as gTkns
+	addGroup( "gTkn", "tNull" );	// predefine one value in group gTkns: subsequent non-predefined strings get allocated as gTkns
 }
 
 static short			hashFn( const char *s ){					// INTERNAL: => hash value of tolower(s)
@@ -345,7 +418,7 @@ Action						asAction( TknID tknid ){					// => Action or aNull
 		return (Action)tknVal(tknid);
 	return aNull;
 }
-char *						eventNm( Event event ){								// => string for enum Event 
+/* char *						eventNm( Event event ){								// => string for enum Event 
 	TknID id; // = asTknID( gEvent, event );
 	id.flds.grp = gEvent;
 	id.flds.val = event;
@@ -357,6 +430,7 @@ char *						actionNm( Action a ){							// => string for enum Action
 	id.flds.val = a;
 	return tknStr( id );
 }
+*/
 // private static variables used by tokenize
 const char *			delimChars = ",;{}[]()\":";
 const char *			whiteChars = " \t\r\n";
@@ -416,9 +490,21 @@ short							tokenize( TknID *tkns, short tsiz, char *line ){	// tokenizes 'line'
 	return nxtTkn;
 }
 
+static void				        addGroupNms( char *grpNm, char ** valnms  ){ 	    // INTERNAL: predefine token group 'grpNm' with values from valnms[]
+	short grpID = tknVal( toTkn( grpNm ));	// grp:1, val: 0..NGRPS-1 
+	
+	currGrpID = grpID;				// now start allocating IDs in that group
+	nxtTknID = 0;					// beginning with xNull = val:0
+	grpFirstNd[ grpID ] = nxtNd;	// ndIdx that will be assigned to first value
 
-
-static void				addGroup( char *grpNm, char *vals1, char *vals2, char *vals3, char *vals4, char *vals5  ){ 	// INTERNAL: predefine token group 'grpNm' with values from 'grpVals'
+	for (int i=0; i<100; i++){
+        char * nm = valnms[i];
+        if ( nm == NULL ) return;    // end of list marker
+        
+        toTkn( nm );        // add name to token table
+    }
+}
+static void				        addGroup( char *grpNm, char *vals  ){ 	            // INTERNAL: predefine token group 'grpNm' with values from 'vals'
 	short grpID = tknVal( toTkn( grpNm ));	// grp:1, val: 0..NGRPS-1 
 	
 	currGrpID = grpID;				// now start allocating IDs in that group
@@ -430,13 +516,9 @@ static void				addGroup( char *grpNm, char *vals1, char *vals2, char *vals3, cha
 		grpFirstNd[ grpID ] = 1;   	// nullNull==sTknNds[0]==<g0:0>, gNull==sTknNds[1]==<g1:0>, gGroup==sTknNds[1]==<g1:1>
 		nxtTknID = 2;				// gEvents will ==<g1:2>
 	}
-	
+
 	TknID tkns[MAX_TKNS_PER_LN];
-	short cnt = tokenize( tkns, MAX_TKNS_PER_LN, vals1 );		// allocate tokenIDs for values
-	cnt += tokenize( tkns, MAX_TKNS_PER_LN, vals2 );		// allocate tokenIDs for values
-	cnt += tokenize( tkns, MAX_TKNS_PER_LN, vals3 );		// allocate tokenIDs for values
-	cnt += tokenize( tkns, MAX_TKNS_PER_LN, vals4 );		// allocate tokenIDs for values
-	cnt += tokenize( tkns, MAX_TKNS_PER_LN, vals5 );		// allocate tokenIDs for values
+	short cnt = tokenize( tkns, MAX_TKNS_PER_LN, vals );		// allocate tokenIDs for values
 }
 
 TknID							getLstNm( TknID listObj, short idx ){				// => nm of listObj[idx] as TknID
@@ -699,5 +781,6 @@ TknID 						parseFile( const char *fnm ){						// read and parse a JSONish text 
 	showTknTable();
 	return lst;
 }
+//#endif 		// LOAD_CSM_DYNAMICALLY
 //end  tknTable.c
 

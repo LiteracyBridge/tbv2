@@ -30,7 +30,7 @@ GPIO_ID keyDown( ){
 		}
 	return gINVALID;
 }
-extern int 		DebugMask;
+extern int 		RecDBG;			                    // defined in ti_aic3100.c
 extern void 	debugLoop( bool autoUSB );			// called if boot-MINUS, no file system,  autoUSB => usbMode
 extern char * fsDevs[];
 extern int    fsNDevs;
@@ -54,15 +54,6 @@ void tglUSBmode(){
 		enableMassStorage( fsDevs[0], fsDevs[1], fsDevs[2], fsDevs[3] );		// just put 1st device on USB
 	}	
 }
-void tglDebugMask( int bit ){
-	int d = 1 << (bit-1);
-	if ( DebugMask & d )
-		DebugMask &= ~d;		// reset
-	else
-		DebugMask |= d;			// set
-	dbgLog("! Tgl %d DbgMsk= 0x%06x \n", bit, DebugMask );
-}
-
 
 int ts_recStart = 0;  // timestamp of recording start
 int dbgIdx = 0;				// file index for current value of RecDBG
@@ -111,7 +102,7 @@ void PlayRecCmd( GPIO_ID k ){		// PlayRec mode subcommands --
 			break;
 			
 		case gLHAND:		// adjust debug flags mask
-			tglDebugMask( RecDBG );
+			tglDebugFlag( RecDBG );
 			break;
 		case gRHAND:			// USB commands -- have FS and autoUSB or HOME -- enable
 			tglUSBmode();
@@ -179,6 +170,7 @@ void CodecCmd( GPIO_ID k ){			// Codec mode subcommands
 			break;
 	}
 }
+extern int RecDBG;
 void debugLoop( bool autoUSB ){			// called if boot-MINUS, no file system,  autoUSB => usbMode
 	if ( fsNDevs==0 ) dbgLog( " no storage avail \n" );
 	else dbgLog( " no TBook on %s \n", fsDevs[0]  );

@@ -47,10 +47,47 @@ void MarcDebug(){				// DEBUG test for Marc -- for Stop mode power calcs
 	flashCode( DbgPwrDn );
 }
 */
+int BootMode; // DEBUG**********************************
+char BootKey;
+// BootOption-- 
+// STAR=1 LHAND=2 MINUS=3  PLUS=4  RHAND=5 CIRCLE=6 HOME=7
+// hardware boot functions:
+//  TABLE + TREE => hardware forced reboot
+//  TABLE + TREE + POT => hardware forced DFU mode
+
+// 'P'  										=> call talking_book() before starting OS, then debugLoop()
+// 'M'  										=> call debugLoop() in talking_book() thread
+// no FileSys found 							=> call debugLoop( false ) in talking_book() thread
+// if FileSys, but no /system/QC_PASS.txt 	    => run acceptance test
+// if QC_PASS.txt, but no package_dat.txt 	    => enter USBmode
+// 'C'  										=> force running QC acceptance test
+
+// calls to DbgPwrDown( cd ):
+//   if cd==BootMode, flash cd on LED & fastPowerDown()
+
+void setBootMode(){	// use key to to select value for BootMode
+	flashInit();			// enable keyboard to decode boot type
+	
+	BootMode = 0;  BootKey = ' ';
+	     if ( gGet( gSTAR ))		{ BootMode = 1;  BootKey = 'S'; }
+	else if ( gGet( gLHAND ))		{ BootMode = 2;  BootKey = 'L'; }
+	else if ( gGet( gMINUS ))		{ BootMode = 3;  BootKey = 'M'; }
+	else if ( gGet( gPLUS ))		{ BootMode = 4;  BootKey = 'P'; }
+	else if ( gGet( gRHAND ))		{ BootMode = 5;  BootKey = 'R'; }
+	else if ( gGet( gCIRCLE ))	    { BootMode = 6;  BootKey = 'C'; }
+	else if ( gGet( gHOME ))		{ BootMode = 7;  BootKey = 'H'; }
+    if ( BootMode != 0 )
+		flashCode( BootMode );
+}
+
+
 static osThreadAttr_t 	tb_attr;																				// has to be static!
 int  										main( void ){
+	// main.h defines gpioSignals[] for this platform configuration,  e.g.  { gRED, "PF8" } for STM3210E eval board RED LED
+	//  used by various initializers to call GPIOconfigure()
 	GPIO_DefineSignals( gpioSignals );   // create GPIO_Def_t entries { id, port, pin, intq, signm, pressed } for each GPIO signal in use
-//	MarcDebug();
+
+    setBootMode();
 	
 	SCB->SHCSR |= SCB_SHCSR_USGFAULTENA_Msk
 	 | SCB_SHCSR_BUSFAULTENA_Msk
@@ -62,19 +99,14 @@ int  										main( void ){
 	volatile int CpuMhz = 24, apbsh2 = 0, apbsh1 = 1;
 	const int MHZ=1000000;
 	setCpuClock( CpuMhz, apbsh2, apbsh1 );						// generate HCLK (CPU_clock) from PLL based on 8MHz HSE  & PLLI2S_Q at 48MHz
-  SystemCoreClockUpdate();			// derives clock speed from configured register values-- cross-check calculated value
+    SystemCoreClockUpdate();			// derives clock speed from configured register values-- cross-check calculated value
 	if ( SystemCoreClock != CpuMhz * MHZ )
 		__breakpoint(0);
 
-//	GPIO_DefineSignals( gpioSignals );   // create GPIO_Def_t entries { id, port, pin, intq, signm, pressed } for each GPIO signal in use
-	// main.h defines gpioSignals[] for this platform configuration,  e.g.  { gRED, "PF8" } for STM3210E eval board RED LED
-	//  used by various initializers to cal GPIOconfigure()
-	gConfigI2S( gMCO2 );  // TBookV2B 	{ gMCO2,					"PC9|0"		},  // DEBUG: MCO2 for external SystemClock/4 on PC9
+//	gConfigI2S( gMCO2 );  // TBookV2B 	{ gMCO2,					"PC9|0"		},  // DEBUG: MCO2 for external SystemClock/4 on PC9
 
   initPrintf(  TBV2_Version );
-  flashInit();		// init Keypad for debugging
-	if ( gGet( gPLUS )){  //  PLUS => tbook with no OS -> debugLoop
-		flashCode( 10 );
+    if ( BootKey=='P' ){    // PLUS => tbook with no OS -> debugLoop
 		talking_book( NULL );   // call without OS
 	}
 	

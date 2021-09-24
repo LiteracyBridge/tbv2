@@ -78,7 +78,7 @@ I (.\Src\inc\inputMgr.h)(0x613A724E)
 I (.\Src\inc\tb_evr.h)(0x613A724E)
 I (.\Src\inc\controlmanager.h)(0x614A3D0C)
 I (.\Src\inc\mediaPlyr.h)(0x6143ACD3)
-I (.\Src\inc\audio.h)(0x6143ABDE)
+I (.\Src\inc\audio.h)(0x614E422B)
 I (.\Keil\inc\Driver_SAI.h)(0x613A724D)
 I (.\Src\inc\codecI2C.h)(0x613A724E)
 I (.\Src\inc\ti_aic3100.h)(0x613A724E)
@@ -165,7 +165,7 @@ I (.\Src\inc\powerMgr.h)(0x613A724E)
 I (.\Src\inc\inputMgr.h)(0x613A724E)
 I (.\Src\inc\tb_evr.h)(0x613A724E)
 I (.\Src\inc\mediaPlyr.h)(0x6143ACD3)
-I (.\Src\inc\audio.h)(0x6143ABDE)
+I (.\Src\inc\audio.h)(0x614E422B)
 I (.\Keil\inc\Driver_SAI.h)(0x613A724D)
 I (.\Src\inc\codecI2C.h)(0x613A724E)
 I (.\Src\inc\ti_aic3100.h)(0x613A724E)
@@ -212,7 +212,7 @@ I (.\Src\inc\powerMgr.h)(0x613A724E)
 I (.\Src\inc\inputMgr.h)(0x613A724E)
 I (.\Src\inc\tb_evr.h)(0x613A724E)
 I (.\Src\inc\mediaPlyr.h)(0x6143ACD3)
-I (.\Src\inc\audio.h)(0x6143ABDE)
+I (.\Src\inc\audio.h)(0x614E422B)
 I (.\Keil\inc\Driver_SAI.h)(0x613A724D)
 I (.\Src\inc\codecI2C.h)(0x613A724E)
 I (.\Src\inc\ti_aic3100.h)(0x613A724E)
@@ -451,7 +451,7 @@ I (.\Src\inc\ledMgr.h)(0x613A724E)
 I (.\Src\inc\powerMgr.h)(0x613A724E)
 I (.\Src\inc\inputMgr.h)(0x613A724E)
 I (.\Src\inc\tb_evr.h)(0x613A724E)
-I (.\Src\inc\audio.h)(0x6143ABDE)
+I (.\Src\inc\audio.h)(0x614E422B)
 I (.\Keil\inc\Driver_SAI.h)(0x613A724D)
 I (.\Src\inc\codecI2C.h)(0x613A724E)
 I (.\Src\inc\ti_aic3100.h)(0x613A724E)
@@ -496,8 +496,8 @@ I (.\Src\inc\ledMgr.h)(0x613A724E)
 I (.\Src\inc\powerMgr.h)(0x613A724E)
 I (.\Src\inc\inputMgr.h)(0x613A724E)
 I (.\Src\inc\tb_evr.h)(0x613A724E)
-F (.\Src\audio.c)(0x614CE9B7)(--c99 -c --cpu Cortex-M4.fp.sp -g -O0 --apcs=interwork --split_sections --asm --interleave --asm_dir ".\\Listings\\" -I .\Src\config -I .\Src\inc -I .\Keil\inc -I .\Src\Rev2b\inc -I .\Keil\mbedtls-I.\RTE\_TBv2b-IC:\Keil_v5\ARM\PACK\ARM\CMSIS\5.7.0\CMSIS\Driver\Include-IC:\Keil_v5\ARM\PACK\Keil\STM32F4xx_DFP\2.15.0\Drivers\CMSIS\Device\ST\STM32F4xx\Include-D__UVISION_VERSION="534" -D_RTE_ -DSTM32F412Vx -D_RTE_ -DTBOOKREV2B -DSTM32F412Vx -DHSE_VALUE="8000000" -D_RTE_ -DFPM_DEFAULT-o .\objects\audio.o --list_dir ".\\Listings\\" --list --omf_browse .\objects\audio.crf --depend .\objects\audio.d)
-I (.\Src\inc\audio.h)(0x6143ABDE)
+F (.\Src\audio.c)(0x614E4227)(--c99 -c --cpu Cortex-M4.fp.sp -g -O0 --apcs=interwork --split_sections --asm --interleave --asm_dir ".\\Listings\\" -I .\Src\config -I .\Src\inc -I .\Keil\inc -I .\Src\Rev2b\inc -I .\Keil\mbedtls-I.\RTE\_TBv2b-IC:\Keil_v5\ARM\PACK\ARM\CMSIS\5.7.0\CMSIS\Driver\Include-IC:\Keil_v5\ARM\PACK\Keil\STM32F4xx_DFP\2.15.0\Drivers\CMSIS\Device\ST\STM32F4xx\Include-D__UVISION_VERSION="534" -D_RTE_ -DSTM32F412Vx -D_RTE_ -DTBOOKREV2B -DSTM32F412Vx -DHSE_VALUE="8000000" -D_RTE_ -DFPM_DEFAULT-o .\objects\audio.o --list_dir ".\\Listings\\" --list --omf_browse .\objects\audio.crf --depend .\objects\audio.d)
+I (.\Src\inc\audio.h)(0x614E422B)
 I (.\Src\inc\main.h)(0x613A724E)
 I (C:\Keil_v5\ARM\ARMCC\include\stdint.h)(0x5E8F0FB2)
 I (C:\Keil_v5\ARM\ARMCC\include\stdbool.h)(0x5E8F0FB2)
@@ -857,7 +857,7 @@ I (.\Src\inc\powerMgr.h)(0x613A724E)
 I (.\Src\inc\inputMgr.h)(0x613A724E)
 I (.\Src\inc\tb_evr.h)(0x613A724E)
 I (.\Src\inc\mediaPlyr.h)(0x6143ACD3)
-I (.\Src\inc\audio.h)(0x6143ABDE)
+I (.\Src\inc\audio.h)(0x614E422B)
 I (.\Keil\inc\Driver_SAI.h)(0x613A724D)
 I (.\Src\inc\codecI2C.h)(0x613A724E)
 I (.\Src\inc\ti_aic3100.h)(0x613A724E)
@@ -1009,7 +1009,7 @@ I (.\Src\inc\inputMgr.h)(0x613A724E)
 I (.\Src\inc\tb_evr.h)(0x613A724E)
 I (.\Src\Rev2b\inc\I2S_STM32F4xx.h)(0x613A724E)
 I (.\Keil\inc\Driver_SAI.h)(0x613A724D)
-I (.\Src\inc\audio.h)(0x6143ABDE)
+I (.\Src\inc\audio.h)(0x614E422B)
 I (.\Src\inc\codecI2C.h)(0x613A724E)
 I (.\Src\inc\ti_aic3100.h)(0x613A724E)
 I (.\Keil\inc\rl_fs_lib.h)(0x613A724E)
@@ -2491,7 +2491,7 @@ I (.\Src\inc\powerMgr.h)(0x613A724E)
 I (.\Src\inc\inputMgr.h)(0x613A724E)
 I (.\Src\inc\tb_evr.h)(0x613A724E)
 I (.\Src\inc\ti_aic3100.h)(0x613A724E)
-I (.\Src\inc\audio.h)(0x6143ABDE)
+I (.\Src\inc\audio.h)(0x614E422B)
 I (.\Keil\inc\Driver_SAI.h)(0x613A724D)
 I (.\Keil\inc\rl_fs_lib.h)(0x613A724E)
 I (.\Keil\inc\Driver_MCI.h)(0x613A724D)
@@ -2535,7 +2535,7 @@ I (.\Src\inc\inputMgr.h)(0x613A724E)
 I (.\Src\inc\tb_evr.h)(0x613A724E)
 I (.\Src\inc\codecI2C.h)(0x613A724E)
 I (.\Src\inc\ti_aic3100.h)(0x613A724E)
-I (.\Src\inc\audio.h)(0x6143ABDE)
+I (.\Src\inc\audio.h)(0x614E422B)
 I (.\Keil\inc\Driver_SAI.h)(0x613A724D)
 I (.\Keil\inc\rl_fs_lib.h)(0x613A724E)
 I (.\Keil\inc\Driver_MCI.h)(0x613A724D)

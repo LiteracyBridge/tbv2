@@ -49,7 +49,8 @@ typedef enum {				// audType
   audUNDEF,
   audWave,
   audMP3,
-  audOGG
+  audOGG,
+  audTONE           // sqrWAV generated tone
 } audType_t;
 
 typedef enum {  			// pnRes_t  					-- return codes from PlayNext

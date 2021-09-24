@@ -129,11 +129,11 @@
     // 12)  Keys:   flash G once, tune(F.)   till Star                 or Table => Error(no_Star)
 	// 13)  Keys:   flash G once, tune(G.)   till Table                or Star  => Error(no_Table)
 	// 14)  Complete:  tune(E.C.*)
-	// on Skip:   tune()  
+	// on Skip:   tune(G.C.*)  
 	// on Error: (filesTest failed or Table pressed early) tune(H.*_H.*_H.*_H.*_) flashing Red, write QC_FAIL.txt with reason, test complete
 	// on Test complete: flashing G till
 	//        Star:  USB mode,  Table: restart Qc test,  Home: Reboot,  Pot: play tune
-	// Error
+	// 
     stQcTest:       { Actions: [ playTune(C.)                      ]  AudioDone: stQc1 } 
     stQc1:          { Actions: [ filesTest(),bgLED(G3_3)           ]  FilesSuccess: stQc2, FilesFail: stQcErrFiles, anyKey: stQcBeep }
     stQc2:          { Actions: [ bgLED(G3_3), playTune(G.)         ]  Plus:  stQc3,  Table: stQcErrGrn,  Plus__:  stQc3,  Table__: stQcErrGrn,  anyKey: stQcBeep }
@@ -152,7 +152,7 @@
     stQc13:         { Actions: [ LED(G3), playTune(G.)             ]  Table: stQc14, Star:  stQcErrNoTa, Table__: stQc14, Star__:  stQcErrNoTa, anyKey: stQcBeep }
     stQc14:         { Actions: [ playTune(E.C.*)                   ]  AudioDone:  stQc15 }
     stQc15:         { Actions: [ writeMsg(QC_OK), bgLED(G2_8)]        CGroups: [ whenTestDone ] }
-    stQcSkip:       { Actions: [ playTune(E.C.*)                   ]  AudioDone:  stQcSkip2 }
+    stQcSkip:       { Actions: [ playTune(G.C.*)                   ]  AudioDone:  stQcSkip2 }
 	stQcSkip2:      { Actions: [ writeMsg(QC_OK_short), bgLED(G2_8)]  CGroups: [ whenTestDone ] }
 	
     stQcBeep:       { Actions: [ playTune(H_H), goPrevSt  ]   }

@@ -3,7 +3,7 @@
 <title>Static Call Graph - [.\Objects\TBookRev2b.axf]</title></head>
 <body><HR>
 <H1>Static Call Graph for image .\Objects\TBookRev2b.axf</H1><HR>
-<BR><P>#&#060CALLGRAPH&#062# ARM Linker, 5060960: Last Updated: Fri Sep 24 14:25:06 2021
+<BR><P>#&#060CALLGRAPH&#062# ARM Linker, 5060960: Last Updated: Tue Sep 28 14:25:59 2021
 <BR><P>
 <H3>Maximum Stack Usage =       7552 bytes + Unknown(Functions without stacksize, Cycles, Untraceable Function Pointers)</H3><H3>
 Call chain for Maximum Stack Depth:</H3>
@@ -653,7 +653,7 @@ Global Symbols
 </UL>
 
 <P><STRONG><a name="[168]"></a>__rt_entry_main</STRONG> (Thumb, 0 bytes, Stack size unknown bytes, __rtentry2.o(.ARM.Collect$$rtentry$$0000000D))
-<BR><BR>[Stack]<UL><LI>Max Depth = 4872 + Unknown Stack Size
+<BR><BR>[Stack]<UL><LI>Max Depth = 4880 + Unknown Stack Size
 <LI>Call Chain = __rt_entry_main &rArr; main &rArr; talking_book &rArr; initControlManager &rArr; findPackages &rArr; readContent &rArr; parseFile &rArr; parseValue &rArr; parseLstObj &rArr;  parseValue (Cycle)
 </UL>
 <BR>[Calls]<UL><LI><a href="#[169]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;main
@@ -914,7 +914,7 @@ Global Symbols
 </UL>
 
 <P><STRONG><a name="[d]"></a>BusFault_Handler</STRONG> (Thumb, 0 bytes, Stack size unknown bytes, hardfault.o(.text))
-<BR><BR>[Stack]<UL><LI>Max Depth = 2448 + Unknown Stack Size
+<BR><BR>[Stack]<UL><LI>Max Depth = 2456 + Unknown Stack Size
 <LI>Call Chain = BusFault_Handler &rArr; HardFault_Handler_C &rArr; tbErr &rArr; USBmode &rArr; logPowerUp &rArr; NLogShowStatus &rArr; logEvtNININI &rArr; logEvtS &rArr;  tbErr (Cycle)
 </UL>
 <BR>[Calls]<UL><LI><a href="#[175]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HardFault_Handler_C
@@ -1237,7 +1237,7 @@ Global Symbols
 <LI><a href="#[182]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;_free_internal
 </UL>
 <BR>[Called By]<UL><LI><a href="#[3ed]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;logEvtFmt
-<LI><a href="#[51a]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mp3_free
+<LI><a href="#[51b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mp3_free
 <LI><a href="#[15f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;_terminateio
 <LI><a href="#[1a7]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;_fclose_internal
 </UL>
@@ -1348,7 +1348,7 @@ Global Symbols
 <LI><a href="#[590]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;padStr
 <LI><a href="#[459]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;showBattCharge
 <LI><a href="#[391]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;logPowerUp
-<LI><a href="#[510]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;logMsgName
+<LI><a href="#[511]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;logMsgName
 <LI><a href="#[469]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;logEvtNSNSNS
 <LI><a href="#[44b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;logEvtNSNS
 <LI><a href="#[50e]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;logEvtNSNININS
@@ -1692,7 +1692,7 @@ Global Symbols
 </UL>
 <BR>[Called By]<UL><LI><a href="#[c9]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mad_layer_III
 <LI><a href="#[2b6]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;III_huffdecode
-<LI><a href="#[528]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;scale_rational
+<LI><a href="#[529]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;scale_rational
 <LI><a href="#[5a1]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;reduce_rational
 </UL>
 
@@ -1778,7 +1778,7 @@ Global Symbols
 <LI><a href="#[3fa]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;audPlayAudio
 <LI><a href="#[42f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;copyNorLog
 <LI><a href="#[3dd]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;appendNorLog
-<LI><a href="#[50f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;norEvt
+<LI><a href="#[510]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;norEvt
 <LI><a href="#[447]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mp3ToWav
 <LI><a href="#[5a5]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;scanTree
 <LI><a href="#[45e]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;endsWith
@@ -1816,7 +1816,7 @@ Global Symbols
 <LI><a href="#[ad]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;osRtxMessageQueuePostProcess
 <LI><a href="#[4fb]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;isrRtxMessageQueuePut
 <LI><a href="#[4f9]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;isrRtxMessageQueueGet
-<LI><a href="#[534]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc_control_lock
+<LI><a href="#[535]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc_control_lock
 <LI><a href="#[477]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;fat_ffind
 <LI><a href="#[425]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;write_cache
 <LI><a href="#[405]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;read_sector
@@ -1836,7 +1836,7 @@ Global Symbols
 
 <P><STRONG><a name="[61d]"></a>_memcpy_lastbytes</STRONG> (Thumb, 0 bytes, Stack size unknown bytes, rt_memcpy_v6.o(.text), UNUSED)
 
-<P><STRONG><a name="[523]"></a>__aeabi_memmove</STRONG> (Thumb, 0 bytes, Stack size 0 bytes, rt_memmove_v6.o(.text))
+<P><STRONG><a name="[524]"></a>__aeabi_memmove</STRONG> (Thumb, 0 bytes, Stack size 0 bytes, rt_memmove_v6.o(.text))
 <BR><BR>[Called By]<UL><LI><a href="#[c9]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mad_layer_III
 </UL>
 
@@ -1850,11 +1850,11 @@ Global Symbols
 <P><STRONG><a name="[1bb]"></a>__aeabi_memcpy4</STRONG> (Thumb, 0 bytes, Stack size 8 bytes, rt_memcpy_w.o(.text))
 <BR><BR>[Stack]<UL><LI>Max Depth = 8<LI>Call Chain = __aeabi_memcpy4
 </UL>
-<BR>[Called By]<UL><LI><a href="#[512]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;showRTC
+<BR>[Called By]<UL><LI><a href="#[513]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;showRTC
 <LI><a href="#[175]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HardFault_Handler_C
 <LI><a href="#[45a]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;writeCSM
 <LI><a href="#[2ec]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;ResetGPIO
-<LI><a href="#[513]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;setupRTC
+<LI><a href="#[514]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;setupRTC
 <LI><a href="#[2b8]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;III_reorder
 <LI><a href="#[20e]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;showCdcRegs
 <LI><a href="#[20d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;cdc_RecordEnable
@@ -1933,7 +1933,7 @@ Global Symbols
 <LI><a href="#[2f3]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SPI_Initialize
 <LI><a href="#[2ef]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SPI_Control
 <LI><a href="#[f7]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;Initialize
-<LI><a href="#[534]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc_control_lock
+<LI><a href="#[535]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc_control_lock
 <LI><a href="#[48f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;fat_uninit
 <LI><a href="#[484]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;fat_mount
 <LI><a href="#[39f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;fat_handle_get
@@ -2701,7 +2701,7 @@ Global Symbols
 </UL>
 
 <P><STRONG><a name="[25]"></a>ADC_IRQHandler</STRONG> (Thumb, 42 bytes, Stack size 8 bytes, powermanager.o(i.ADC_IRQHandler))
-<BR><BR>[Stack]<UL><LI>Max Depth = 2424 + Unknown Stack Size
+<BR><BR>[Stack]<UL><LI>Max Depth = 2432 + Unknown Stack Size
 <LI>Call Chain = ADC_IRQHandler &rArr; tbErr &rArr; USBmode &rArr; logPowerUp &rArr; NLogShowStatus &rArr; logEvtNININI &rArr; logEvtS &rArr;  tbErr (Cycle)
 </UL>
 <BR>[Calls]<UL><LI><a href="#[1fc]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;tbErr
@@ -2712,7 +2712,7 @@ Global Symbols
 <P><STRONG><a name="[5a8]"></a>Bcd2</STRONG> (Thumb, 40 bytes, Stack size 8 bytes, powermanager.o(i.Bcd2))
 <BR><BR>[Stack]<UL><LI>Max Depth = 8<LI>Call Chain = Bcd2
 </UL>
-<BR>[Called By]<UL><LI><a href="#[513]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;setupRTC
+<BR>[Called By]<UL><LI><a href="#[514]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;setupRTC
 </UL>
 
 <P><STRONG><a name="[1ff]"></a>CheckNLog</STRONG> (Thumb, 116 bytes, Stack size 24 bytes, norlog.o(i.CheckNLog))
@@ -2726,7 +2726,7 @@ Global Symbols
 </UL>
 
 <P><STRONG><a name="[201]"></a>CheckRecording</STRONG> (Thumb, 70 bytes, Stack size 8 bytes, dbgloop.o(i.CheckRecording))
-<BR><BR>[Stack]<UL><LI>Max Depth = 2544 + Unknown Stack Size
+<BR><BR>[Stack]<UL><LI>Max Depth = 2552 + Unknown Stack Size
 <LI>Call Chain = CheckRecording &rArr; resetAudio &rArr; audStopAudio &rArr; audRecordComplete &rArr; audSaveBuffs &rArr; saveBuff &rArr; releaseBuff &rArr; adjBuffCnt &rArr; tbErr &rArr; USBmode &rArr; logPowerUp &rArr; NLogShowStatus &rArr; logEvtNININI &rArr; logEvtS &rArr;  tbErr (Cycle)
 </UL>
 <BR>[Calls]<UL><LI><a href="#[203]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;tbTimeStamp
@@ -2868,12 +2868,12 @@ Global Symbols
 <LI><a href="#[353]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;USBD_Initialize
 <LI><a href="#[328]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;USBD_Disconnect
 <LI><a href="#[30f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;USBD_Connect
-<LI><a href="#[533]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc_mci_WriteSector
-<LI><a href="#[532]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc_mci_UnInit
-<LI><a href="#[531]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc_mci_ReadSector
-<LI><a href="#[530]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc_mci_ReadInfo
-<LI><a href="#[52f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc_mci_Init
-<LI><a href="#[52e]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc_mci_DevCtrl
+<LI><a href="#[534]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc_mci_WriteSector
+<LI><a href="#[533]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc_mci_UnInit
+<LI><a href="#[532]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc_mci_ReadSector
+<LI><a href="#[531]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc_mci_ReadInfo
+<LI><a href="#[530]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc_mci_Init
+<LI><a href="#[52f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc_mci_DevCtrl
 <LI><a href="#[3af]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;_fdelete
 <LI><a href="#[308]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;USBD_SignalEndpointEvent
 <LI><a href="#[307]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;USBD_SignalDeviceEvent
@@ -2907,11 +2907,11 @@ Global Symbols
 <LI><a href="#[39d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__sys_open
 <LI><a href="#[39a]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__sys_flen
 <LI><a href="#[393]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__sys_close
-<LI><a href="#[53b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mci_update_sw_state
-<LI><a href="#[53e]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc_select_tran_state
-<LI><a href="#[545]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc_native_init
-<LI><a href="#[538]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc_control_sleep
-<LI><a href="#[534]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc_control_lock
+<LI><a href="#[53c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mci_update_sw_state
+<LI><a href="#[53f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc_select_tran_state
+<LI><a href="#[546]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc_native_init
+<LI><a href="#[539]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc_control_sleep
+<LI><a href="#[535]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc_control_lock
 <LI><a href="#[491]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;fat_unmount
 <LI><a href="#[48f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;fat_uninit
 <LI><a href="#[48e]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;fat_time_set
@@ -3006,10 +3006,10 @@ Global Symbols
 <LI><a href="#[35f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;fs_ioc_read_sector
 <LI><a href="#[4c6]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;fs_ioc_get_cache
 <LI><a href="#[35d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;fs_ioc_device_ctrl
-<LI><a href="#[533]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc_mci_WriteSector
-<LI><a href="#[531]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc_mci_ReadSector
-<LI><a href="#[52f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc_mci_Init
-<LI><a href="#[52e]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc_mci_DevCtrl
+<LI><a href="#[534]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc_mci_WriteSector
+<LI><a href="#[532]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc_mci_ReadSector
+<LI><a href="#[530]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc_mci_Init
+<LI><a href="#[52f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc_mci_DevCtrl
 <LI><a href="#[257]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;EvrRtxThreadNew
 <LI><a href="#[24f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;EvrRtxMemoryInit
 <LI><a href="#[24e]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;EvrRtxMemoryFree
@@ -3018,7 +3018,7 @@ Global Symbols
 <LI><a href="#[24a]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;EvrRtxMemoryAlloc
 <LI><a href="#[3a9]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__sys_write
 <LI><a href="#[3a3]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__sys_read
-<LI><a href="#[53e]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc_select_tran_state
+<LI><a href="#[53f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc_select_tran_state
 <LI><a href="#[23e]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;EvrFsMcMCI_WriteXferSetupError
 <LI><a href="#[23d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;EvrFsMcMCI_SendCommandError
 <LI><a href="#[23c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;EvrFsMcMCI_ReadXferSetupError
@@ -3126,7 +3126,7 @@ Global Symbols
 </UL>
 <BR>[Calls]<UL><LI><a href="#[224]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;EventRecord2
 </UL>
-<BR>[Called By]<UL><LI><a href="#[52d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;osKernelStart
+<BR>[Called By]<UL><LI><a href="#[52e]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;osKernelStart
 <LI><a href="#[3b6]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;osKernelInitialize
 <LI><a href="#[45f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;osKernelSuspend
 <LI><a href="#[8f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;svcRtxKernelSuspend
@@ -3187,7 +3187,7 @@ Global Symbols
 </UL>
 <BR>[Calls]<UL><LI><a href="#[224]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;EventRecord2
 </UL>
-<BR>[Called By]<UL><LI><a href="#[52d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;osKernelStart
+<BR>[Called By]<UL><LI><a href="#[52e]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;osKernelStart
 </UL>
 
 <P><STRONG><a name="[247]"></a>EvrRtxKernelStarted</STRONG> (Thumb, 14 bytes, Stack size 8 bytes, rtx_evr.o(i.EvrRtxKernelStarted))
@@ -3402,7 +3402,7 @@ Global Symbols
 </UL>
 
 <P><STRONG><a name="[278]"></a>GPIO_DefineSignals</STRONG> (Thumb, 34 bytes, Stack size 16 bytes, tbutil.o(i.GPIO_DefineSignals))
-<BR><BR>[Stack]<UL><LI>Max Depth = 2472 + Unknown Stack Size
+<BR><BR>[Stack]<UL><LI>Max Depth = 2480 + Unknown Stack Size
 <LI>Call Chain = GPIO_DefineSignals &rArr; gDef &rArr; tbErr &rArr; USBmode &rArr; logPowerUp &rArr; NLogShowStatus &rArr; logEvtNININI &rArr; logEvtS &rArr;  tbErr (Cycle)
 </UL>
 <BR>[Calls]<UL><LI><a href="#[279]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;gDef
@@ -3433,7 +3433,7 @@ Global Symbols
 </UL>
 
 <P><STRONG><a name="[1fe]"></a>HAL_DMA_Abort</STRONG> (Thumb, 170 bytes, Stack size 16 bytes, stm32f4xx_hal_dma.o(i.HAL_DMA_Abort))
-<BR><BR>[Stack]<UL><LI>Max Depth = 2440 + Unknown Stack Size
+<BR><BR>[Stack]<UL><LI>Max Depth = 2448 + Unknown Stack Size
 <LI>Call Chain = HAL_DMA_Abort &rArr; HAL_GetTick &rArr; tbErr &rArr; USBmode &rArr; logPowerUp &rArr; NLogShowStatus &rArr; logEvtNININI &rArr; logEvtS &rArr;  tbErr (Cycle)
 </UL>
 <BR>[Calls]<UL><LI><a href="#[280]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_GetTick
@@ -3461,7 +3461,7 @@ Global Symbols
 </UL>
 
 <P><STRONG><a name="[283]"></a>HAL_DMA_Init</STRONG> (Thumb, 232 bytes, Stack size 24 bytes, stm32f4xx_hal_dma.o(i.HAL_DMA_Init))
-<BR><BR>[Stack]<UL><LI>Max Depth = 2448 + Unknown Stack Size
+<BR><BR>[Stack]<UL><LI>Max Depth = 2456 + Unknown Stack Size
 <LI>Call Chain = HAL_DMA_Init &rArr; HAL_GetTick &rArr; tbErr &rArr; USBmode &rArr; logPowerUp &rArr; NLogShowStatus &rArr; logEvtNININI &rArr; logEvtS &rArr;  tbErr (Cycle)
 </UL>
 <BR>[Calls]<UL><LI><a href="#[280]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_GetTick
@@ -3485,7 +3485,7 @@ Global Symbols
 </UL>
 
 <P><STRONG><a name="[287]"></a>HAL_Delay</STRONG> (Thumb, 36 bytes, Stack size 16 bytes, stm32f4xx_hal.o(i.HAL_Delay))
-<BR><BR>[Stack]<UL><LI>Max Depth = 2440 + Unknown Stack Size
+<BR><BR>[Stack]<UL><LI>Max Depth = 2448 + Unknown Stack Size
 <LI>Call Chain = HAL_Delay &rArr; HAL_GetTick &rArr; tbErr &rArr; USBmode &rArr; logPowerUp &rArr; NLogShowStatus &rArr; logEvtNININI &rArr; logEvtS &rArr;  tbErr (Cycle)
 </UL>
 <BR>[Calls]<UL><LI><a href="#[280]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_GetTick
@@ -3527,7 +3527,7 @@ Global Symbols
 </UL>
 
 <P><STRONG><a name="[280]"></a>HAL_GetTick</STRONG> (Thumb, 52 bytes, Stack size 8 bytes, tbutil.o(i.HAL_GetTick))
-<BR><BR>[Stack]<UL><LI>Max Depth = 2424 + Unknown Stack Size
+<BR><BR>[Stack]<UL><LI>Max Depth = 2432 + Unknown Stack Size
 <LI>Call Chain = HAL_GetTick &rArr; tbErr &rArr; USBmode &rArr; logPowerUp &rArr; NLogShowStatus &rArr; logEvtNININI &rArr; logEvtS &rArr;  tbErr (Cycle)
 </UL>
 <BR>[Calls]<UL><LI><a href="#[203]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;tbTimeStamp
@@ -3582,7 +3582,7 @@ Global Symbols
 <BR>[Address Reference Count : 1]<UL><LI> spi_stm32f4xx.o(.constdata)
 </UL>
 <P><STRONG><a name="[175]"></a>HardFault_Handler_C</STRONG> (Thumb, 242 bytes, Stack size 32 bytes, tbutil.o(i.HardFault_Handler_C))
-<BR><BR>[Stack]<UL><LI>Max Depth = 2448 + Unknown Stack Size
+<BR><BR>[Stack]<UL><LI>Max Depth = 2456 + Unknown Stack Size
 <LI>Call Chain = HardFault_Handler_C &rArr; tbErr &rArr; USBmode &rArr; logPowerUp &rArr; NLogShowStatus &rArr; logEvtNININI &rArr; logEvtS &rArr;  tbErr (Cycle)
 </UL>
 <BR>[Calls]<UL><LI><a href="#[1fc]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;tbErr
@@ -3595,7 +3595,7 @@ Global Symbols
 </UL>
 
 <P><STRONG><a name="[33]"></a>I2C1_ER_IRQHandler</STRONG> (Thumb, 10 bytes, Stack size 8 bytes, i2c_stm32f4xx.o(i.I2C1_ER_IRQHandler))
-<BR><BR>[Stack]<UL><LI>Max Depth = 2472 + Unknown Stack Size
+<BR><BR>[Stack]<UL><LI>Max Depth = 2480 + Unknown Stack Size
 <LI>Call Chain = I2C1_ER_IRQHandler &rArr; I2C_ER_IRQHandler &rArr; HAL_DMA_Abort &rArr; HAL_GetTick &rArr; tbErr &rArr; USBmode &rArr; logPowerUp &rArr; NLogShowStatus &rArr; logEvtNININI &rArr; logEvtS &rArr;  tbErr (Cycle)
 </UL>
 <BR>[Calls]<UL><LI><a href="#[28d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;I2C_ER_IRQHandler
@@ -3635,7 +3635,7 @@ Global Symbols
 <LI><a href="#[4dc]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;handlePowerEvent
 </UL>
 
-<P><STRONG><a name="[511]"></a>NLogIdx</STRONG> (Thumb, 6 bytes, Stack size 0 bytes, norlog.o(i.NLogIdx))
+<P><STRONG><a name="[512]"></a>NLogIdx</STRONG> (Thumb, 6 bytes, Stack size 0 bytes, norlog.o(i.NLogIdx))
 <BR><BR>[Called By]<UL><LI><a href="#[391]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;logPowerUp
 </UL>
 
@@ -3760,7 +3760,7 @@ Global Symbols
 </UL>
 
 <P><STRONG><a name="[2de]"></a>PlayRecCmd</STRONG> (Thumb, 208 bytes, Stack size 104 bytes, dbgloop.o(i.PlayRecCmd))
-<BR><BR>[Stack]<UL><LI>Max Depth = 2680 + Unknown Stack Size
+<BR><BR>[Stack]<UL><LI>Max Depth = 2688 + Unknown Stack Size
 <LI>Call Chain = PlayRecCmd &rArr; playWave &rArr; audStopAudio &rArr; audRecordComplete &rArr; audSaveBuffs &rArr; saveBuff &rArr; releaseBuff &rArr; adjBuffCnt &rArr; tbErr &rArr; USBmode &rArr; logPowerUp &rArr; NLogShowStatus &rArr; logEvtNININI &rArr; logEvtS &rArr;  tbErr (Cycle)
 </UL>
 <BR>[Calls]<UL><LI><a href="#[2e2]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;tglDebugFlag
@@ -3830,10 +3830,10 @@ Global Symbols
 </UL>
 <BR>[Address Reference Count : 1]<UL><LI> startup_stm32f412vx.o(RESET)
 </UL>
-<P><STRONG><a name="[52c]"></a>SystemCoreClockUpdate</STRONG> (Thumb, 170 bytes, Stack size 16 bytes, system_stm32f4xx.o(i.SystemCoreClockUpdate))
+<P><STRONG><a name="[52d]"></a>SystemCoreClockUpdate</STRONG> (Thumb, 170 bytes, Stack size 16 bytes, system_stm32f4xx.o(i.SystemCoreClockUpdate))
 <BR><BR>[Stack]<UL><LI>Max Depth = 16<LI>Call Chain = SystemCoreClockUpdate
 </UL>
-<BR>[Called By]<UL><LI><a href="#[52b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;setCpuClock
+<BR>[Called By]<UL><LI><a href="#[52c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;setCpuClock
 <LI><a href="#[169]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;main
 </UL>
 
@@ -4742,7 +4742,7 @@ Global Symbols
 </UL>
 
 <P><STRONG><a name="[38a]"></a>USBmode</STRONG> (Thumb, 84 bytes, Stack size 8 bytes, controlmanager.o(i.USBmode))
-<BR><BR>[Stack]<UL><LI>Max Depth = 2288 + Unknown Stack Size
+<BR><BR>[Stack]<UL><LI>Max Depth = 2296 + Unknown Stack Size
 <LI>Call Chain = USBmode &rArr; logPowerUp &rArr; NLogShowStatus &rArr; logEvtNININI &rArr; logEvtS &rArr;  tbErr (Cycle)
 </UL>
 <BR>[Calls]<UL><LI><a href="#[38e]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;setDbgFlag
@@ -5060,7 +5060,7 @@ Global Symbols
 </UL>
 
 <P><STRONG><a name="[3bf]"></a>addPlaySys</STRONG> (Thumb, 62 bytes, Stack size 88 bytes, controlparser.o(i.addPlaySys))
-<BR><BR>[Stack]<UL><LI>Max Depth = 2544 + Unknown Stack Size
+<BR><BR>[Stack]<UL><LI>Max Depth = 2552 + Unknown Stack Size
 <LI>Call Chain = addPlaySys &rArr; buildPath &rArr; tbErr &rArr; USBmode &rArr; logPowerUp &rArr; NLogShowStatus &rArr; logEvtNININI &rArr; logEvtS &rArr;  tbErr (Cycle)
 </UL>
 <BR>[Calls]<UL><LI><a href="#[3c1]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;allocStr
@@ -5164,7 +5164,7 @@ Global Symbols
 <LI><a href="#[2d7]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;NLogWrite
 <LI><a href="#[3be]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;strlen
 </UL>
-<BR>[Called By]<UL><LI><a href="#[50f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;norEvt
+<BR>[Called By]<UL><LI><a href="#[510]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;norEvt
 <LI><a href="#[461]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;restoreNorLog
 </UL>
 
@@ -5192,7 +5192,7 @@ Global Symbols
 </UL>
 <BR>[Calls]<UL><LI><a href="#[3e2]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;tknGrp
 </UL>
-<BR>[Called By]<UL><LI><a href="#[515]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;lstID
+<BR>[Called By]<UL><LI><a href="#[516]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;lstID
 </UL>
 
 <P><STRONG><a name="[3e5]"></a>asPunct</STRONG> (Thumb, 24 bytes, Stack size 8 bytes, tkntable.o(i.asPunct))
@@ -5214,7 +5214,7 @@ Global Symbols
 </UL>
 
 <P><STRONG><a name="[3ea]"></a>assertValidState</STRONG> (Thumb, 24 bytes, Stack size 8 bytes, controlmanager.o(i.assertValidState))
-<BR><BR>[Stack]<UL><LI>Max Depth = 2424 + Unknown Stack Size
+<BR><BR>[Stack]<UL><LI>Max Depth = 2432 + Unknown Stack Size
 <LI>Call Chain = assertValidState &rArr; tbErr &rArr; USBmode &rArr; logPowerUp &rArr; NLogShowStatus &rArr; logEvtNININI &rArr; logEvtS &rArr;  tbErr (Cycle)
 </UL>
 <BR>[Calls]<UL><LI><a href="#[1fc]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;tbErr
@@ -5225,7 +5225,7 @@ Global Symbols
 </UL>
 
 <P><STRONG><a name="[3eb]"></a>audAdjPlayPos</STRONG> (Thumb, 122 bytes, Stack size 24 bytes, audio.o(i.audAdjPlayPos))
-<BR><BR>[Stack]<UL><LI>Max Depth = 2584 + Unknown Stack Size
+<BR><BR>[Stack]<UL><LI>Max Depth = 2592 + Unknown Stack Size
 <LI>Call Chain = audAdjPlayPos &rArr; audPauseResumeAudio &rArr; setWavPos &rArr; startPlayback &rArr; audLoadBuffs &rArr; loadBuff &rArr; allocBuff &rArr; adjBuffCnt &rArr; tbErr &rArr; USBmode &rArr; logPowerUp &rArr; NLogShowStatus &rArr; logEvtNININI &rArr; logEvtS &rArr;  tbErr (Cycle)
 </UL>
 <BR>[Calls]<UL><LI><a href="#[3ed]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;logEvtFmt
@@ -5259,7 +5259,7 @@ Global Symbols
 </UL>
 
 <P><STRONG><a name="[3f1]"></a>audInitialize</STRONG> (Thumb, 44 bytes, Stack size 8 bytes, audio.o(i.audInitialize))
-<BR><BR>[Stack]<UL><LI>Max Depth = 2456 + Unknown Stack Size
+<BR><BR>[Stack]<UL><LI>Max Depth = 2464 + Unknown Stack Size
 <LI>Call Chain = audInitialize &rArr; initBuffs &rArr; adjBuffCnt &rArr; tbErr &rArr; USBmode &rArr; logPowerUp &rArr; NLogShowStatus &rArr; logEvtNININI &rArr; logEvtS &rArr;  tbErr (Cycle)
 </UL>
 <BR>[Calls]<UL><LI><a href="#[3d0]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;tbAlloc
@@ -5269,7 +5269,7 @@ Global Symbols
 </UL>
 
 <P><STRONG><a name="[3f3]"></a>audLoadBuffs</STRONG> (Thumb, 32 bytes, Stack size 8 bytes, audio.o(i.audLoadBuffs))
-<BR><BR>[Stack]<UL><LI>Max Depth = 2488 + Unknown Stack Size
+<BR><BR>[Stack]<UL><LI>Max Depth = 2496 + Unknown Stack Size
 <LI>Call Chain = audLoadBuffs &rArr; loadBuff &rArr; allocBuff &rArr; adjBuffCnt &rArr; tbErr &rArr; USBmode &rArr; logPowerUp &rArr; NLogShowStatus &rArr; logEvtNININI &rArr; logEvtS &rArr;  tbErr (Cycle)
 </UL>
 <BR>[Calls]<UL><LI><a href="#[3f4]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;loadBuff
@@ -5279,7 +5279,7 @@ Global Symbols
 </UL>
 
 <P><STRONG><a name="[3ec]"></a>audPauseResumeAudio</STRONG> (Thumb, 486 bytes, Stack size 32 bytes, audio.o(i.audPauseResumeAudio))
-<BR><BR>[Stack]<UL><LI>Max Depth = 2560 + Unknown Stack Size
+<BR><BR>[Stack]<UL><LI>Max Depth = 2568 + Unknown Stack Size
 <LI>Call Chain = audPauseResumeAudio &rArr; setWavPos &rArr; startPlayback &rArr; audLoadBuffs &rArr; loadBuff &rArr; allocBuff &rArr; adjBuffCnt &rArr; tbErr &rArr; USBmode &rArr; logPowerUp &rArr; NLogShowStatus &rArr; logEvtNININI &rArr; logEvtS &rArr;  tbErr (Cycle)
 </UL>
 <BR>[Calls]<UL><LI><a href="#[3ed]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;logEvtFmt
@@ -5301,7 +5301,7 @@ Global Symbols
 </UL>
 
 <P><STRONG><a name="[3fa]"></a>audPlayAudio</STRONG> (Thumb, 78 bytes, Stack size 16 bytes, audio.o(i.audPlayAudio))
-<BR><BR>[Stack]<UL><LI>Max Depth = 2592 + Unknown Stack Size
+<BR><BR>[Stack]<UL><LI>Max Depth = 2600 + Unknown Stack Size
 <LI>Call Chain = audPlayAudio &rArr; playWave &rArr; audStopAudio &rArr; audRecordComplete &rArr; audSaveBuffs &rArr; saveBuff &rArr; releaseBuff &rArr; adjBuffCnt &rArr; tbErr &rArr; USBmode &rArr; logPowerUp &rArr; NLogShowStatus &rArr; logEvtNININI &rArr; logEvtS &rArr;  tbErr (Cycle)
 </UL>
 <BR>[Calls]<UL><LI><a href="#[1fc]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;tbErr
@@ -5337,8 +5337,8 @@ Global Symbols
 <LI><a href="#[3ec]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;audPauseResumeAudio
 </UL>
 
-<P><STRONG><a name="[3fc]"></a>audPlayTone</STRONG> (Thumb, 158 bytes, Stack size 16 bytes, audio.o(i.audPlayTone))
-<BR><BR>[Stack]<UL><LI>Max Depth = 2520 + Unknown Stack Size
+<P><STRONG><a name="[3fc]"></a>audPlayTone</STRONG> (Thumb, 152 bytes, Stack size 16 bytes, audio.o(i.audPlayTone))
+<BR><BR>[Stack]<UL><LI>Max Depth = 2528 + Unknown Stack Size
 <LI>Call Chain = audPlayTone &rArr; startPlayback &rArr; audLoadBuffs &rArr; loadBuff &rArr; allocBuff &rArr; adjBuffCnt &rArr; tbErr &rArr; USBmode &rArr; logPowerUp &rArr; NLogShowStatus &rArr; logEvtNININI &rArr; logEvtS &rArr;  tbErr (Cycle)
 </UL>
 <BR>[Calls]<UL><LI><a href="#[2eb]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;sendEvent
@@ -5350,7 +5350,7 @@ Global Symbols
 </UL>
 
 <P><STRONG><a name="[3ff]"></a>audPlaybackComplete</STRONG> (Thumb, 230 bytes, Stack size 24 bytes, audio.o(i.audPlaybackComplete))
-<BR><BR>[Stack]<UL><LI>Max Depth = 2488 + Unknown Stack Size
+<BR><BR>[Stack]<UL><LI>Max Depth = 2496 + Unknown Stack Size
 <LI>Call Chain = audPlaybackComplete &rArr; haltPlayback &rArr; freeBuffs &rArr; releaseBuff &rArr; adjBuffCnt &rArr; tbErr &rArr; USBmode &rArr; logPowerUp &rArr; NLogShowStatus &rArr; logEvtNININI &rArr; logEvtS &rArr;  tbErr (Cycle)
 </UL>
 <BR>[Calls]<UL><LI><a href="#[3ed]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;logEvtFmt
@@ -5367,7 +5367,7 @@ Global Symbols
 </UL>
 
 <P><STRONG><a name="[400]"></a>audRecordComplete</STRONG> (Thumb, 158 bytes, Stack size 8 bytes, audio.o(i.audRecordComplete))
-<BR><BR>[Stack]<UL><LI>Max Depth = 2496 + Unknown Stack Size
+<BR><BR>[Stack]<UL><LI>Max Depth = 2504 + Unknown Stack Size
 <LI>Call Chain = audRecordComplete &rArr; audSaveBuffs &rArr; saveBuff &rArr; releaseBuff &rArr; adjBuffCnt &rArr; tbErr &rArr; USBmode &rArr; logPowerUp &rArr; NLogShowStatus &rArr; logEvtNININI &rArr; logEvtS &rArr;  tbErr (Cycle)
 </UL>
 <BR>[Calls]<UL><LI><a href="#[28a]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;dbgEvt
@@ -5384,7 +5384,7 @@ Global Symbols
 </UL>
 
 <P><STRONG><a name="[204]"></a>audRequestRecStop</STRONG> (Thumb, 44 bytes, Stack size 8 bytes, audio.o(i.audRequestRecStop))
-<BR><BR>[Stack]<UL><LI>Max Depth = 2504 + Unknown Stack Size
+<BR><BR>[Stack]<UL><LI>Max Depth = 2512 + Unknown Stack Size
 <LI>Call Chain = audRequestRecStop &rArr; audRecordComplete &rArr; audSaveBuffs &rArr; saveBuff &rArr; releaseBuff &rArr; adjBuffCnt &rArr; tbErr &rArr; USBmode &rArr; logPowerUp &rArr; NLogShowStatus &rArr; logEvtNININI &rArr; logEvtS &rArr;  tbErr (Cycle)
 </UL>
 <BR>[Calls]<UL><LI><a href="#[35c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;ledFg
@@ -5395,7 +5395,7 @@ Global Symbols
 </UL>
 
 <P><STRONG><a name="[3f8]"></a>audSaveBuffs</STRONG> (Thumb, 74 bytes, Stack size 16 bytes, audio.o(i.audSaveBuffs))
-<BR><BR>[Stack]<UL><LI>Max Depth = 2488 + Unknown Stack Size
+<BR><BR>[Stack]<UL><LI>Max Depth = 2496 + Unknown Stack Size
 <LI>Call Chain = audSaveBuffs &rArr; saveBuff &rArr; releaseBuff &rArr; adjBuffCnt &rArr; tbErr &rArr; USBmode &rArr; logPowerUp &rArr; NLogShowStatus &rArr; logEvtNININI &rArr; logEvtS &rArr;  tbErr (Cycle)
 </UL>
 <BR>[Calls]<UL><LI><a href="#[28a]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;dbgEvt
@@ -5413,7 +5413,7 @@ Global Symbols
 </UL>
 
 <P><STRONG><a name="[2e1]"></a>audStartRecording</STRONG> (Thumb, 256 bytes, Stack size 32 bytes, audio.o(i.audStartRecording))
-<BR><BR>[Stack]<UL><LI>Max Depth = 2504 + Unknown Stack Size
+<BR><BR>[Stack]<UL><LI>Max Depth = 2512 + Unknown Stack Size
 <LI>Call Chain = audStartRecording &rArr; startRecord &rArr; allocBuff &rArr; adjBuffCnt &rArr; tbErr &rArr; USBmode &rArr; logPowerUp &rArr; NLogShowStatus &rArr; logEvtNININI &rArr; logEvtS &rArr;  tbErr (Cycle)
 </UL>
 <BR>[Calls]<UL><LI><a href="#[1fc]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;tbErr
@@ -5427,14 +5427,14 @@ Global Symbols
 <LI><a href="#[2de]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;PlayRecCmd
 </UL>
 
-<P><STRONG><a name="[403]"></a>audStopAudio</STRONG> (Thumb, 248 bytes, Stack size 32 bytes, audio.o(i.audStopAudio))
-<BR><BR>[Stack]<UL><LI>Max Depth = 2528 + Unknown Stack Size
+<P><STRONG><a name="[403]"></a>audStopAudio</STRONG> (Thumb, 256 bytes, Stack size 32 bytes, audio.o(i.audStopAudio))
+<BR><BR>[Stack]<UL><LI>Max Depth = 2536 + Unknown Stack Size
 <LI>Call Chain = audStopAudio &rArr; audRecordComplete &rArr; audSaveBuffs &rArr; saveBuff &rArr; releaseBuff &rArr; adjBuffCnt &rArr; tbErr &rArr; USBmode &rArr; logPowerUp &rArr; NLogShowStatus &rArr; logEvtNININI &rArr; logEvtS &rArr;  tbErr (Cycle)
 </UL>
 <BR>[Calls]<UL><LI><a href="#[3ed]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;logEvtFmt
 <LI><a href="#[205]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;dbgLog
 <LI><a href="#[202]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;audGetState
-<LI><a href="#[38c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;logEvt
+<LI><a href="#[3c4]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;logEvtNI
 <LI><a href="#[3f7]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;haltRecord
 <LI><a href="#[3f5]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;haltPlayback
 <LI><a href="#[401]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;freeBuffs
@@ -5449,7 +5449,7 @@ Global Symbols
 </UL>
 
 <P><STRONG><a name="[3c0]"></a>buildPath</STRONG> (Thumb, 166 bytes, Stack size 40 bytes, controlparser.o(i.buildPath))
-<BR><BR>[Stack]<UL><LI>Max Depth = 2456 + Unknown Stack Size
+<BR><BR>[Stack]<UL><LI>Max Depth = 2464 + Unknown Stack Size
 <LI>Call Chain = buildPath &rArr; tbErr &rArr; USBmode &rArr; logPowerUp &rArr; NLogShowStatus &rArr; logEvtNININI &rArr; logEvtS &rArr;  tbErr (Cycle)
 </UL>
 <BR>[Calls]<UL><LI><a href="#[1fc]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;tbErr
@@ -5658,7 +5658,7 @@ Global Symbols
 <LI><a href="#[7b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;powerThreadProc
 </UL>
 
-<P><STRONG><a name="[7a]"></a>checkPowerTimer</STRONG> (Thumb, 44 bytes, Stack size 8 bytes, powermanager.o(i.checkPowerTimer))
+<P><STRONG><a name="[7a]"></a>checkPowerTimer</STRONG> (Thumb, 50 bytes, Stack size 8 bytes, powermanager.o(i.checkPowerTimer))
 <BR><BR>[Stack]<UL><LI>Max Depth = 80<LI>Call Chain = checkPowerTimer &rArr; osEventFlagsSet &rArr; osRtxPostProcess &rArr; isr_queue_put
 </UL>
 <BR>[Calls]<UL><LI><a href="#[422]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;setPowerCheckTimer
@@ -5798,7 +5798,6 @@ Global Symbols
 <BR>[Called By]<UL><LI><a href="#[50a]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;logEvtS
 <LI><a href="#[3d0]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;tbAlloc
 <LI><a href="#[175]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HardFault_Handler_C
-<LI><a href="#[4f7]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;keypadTestKey
 <LI><a href="#[77]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;inputThread
 <LI><a href="#[214]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;handleInterrupt
 <LI><a href="#[45c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;enableInputs
@@ -5835,6 +5834,7 @@ Global Symbols
 <LI><a href="#[426]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;closeLog
 <LI><a href="#[4db]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;updateKeyState
 <LI><a href="#[4f6]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;startKeypadTest
+<LI><a href="#[4f7]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;keypadTestKey
 <LI><a href="#[362]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;uninitLUN
 <LI><a href="#[35b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;initLUN
 <LI><a href="#[35a]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;getCacheInfoLUN
@@ -5921,11 +5921,10 @@ Global Symbols
 <LI><a href="#[446]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;fexists
 <LI><a href="#[441]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;debugLoop
 <LI><a href="#[7f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;talking_book
-<LI><a href="#[4f7]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;keypadTestKey
 <LI><a href="#[77]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;inputThread
 <LI><a href="#[45c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;enableInputs
 <LI><a href="#[428]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;configInputKey
-<LI><a href="#[516]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;showTknTable
+<LI><a href="#[517]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;showTknTable
 <LI><a href="#[591]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;parseFile
 <LI><a href="#[4e3]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;readControlDef
 <LI><a href="#[506]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;loadStats
@@ -5951,6 +5950,7 @@ Global Symbols
 <LI><a href="#[426]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;closeLog
 <LI><a href="#[78]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;ledThread
 <LI><a href="#[4f6]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;startKeypadTest
+<LI><a href="#[4f7]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;keypadTestKey
 <LI><a href="#[49d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;findLogNext
 <LI><a href="#[460]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;findCurrNLog
 <LI><a href="#[2d9]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;NLogWriteSA
@@ -5986,7 +5986,7 @@ Global Symbols
 </UL>
 
 <P><STRONG><a name="[441]"></a>debugLoop</STRONG> (Thumb, 286 bytes, Stack size 16 bytes, dbgloop.o(i.debugLoop))
-<BR><BR>[Stack]<UL><LI>Max Depth = 2696 + Unknown Stack Size
+<BR><BR>[Stack]<UL><LI>Max Depth = 2704 + Unknown Stack Size
 <LI>Call Chain = debugLoop &rArr; PlayRecCmd &rArr; playWave &rArr; audStopAudio &rArr; audRecordComplete &rArr; audSaveBuffs &rArr; saveBuff &rArr; releaseBuff &rArr; adjBuffCnt &rArr; tbErr &rArr; USBmode &rArr; logPowerUp &rArr; NLogShowStatus &rArr; logEvtNININI &rArr; logEvtS &rArr;  tbErr (Cycle)
 </UL>
 <BR>[Calls]<UL><LI><a href="#[206]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;gSet
@@ -6237,7 +6237,7 @@ Global Symbols
 </UL>
 
 <P><STRONG><a name="[468]"></a>executeCSM</STRONG> (Thumb, 300 bytes, Stack size 24 bytes, controlmanager.o(i.executeCSM))
-<BR><BR>[Stack]<UL><LI>Max Depth = 2744 + Unknown Stack Size
+<BR><BR>[Stack]<UL><LI>Max Depth = 2752 + Unknown Stack Size
 <LI>Call Chain = executeCSM &rArr; changeCSMstate &rArr; doAction &rArr; startRecAudio &rArr; resetAudio &rArr; audStopAudio &rArr; audRecordComplete &rArr; audSaveBuffs &rArr; saveBuff &rArr; releaseBuff &rArr; adjBuffCnt &rArr; tbErr &rArr; USBmode &rArr; logPowerUp &rArr; NLogShowStatus &rArr; logEvtNININI &rArr; logEvtS &rArr;  tbErr (Cycle)
 </UL>
 <BR>[Calls]<UL><LI><a href="#[1fc]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;tbErr
@@ -6661,7 +6661,7 @@ Global Symbols
 <LI><a href="#[178]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__rt_ctype_table
 <LI><a href="#[49a]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;strrchr
 </UL>
-<BR>[Called By]<UL><LI><a href="#[510]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;logMsgName
+<BR>[Called By]<UL><LI><a href="#[511]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;logMsgName
 </UL>
 
 <P><STRONG><a name="[460]"></a>findCurrNLog</STRONG> (Thumb, 214 bytes, Stack size 24 bytes, norlog.o(i.findCurrNLog))
@@ -6694,7 +6694,7 @@ Global Symbols
 </UL>
 
 <P><STRONG><a name="[49e]"></a>findPackages</STRONG> (Thumb, 122 bytes, Stack size 368 bytes, controlparser.o(i.findPackages))
-<BR><BR>[Stack]<UL><LI>Max Depth = 4824 + Unknown Stack Size
+<BR><BR>[Stack]<UL><LI>Max Depth = 4832 + Unknown Stack Size
 <LI>Call Chain = findPackages &rArr; readContent &rArr; parseFile &rArr; parseValue &rArr; parseLstObj &rArr;  parseValue (Cycle)
 </UL>
 <BR>[Calls]<UL><LI><a href="#[492]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;ffind
@@ -6726,7 +6726,7 @@ Global Symbols
 <LI><a href="#[4a5]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;flashLED
 </UL>
 <BR>[Called By]<UL><LI><a href="#[7f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;talking_book
-<LI><a href="#[52a]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;setBootMode
+<LI><a href="#[52b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;setBootMode
 </UL>
 
 <P><STRONG><a name="[4a6]"></a>flashInit</STRONG> (Thumb, 34 bytes, Stack size 8 bytes, tbutil.o(i.flashInit))
@@ -6735,7 +6735,7 @@ Global Symbols
 <BR>[Calls]<UL><LI><a href="#[2ca]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;LED_Init
 <LI><a href="#[429]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;gConfigKey
 </UL>
-<BR>[Called By]<UL><LI><a href="#[52a]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;setBootMode
+<BR>[Called By]<UL><LI><a href="#[52b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;setBootMode
 </UL>
 
 <P><STRONG><a name="[4a5]"></a>flashLED</STRONG> (Thumb, 112 bytes, Stack size 16 bytes, tbutil.o(i.flashLED))
@@ -6860,10 +6860,10 @@ Global Symbols
 </UL>
 <BR>[Calls]<UL><LI><a href="#[4c2]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;osKernelGetSysTimerCount
 </UL>
-<BR>[Called By]<UL><LI><a href="#[536]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc_wfe
-<LI><a href="#[53e]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc_select_tran_state
-<LI><a href="#[54c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc_select_bus_width
-<LI><a href="#[545]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc_native_init
+<BR>[Called By]<UL><LI><a href="#[537]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc_wfe
+<LI><a href="#[53f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc_select_tran_state
+<LI><a href="#[54d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc_select_bus_width
+<LI><a href="#[546]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc_native_init
 </UL>
 
 <P><STRONG><a name="[4c3]"></a>fs_get_sys_tick_us</STRONG> (Thumb, 22 bytes, Stack size 8 bytes, fs_config.o(i.fs_get_sys_tick_us))
@@ -6872,10 +6872,10 @@ Global Symbols
 <BR>[Calls]<UL><LI><a href="#[4c4]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;osKernelGetSysTimerFreq
 <LI><a href="#[387]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_uldivmod
 </UL>
-<BR>[Called By]<UL><LI><a href="#[536]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc_wfe
-<LI><a href="#[53e]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc_select_tran_state
-<LI><a href="#[54c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc_select_bus_width
-<LI><a href="#[545]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc_native_init
+<BR>[Called By]<UL><LI><a href="#[537]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc_wfe
+<LI><a href="#[53f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc_select_tran_state
+<LI><a href="#[54d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc_select_bus_width
+<LI><a href="#[546]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc_native_init
 </UL>
 
 <P><STRONG><a name="[433]"></a>fs_get_time</STRONG> (Thumb, 14 bytes, Stack size 8 bytes, fs_get_time.o(i.fs_get_time))
@@ -6981,8 +6981,8 @@ Global Symbols
 <BR>[Called By]<UL><LI><a href="#[d8]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;USBD_MSC0_LUN_Write
 </UL>
 
-<P><STRONG><a name="[549]"></a>fs_mc_lock_unlock</STRONG> (Thumb, 4 bytes, Stack size 0 bytes, fs_mc_mci.o(i.fs_mc_lock_unlock))
-<BR><BR>[Called By]<UL><LI><a href="#[545]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc_native_init
+<P><STRONG><a name="[54a]"></a>fs_mc_lock_unlock</STRONG> (Thumb, 4 bytes, Stack size 0 bytes, fs_mc_mci.o(i.fs_mc_lock_unlock))
+<BR><BR>[Called By]<UL><LI><a href="#[546]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc_native_init
 </UL>
 
 <P><STRONG><a name="[394]"></a>fs_mutex_acquire</STRONG> (Thumb, 18 bytes, Stack size 8 bytes, fs_config.o(i.fs_mutex_acquire))
@@ -7052,11 +7052,11 @@ Global Symbols
 </UL>
 <BR>[Calls]<UL><LI><a href="#[326]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;osDelay
 </UL>
-<BR>[Called By]<UL><LI><a href="#[52f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc_mci_Init
-<LI><a href="#[543]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mci_card_power
-<LI><a href="#[54c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc_select_bus_width
-<LI><a href="#[545]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc_native_init
-<LI><a href="#[538]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc_control_sleep
+<BR>[Called By]<UL><LI><a href="#[530]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc_mci_Init
+<LI><a href="#[544]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mci_card_power
+<LI><a href="#[54d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc_select_bus_width
+<LI><a href="#[546]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc_native_init
+<LI><a href="#[539]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc_control_sleep
 </UL>
 
 <P><STRONG><a name="[495]"></a>fs_strmatch</STRONG> (Thumb, 80 bytes, Stack size 24 bytes, fs_common.o(i.fs_strmatch))
@@ -7172,7 +7172,7 @@ Global Symbols
 </UL>
 
 <P><STRONG><a name="[279]"></a>gDef</STRONG> (Thumb, 336 bytes, Stack size 40 bytes, tbutil.o(i.gDef))
-<BR><BR>[Stack]<UL><LI>Max Depth = 2456 + Unknown Stack Size
+<BR><BR>[Stack]<UL><LI>Max Depth = 2464 + Unknown Stack Size
 <LI>Call Chain = gDef &rArr; tbErr &rArr; USBmode &rArr; logPowerUp &rArr; NLogShowStatus &rArr; logEvtNININI &rArr; logEvtS &rArr;  tbErr (Cycle)
 </UL>
 <BR>[Calls]<UL><LI><a href="#[1fc]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;tbErr
@@ -7186,7 +7186,7 @@ Global Symbols
 <P><STRONG><a name="[215]"></a>gGet</STRONG> (Thumb, 64 bytes, Stack size 8 bytes, tbutil.o(i.gGet))
 <BR><BR>[Stack]<UL><LI>Max Depth = 8<LI>Call Chain = gGet
 </UL>
-<BR>[Called By]<UL><LI><a href="#[52a]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;setBootMode
+<BR>[Called By]<UL><LI><a href="#[52b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;setBootMode
 <LI><a href="#[4ea]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;initializeInterrupts
 <LI><a href="#[45c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;enableInputs
 <LI><a href="#[41c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;checkPower
@@ -7234,7 +7234,7 @@ Global Symbols
 </UL>
 
 <P><STRONG><a name="[4d1]"></a>getField</STRONG> (Thumb, 170 bytes, Stack size 136 bytes, tkntable.o(i.getField))
-<BR><BR>[Stack]<UL><LI>Max Depth = 2872 + Unknown Stack Size
+<BR><BR>[Stack]<UL><LI>Max Depth = 2880 + Unknown Stack Size
 <LI>Call Chain = getField &rArr; toTkn &rArr; initTknTable &rArr;  toTkn (Cycle)
 </UL>
 <BR>[Calls]<UL><LI><a href="#[4d2]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;listEl
@@ -7260,7 +7260,7 @@ Global Symbols
 </UL>
 
 <P><STRONG><a name="[4d6]"></a>getIntFld</STRONG> (Thumb, 44 bytes, Stack size 32 bytes, tkntable.o(i.getIntFld))
-<BR><BR>[Stack]<UL><LI>Max Depth = 2904 + Unknown Stack Size
+<BR><BR>[Stack]<UL><LI>Max Depth = 2912 + Unknown Stack Size
 <LI>Call Chain = getIntFld &rArr; getField &rArr; toTkn &rArr; initTknTable &rArr;  toTkn (Cycle)
 </UL>
 <BR>[Calls]<UL><LI><a href="#[3e7]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;tknStr
@@ -7298,7 +7298,7 @@ Global Symbols
 </UL>
 
 <P><STRONG><a name="[4d9]"></a>getStrFld</STRONG> (Thumb, 46 bytes, Stack size 112 bytes, controlparser.o(i.getStrFld))
-<BR><BR>[Stack]<UL><LI>Max Depth = 2984 + Unknown Stack Size
+<BR><BR>[Stack]<UL><LI>Max Depth = 2992 + Unknown Stack Size
 <LI>Call Chain = getStrFld &rArr; getField &rArr; toTkn &rArr; initTknTable &rArr;  toTkn (Cycle)
 </UL>
 <BR>[Calls]<UL><LI><a href="#[4d3]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;toStr
@@ -7466,8 +7466,8 @@ Global Symbols
 <LI><a href="#[3cd]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;i2c_wrReg
 </UL>
 
-<P><STRONG><a name="[4e1]"></a>initControlManager</STRONG> (Thumb, 354 bytes, Stack size 8 bytes, controlmanager.o(i.initControlManager))
-<BR><BR>[Stack]<UL><LI>Max Depth = 4832 + Unknown Stack Size
+<P><STRONG><a name="[4e1]"></a>initControlManager</STRONG> (Thumb, 358 bytes, Stack size 8 bytes, controlmanager.o(i.initControlManager))
+<BR><BR>[Stack]<UL><LI>Max Depth = 4840 + Unknown Stack Size
 <LI>Call Chain = initControlManager &rArr; findPackages &rArr; readContent &rArr; parseFile &rArr; parseValue &rArr; parseLstObj &rArr;  parseValue (Cycle)
 </UL>
 <BR>[Calls]<UL><LI><a href="#[38a]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;USBmode
@@ -7489,7 +7489,7 @@ Global Symbols
 </UL>
 
 <P><STRONG><a name="[4e6]"></a>initFileOps</STRONG> (Thumb, 64 bytes, Stack size 8 bytes, fileops.o(i.initFileOps))
-<BR><BR>[Stack]<UL><LI>Max Depth = 2424 + Unknown Stack Size
+<BR><BR>[Stack]<UL><LI>Max Depth = 2432 + Unknown Stack Size
 <LI>Call Chain = initFileOps &rArr; tbErr &rArr; USBmode &rArr; logPowerUp &rArr; NLogShowStatus &rArr; logEvtNININI &rArr; logEvtS &rArr;  tbErr (Cycle)
 </UL>
 <BR>[Calls]<UL><LI><a href="#[1fc]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;tbErr
@@ -7509,7 +7509,7 @@ Global Symbols
 </UL>
 
 <P><STRONG><a name="[4e9]"></a>initInputManager</STRONG> (Thumb, 148 bytes, Stack size 8 bytes, inputmanager.o(i.initInputManager))
-<BR><BR>[Stack]<UL><LI>Max Depth = 2424 + Unknown Stack Size
+<BR><BR>[Stack]<UL><LI>Max Depth = 2432 + Unknown Stack Size
 <LI>Call Chain = initInputManager &rArr; tbErr &rArr; USBmode &rArr; logPowerUp &rArr; NLogShowStatus &rArr; logEvtNININI &rArr; logEvtS &rArr;  tbErr (Cycle)
 </UL>
 <BR>[Calls]<UL><LI><a href="#[1fc]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;tbErr
@@ -7538,7 +7538,7 @@ Global Symbols
 </UL>
 
 <P><STRONG><a name="[4ee]"></a>initLedManager</STRONG> (Thumb, 94 bytes, Stack size 8 bytes, ledmanager.o(i.initLedManager))
-<BR><BR>[Stack]<UL><LI>Max Depth = 2424 + Unknown Stack Size
+<BR><BR>[Stack]<UL><LI>Max Depth = 2432 + Unknown Stack Size
 <LI>Call Chain = initLedManager &rArr; tbErr &rArr; USBmode &rArr; logPowerUp &rArr; NLogShowStatus &rArr; logEvtNININI &rArr; logEvtS &rArr;  tbErr (Cycle)
 </UL>
 <BR>[Calls]<UL><LI><a href="#[1fc]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;tbErr
@@ -7552,7 +7552,7 @@ Global Symbols
 </UL>
 
 <P><STRONG><a name="[442]"></a>initLogger</STRONG> (Thumb, 48 bytes, Stack size 8 bytes, logger.o(i.initLogger))
-<BR><BR>[Stack]<UL><LI>Max Depth = 2288 + Unknown Stack Size
+<BR><BR>[Stack]<UL><LI>Max Depth = 2296 + Unknown Stack Size
 <LI>Call Chain = initLogger &rArr; logPowerUp &rArr; NLogShowStatus &rArr; logEvtNININI &rArr; logEvtS &rArr;  tbErr (Cycle)
 </UL>
 <BR>[Calls]<UL><LI><a href="#[205]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;dbgLog
@@ -7566,7 +7566,7 @@ Global Symbols
 </UL>
 
 <P><STRONG><a name="[4f0]"></a>initMediaPlayer</STRONG> (Thumb, 90 bytes, Stack size 8 bytes, mediaplayer.o(i.initMediaPlayer))
-<BR><BR>[Stack]<UL><LI>Max Depth = 2464 + Unknown Stack Size
+<BR><BR>[Stack]<UL><LI>Max Depth = 2472 + Unknown Stack Size
 <LI>Call Chain = initMediaPlayer &rArr; audInitialize &rArr; initBuffs &rArr; adjBuffCnt &rArr; tbErr &rArr; USBmode &rArr; logPowerUp &rArr; NLogShowStatus &rArr; logEvtNININI &rArr; logEvtS &rArr;  tbErr (Cycle)
 </UL>
 <BR>[Calls]<UL><LI><a href="#[1fc]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;tbErr
@@ -7591,7 +7591,7 @@ Global Symbols
 </UL>
 
 <P><STRONG><a name="[4f1]"></a>initPowerMgr</STRONG> (Thumb, 134 bytes, Stack size 24 bytes, powermanager.o(i.initPowerMgr))
-<BR><BR>[Stack]<UL><LI>Max Depth = 2440 + Unknown Stack Size
+<BR><BR>[Stack]<UL><LI>Max Depth = 2448 + Unknown Stack Size
 <LI>Call Chain = initPowerMgr &rArr; tbErr &rArr; USBmode &rArr; logPowerUp &rArr; NLogShowStatus &rArr; logEvtNININI &rArr; logEvtS &rArr;  tbErr (Cycle)
 </UL>
 <BR>[Calls]<UL><LI><a href="#[1fc]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;tbErr
@@ -7615,7 +7615,7 @@ Global Symbols
 </UL>
 
 <P><STRONG><a name="[4e2]"></a>initTknTable</STRONG> (Thumb, 178 bytes, Stack size 8 bytes, tkntable.o(i.initTknTable))
-<BR><BR>[Stack]<UL><LI>Max Depth = 2704 + Unknown Stack Size
+<BR><BR>[Stack]<UL><LI>Max Depth = 2712 + Unknown Stack Size
  + In Cycle
 <LI>Call Chain = initTknTable &rArr;  toTkn (Cycle)
 </UL>
@@ -7645,12 +7645,12 @@ Global Symbols
 </UL>
 <BR>[Calls]<UL><LI><a href="#[28a]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;dbgEvt
 <LI><a href="#[205]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;dbgLog
-<LI><a href="#[4f7]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;keypadTestKey
 <LI><a href="#[214]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;handleInterrupt
 <LI><a href="#[2eb]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;sendEvent
 <LI><a href="#[466]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;eventNm
 <LI><a href="#[49c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;osEventFlagsWait
 <LI><a href="#[4f6]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;startKeypadTest
+<LI><a href="#[4f7]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;keypadTestKey
 </UL>
 <BR>[Address Reference Count : 1]<UL><LI> inputmanager.o(i.initInputManager)
 </UL>
@@ -7718,7 +7718,6 @@ Global Symbols
 </UL>
 <BR>[Called By]<UL><LI><a href="#[38a]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;USBmode
 <LI><a href="#[7f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;talking_book
-<LI><a href="#[4f7]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;keypadTestKey
 <LI><a href="#[459]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;showBattCharge
 <LI><a href="#[5a4]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;saveRecording
 <LI><a href="#[41d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;powerDownTBook
@@ -7735,6 +7734,7 @@ Global Symbols
 <LI><a href="#[3ec]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;audPauseResumeAudio
 <LI><a href="#[3de]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;eraseNorFlash
 <LI><a href="#[4f6]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;startKeypadTest
+<LI><a href="#[4f7]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;keypadTestKey
 <LI><a href="#[d2]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;USBD_MSC0_Initialize
 </UL>
 
@@ -7816,7 +7816,6 @@ Global Symbols
 <LI><a href="#[41d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;powerDownTBook
 <LI><a href="#[391]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;logPowerUp
 <LI><a href="#[59c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;readADC
-<LI><a href="#[403]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;audStopAudio
 <LI><a href="#[3ec]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;audPauseResumeAudio
 </UL>
 
@@ -7829,7 +7828,7 @@ Global Symbols
 <LI><a href="#[183]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;free
 <LI><a href="#[181]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;malloc
 </UL>
-<BR>[Called By]<UL><LI><a href="#[512]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;showRTC
+<BR>[Called By]<UL><LI><a href="#[513]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;showRTC
 <LI><a href="#[391]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;logPowerUp
 <LI><a href="#[44d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;playSysAudio
 <LI><a href="#[44e]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;playSubjAudio
@@ -7855,6 +7854,7 @@ Global Symbols
 <LI><a href="#[3c7]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;adjSubj
 <LI><a href="#[3c3]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;adjMsg
 <LI><a href="#[41c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;checkPower
+<LI><a href="#[403]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;audStopAudio
 <LI><a href="#[79]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mediaThread
 <LI><a href="#[4a7]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;flushStats
 </UL>
@@ -7968,7 +7968,7 @@ Global Symbols
 <BR>[Called By]<UL><LI><a href="#[468]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;executeCSM
 </UL>
 
-<P><STRONG><a name="[50a]"></a>logEvtS</STRONG> (Thumb, 300 bytes, Stack size 88 bytes, logger.o(i.logEvtS))
+<P><STRONG><a name="[50a]"></a>logEvtS</STRONG> (Thumb, 314 bytes, Stack size 88 bytes, logger.o(i.logEvtS))
 <BR><BR>[Stack]<UL><LI>Max Depth = 1336 + Unknown Stack Size
  + In Cycle
 <LI>Call Chain = logEvtS &rArr;  tbErr (Cycle)
@@ -7976,11 +7976,12 @@ Global Symbols
 <BR>[Calls]<UL><LI><a href="#[203]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;tbTimeStamp
 <LI><a href="#[1fc]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;tbErr
 <LI><a href="#[28a]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;dbgEvt
+<LI><a href="#[50f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;osKernelGetState
 <LI><a href="#[205]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;dbgLog
 <LI><a href="#[3b5]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;osMutexRelease
 <LI><a href="#[3b2]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;osMutexAcquire
 <LI><a href="#[1fa]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;fflush
-<LI><a href="#[50f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;norEvt
+<LI><a href="#[510]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;norEvt
 <LI><a href="#[18c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__2sprintf
 <LI><a href="#[18b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__2fprintf
 </UL>
@@ -8001,7 +8002,7 @@ Global Symbols
 <LI><a href="#[3df]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;logEvtNINI
 </UL>
 
-<P><STRONG><a name="[510]"></a>logMsgName</STRONG> (Thumb, 92 bytes, Stack size 136 bytes, logger.o(i.logMsgName))
+<P><STRONG><a name="[511]"></a>logMsgName</STRONG> (Thumb, 92 bytes, Stack size 136 bytes, logger.o(i.logMsgName))
 <BR><BR>[Stack]<UL><LI>Max Depth = 840 + Unknown Stack Size
 <LI>Call Chain = logMsgName &rArr; fileMatchNext &rArr; ffind &rArr; fat_ffind &rArr; path_open &rArr; frec_find &rArr; entry_pos_inc &rArr; alloc_table_read &rArr; cache_fat &rArr; EvrFsFAT_SectorWriteFailed &rArr; EventRecord4 &rArr; EventRecordItem
 </UL>
@@ -8029,8 +8030,8 @@ Global Symbols
 <LI><a href="#[41d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;powerDownTBook
 </UL>
 
-<P><STRONG><a name="[391]"></a>logPowerUp</STRONG> (Thumb, 592 bytes, Stack size 568 bytes, logger.o(i.logPowerUp))
-<BR><BR>[Stack]<UL><LI>Max Depth = 2280 + Unknown Stack Size
+<P><STRONG><a name="[391]"></a>logPowerUp</STRONG> (Thumb, 622 bytes, Stack size 576 bytes, logger.o(i.logPowerUp))
+<BR><BR>[Stack]<UL><LI>Max Depth = 2288 + Unknown Stack Size
 <LI>Call Chain = logPowerUp &rArr; NLogShowStatus &rArr; logEvtNININI &rArr; logEvtS &rArr;  tbErr (Cycle)
 </UL>
 <BR>[Calls]<UL><LI><a href="#[50a]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;logEvtS
@@ -8038,7 +8039,7 @@ Global Symbols
 <LI><a href="#[3ed]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;logEvtFmt
 <LI><a href="#[4bb]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;frename
 <LI><a href="#[492]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;ffind
-<LI><a href="#[512]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;showRTC
+<LI><a href="#[513]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;showRTC
 <LI><a href="#[508]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;loadTBookName
 <LI><a href="#[276]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;errLog
 <LI><a href="#[28a]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;dbgEvt
@@ -8047,12 +8048,12 @@ Global Symbols
 <LI><a href="#[3c4]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;logEvtNI
 <LI><a href="#[38c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;logEvt
 <LI><a href="#[2e7]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;loadLine
-<LI><a href="#[513]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;setupRTC
+<LI><a href="#[514]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;setupRTC
 <LI><a href="#[4ef]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;initNorLog
 <LI><a href="#[3de]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;eraseNorFlash
 <LI><a href="#[42f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;copyNorLog
 <LI><a href="#[2d5]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;NLogShowStatus
-<LI><a href="#[511]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;NLogIdx
+<LI><a href="#[512]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;NLogIdx
 <LI><a href="#[3df]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;logEvtNINI
 <LI><a href="#[4d5]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;getFileTime
 <LI><a href="#[43a]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;dateStr
@@ -8089,13 +8090,13 @@ Global Symbols
 <LI><a href="#[c7]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mad_layer_I
 </UL>
 
-<P><STRONG><a name="[51d]"></a>mad_bit_init</STRONG> (Thumb, 12 bytes, Stack size 0 bytes, bit.o(i.mad_bit_init))
+<P><STRONG><a name="[51e]"></a>mad_bit_init</STRONG> (Thumb, 12 bytes, Stack size 0 bytes, bit.o(i.mad_bit_init))
 <BR><BR>[Called By]<UL><LI><a href="#[4f5]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mad_stream_buffer
 <LI><a href="#[c9]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mad_layer_III
-<LI><a href="#[525]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mad_stream_init
+<LI><a href="#[526]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mad_stream_init
 <LI><a href="#[4ba]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mad_stream_sync
-<LI><a href="#[51c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mad_header_decode
-<LI><a href="#[51b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mad_frame_decode
+<LI><a href="#[51d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mad_header_decode
+<LI><a href="#[51c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mad_frame_decode
 </UL>
 
 <P><STRONG><a name="[2c3]"></a>mad_bit_length</STRONG> (Thumb, 30 bytes, Stack size 8 bytes, bit.o(i.mad_bit_length))
@@ -8103,14 +8104,14 @@ Global Symbols
 </UL>
 <BR>[Called By]<UL><LI><a href="#[2b4]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;III_scalefactors_lsf
 <LI><a href="#[2b5]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;III_scalefactors
-<LI><a href="#[51b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mad_frame_decode
+<LI><a href="#[51c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mad_frame_decode
 <LI><a href="#[c8]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mad_layer_II
 </UL>
 
 <P><STRONG><a name="[4b9]"></a>mad_bit_nextbyte</STRONG> (Thumb, 18 bytes, Stack size 0 bytes, bit.o(i.mad_bit_nextbyte))
 <BR><BR>[Called By]<UL><LI><a href="#[c9]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mad_layer_III
 <LI><a href="#[4ba]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mad_stream_sync
-<LI><a href="#[51c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mad_header_decode
+<LI><a href="#[51d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mad_header_decode
 <LI><a href="#[4b8]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;free_bitrate
 </UL>
 
@@ -8137,49 +8138,49 @@ Global Symbols
 <LI><a href="#[448]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;decode_header
 </UL>
 
-<P><STRONG><a name="[550]"></a>mad_decoder_finish</STRONG> (Thumb, 6 bytes, Stack size 0 bytes, decoder.o(i.mad_decoder_finish))
+<P><STRONG><a name="[551]"></a>mad_decoder_finish</STRONG> (Thumb, 6 bytes, Stack size 0 bytes, decoder.o(i.mad_decoder_finish))
 <BR><BR>[Called By]<UL><LI><a href="#[447]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mp3ToWav
 </UL>
 
-<P><STRONG><a name="[54f]"></a>mad_decoder_init</STRONG> (Thumb, 62 bytes, Stack size 24 bytes, decoder.o(i.mad_decoder_init))
+<P><STRONG><a name="[550]"></a>mad_decoder_init</STRONG> (Thumb, 62 bytes, Stack size 24 bytes, decoder.o(i.mad_decoder_init))
 <BR><BR>[Stack]<UL><LI>Max Depth = 24<LI>Call Chain = mad_decoder_init
 </UL>
 <BR>[Called By]<UL><LI><a href="#[447]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mp3ToWav
 </UL>
 
-<P><STRONG><a name="[518]"></a>mad_decoder_run</STRONG> (Thumb, 78 bytes, Stack size 24 bytes, decoder.o(i.mad_decoder_run))
+<P><STRONG><a name="[519]"></a>mad_decoder_run</STRONG> (Thumb, 78 bytes, Stack size 24 bytes, decoder.o(i.mad_decoder_run))
 <BR><BR>[Stack]<UL><LI>Max Depth = 736 + Unknown Stack Size
 <LI>Call Chain = mad_decoder_run &rArr; mp3_malloc &rArr; tbAlloc &rArr; errLog &rArr; logEvtNS &rArr;  logEvtS (Cycle)
 </UL>
-<BR>[Calls]<UL><LI><a href="#[519]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mp3_malloc
-<LI><a href="#[51a]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mp3_free
+<BR>[Calls]<UL><LI><a href="#[51a]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mp3_malloc
+<LI><a href="#[51b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mp3_free
 </UL>
 <BR>[Called By]<UL><LI><a href="#[447]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mp3ToWav
 </UL>
 
-<P><STRONG><a name="[51b]"></a>mad_frame_decode</STRONG> (Thumb, 122 bytes, Stack size 24 bytes, frame.o(i.mad_frame_decode))
+<P><STRONG><a name="[51c]"></a>mad_frame_decode</STRONG> (Thumb, 122 bytes, Stack size 24 bytes, frame.o(i.mad_frame_decode))
 <BR><BR>[Stack]<UL><LI>Max Depth = 264 + Unknown Stack Size
 <LI>Call Chain = mad_frame_decode &rArr; mad_header_decode &rArr; free_bitrate &rArr; decode_header &rArr; mad_bit_crc &rArr; mad_bit_read
 </UL>
 <BR>[Calls]<UL><LI><a href="#[2c3]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mad_bit_length
-<LI><a href="#[51d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mad_bit_init
-<LI><a href="#[51c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mad_header_decode
+<LI><a href="#[51e]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mad_bit_init
+<LI><a href="#[51d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mad_header_decode
 </UL>
 <BR>[Called By]<UL><LI><a href="#[7c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;run_sync
 </UL>
 
-<P><STRONG><a name="[51e]"></a>mad_frame_finish</STRONG> (Thumb, 32 bytes, Stack size 8 bytes, frame.o(i.mad_frame_finish))
+<P><STRONG><a name="[51f]"></a>mad_frame_finish</STRONG> (Thumb, 32 bytes, Stack size 8 bytes, frame.o(i.mad_frame_finish))
 <BR><BR>[Stack]<UL><LI>Max Depth = 64<LI>Call Chain = mad_frame_finish &rArr; mp3_free &rArr; free &rArr; _free_internal &rArr; _mutex_release &rArr; osMutexRelease
 </UL>
-<BR>[Calls]<UL><LI><a href="#[51a]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mp3_free
+<BR>[Calls]<UL><LI><a href="#[51b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mp3_free
 </UL>
 <BR>[Called By]<UL><LI><a href="#[7c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;run_sync
 </UL>
 
-<P><STRONG><a name="[51f]"></a>mad_frame_init</STRONG> (Thumb, 30 bytes, Stack size 8 bytes, frame.o(i.mad_frame_init))
+<P><STRONG><a name="[520]"></a>mad_frame_init</STRONG> (Thumb, 30 bytes, Stack size 8 bytes, frame.o(i.mad_frame_init))
 <BR><BR>[Stack]<UL><LI>Max Depth = 20<LI>Call Chain = mad_frame_init &rArr; mad_frame_mute
 </UL>
-<BR>[Calls]<UL><LI><a href="#[520]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mad_header_init
+<BR>[Calls]<UL><LI><a href="#[521]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mad_header_init
 <LI><a href="#[463]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mad_frame_mute
 </UL>
 <BR>[Called By]<UL><LI><a href="#[7c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;run_sync
@@ -8189,44 +8190,44 @@ Global Symbols
 <BR><BR>[Stack]<UL><LI>Max Depth = 12<LI>Call Chain = mad_frame_mute
 </UL>
 <BR>[Called By]<UL><LI><a href="#[aa]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;error_default
-<LI><a href="#[51f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mad_frame_init
+<LI><a href="#[520]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mad_frame_init
 </UL>
 
-<P><STRONG><a name="[51c]"></a>mad_header_decode</STRONG> (Thumb, 450 bytes, Stack size 32 bytes, frame.o(i.mad_header_decode))
+<P><STRONG><a name="[51d]"></a>mad_header_decode</STRONG> (Thumb, 450 bytes, Stack size 32 bytes, frame.o(i.mad_header_decode))
 <BR><BR>[Stack]<UL><LI>Max Depth = 240 + Unknown Stack Size
 <LI>Call Chain = mad_header_decode &rArr; free_bitrate &rArr; decode_header &rArr; mad_bit_crc &rArr; mad_bit_read
 </UL>
 <BR>[Calls]<UL><LI><a href="#[4b9]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mad_bit_nextbyte
-<LI><a href="#[51d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mad_bit_init
-<LI><a href="#[521]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mad_timer_set
+<LI><a href="#[51e]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mad_bit_init
+<LI><a href="#[522]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mad_timer_set
 <LI><a href="#[4ba]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mad_stream_sync
 <LI><a href="#[4b8]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;free_bitrate
 <LI><a href="#[448]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;decode_header
 </UL>
 <BR>[Called By]<UL><LI><a href="#[7c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;run_sync
-<LI><a href="#[51b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mad_frame_decode
+<LI><a href="#[51c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mad_frame_decode
 </UL>
 
-<P><STRONG><a name="[520]"></a>mad_header_init</STRONG> (Thumb, 32 bytes, Stack size 0 bytes, frame.o(i.mad_header_init))
-<BR><BR>[Called By]<UL><LI><a href="#[51f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mad_frame_init
+<P><STRONG><a name="[521]"></a>mad_header_init</STRONG> (Thumb, 32 bytes, Stack size 0 bytes, frame.o(i.mad_header_init))
+<BR><BR>[Called By]<UL><LI><a href="#[520]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mad_frame_init
 </UL>
 
 <P><STRONG><a name="[c7]"></a>mad_layer_I</STRONG> (Thumb, 550 bytes, Stack size 176 bytes, layer12.o(i.mad_layer_I))
 <BR><BR>[Stack]<UL><LI>Max Depth = 224<LI>Call Chain = mad_layer_I &rArr; mad_bit_crc &rArr; mad_bit_read
 </UL>
-<BR>[Calls]<UL><LI><a href="#[2c0]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mad_bit_read
-<LI><a href="#[449]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mad_bit_crc
+<BR>[Calls]<UL><LI><a href="#[449]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mad_bit_crc
 <LI><a href="#[2c6]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;I_sample
+<LI><a href="#[2c0]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mad_bit_read
 </UL>
 <BR>[Address Reference Count : 1]<UL><LI> frame.o(.constdata)
 </UL>
 <P><STRONG><a name="[c8]"></a>mad_layer_II</STRONG> (Thumb, 1238 bytes, Stack size 400 bytes, layer12.o(i.mad_layer_II))
 <BR><BR>[Stack]<UL><LI>Max Depth = 460<LI>Call Chain = mad_layer_II &rArr; II_samples &rArr; mad_bit_read
 </UL>
-<BR>[Calls]<UL><LI><a href="#[2c0]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mad_bit_read
-<LI><a href="#[2c3]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mad_bit_length
+<BR>[Calls]<UL><LI><a href="#[2c3]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mad_bit_length
 <LI><a href="#[449]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mad_bit_crc
 <LI><a href="#[2c5]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;II_samples
+<LI><a href="#[2c0]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mad_bit_read
 </UL>
 <BR>[Address Reference Count : 1]<UL><LI> frame.o(.constdata)
 </UL>
@@ -8234,16 +8235,16 @@ Global Symbols
 <BR><BR>[Stack]<UL><LI>Max Depth = 7552 + Unknown Stack Size
 <LI>Call Chain = mad_layer_III &rArr; III_decode &rArr; III_reorder &rArr; __aeabi_memcpy4
 </UL>
-<BR>[Calls]<UL><LI><a href="#[519]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mp3_malloc
-<LI><a href="#[522]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mp3_calloc
-<LI><a href="#[2bf]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mad_bit_skip
-<LI><a href="#[2c0]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mad_bit_read
+<BR>[Calls]<UL><LI><a href="#[51a]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mp3_malloc
+<LI><a href="#[523]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mp3_calloc
 <LI><a href="#[4b9]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mad_bit_nextbyte
-<LI><a href="#[51d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mad_bit_init
+<LI><a href="#[51e]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mad_bit_init
 <LI><a href="#[449]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mad_bit_crc
 <LI><a href="#[2c4]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;III_sideinfo
 <LI><a href="#[2b3]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;III_decode
-<LI><a href="#[523]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_memmove
+<LI><a href="#[2bf]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mad_bit_skip
+<LI><a href="#[2c0]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mad_bit_read
+<LI><a href="#[524]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_memmove
 <LI><a href="#[1bd]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_memcpy
 <LI><a href="#[1b6]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;abort
 </UL>
@@ -8252,27 +8253,27 @@ Global Symbols
 <P><STRONG><a name="[4f5]"></a>mad_stream_buffer</STRONG> (Thumb, 34 bytes, Stack size 16 bytes, stream.o(i.mad_stream_buffer))
 <BR><BR>[Stack]<UL><LI>Max Depth = 16<LI>Call Chain = mad_stream_buffer
 </UL>
-<BR>[Calls]<UL><LI><a href="#[51d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mad_bit_init
+<BR>[Calls]<UL><LI><a href="#[51e]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mad_bit_init
 </UL>
 <BR>[Called By]<UL><LI><a href="#[83]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;input
 </UL>
 
-<P><STRONG><a name="[54e]"></a>mad_stream_errorstr</STRONG> (Thumb, 234 bytes, Stack size 0 bytes, stream.o(i.mad_stream_errorstr))
+<P><STRONG><a name="[54f]"></a>mad_stream_errorstr</STRONG> (Thumb, 234 bytes, Stack size 0 bytes, stream.o(i.mad_stream_errorstr))
 <BR><BR>[Called By]<UL><LI><a href="#[462]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mp3Err
 </UL>
 
-<P><STRONG><a name="[524]"></a>mad_stream_finish</STRONG> (Thumb, 20 bytes, Stack size 8 bytes, stream.o(i.mad_stream_finish))
+<P><STRONG><a name="[525]"></a>mad_stream_finish</STRONG> (Thumb, 20 bytes, Stack size 8 bytes, stream.o(i.mad_stream_finish))
 <BR><BR>[Stack]<UL><LI>Max Depth = 64<LI>Call Chain = mad_stream_finish &rArr; mp3_free &rArr; free &rArr; _free_internal &rArr; _mutex_release &rArr; osMutexRelease
 </UL>
-<BR>[Calls]<UL><LI><a href="#[51a]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mp3_free
+<BR>[Calls]<UL><LI><a href="#[51b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mp3_free
 </UL>
 <BR>[Called By]<UL><LI><a href="#[7c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;run_sync
 </UL>
 
-<P><STRONG><a name="[525]"></a>mad_stream_init</STRONG> (Thumb, 54 bytes, Stack size 8 bytes, stream.o(i.mad_stream_init))
+<P><STRONG><a name="[526]"></a>mad_stream_init</STRONG> (Thumb, 54 bytes, Stack size 8 bytes, stream.o(i.mad_stream_init))
 <BR><BR>[Stack]<UL><LI>Max Depth = 8<LI>Call Chain = mad_stream_init
 </UL>
-<BR>[Calls]<UL><LI><a href="#[51d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mad_bit_init
+<BR>[Calls]<UL><LI><a href="#[51e]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mad_bit_init
 </UL>
 <BR>[Called By]<UL><LI><a href="#[7c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;run_sync
 </UL>
@@ -8281,9 +8282,9 @@ Global Symbols
 <BR><BR>[Stack]<UL><LI>Max Depth = 16<LI>Call Chain = mad_stream_sync
 </UL>
 <BR>[Calls]<UL><LI><a href="#[4b9]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mad_bit_nextbyte
-<LI><a href="#[51d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mad_bit_init
+<LI><a href="#[51e]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mad_bit_init
 </UL>
-<BR>[Called By]<UL><LI><a href="#[51c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mad_header_decode
+<BR>[Called By]<UL><LI><a href="#[51d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mad_header_decode
 <LI><a href="#[4b8]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;free_bitrate
 </UL>
 
@@ -8293,63 +8294,63 @@ Global Symbols
 <BR>[Called By]<UL><LI><a href="#[7c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;run_sync
 </UL>
 
-<P><STRONG><a name="[526]"></a>mad_synth_init</STRONG> (Thumb, 42 bytes, Stack size 8 bytes, synth.o(i.mad_synth_init))
+<P><STRONG><a name="[527]"></a>mad_synth_init</STRONG> (Thumb, 42 bytes, Stack size 8 bytes, synth.o(i.mad_synth_init))
 <BR><BR>[Stack]<UL><LI>Max Depth = 20<LI>Call Chain = mad_synth_init &rArr; mad_synth_mute
 </UL>
-<BR>[Calls]<UL><LI><a href="#[527]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mad_synth_mute
+<BR>[Calls]<UL><LI><a href="#[528]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mad_synth_mute
 </UL>
 <BR>[Called By]<UL><LI><a href="#[7c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;run_sync
 </UL>
 
-<P><STRONG><a name="[527]"></a>mad_synth_mute</STRONG> (Thumb, 98 bytes, Stack size 12 bytes, synth.o(i.mad_synth_mute))
+<P><STRONG><a name="[528]"></a>mad_synth_mute</STRONG> (Thumb, 98 bytes, Stack size 12 bytes, synth.o(i.mad_synth_mute))
 <BR><BR>[Stack]<UL><LI>Max Depth = 12<LI>Call Chain = mad_synth_mute
 </UL>
-<BR>[Called By]<UL><LI><a href="#[526]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mad_synth_init
+<BR>[Called By]<UL><LI><a href="#[527]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mad_synth_init
 </UL>
 
-<P><STRONG><a name="[521]"></a>mad_timer_set</STRONG> (Thumb, 284 bytes, Stack size 24 bytes, timer.o(i.mad_timer_set))
+<P><STRONG><a name="[522]"></a>mad_timer_set</STRONG> (Thumb, 284 bytes, Stack size 24 bytes, timer.o(i.mad_timer_set))
 <BR><BR>[Stack]<UL><LI>Max Depth = 104 + Unknown Stack Size
 <LI>Call Chain = mad_timer_set &rArr; scale_rational &rArr; reduce_rational &rArr; abort &rArr; __rt_SIGABRT &rArr; __rt_SIGABRT_inner &rArr; __default_signal_display &rArr; _ttywrch
 </UL>
-<BR>[Calls]<UL><LI><a href="#[528]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;scale_rational
-<LI><a href="#[529]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;reduce_timer
+<BR>[Calls]<UL><LI><a href="#[529]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;scale_rational
+<LI><a href="#[52a]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;reduce_timer
 </UL>
-<BR>[Called By]<UL><LI><a href="#[51c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mad_header_decode
+<BR>[Called By]<UL><LI><a href="#[51d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mad_header_decode
 </UL>
 
 <P><STRONG><a name="[169]"></a>main</STRONG> (Thumb, 152 bytes, Stack size 16 bytes, main.o(i.main))
-<BR><BR>[Stack]<UL><LI>Max Depth = 4872 + Unknown Stack Size
+<BR><BR>[Stack]<UL><LI>Max Depth = 4880 + Unknown Stack Size
 <LI>Call Chain = main &rArr; talking_book &rArr; initControlManager &rArr; findPackages &rArr; readContent &rArr; parseFile &rArr; parseValue &rArr; parseLstObj &rArr;  parseValue (Cycle)
 </UL>
 <BR>[Calls]<UL><LI><a href="#[7f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;talking_book
-<LI><a href="#[52b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;setCpuClock
+<LI><a href="#[52c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;setCpuClock
 <LI><a href="#[384]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;osThreadNew
-<LI><a href="#[52d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;osKernelStart
+<LI><a href="#[52e]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;osKernelStart
 <LI><a href="#[3b6]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;osKernelInitialize
 <LI><a href="#[4f3]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;initPrintf
 <LI><a href="#[4e8]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;initIDs
-<LI><a href="#[52c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SystemCoreClockUpdate
+<LI><a href="#[52d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SystemCoreClockUpdate
 <LI><a href="#[278]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;GPIO_DefineSignals
-<LI><a href="#[52a]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;setBootMode
+<LI><a href="#[52b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;setBootMode
 </UL>
 <BR>[Called By]<UL><LI><a href="#[168]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__rt_entry_main
 </UL>
 
-<P><STRONG><a name="[52e]"></a>mc_mci_DevCtrl</STRONG> (Thumb, 392 bytes, Stack size 48 bytes, fs_mc_mci.o(i.mc_mci_DevCtrl))
+<P><STRONG><a name="[52f]"></a>mc_mci_DevCtrl</STRONG> (Thumb, 392 bytes, Stack size 48 bytes, fs_mc_mci.o(i.mc_mci_DevCtrl))
 <BR><BR>[Stack]<UL><LI>Max Depth = 384<LI>Call Chain = mc_mci_DevCtrl &rArr; mc_mci_Init &rArr; mc_native_init &rArr; mc_control_lock &rArr; mc_set_block_len &rArr; mc_wfe &rArr; fs_get_sys_tick_us &rArr; osKernelGetSysTimerFreq &rArr; svcRtxKernelGetSysTimerFreq &rArr; EvrRtxKernelGetSysTimerFreq &rArr; EventRecord2 &rArr; EventRecordItem
 </UL>
 <BR>[Calls]<UL><LI><a href="#[227]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;EventRecord4
-<LI><a href="#[52f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc_mci_Init
+<LI><a href="#[530]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc_mci_Init
 <LI><a href="#[224]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;EventRecord2
-<LI><a href="#[53b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mci_update_sw_state
-<LI><a href="#[536]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc_wfe
-<LI><a href="#[535]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc_set_block_len
-<LI><a href="#[53e]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc_select_tran_state
-<LI><a href="#[53c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc_select_deselect
-<LI><a href="#[537]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc_read_status
-<LI><a href="#[538]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc_control_sleep
-<LI><a href="#[534]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc_control_lock
-<LI><a href="#[53d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;fill_cid
+<LI><a href="#[53c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mci_update_sw_state
+<LI><a href="#[537]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc_wfe
+<LI><a href="#[536]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc_set_block_len
+<LI><a href="#[53f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc_select_tran_state
+<LI><a href="#[53d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc_select_deselect
+<LI><a href="#[538]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc_read_status
+<LI><a href="#[539]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc_control_sleep
+<LI><a href="#[535]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc_control_lock
+<LI><a href="#[53e]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;fill_cid
 <LI><a href="#[23d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;EvrFsMcMCI_SendCommandError
 </UL>
 <BR>[Called By]<UL><LI><a href="#[cf]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc0_DevCtrl
@@ -8361,25 +8362,25 @@ Global Symbols
 <BR>[Called By]<UL><LI><a href="#[73]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;MC0_MCI_SignalEvent
 </UL>
 
-<P><STRONG><a name="[52f]"></a>mc_mci_Init</STRONG> (Thumb, 286 bytes, Stack size 16 bytes, fs_mc_mci.o(i.mc_mci_Init))
+<P><STRONG><a name="[530]"></a>mc_mci_Init</STRONG> (Thumb, 286 bytes, Stack size 16 bytes, fs_mc_mci.o(i.mc_mci_Init))
 <BR><BR>[Stack]<UL><LI>Max Depth = 336<LI>Call Chain = mc_mci_Init &rArr; mc_native_init &rArr; mc_control_lock &rArr; mc_set_block_len &rArr; mc_wfe &rArr; fs_get_sys_tick_us &rArr; osKernelGetSysTimerFreq &rArr; svcRtxKernelGetSysTimerFreq &rArr; EvrRtxKernelGetSysTimerFreq &rArr; EventRecord2 &rArr; EventRecordItem
 </UL>
 <BR>[Calls]<UL><LI><a href="#[227]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;EventRecord4
 <LI><a href="#[4ca]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;fs_set_rtos_delay
 <LI><a href="#[224]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;EventRecord2
-<LI><a href="#[544]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mci_idle_clock
-<LI><a href="#[541]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mci_data_timeout
-<LI><a href="#[543]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mci_card_power
-<LI><a href="#[53f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mci_bus_width
-<LI><a href="#[540]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mci_bus_speed_mode
-<LI><a href="#[542]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mci_bus_speed
-<LI><a href="#[545]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc_native_init
+<LI><a href="#[545]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mci_idle_clock
+<LI><a href="#[542]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mci_data_timeout
+<LI><a href="#[544]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mci_card_power
+<LI><a href="#[540]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mci_bus_width
+<LI><a href="#[541]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mci_bus_speed_mode
+<LI><a href="#[543]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mci_bus_speed
+<LI><a href="#[546]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc_native_init
 </UL>
-<BR>[Called By]<UL><LI><a href="#[52e]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc_mci_DevCtrl
+<BR>[Called By]<UL><LI><a href="#[52f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc_mci_DevCtrl
 <LI><a href="#[ca]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc0_Init
 </UL>
 
-<P><STRONG><a name="[530]"></a>mc_mci_ReadInfo</STRONG> (Thumb, 74 bytes, Stack size 16 bytes, fs_mc_mci.o(i.mc_mci_ReadInfo))
+<P><STRONG><a name="[531]"></a>mc_mci_ReadInfo</STRONG> (Thumb, 74 bytes, Stack size 16 bytes, fs_mc_mci.o(i.mc_mci_ReadInfo))
 <BR><BR>[Stack]<UL><LI>Max Depth = 96<LI>Call Chain = mc_mci_ReadInfo &rArr; EventRecord2 &rArr; EventRecordItem
 </UL>
 <BR>[Calls]<UL><LI><a href="#[224]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;EventRecord2
@@ -8387,40 +8388,40 @@ Global Symbols
 <BR>[Called By]<UL><LI><a href="#[ce]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc0_RdInfo
 </UL>
 
-<P><STRONG><a name="[531]"></a>mc_mci_ReadSector</STRONG> (Thumb, 362 bytes, Stack size 64 bytes, fs_mc_mci.o(i.mc_mci_ReadSector))
+<P><STRONG><a name="[532]"></a>mc_mci_ReadSector</STRONG> (Thumb, 362 bytes, Stack size 64 bytes, fs_mc_mci.o(i.mc_mci_ReadSector))
 <BR><BR>[Stack]<UL><LI>Max Depth = 256<LI>Call Chain = mc_mci_ReadSector &rArr; mc_select_tran_state &rArr; mc_stop_transmission &rArr; mc_wfe &rArr; fs_get_sys_tick_us &rArr; osKernelGetSysTimerFreq &rArr; svcRtxKernelGetSysTimerFreq &rArr; EvrRtxKernelGetSysTimerFreq &rArr; EventRecord2 &rArr; EventRecordItem
 </UL>
 <BR>[Calls]<UL><LI><a href="#[227]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;EventRecord4
 <LI><a href="#[224]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;EventRecord2
-<LI><a href="#[536]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc_wfe
-<LI><a href="#[546]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc_stop_transmission
-<LI><a href="#[53e]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc_select_tran_state
-<LI><a href="#[53c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc_select_deselect
+<LI><a href="#[537]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc_wfe
+<LI><a href="#[547]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc_stop_transmission
+<LI><a href="#[53f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc_select_tran_state
+<LI><a href="#[53d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc_select_deselect
 <LI><a href="#[23d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;EvrFsMcMCI_SendCommandError
 <LI><a href="#[23c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;EvrFsMcMCI_ReadXferSetupError
 </UL>
 <BR>[Called By]<UL><LI><a href="#[cc]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc0_RdSect
 </UL>
 
-<P><STRONG><a name="[532]"></a>mc_mci_UnInit</STRONG> (Thumb, 94 bytes, Stack size 16 bytes, fs_mc_mci.o(i.mc_mci_UnInit))
+<P><STRONG><a name="[533]"></a>mc_mci_UnInit</STRONG> (Thumb, 94 bytes, Stack size 16 bytes, fs_mc_mci.o(i.mc_mci_UnInit))
 <BR><BR>[Stack]<UL><LI>Max Depth = 96<LI>Call Chain = mc_mci_UnInit &rArr; EventRecord2 &rArr; EventRecordItem
 </UL>
 <BR>[Calls]<UL><LI><a href="#[224]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;EventRecord2
-<LI><a href="#[543]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mci_card_power
+<LI><a href="#[544]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mci_card_power
 </UL>
 <BR>[Called By]<UL><LI><a href="#[cb]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc0_UnInit
 </UL>
 
-<P><STRONG><a name="[533]"></a>mc_mci_WriteSector</STRONG> (Thumb, 388 bytes, Stack size 64 bytes, fs_mc_mci.o(i.mc_mci_WriteSector))
+<P><STRONG><a name="[534]"></a>mc_mci_WriteSector</STRONG> (Thumb, 388 bytes, Stack size 64 bytes, fs_mc_mci.o(i.mc_mci_WriteSector))
 <BR><BR>[Stack]<UL><LI>Max Depth = 256<LI>Call Chain = mc_mci_WriteSector &rArr; mc_select_tran_state &rArr; mc_stop_transmission &rArr; mc_wfe &rArr; fs_get_sys_tick_us &rArr; osKernelGetSysTimerFreq &rArr; svcRtxKernelGetSysTimerFreq &rArr; EvrRtxKernelGetSysTimerFreq &rArr; EventRecord2 &rArr; EventRecordItem
 </UL>
 <BR>[Calls]<UL><LI><a href="#[227]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;EventRecord4
 <LI><a href="#[224]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;EventRecord2
-<LI><a href="#[536]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc_wfe
-<LI><a href="#[546]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc_stop_transmission
-<LI><a href="#[53e]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc_select_tran_state
-<LI><a href="#[53c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc_select_deselect
-<LI><a href="#[537]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc_read_status
+<LI><a href="#[537]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc_wfe
+<LI><a href="#[547]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc_stop_transmission
+<LI><a href="#[53f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc_select_tran_state
+<LI><a href="#[53d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc_select_deselect
+<LI><a href="#[538]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc_read_status
 <LI><a href="#[23e]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;EvrFsMcMCI_WriteXferSetupError
 <LI><a href="#[23d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;EvrFsMcMCI_SendCommandError
 </UL>
@@ -8435,9 +8436,9 @@ Global Symbols
 <LI><a href="#[504]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;tbOpenReadBinary
 <LI><a href="#[3f0]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;tbCloseFile
 <LI><a href="#[205]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;dbgLog
-<LI><a href="#[518]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mad_decoder_run
-<LI><a href="#[54f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mad_decoder_init
-<LI><a href="#[550]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mad_decoder_finish
+<LI><a href="#[519]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mad_decoder_run
+<LI><a href="#[550]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mad_decoder_init
+<LI><a href="#[551]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mad_decoder_finish
 <LI><a href="#[462]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mp3Err
 <LI><a href="#[1aa]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_memclr4
 <LI><a href="#[3be]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;strlen
@@ -8447,7 +8448,7 @@ Global Symbols
 <BR>[Called By]<UL><LI><a href="#[445]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;decodeMp3
 </UL>
 
-<P><STRONG><a name="[522]"></a>mp3_calloc</STRONG> (Thumb, 40 bytes, Stack size 16 bytes, tbutil.o(i.mp3_calloc))
+<P><STRONG><a name="[523]"></a>mp3_calloc</STRONG> (Thumb, 40 bytes, Stack size 16 bytes, tbutil.o(i.mp3_calloc))
 <BR><BR>[Stack]<UL><LI>Max Depth = 720 + Unknown Stack Size
 <LI>Call Chain = mp3_calloc &rArr; tbAlloc &rArr; errLog &rArr; logEvtNS &rArr;  logEvtS (Cycle)
 </UL>
@@ -8456,28 +8457,28 @@ Global Symbols
 <BR>[Called By]<UL><LI><a href="#[c9]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mad_layer_III
 </UL>
 
-<P><STRONG><a name="[51a]"></a>mp3_free</STRONG> (Thumb, 12 bytes, Stack size 8 bytes, tbutil.o(i.mp3_free))
+<P><STRONG><a name="[51b]"></a>mp3_free</STRONG> (Thumb, 12 bytes, Stack size 8 bytes, tbutil.o(i.mp3_free))
 <BR><BR>[Stack]<UL><LI>Max Depth = 56<LI>Call Chain = mp3_free &rArr; free &rArr; _free_internal &rArr; _mutex_release &rArr; osMutexRelease
 </UL>
 <BR>[Calls]<UL><LI><a href="#[183]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;free
 </UL>
-<BR>[Called By]<UL><LI><a href="#[518]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mad_decoder_run
-<LI><a href="#[524]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mad_stream_finish
-<LI><a href="#[51e]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mad_frame_finish
+<BR>[Called By]<UL><LI><a href="#[519]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mad_decoder_run
+<LI><a href="#[525]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mad_stream_finish
+<LI><a href="#[51f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mad_frame_finish
 </UL>
 
-<P><STRONG><a name="[519]"></a>mp3_malloc</STRONG> (Thumb, 14 bytes, Stack size 8 bytes, tbutil.o(i.mp3_malloc))
+<P><STRONG><a name="[51a]"></a>mp3_malloc</STRONG> (Thumb, 14 bytes, Stack size 8 bytes, tbutil.o(i.mp3_malloc))
 <BR><BR>[Stack]<UL><LI>Max Depth = 712 + Unknown Stack Size
 <LI>Call Chain = mp3_malloc &rArr; tbAlloc &rArr; errLog &rArr; logEvtNS &rArr;  logEvtS (Cycle)
 </UL>
 <BR>[Calls]<UL><LI><a href="#[3d0]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;tbAlloc
 </UL>
-<BR>[Called By]<UL><LI><a href="#[518]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mad_decoder_run
+<BR>[Called By]<UL><LI><a href="#[519]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mad_decoder_run
 <LI><a href="#[c9]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mad_layer_III
 </UL>
 
-<P><STRONG><a name="[551]"></a>nTkn</STRONG> (Thumb, 46 bytes, Stack size 112 bytes, tkntable.o(i.nTkn))
-<BR><BR>[Stack]<UL><LI>Max Depth = 2696 + Unknown Stack Size
+<P><STRONG><a name="[552]"></a>nTkn</STRONG> (Thumb, 46 bytes, Stack size 112 bytes, tkntable.o(i.nTkn))
+<BR><BR>[Stack]<UL><LI>Max Depth = 2704 + Unknown Stack Size
 <LI>Call Chain = nTkn &rArr; cTkn &rArr; tokenize &rArr;  toTkn (Cycle)
 </UL>
 <BR>[Calls]<UL><LI><a href="#[409]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;cTkn
@@ -8509,7 +8510,7 @@ Global Symbols
 <LI><a href="#[2d1]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;NLogReadPage
 </UL>
 
-<P><STRONG><a name="[50f]"></a>norEvt</STRONG> (Thumb, 42 bytes, Stack size 16 bytes, logger.o(i.norEvt))
+<P><STRONG><a name="[510]"></a>norEvt</STRONG> (Thumb, 42 bytes, Stack size 16 bytes, logger.o(i.norEvt))
 <BR><BR>[Stack]<UL><LI>Max Depth = 1248 + Unknown Stack Size
 <LI>Call Chain = norEvt &rArr; appendNorLog &rArr; eraseNorFlash &rArr; copyNorLog &rArr; CheckNLog &rArr; NLogReadSA &rArr; tbOpenWrite &rArr; fexists &rArr; FileSysPower &rArr; errLog &rArr; logEvtNS &rArr;  logEvtS (Cycle)
 </UL>
@@ -8527,8 +8528,8 @@ Global Symbols
 <P><STRONG><a name="[326]"></a>osDelay</STRONG> (Thumb, 40 bytes, Stack size 16 bytes, rtx_delay.o(i.osDelay))
 <BR><BR>[Stack]<UL><LI>Max Depth = 16<LI>Call Chain = osDelay
 </UL>
-<BR>[Calls]<UL><LI><a href="#[555]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;IsIrqMode
-<LI><a href="#[556]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;IsIrqMasked
+<BR>[Calls]<UL><LI><a href="#[556]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;IsIrqMode
+<LI><a href="#[557]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;IsIrqMasked
 </UL>
 <BR>[Called By]<UL><LI><a href="#[218]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;tbDelay_ms
 <LI><a href="#[4ca]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;fs_set_rtos_delay
@@ -8538,8 +8539,8 @@ Global Symbols
 <P><STRONG><a name="[4e7]"></a>osEventFlagsNew</STRONG> (Thumb, 38 bytes, Stack size 16 bytes, rtx_evflags.o(i.osEventFlagsNew))
 <BR><BR>[Stack]<UL><LI>Max Depth = 16<LI>Call Chain = osEventFlagsNew
 </UL>
-<BR>[Calls]<UL><LI><a href="#[557]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;IsIrqMode
-<LI><a href="#[558]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;IsIrqMasked
+<BR>[Calls]<UL><LI><a href="#[558]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;IsIrqMode
+<LI><a href="#[559]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;IsIrqMasked
 </UL>
 <BR>[Called By]<UL><LI><a href="#[4f1]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;initPowerMgr
 <LI><a href="#[4f0]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;initMediaPlayer
@@ -8552,8 +8553,8 @@ Global Symbols
 <BR><BR>[Stack]<UL><LI>Max Depth = 72<LI>Call Chain = osEventFlagsSet &rArr; osRtxPostProcess &rArr; isr_queue_put
 </UL>
 <BR>[Calls]<UL><LI><a href="#[4fa]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;osRtxPostProcess
-<LI><a href="#[557]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;IsIrqMode
-<LI><a href="#[558]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;IsIrqMasked
+<LI><a href="#[558]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;IsIrqMode
+<LI><a href="#[559]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;IsIrqMasked
 <LI><a href="#[21e]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;EventFlagsSet
 </UL>
 <BR>[Called By]<UL><LI><a href="#[35c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;ledFg
@@ -8579,8 +8580,8 @@ Global Symbols
 <P><STRONG><a name="[49c]"></a>osEventFlagsWait</STRONG> (Thumb, 122 bytes, Stack size 48 bytes, rtx_evflags.o(i.osEventFlagsWait))
 <BR><BR>[Stack]<UL><LI>Max Depth = 72<LI>Call Chain = osEventFlagsWait &rArr; EventFlagsCheck
 </UL>
-<BR>[Calls]<UL><LI><a href="#[557]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;IsIrqMode
-<LI><a href="#[558]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;IsIrqMasked
+<BR>[Calls]<UL><LI><a href="#[558]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;IsIrqMode
+<LI><a href="#[559]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;IsIrqMasked
 <LI><a href="#[21b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;EventFlagsCheck
 </UL>
 <BR>[Called By]<UL><LI><a href="#[77]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;inputThread
@@ -8591,7 +8592,7 @@ Global Symbols
 <LI><a href="#[76]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;fileOpThread
 </UL>
 
-<P><STRONG><a name="[559]"></a>osKernelGetState</STRONG> (Thumb, 44 bytes, Stack size 8 bytes, rtx_kernel.o(i.osKernelGetState))
+<P><STRONG><a name="[50f]"></a>osKernelGetState</STRONG> (Thumb, 44 bytes, Stack size 8 bytes, rtx_kernel.o(i.osKernelGetState))
 <BR><BR>[Stack]<UL><LI>Max Depth = 8<LI>Call Chain = osKernelGetState
 </UL>
 <BR>[Calls]<UL><LI><a href="#[88]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;svcRtxKernelGetState
@@ -8599,7 +8600,8 @@ Global Symbols
 <LI><a href="#[55a]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;IsIrqMode
 <LI><a href="#[55b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;IsIrqMasked
 </UL>
-<BR>[Called By]<UL><LI><a href="#[203]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;tbTimeStamp
+<BR>[Called By]<UL><LI><a href="#[50a]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;logEvtS
+<LI><a href="#[203]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;tbTimeStamp
 <LI><a href="#[218]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;tbDelay_ms
 <LI><a href="#[7f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;talking_book
 <LI><a href="#[55e]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;osRtxKernelPreInit
@@ -8662,7 +8664,7 @@ Global Symbols
 <LI><a href="#[165]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;_platform_post_stackheap_init
 </UL>
 
-<P><STRONG><a name="[52d]"></a>osKernelStart</STRONG> (Thumb, 48 bytes, Stack size 8 bytes, rtx_kernel.o(i.osKernelStart))
+<P><STRONG><a name="[52e]"></a>osKernelStart</STRONG> (Thumb, 48 bytes, Stack size 8 bytes, rtx_kernel.o(i.osKernelStart))
 <BR><BR>[Stack]<UL><LI>Max Depth = 96<LI>Call Chain = osKernelStart &rArr; EvrRtxKernelStart &rArr; EventRecord2 &rArr; EventRecordItem
 </UL>
 <BR>[Calls]<UL><LI><a href="#[55a]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;IsIrqMode
@@ -8810,7 +8812,7 @@ Global Symbols
 <P><STRONG><a name="[55e]"></a>osRtxKernelPreInit</STRONG> (Thumb, 14 bytes, Stack size 8 bytes, rtx_lib.o(i.osRtxKernelPreInit))
 <BR><BR>[Stack]<UL><LI>Max Depth = 120<LI>Call Chain = osRtxKernelPreInit &rArr; evr_initialize &rArr; EventRecorderInitialize &rArr; EventRecorderStart &rArr; EventRecordItem
 </UL>
-<BR>[Calls]<UL><LI><a href="#[559]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;osKernelGetState
+<BR>[Calls]<UL><LI><a href="#[50f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;osKernelGetState
 <LI><a href="#[467]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;evr_initialize
 </UL>
 <BR>[Called By]<UL><LI><a href="#[3b6]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;osKernelInitialize
@@ -9292,7 +9294,7 @@ Global Symbols
 </UL>
 
 <P><STRONG><a name="[591]"></a>parseFile</STRONG> (Thumb, 130 bytes, Stack size 424 bytes, tkntable.o(i.parseFile))
-<BR><BR>[Stack]<UL><LI>Max Depth = 3944 + Unknown Stack Size
+<BR><BR>[Stack]<UL><LI>Max Depth = 3952 + Unknown Stack Size
 <LI>Call Chain = parseFile &rArr; parseValue &rArr; parseLstObj &rArr;  parseValue (Cycle)
 </UL>
 <BR>[Calls]<UL><LI><a href="#[592]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;tbShw
@@ -9300,7 +9302,7 @@ Global Symbols
 <LI><a href="#[1fc]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;tbErr
 <LI><a href="#[3f0]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;tbCloseFile
 <LI><a href="#[205]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;dbgLog
-<LI><a href="#[516]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;showTknTable
+<LI><a href="#[517]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;showTknTable
 <LI><a href="#[593]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;parseValue
 <LI><a href="#[409]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;cTkn
 <LI><a href="#[4d3]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;toStr
@@ -9311,7 +9313,7 @@ Global Symbols
 </UL>
 
 <P><STRONG><a name="[450]"></a>pauseResume</STRONG> (Thumb, 8 bytes, Stack size 8 bytes, mediaplayer.o(i.pauseResume))
-<BR><BR>[Stack]<UL><LI>Max Depth = 2568 + Unknown Stack Size
+<BR><BR>[Stack]<UL><LI>Max Depth = 2576 + Unknown Stack Size
 <LI>Call Chain = pauseResume &rArr; audPauseResumeAudio &rArr; setWavPos &rArr; startPlayback &rArr; audLoadBuffs &rArr; loadBuff &rArr; allocBuff &rArr; adjBuffCnt &rArr; tbErr &rArr; USBmode &rArr; logPowerUp &rArr; NLogShowStatus &rArr; logEvtNININI &rArr; logEvtS &rArr;  tbErr (Cycle)
 </UL>
 <BR>[Calls]<UL><LI><a href="#[3ec]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;audPauseResumeAudio
@@ -9377,7 +9379,7 @@ Global Symbols
 </UL>
 
 <P><STRONG><a name="[44e]"></a>playSubjAudio</STRONG> (Thumb, 246 bytes, Stack size 104 bytes, controlmanager.o(i.playSubjAudio))
-<BR><BR>[Stack]<UL><LI>Max Depth = 2640 + Unknown Stack Size
+<BR><BR>[Stack]<UL><LI>Max Depth = 2648 + Unknown Stack Size
 <LI>Call Chain = playSubjAudio &rArr; resetAudio &rArr; audStopAudio &rArr; audRecordComplete &rArr; audSaveBuffs &rArr; saveBuff &rArr; releaseBuff &rArr; adjBuffCnt &rArr; tbErr &rArr; USBmode &rArr; logPowerUp &rArr; NLogShowStatus &rArr; logEvtNININI &rArr; logEvtS &rArr;  tbErr (Cycle)
 </UL>
 <BR>[Calls]<UL><LI><a href="#[3ed]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;logEvtFmt
@@ -9393,7 +9395,7 @@ Global Symbols
 </UL>
 
 <P><STRONG><a name="[44d]"></a>playSysAudio</STRONG> (Thumb, 102 bytes, Stack size 16 bytes, controlmanager.o(i.playSysAudio))
-<BR><BR>[Stack]<UL><LI>Max Depth = 2552 + Unknown Stack Size
+<BR><BR>[Stack]<UL><LI>Max Depth = 2560 + Unknown Stack Size
 <LI>Call Chain = playSysAudio &rArr; resetAudio &rArr; audStopAudio &rArr; audRecordComplete &rArr; audSaveBuffs &rArr; saveBuff &rArr; releaseBuff &rArr; adjBuffCnt &rArr; tbErr &rArr; USBmode &rArr; logPowerUp &rArr; NLogShowStatus &rArr; logEvtNININI &rArr; logEvtS &rArr;  tbErr (Cycle)
 </UL>
 <BR>[Calls]<UL><LI><a href="#[3ed]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;logEvtFmt
@@ -9406,7 +9408,7 @@ Global Symbols
 </UL>
 
 <P><STRONG><a name="[2df]"></a>playWave</STRONG> (Thumb, 490 bytes, Stack size 48 bytes, audio.o(i.playWave))
-<BR><BR>[Stack]<UL><LI>Max Depth = 2576 + Unknown Stack Size
+<BR><BR>[Stack]<UL><LI>Max Depth = 2584 + Unknown Stack Size
 <LI>Call Chain = playWave &rArr; audStopAudio &rArr; audRecordComplete &rArr; audSaveBuffs &rArr; saveBuff &rArr; releaseBuff &rArr; adjBuffCnt &rArr; tbErr &rArr; USBmode &rArr; logPowerUp &rArr; NLogShowStatus &rArr; logEvtNININI &rArr; logEvtS &rArr;  tbErr (Cycle)
 </UL>
 <BR>[Calls]<UL><LI><a href="#[3ed]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;logEvtFmt
@@ -9472,7 +9474,7 @@ Global Symbols
 </UL>
 
 <P><STRONG><a name="[49f]"></a>readContent</STRONG> (Thumb, 462 bytes, Stack size 512 bytes, controlparser.o(i.readContent))
-<BR><BR>[Stack]<UL><LI>Max Depth = 4456 + Unknown Stack Size
+<BR><BR>[Stack]<UL><LI>Max Depth = 4464 + Unknown Stack Size
 <LI>Call Chain = readContent &rArr; parseFile &rArr; parseValue &rArr; parseLstObj &rArr;  parseValue (Cycle)
 </UL>
 <BR>[Calls]<UL><LI><a href="#[504]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;tbOpenReadBinary
@@ -9498,7 +9500,7 @@ Global Symbols
 </UL>
 
 <P><STRONG><a name="[4e3]"></a>readControlDef</STRONG> (Thumb, 956 bytes, Stack size 472 bytes, controlparser.o(i.readControlDef))
-<BR><BR>[Stack]<UL><LI>Max Depth = 4416 + Unknown Stack Size
+<BR><BR>[Stack]<UL><LI>Max Depth = 4424 + Unknown Stack Size
 <LI>Call Chain = readControlDef &rArr; parseFile &rArr; parseValue &rArr; parseLstObj &rArr;  parseValue (Cycle)
 </UL>
 <BR>[Calls]<UL><LI><a href="#[1fc]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;tbErr
@@ -9537,7 +9539,7 @@ Global Symbols
 </UL>
 
 <P><STRONG><a name="[207]"></a>resetAudio</STRONG> (Thumb, 8 bytes, Stack size 8 bytes, mediaplayer.o(i.resetAudio))
-<BR><BR>[Stack]<UL><LI>Max Depth = 2536 + Unknown Stack Size
+<BR><BR>[Stack]<UL><LI>Max Depth = 2544 + Unknown Stack Size
 <LI>Call Chain = resetAudio &rArr; audStopAudio &rArr; audRecordComplete &rArr; audSaveBuffs &rArr; saveBuff &rArr; releaseBuff &rArr; adjBuffCnt &rArr; tbErr &rArr; USBmode &rArr; logPowerUp &rArr; NLogShowStatus &rArr; logEvtNININI &rArr; logEvtS &rArr;  tbErr (Cycle)
 </UL>
 <BR>[Calls]<UL><LI><a href="#[403]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;audStopAudio
@@ -9575,7 +9577,7 @@ Global Symbols
 </UL>
 
 <P><STRONG><a name="[71]"></a>saiEvent</STRONG> (Thumb, 526 bytes, Stack size 24 bytes, audio.o(i.saiEvent))
-<BR><BR>[Stack]<UL><LI>Max Depth = 2480 + Unknown Stack Size
+<BR><BR>[Stack]<UL><LI>Max Depth = 2488 + Unknown Stack Size
 <LI>Call Chain = saiEvent &rArr; freeBuffs &rArr; releaseBuff &rArr; adjBuffCnt &rArr; tbErr &rArr; USBmode &rArr; logPowerUp &rArr; NLogShowStatus &rArr; logEvtNININI &rArr; logEvtS &rArr;  tbErr (Cycle)
 </UL>
 <BR>[Calls]<UL><LI><a href="#[203]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;tbTimeStamp
@@ -9631,7 +9633,7 @@ Global Symbols
 <BR>[Calls]<UL><LI><a href="#[28a]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;dbgEvt
 <LI><a href="#[2d4]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;tbOpenWrite
 <LI><a href="#[3f0]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;tbCloseFile
-<LI><a href="#[510]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;logMsgName
+<LI><a href="#[511]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;logMsgName
 <LI><a href="#[50e]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;logEvtNSNININS
 <LI><a href="#[18b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__2fprintf
 </UL>
@@ -9662,7 +9664,7 @@ Global Symbols
 <BR>[Called By]<UL><LI><a href="#[42b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;convertSeq
 </UL>
 
-<P><STRONG><a name="[52a]"></a>setBootMode</STRONG> (Thumb, 186 bytes, Stack size 8 bytes, main.o(i.setBootMode))
+<P><STRONG><a name="[52b]"></a>setBootMode</STRONG> (Thumb, 186 bytes, Stack size 8 bytes, main.o(i.setBootMode))
 <BR><BR>[Stack]<UL><LI>Max Depth = 168<LI>Call Chain = setBootMode &rArr; flashCode &rArr; flashLED &rArr; tbDelay_ms &rArr; tbTimeStamp &rArr; osKernelGetTickCount &rArr; svcRtxKernelGetTickCount &rArr; EvrRtxKernelGetTickCount &rArr; EventRecord2 &rArr; EventRecordItem
 </UL>
 <BR>[Calls]<UL><LI><a href="#[215]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;gGet
@@ -9687,16 +9689,16 @@ Global Symbols
 <BR>[Called By]<UL><LI><a href="#[208]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;CodecCmd
 </UL>
 
-<P><STRONG><a name="[52b]"></a>setCpuClock</STRONG> (Thumb, 472 bytes, Stack size 88 bytes, tbutil.o(i.setCpuClock))
+<P><STRONG><a name="[52c]"></a>setCpuClock</STRONG> (Thumb, 472 bytes, Stack size 88 bytes, tbutil.o(i.setCpuClock))
 <BR><BR>[Stack]<UL><LI>Max Depth = 104<LI>Call Chain = setCpuClock &rArr; SystemCoreClockUpdate
 </UL>
-<BR>[Calls]<UL><LI><a href="#[52c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SystemCoreClockUpdate
+<BR>[Calls]<UL><LI><a href="#[52d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SystemCoreClockUpdate
 </UL>
 <BR>[Called By]<UL><LI><a href="#[169]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;main
 </UL>
 
 <P><STRONG><a name="[415]"></a>setCurrState</STRONG> (Thumb, 80 bytes, Stack size 8 bytes, controlmanager.o(i.setCurrState))
-<BR><BR>[Stack]<UL><LI>Max Depth = 2432 + Unknown Stack Size
+<BR><BR>[Stack]<UL><LI>Max Depth = 2440 + Unknown Stack Size
 <LI>Call Chain = setCurrState &rArr; assertValidState &rArr; tbErr &rArr; USBmode &rArr; logPowerUp &rArr; NLogShowStatus &rArr; logEvtNININI &rArr; logEvtS &rArr;  tbErr (Cycle)
 </UL>
 <BR>[Calls]<UL><LI><a href="#[3ea]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;assertValidState
@@ -9764,7 +9766,7 @@ Global Symbols
 <LI><a href="#[395]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;fat_close
 </UL>
 
-<P><STRONG><a name="[513]"></a>setupRTC</STRONG> (Thumb, 596 bytes, Stack size 112 bytes, powermanager.o(i.setupRTC))
+<P><STRONG><a name="[514]"></a>setupRTC</STRONG> (Thumb, 596 bytes, Stack size 112 bytes, powermanager.o(i.setupRTC))
 <BR><BR>[Stack]<UL><LI>Max Depth = 120<LI>Call Chain = setupRTC &rArr; Bcd2
 </UL>
 <BR>[Calls]<UL><LI><a href="#[5a8]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;Bcd2
@@ -9825,7 +9827,7 @@ Global Symbols
 <BR>[Called By]<UL><LI><a href="#[417]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;changePackage
 </UL>
 
-<P><STRONG><a name="[512]"></a>showRTC</STRONG> (Thumb, 220 bytes, Stack size 104 bytes, tbutil.o(i.showRTC))
+<P><STRONG><a name="[513]"></a>showRTC</STRONG> (Thumb, 220 bytes, Stack size 104 bytes, tbutil.o(i.showRTC))
 <BR><BR>[Stack]<UL><LI>Max Depth = 1480 + Unknown Stack Size
 <LI>Call Chain = showRTC &rArr; logEvtFmt &rArr; logEvtS &rArr;  tbErr (Cycle)
 </UL>
@@ -9835,13 +9837,13 @@ Global Symbols
 <BR>[Called By]<UL><LI><a href="#[391]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;logPowerUp
 </UL>
 
-<P><STRONG><a name="[516]"></a>showTknTable</STRONG> (Thumb, 170 bytes, Stack size 32 bytes, tkntable.o(i.showTknTable))
+<P><STRONG><a name="[517]"></a>showTknTable</STRONG> (Thumb, 170 bytes, Stack size 32 bytes, tkntable.o(i.showTknTable))
 <BR><BR>[Stack]<UL><LI>Max Depth = 192 + Unknown Stack Size
 <LI>Call Chain = showTknTable &rArr; dbgLog &rArr; tbDelay_ms &rArr; tbTimeStamp &rArr; osKernelGetTickCount &rArr; svcRtxKernelGetTickCount &rArr; EvrRtxKernelGetTickCount &rArr; EventRecord2 &rArr; EventRecordItem
 </UL>
 <BR>[Calls]<UL><LI><a href="#[205]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;dbgLog
 </UL>
-<BR>[Called By]<UL><LI><a href="#[515]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;lstID
+<BR>[Called By]<UL><LI><a href="#[516]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;lstID
 <LI><a href="#[3b9]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;toTkn
 <LI><a href="#[591]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;parseFile
 </UL>
@@ -9859,8 +9861,8 @@ Global Symbols
 <LI><a href="#[205]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;dbgLog
 <LI><a href="#[4eb]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;resetKeypadTest
 </UL>
-<BR>[Called By]<UL><LI><a href="#[4f7]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;keypadTestKey
-<LI><a href="#[77]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;inputThread
+<BR>[Called By]<UL><LI><a href="#[77]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;inputThread
+<LI><a href="#[4f7]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;keypadTestKey
 </UL>
 
 <P><STRONG><a name="[41e]"></a>startPowerCheck</STRONG> (Thumb, 102 bytes, Stack size 0 bytes, powermanager.o(i.startPowerCheck))
@@ -9868,12 +9870,12 @@ Global Symbols
 </UL>
 
 <P><STRONG><a name="[44f]"></a>startRecAudio</STRONG> (Thumb, 132 bytes, Stack size 120 bytes, controlmanager.o(i.startRecAudio))
-<BR><BR>[Stack]<UL><LI>Max Depth = 2656 + Unknown Stack Size
+<BR><BR>[Stack]<UL><LI>Max Depth = 2664 + Unknown Stack Size
 <LI>Call Chain = startRecAudio &rArr; resetAudio &rArr; audStopAudio &rArr; audRecordComplete &rArr; audSaveBuffs &rArr; saveBuff &rArr; releaseBuff &rArr; adjBuffCnt &rArr; tbErr &rArr; USBmode &rArr; logPowerUp &rArr; NLogShowStatus &rArr; logEvtNININI &rArr; logEvtS &rArr;  tbErr (Cycle)
 </UL>
 <BR>[Calls]<UL><LI><a href="#[207]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;resetAudio
 <LI><a href="#[5a0]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;recordAudio
-<LI><a href="#[510]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;logMsgName
+<LI><a href="#[511]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;logMsgName
 <LI><a href="#[50d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;logEvtNSNINI
 <LI><a href="#[506]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;loadStats
 </UL>
@@ -9881,7 +9883,7 @@ Global Symbols
 </UL>
 
 <P><STRONG><a name="[456]"></a>stopPlayback</STRONG> (Thumb, 8 bytes, Stack size 8 bytes, mediaplayer.o(i.stopPlayback))
-<BR><BR>[Stack]<UL><LI>Max Depth = 2536 + Unknown Stack Size
+<BR><BR>[Stack]<UL><LI>Max Depth = 2544 + Unknown Stack Size
 <LI>Call Chain = stopPlayback &rArr; audStopAudio &rArr; audRecordComplete &rArr; audSaveBuffs &rArr; saveBuff &rArr; releaseBuff &rArr; adjBuffCnt &rArr; tbErr &rArr; USBmode &rArr; logPowerUp &rArr; NLogShowStatus &rArr; logEvtNININI &rArr; logEvtS &rArr;  tbErr (Cycle)
 </UL>
 <BR>[Calls]<UL><LI><a href="#[403]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;audStopAudio
@@ -9890,7 +9892,7 @@ Global Symbols
 </UL>
 
 <P><STRONG><a name="[453]"></a>stopRecording</STRONG> (Thumb, 8 bytes, Stack size 8 bytes, mediaplayer.o(i.stopRecording))
-<BR><BR>[Stack]<UL><LI>Max Depth = 2512 + Unknown Stack Size
+<BR><BR>[Stack]<UL><LI>Max Depth = 2520 + Unknown Stack Size
 <LI>Call Chain = stopRecording &rArr; audRequestRecStop &rArr; audRecordComplete &rArr; audSaveBuffs &rArr; saveBuff &rArr; releaseBuff &rArr; adjBuffCnt &rArr; tbErr &rArr; USBmode &rArr; logPowerUp &rArr; NLogShowStatus &rArr; logEvtNININI &rArr; logEvtS &rArr;  tbErr (Cycle)
 </UL>
 <BR>[Calls]<UL><LI><a href="#[204]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;audRequestRecStop
@@ -9912,10 +9914,10 @@ Global Symbols
 </UL>
 
 <P><STRONG><a name="[7f]"></a>talking_book</STRONG> (Thumb, 400 bytes, Stack size 24 bytes, tbook.o(i.talking_book))
-<BR><BR>[Stack]<UL><LI>Max Depth = 4856 + Unknown Stack Size
+<BR><BR>[Stack]<UL><LI>Max Depth = 4864 + Unknown Stack Size
 <LI>Call Chain = talking_book &rArr; initControlManager &rArr; findPackages &rArr; readContent &rArr; parseFile &rArr; parseValue &rArr; parseLstObj &rArr;  parseValue (Cycle)
 </UL>
-<BR>[Calls]<UL><LI><a href="#[559]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;osKernelGetState
+<BR>[Calls]<UL><LI><a href="#[50f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;osKernelGetState
 <LI><a href="#[35c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;ledFg
 <LI><a href="#[4f1]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;initPowerMgr
 <LI><a href="#[4f0]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;initMediaPlayer
@@ -9949,8 +9951,8 @@ Global Symbols
 <LI><a href="#[28a]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;dbgEvt
 <LI><a href="#[181]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;malloc
 </UL>
-<BR>[Called By]<UL><LI><a href="#[519]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mp3_malloc
-<LI><a href="#[522]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mp3_calloc
+<BR>[Called By]<UL><LI><a href="#[51a]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mp3_malloc
+<LI><a href="#[523]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mp3_calloc
 <LI><a href="#[4f0]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;initMediaPlayer
 <LI><a href="#[49f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;readContent
 <LI><a href="#[3e6]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;asStIdx
@@ -9992,7 +9994,7 @@ Global Symbols
 </UL>
 <BR>[Calls]<UL><LI><a href="#[326]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;osDelay
 <LI><a href="#[203]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;tbTimeStamp
-<LI><a href="#[559]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;osKernelGetState
+<LI><a href="#[50f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;osKernelGetState
 </UL>
 <BR>[Called By]<UL><LI><a href="#[41a]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;checkMem
 <LI><a href="#[272]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;FileSysPower
@@ -10008,7 +10010,7 @@ Global Symbols
 </UL>
 
 <P><STRONG><a name="[1fc]"></a>tbErr</STRONG> (Thumb, 80 bytes, Stack size 128 bytes, tbutil.o(i.tbErr))
-<BR><BR>[Stack]<UL><LI>Max Depth = 2416 + Unknown Stack Size
+<BR><BR>[Stack]<UL><LI>Max Depth = 2424 + Unknown Stack Size
 <LI>Call Chain = tbErr &rArr; USBmode &rArr; logPowerUp &rArr; NLogShowStatus &rArr; logEvtNININI &rArr; logEvtS &rArr;  tbErr (Cycle)
 </UL>
 <BR>[Calls]<UL><LI><a href="#[50a]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;logEvtS
@@ -10033,7 +10035,7 @@ Global Symbols
 <LI><a href="#[593]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;parseValue
 <LI><a href="#[595]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;parseName
 <LI><a href="#[594]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;parseLstObj
-<LI><a href="#[515]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;lstID
+<LI><a href="#[516]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;lstID
 <LI><a href="#[4dd]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;hashFn
 <LI><a href="#[3bb]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;tokenize
 <LI><a href="#[3b9]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;toTkn
@@ -10145,7 +10147,7 @@ Global Symbols
 <BR><BR>[Stack]<UL><LI>Max Depth = 112<LI>Call Chain = tbTimeStamp &rArr; osKernelGetTickCount &rArr; svcRtxKernelGetTickCount &rArr; EvrRtxKernelGetTickCount &rArr; EventRecord2 &rArr; EventRecordItem
 </UL>
 <BR>[Calls]<UL><LI><a href="#[55d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;osKernelGetTickCount
-<LI><a href="#[559]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;osKernelGetState
+<LI><a href="#[50f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;osKernelGetState
 </UL>
 <BR>[Called By]<UL><LI><a href="#[50a]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;logEvtS
 <LI><a href="#[218]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;tbDelay_ms
@@ -10243,7 +10245,7 @@ Global Symbols
 </UL>
 <BR>[Calls]<UL><LI><a href="#[596]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;toVStr
 </UL>
-<BR>[Called By]<UL><LI><a href="#[551]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;nTkn
+<BR>[Called By]<UL><LI><a href="#[552]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;nTkn
 <LI><a href="#[593]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;parseValue
 <LI><a href="#[591]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;parseFile
 <LI><a href="#[4d1]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;getField
@@ -10252,11 +10254,11 @@ Global Symbols
 </UL>
 
 <P><STRONG><a name="[3b9]"></a>toTkn</STRONG> (Thumb, 260 bytes, Stack size 32 bytes, tkntable.o(i.toTkn))
-<BR><BR>[Stack]<UL><LI>Max Depth = 2736 + Unknown Stack Size
+<BR><BR>[Stack]<UL><LI>Max Depth = 2744 + Unknown Stack Size
 <LI>Call Chain = toTkn &rArr; initTknTable &rArr;  toTkn (Cycle)
 </UL>
 <BR>[Calls]<UL><LI><a href="#[1fc]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;tbErr
-<LI><a href="#[516]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;showTknTable
+<LI><a href="#[517]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;showTknTable
 <LI><a href="#[4dd]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;hashFn
 <LI><a href="#[4e2]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;initTknTable
 <LI><a href="#[3be]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;strlen
@@ -10286,7 +10288,7 @@ Global Symbols
 </UL>
 
 <P><STRONG><a name="[3bb]"></a>tokenize</STRONG> (Thumb, 290 bytes, Stack size 152 bytes, tkntable.o(i.tokenize))
-<BR><BR>[Stack]<UL><LI>Max Depth = 2568 + Unknown Stack Size
+<BR><BR>[Stack]<UL><LI>Max Depth = 2576 + Unknown Stack Size
  + In Cycle
 <LI>Call Chain = tokenize &rArr;  toTkn (Cycle)
 </UL>
@@ -10435,7 +10437,7 @@ Local Symbols
 </UL>
 
 <P><STRONG><a name="[414]"></a>changeCSMstate</STRONG> (Thumb, 194 bytes, Stack size 40 bytes, controlmanager.o(i.changeCSMstate))
-<BR><BR>[Stack]<UL><LI>Max Depth = 2720 + Unknown Stack Size
+<BR><BR>[Stack]<UL><LI>Max Depth = 2728 + Unknown Stack Size
 <LI>Call Chain = changeCSMstate &rArr; doAction &rArr; startRecAudio &rArr; resetAudio &rArr; audStopAudio &rArr; audRecordComplete &rArr; audSaveBuffs &rArr; saveBuff &rArr; releaseBuff &rArr; adjBuffCnt &rArr; tbErr &rArr; USBmode &rArr; logPowerUp &rArr; NLogShowStatus &rArr; logEvtNININI &rArr; logEvtS &rArr;  tbErr (Cycle)
 </UL>
 <BR>[Calls]<UL><LI><a href="#[28a]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;dbgEvt
@@ -10448,7 +10450,7 @@ Local Symbols
 </UL>
 
 <P><STRONG><a name="[416]"></a>doAction</STRONG> (Thumb, 542 bytes, Stack size 24 bytes, controlmanager.o(i.doAction))
-<BR><BR>[Stack]<UL><LI>Max Depth = 2680 + Unknown Stack Size
+<BR><BR>[Stack]<UL><LI>Max Depth = 2688 + Unknown Stack Size
 <LI>Call Chain = doAction &rArr; startRecAudio &rArr; resetAudio &rArr; audStopAudio &rArr; audRecordComplete &rArr; audSaveBuffs &rArr; saveBuff &rArr; releaseBuff &rArr; adjBuffCnt &rArr; tbErr &rArr; USBmode &rArr; logPowerUp &rArr; NLogShowStatus &rArr; logEvtNININI &rArr; logEvtS &rArr;  tbErr (Cycle)
 </UL>
 <BR>[Calls]<UL><LI><a href="#[38a]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;USBmode
@@ -10490,7 +10492,7 @@ Local Symbols
 </UL>
 
 <P><STRONG><a name="[464]"></a>eventTest</STRONG> (Thumb, 182 bytes, Stack size 24 bytes, controlmanager.o(i.eventTest))
-<BR><BR>[Stack]<UL><LI>Max Depth = 2440 + Unknown Stack Size
+<BR><BR>[Stack]<UL><LI>Max Depth = 2448 + Unknown Stack Size
 <LI>Call Chain = eventTest &rArr; tbErr &rArr; USBmode &rArr; logPowerUp &rArr; NLogShowStatus &rArr; logEvtNININI &rArr; logEvtS &rArr;  tbErr (Cycle)
 </UL>
 <BR>[Calls]<UL><LI><a href="#[418]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;logEvtNS
@@ -10537,7 +10539,7 @@ Local Symbols
 </UL>
 
 <P><STRONG><a name="[3e6]"></a>asStIdx</STRONG> (Thumb, 134 bytes, Stack size 16 bytes, controlparser.o(i.asStIdx))
-<BR><BR>[Stack]<UL><LI>Max Depth = 2432 + Unknown Stack Size
+<BR><BR>[Stack]<UL><LI>Max Depth = 2440 + Unknown Stack Size
 <LI>Call Chain = asStIdx &rArr; tbErr &rArr; USBmode &rArr; logPowerUp &rArr; NLogShowStatus &rArr; logEvtNININI &rArr; logEvtS &rArr;  tbErr (Cycle)
 </UL>
 <BR>[Calls]<UL><LI><a href="#[1fc]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;tbErr
@@ -10550,7 +10552,7 @@ Local Symbols
 </UL>
 
 <P><STRONG><a name="[505]"></a>loadPath</STRONG> (Thumb, 34 bytes, Stack size 96 bytes, controlparser.o(i.loadPath))
-<BR><BR>[Stack]<UL><LI>Max Depth = 2552 + Unknown Stack Size
+<BR><BR>[Stack]<UL><LI>Max Depth = 2560 + Unknown Stack Size
 <LI>Call Chain = loadPath &rArr; buildPath &rArr; tbErr &rArr; USBmode &rArr; logPowerUp &rArr; NLogShowStatus &rArr; logEvtNININI &rArr; logEvtS &rArr;  tbErr (Cycle)
 </UL>
 <BR>[Calls]<UL><LI><a href="#[3e7]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;tknStr
@@ -10569,7 +10571,7 @@ Local Symbols
 </UL>
 
 <P><STRONG><a name="[59f]"></a>setAnyKey</STRONG> (Thumb, 34 bytes, Stack size 24 bytes, controlparser.o(i.setAnyKey))
-<BR><BR>[Stack]<UL><LI>Max Depth = 2456 + Unknown Stack Size
+<BR><BR>[Stack]<UL><LI>Max Depth = 2464 + Unknown Stack Size
 <LI>Call Chain = setAnyKey &rArr; asStIdx &rArr; tbErr &rArr; USBmode &rArr; logPowerUp &rArr; NLogShowStatus &rArr; logEvtNININI &rArr; logEvtS &rArr;  tbErr (Cycle)
 </UL>
 <BR>[Calls]<UL><LI><a href="#[3e6]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;asStIdx
@@ -10578,7 +10580,7 @@ Local Symbols
 </UL>
 
 <P><STRONG><a name="[59e]"></a>setCGrp</STRONG> (Thumb, 68 bytes, Stack size 40 bytes, controlparser.o(i.setCGrp))
-<BR><BR>[Stack]<UL><LI>Max Depth = 2472 + Unknown Stack Size
+<BR><BR>[Stack]<UL><LI>Max Depth = 2480 + Unknown Stack Size
 <LI>Call Chain = setCGrp &rArr; asStIdx &rArr; tbErr &rArr; USBmode &rArr; logPowerUp &rArr; NLogShowStatus &rArr; logEvtNININI &rArr; logEvtS &rArr;  tbErr (Cycle)
 </UL>
 <BR>[Calls]<UL><LI><a href="#[4d4]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;lstCnt
@@ -10591,7 +10593,7 @@ Local Symbols
 </UL>
 
 <P><STRONG><a name="[3b8]"></a>addGroup</STRONG> (Thumb, 90 bytes, Stack size 128 bytes, tkntable.o(i.addGroup))
-<BR><BR>[Stack]<UL><LI>Max Depth = 2696 + Unknown Stack Size
+<BR><BR>[Stack]<UL><LI>Max Depth = 2704 + Unknown Stack Size
  + In Cycle
 <LI>Call Chain = addGroup &rArr;  toTkn (Cycle)
 </UL>
@@ -10620,13 +10622,13 @@ Local Symbols
 <LI><a href="#[3e7]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;tknStr
 </UL>
 
-<P><STRONG><a name="[517]"></a>asTknID</STRONG> (Thumb, 32 bytes, Stack size 8 bytes, tkntable.o(i.asTknID))
+<P><STRONG><a name="[518]"></a>asTknID</STRONG> (Thumb, 32 bytes, Stack size 8 bytes, tkntable.o(i.asTknID))
 <BR><BR>[Stack]<UL><LI>Max Depth = 8<LI>Call Chain = asTknID
 </UL>
 <BR>[Called By]<UL><LI><a href="#[4f4]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;verifyEnum
 <LI><a href="#[593]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;parseValue
 <LI><a href="#[594]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;parseLstObj
-<LI><a href="#[515]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;lstID
+<LI><a href="#[516]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;lstID
 </UL>
 
 <P><STRONG><a name="[3e8]"></a>asTknLst</STRONG> (Thumb, 26 bytes, Stack size 16 bytes, tkntable.o(i.asTknLst))
@@ -10638,7 +10640,7 @@ Local Symbols
 </UL>
 
 <P><STRONG><a name="[409]"></a>cTkn</STRONG> (Thumb, 192 bytes, Stack size 16 bytes, tkntable.o(i.cTkn))
-<BR><BR>[Stack]<UL><LI>Max Depth = 2584 + Unknown Stack Size
+<BR><BR>[Stack]<UL><LI>Max Depth = 2592 + Unknown Stack Size
 <LI>Call Chain = cTkn &rArr; tokenize &rArr;  toTkn (Cycle)
 </UL>
 <BR>[Calls]<UL><LI><a href="#[3bb]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;tokenize
@@ -10646,7 +10648,7 @@ Local Symbols
 <LI><a href="#[2e9]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;strchr
 <LI><a href="#[1f0]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;fgets
 </UL>
-<BR>[Called By]<UL><LI><a href="#[551]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;nTkn
+<BR>[Called By]<UL><LI><a href="#[552]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;nTkn
 <LI><a href="#[593]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;parseValue
 <LI><a href="#[595]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;parseName
 <LI><a href="#[594]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;parseLstObj
@@ -10663,7 +10665,7 @@ Local Symbols
 </UL>
 
 <P><STRONG><a name="[4dd]"></a>hashFn</STRONG> (Thumb, 58 bytes, Stack size 16 bytes, tkntable.o(i.hashFn))
-<BR><BR>[Stack]<UL><LI>Max Depth = 2432 + Unknown Stack Size
+<BR><BR>[Stack]<UL><LI>Max Depth = 2440 + Unknown Stack Size
 <LI>Call Chain = hashFn &rArr; tbErr &rArr; USBmode &rArr; logPowerUp &rArr; NLogShowStatus &rArr; logEvtNININI &rArr; logEvtS &rArr;  tbErr (Cycle)
 </UL>
 <BR>[Calls]<UL><LI><a href="#[1fc]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;tbErr
@@ -10691,31 +10693,31 @@ Local Symbols
 <LI><a href="#[4d1]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;getField
 </UL>
 
-<P><STRONG><a name="[515]"></a>lstID</STRONG> (Thumb, 82 bytes, Stack size 24 bytes, tkntable.o(i.lstID))
-<BR><BR>[Stack]<UL><LI>Max Depth = 2440 + Unknown Stack Size
+<P><STRONG><a name="[516]"></a>lstID</STRONG> (Thumb, 82 bytes, Stack size 24 bytes, tkntable.o(i.lstID))
+<BR><BR>[Stack]<UL><LI>Max Depth = 2448 + Unknown Stack Size
 <LI>Call Chain = lstID &rArr; tbErr &rArr; USBmode &rArr; logPowerUp &rArr; NLogShowStatus &rArr; logEvtNININI &rArr; logEvtS &rArr;  tbErr (Cycle)
 </UL>
 <BR>[Calls]<UL><LI><a href="#[1fc]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;tbErr
-<LI><a href="#[516]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;showTknTable
+<LI><a href="#[517]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;showTknTable
 <LI><a href="#[3e4]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;asGroup
-<LI><a href="#[517]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;asTknID
+<LI><a href="#[518]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;asTknID
 </UL>
 <BR>[Called By]<UL><LI><a href="#[593]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;parseValue
 <LI><a href="#[594]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;parseLstObj
 </UL>
 
 <P><STRONG><a name="[594]"></a>parseLstObj</STRONG> (Thumb, 408 bytes, Stack size 352 bytes, tkntable.o(i.parseLstObj))
-<BR><BR>[Stack]<UL><LI>Max Depth = 3064 + Unknown Stack Size
+<BR><BR>[Stack]<UL><LI>Max Depth = 3072 + Unknown Stack Size
  + In Cycle
 <LI>Call Chain = parseLstObj &rArr;  parseValue (Cycle)
 </UL>
 <BR>[Calls]<UL><LI><a href="#[1fc]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;tbErr
-<LI><a href="#[551]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;nTkn
+<LI><a href="#[552]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;nTkn
 <LI><a href="#[593]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;parseValue
 <LI><a href="#[595]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;parseName
-<LI><a href="#[515]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;lstID
+<LI><a href="#[516]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;lstID
 <LI><a href="#[409]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;cTkn
-<LI><a href="#[517]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;asTknID
+<LI><a href="#[518]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;asTknID
 <LI><a href="#[3e7]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;tknStr
 <LI><a href="#[3e5]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;asPunct
 <LI><a href="#[1aa]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_memclr4
@@ -10727,11 +10729,11 @@ Local Symbols
 </UL>
 
 <P><STRONG><a name="[595]"></a>parseName</STRONG> (Thumb, 68 bytes, Stack size 16 bytes, tkntable.o(i.parseName))
-<BR><BR>[Stack]<UL><LI>Max Depth = 2712 + Unknown Stack Size
+<BR><BR>[Stack]<UL><LI>Max Depth = 2720 + Unknown Stack Size
 <LI>Call Chain = parseName &rArr; nTkn &rArr; cTkn &rArr; tokenize &rArr;  toTkn (Cycle)
 </UL>
 <BR>[Calls]<UL><LI><a href="#[1fc]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;tbErr
-<LI><a href="#[551]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;nTkn
+<LI><a href="#[552]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;nTkn
 <LI><a href="#[409]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;cTkn
 <LI><a href="#[3e5]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;asPunct
 </UL>
@@ -10740,17 +10742,17 @@ Local Symbols
 </UL>
 
 <P><STRONG><a name="[593]"></a>parseValue</STRONG> (Thumb, 368 bytes, Stack size 456 bytes, tkntable.o(i.parseValue))
-<BR><BR>[Stack]<UL><LI>Max Depth = 3520 + Unknown Stack Size
+<BR><BR>[Stack]<UL><LI>Max Depth = 3528 + Unknown Stack Size
 <LI>Call Chain = parseValue &rArr; parseLstObj &rArr;  parseValue (Cycle)
 </UL>
 <BR>[Calls]<UL><LI><a href="#[592]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;tbShw
 <LI><a href="#[1fc]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;tbErr
-<LI><a href="#[551]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;nTkn
+<LI><a href="#[552]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;nTkn
 <LI><a href="#[595]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;parseName
 <LI><a href="#[594]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;parseLstObj
-<LI><a href="#[515]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;lstID
+<LI><a href="#[516]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;lstID
 <LI><a href="#[409]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;cTkn
-<LI><a href="#[517]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;asTknID
+<LI><a href="#[518]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;asTknID
 <LI><a href="#[596]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;toVStr
 <LI><a href="#[4d3]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;toStr
 <LI><a href="#[3e5]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;asPunct
@@ -10779,13 +10781,13 @@ Local Symbols
 </UL>
 
 <P><STRONG><a name="[4f4]"></a>verifyEnum</STRONG> (Thumb, 106 bytes, Stack size 48 bytes, tkntable.o(i.verifyEnum))
-<BR><BR>[Stack]<UL><LI>Max Depth = 2464 + Unknown Stack Size
+<BR><BR>[Stack]<UL><LI>Max Depth = 2472 + Unknown Stack Size
  + In Cycle
 <LI>Call Chain = verifyEnum &rArr;  toTkn (Cycle)
 </UL>
 <BR>[Calls]<UL><LI><a href="#[1fc]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;tbErr
 <LI><a href="#[3e2]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;tknGrp
-<LI><a href="#[517]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;asTknID
+<LI><a href="#[518]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;asTknID
 <LI><a href="#[3b9]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;toTkn
 <LI><a href="#[3e7]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;tknStr
 </UL>
@@ -10808,7 +10810,7 @@ Local Symbols
 </UL>
 
 <P><STRONG><a name="[79]"></a>mediaThread</STRONG> (Thumb, 400 bytes, Stack size 24 bytes, mediaplayer.o(i.mediaThread))
-<BR><BR>[Stack]<UL><LI>Max Depth = 2616 + Unknown Stack Size
+<BR><BR>[Stack]<UL><LI>Max Depth = 2624 + Unknown Stack Size
 <LI>Call Chain = mediaThread &rArr; audPlayAudio &rArr; playWave &rArr; audStopAudio &rArr; audRecordComplete &rArr; audSaveBuffs &rArr; saveBuff &rArr; releaseBuff &rArr; adjBuffCnt &rArr; tbErr &rArr; USBmode &rArr; logPowerUp &rArr; NLogShowStatus &rArr; logEvtNININI &rArr; logEvtS &rArr;  tbErr (Cycle)
 </UL>
 <BR>[Calls]<UL><LI><a href="#[2e8]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;fdelete
@@ -10869,7 +10871,7 @@ Local Symbols
 <BR>[Address Reference Count : 1]<UL><LI> powermanager.o(i.initPowerMgr)
 </UL>
 <P><STRONG><a name="[3c2]"></a>adjBuffCnt</STRONG> (Thumb, 90 bytes, Stack size 16 bytes, audio.o(i.adjBuffCnt))
-<BR><BR>[Stack]<UL><LI>Max Depth = 2432 + Unknown Stack Size
+<BR><BR>[Stack]<UL><LI>Max Depth = 2440 + Unknown Stack Size
 <LI>Call Chain = adjBuffCnt &rArr; tbErr &rArr; USBmode &rArr; logPowerUp &rArr; NLogShowStatus &rArr; logEvtNININI &rArr; logEvtS &rArr;  tbErr (Cycle)
 </UL>
 <BR>[Calls]<UL><LI><a href="#[1fc]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;tbErr
@@ -10880,7 +10882,7 @@ Local Symbols
 </UL>
 
 <P><STRONG><a name="[3cf]"></a>allocBuff</STRONG> (Thumb, 76 bytes, Stack size 24 bytes, audio.o(i.allocBuff))
-<BR><BR>[Stack]<UL><LI>Max Depth = 2456 + Unknown Stack Size
+<BR><BR>[Stack]<UL><LI>Max Depth = 2464 + Unknown Stack Size
 <LI>Call Chain = allocBuff &rArr; adjBuffCnt &rArr; tbErr &rArr; USBmode &rArr; logPowerUp &rArr; NLogShowStatus &rArr; logEvtNININI &rArr; logEvtS &rArr;  tbErr (Cycle)
 </UL>
 <BR>[Calls]<UL><LI><a href="#[276]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;errLog
@@ -10899,7 +10901,7 @@ Local Symbols
 </UL>
 
 <P><STRONG><a name="[401]"></a>freeBuffs</STRONG> (Thumb, 32 bytes, Stack size 8 bytes, audio.o(i.freeBuffs))
-<BR><BR>[Stack]<UL><LI>Max Depth = 2456 + Unknown Stack Size
+<BR><BR>[Stack]<UL><LI>Max Depth = 2464 + Unknown Stack Size
 <LI>Call Chain = freeBuffs &rArr; releaseBuff &rArr; adjBuffCnt &rArr; tbErr &rArr; USBmode &rArr; logPowerUp &rArr; NLogShowStatus &rArr; logEvtNININI &rArr; logEvtS &rArr;  tbErr (Cycle)
 </UL>
 <BR>[Calls]<UL><LI><a href="#[4b7]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;releaseBuff
@@ -10912,7 +10914,7 @@ Local Symbols
 </UL>
 
 <P><STRONG><a name="[3f5]"></a>haltPlayback</STRONG> (Thumb, 108 bytes, Stack size 8 bytes, audio.o(i.haltPlayback))
-<BR><BR>[Stack]<UL><LI>Max Depth = 2464 + Unknown Stack Size
+<BR><BR>[Stack]<UL><LI>Max Depth = 2472 + Unknown Stack Size
 <LI>Call Chain = haltPlayback &rArr; freeBuffs &rArr; releaseBuff &rArr; adjBuffCnt &rArr; tbErr &rArr; USBmode &rArr; logPowerUp &rArr; NLogShowStatus &rArr; logEvtNININI &rArr; logEvtS &rArr;  tbErr (Cycle)
 </UL>
 <BR>[Calls]<UL><LI><a href="#[203]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;tbTimeStamp
@@ -10939,7 +10941,7 @@ Local Symbols
 </UL>
 
 <P><STRONG><a name="[3f2]"></a>initBuffs</STRONG> (Thumb, 46 bytes, Stack size 16 bytes, audio.o(i.initBuffs))
-<BR><BR>[Stack]<UL><LI>Max Depth = 2448 + Unknown Stack Size
+<BR><BR>[Stack]<UL><LI>Max Depth = 2456 + Unknown Stack Size
 <LI>Call Chain = initBuffs &rArr; adjBuffCnt &rArr; tbErr &rArr; USBmode &rArr; logPowerUp &rArr; NLogShowStatus &rArr; logEvtNININI &rArr; logEvtS &rArr;  tbErr (Cycle)
 </UL>
 <BR>[Calls]<UL><LI><a href="#[3d0]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;tbAlloc
@@ -10949,7 +10951,7 @@ Local Symbols
 </UL>
 
 <P><STRONG><a name="[3f4]"></a>loadBuff</STRONG> (Thumb, 304 bytes, Stack size 24 bytes, audio.o(i.loadBuff))
-<BR><BR>[Stack]<UL><LI>Max Depth = 2480 + Unknown Stack Size
+<BR><BR>[Stack]<UL><LI>Max Depth = 2488 + Unknown Stack Size
 <LI>Call Chain = loadBuff &rArr; allocBuff &rArr; adjBuffCnt &rArr; tbErr &rArr; USBmode &rArr; logPowerUp &rArr; NLogShowStatus &rArr; logEvtNININI &rArr; logEvtS &rArr;  tbErr (Cycle)
 </UL>
 <BR>[Calls]<UL><LI><a href="#[28a]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;dbgEvt
@@ -10965,7 +10967,7 @@ Local Symbols
 </UL>
 
 <P><STRONG><a name="[4b7]"></a>releaseBuff</STRONG> (Thumb, 46 bytes, Stack size 16 bytes, audio.o(i.releaseBuff))
-<BR><BR>[Stack]<UL><LI>Max Depth = 2448 + Unknown Stack Size
+<BR><BR>[Stack]<UL><LI>Max Depth = 2456 + Unknown Stack Size
 <LI>Call Chain = releaseBuff &rArr; adjBuffCnt &rArr; tbErr &rArr; USBmode &rArr; logPowerUp &rArr; NLogShowStatus &rArr; logEvtNININI &rArr; logEvtS &rArr;  tbErr (Cycle)
 </UL>
 <BR>[Calls]<UL><LI><a href="#[28a]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;dbgEvt
@@ -10977,7 +10979,7 @@ Local Symbols
 </UL>
 
 <P><STRONG><a name="[402]"></a>saveBuff</STRONG> (Thumb, 106 bytes, Stack size 24 bytes, audio.o(i.saveBuff))
-<BR><BR>[Stack]<UL><LI>Max Depth = 2472 + Unknown Stack Size
+<BR><BR>[Stack]<UL><LI>Max Depth = 2480 + Unknown Stack Size
 <LI>Call Chain = saveBuff &rArr; releaseBuff &rArr; adjBuffCnt &rArr; tbErr &rArr; USBmode &rArr; logPowerUp &rArr; NLogShowStatus &rArr; logEvtNININI &rArr; logEvtS &rArr;  tbErr (Cycle)
 </UL>
 <BR>[Calls]<UL><LI><a href="#[1fc]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;tbErr
@@ -10989,7 +10991,7 @@ Local Symbols
 </UL>
 
 <P><STRONG><a name="[3ee]"></a>setWavPos</STRONG> (Thumb, 120 bytes, Stack size 24 bytes, audio.o(i.setWavPos))
-<BR><BR>[Stack]<UL><LI>Max Depth = 2528 + Unknown Stack Size
+<BR><BR>[Stack]<UL><LI>Max Depth = 2536 + Unknown Stack Size
 <LI>Call Chain = setWavPos &rArr; startPlayback &rArr; audLoadBuffs &rArr; loadBuff &rArr; allocBuff &rArr; adjBuffCnt &rArr; tbErr &rArr; USBmode &rArr; logPowerUp &rArr; NLogShowStatus &rArr; logEvtNININI &rArr; logEvtS &rArr;  tbErr (Cycle)
 </UL>
 <BR>[Calls]<UL><LI><a href="#[1fc]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;tbErr
@@ -11004,7 +11006,7 @@ Local Symbols
 </UL>
 
 <P><STRONG><a name="[3fe]"></a>startPlayback</STRONG> (Thumb, 190 bytes, Stack size 16 bytes, audio.o(i.startPlayback))
-<BR><BR>[Stack]<UL><LI>Max Depth = 2504 + Unknown Stack Size
+<BR><BR>[Stack]<UL><LI>Max Depth = 2512 + Unknown Stack Size
 <LI>Call Chain = startPlayback &rArr; audLoadBuffs &rArr; loadBuff &rArr; allocBuff &rArr; adjBuffCnt &rArr; tbErr &rArr; USBmode &rArr; logPowerUp &rArr; NLogShowStatus &rArr; logEvtNININI &rArr; logEvtS &rArr;  tbErr (Cycle)
 </UL>
 <BR>[Calls]<UL><LI><a href="#[203]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;tbTimeStamp
@@ -11019,7 +11021,7 @@ Local Symbols
 </UL>
 
 <P><STRONG><a name="[3f9]"></a>startRecord</STRONG> (Thumb, 142 bytes, Stack size 16 bytes, audio.o(i.startRecord))
-<BR><BR>[Stack]<UL><LI>Max Depth = 2472 + Unknown Stack Size
+<BR><BR>[Stack]<UL><LI>Max Depth = 2480 + Unknown Stack Size
 <LI>Call Chain = startRecord &rArr; allocBuff &rArr; adjBuffCnt &rArr; tbErr &rArr; USBmode &rArr; logPowerUp &rArr; NLogShowStatus &rArr; logEvtNININI &rArr; logEvtS &rArr;  tbErr (Cycle)
 </UL>
 <BR>[Calls]<UL><LI><a href="#[203]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;tbTimeStamp
@@ -11122,7 +11124,7 @@ Local Symbols
 <LI>Call Chain = mp3Err &rArr; errLog &rArr; logEvtNS &rArr;  logEvtS (Cycle)
 </UL>
 <BR>[Calls]<UL><LI><a href="#[276]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;errLog
-<LI><a href="#[54e]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mad_stream_errorstr
+<LI><a href="#[54f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mad_stream_errorstr
 </UL>
 <BR>[Called By]<UL><LI><a href="#[80]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;error
 <LI><a href="#[447]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mp3ToWav
@@ -11505,10 +11507,10 @@ Local Symbols
 <BR><BR>[Stack]<UL><LI>Max Depth = 384 + Unknown Stack Size
 <LI>Call Chain = III_huffdecode &rArr; abort &rArr; __rt_SIGABRT &rArr; __rt_SIGABRT_inner &rArr; __default_signal_display &rArr; _ttywrch
 </UL>
-<BR>[Calls]<UL><LI><a href="#[2bf]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mad_bit_skip
-<LI><a href="#[2c0]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mad_bit_read
-<LI><a href="#[2c1]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;III_requantize
+<BR>[Calls]<UL><LI><a href="#[2c1]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;III_requantize
 <LI><a href="#[2be]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;III_exponents
+<LI><a href="#[2bf]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mad_bit_skip
+<LI><a href="#[2c0]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mad_bit_read
 <LI><a href="#[1b6]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;abort
 </UL>
 <BR>[Called By]<UL><LI><a href="#[2b3]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;III_decode
@@ -11551,8 +11553,8 @@ Local Symbols
 <P><STRONG><a name="[2b5]"></a>III_scalefactors</STRONG> (Thumb, 402 bytes, Stack size 48 bytes, layer3.o(i.III_scalefactors))
 <BR><BR>[Stack]<UL><LI>Max Depth = 60<LI>Call Chain = III_scalefactors &rArr; mad_bit_read
 </UL>
-<BR>[Calls]<UL><LI><a href="#[2c0]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mad_bit_read
-<LI><a href="#[2c3]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mad_bit_length
+<BR>[Calls]<UL><LI><a href="#[2c3]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mad_bit_length
+<LI><a href="#[2c0]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mad_bit_read
 </UL>
 <BR>[Called By]<UL><LI><a href="#[2b3]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;III_decode
 </UL>
@@ -11560,8 +11562,8 @@ Local Symbols
 <P><STRONG><a name="[2b4]"></a>III_scalefactors_lsf</STRONG> (Thumb, 560 bytes, Stack size 88 bytes, layer3.o(i.III_scalefactors_lsf))
 <BR><BR>[Stack]<UL><LI>Max Depth = 100<LI>Call Chain = III_scalefactors_lsf &rArr; mad_bit_read
 </UL>
-<BR>[Calls]<UL><LI><a href="#[2c0]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mad_bit_read
-<LI><a href="#[2c3]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mad_bit_length
+<BR>[Calls]<UL><LI><a href="#[2c3]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mad_bit_length
+<LI><a href="#[2c0]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mad_bit_read
 </UL>
 <BR>[Called By]<UL><LI><a href="#[2b3]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;III_decode
 </UL>
@@ -11650,24 +11652,24 @@ Local Symbols
 <P><STRONG><a name="[448]"></a>decode_header</STRONG> (Thumb, 442 bytes, Stack size 16 bytes, frame.o(i.decode_header))
 <BR><BR>[Stack]<UL><LI>Max Depth = 64<LI>Call Chain = decode_header &rArr; mad_bit_crc &rArr; mad_bit_read
 </UL>
-<BR>[Calls]<UL><LI><a href="#[2bf]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mad_bit_skip
+<BR>[Calls]<UL><LI><a href="#[449]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mad_bit_crc
+<LI><a href="#[2bf]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mad_bit_skip
 <LI><a href="#[2c0]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mad_bit_read
-<LI><a href="#[449]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mad_bit_crc
 </UL>
-<BR>[Called By]<UL><LI><a href="#[51c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mad_header_decode
+<BR>[Called By]<UL><LI><a href="#[51d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mad_header_decode
 <LI><a href="#[4b8]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;free_bitrate
 </UL>
 
 <P><STRONG><a name="[4b8]"></a>free_bitrate</STRONG> (Thumb, 258 bytes, Stack size 144 bytes, frame.o(i.free_bitrate))
 <BR><BR>[Stack]<UL><LI>Max Depth = 208<LI>Call Chain = free_bitrate &rArr; decode_header &rArr; mad_bit_crc &rArr; mad_bit_read
 </UL>
-<BR>[Calls]<UL><LI><a href="#[2bf]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mad_bit_skip
-<LI><a href="#[4b9]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mad_bit_nextbyte
+<BR>[Calls]<UL><LI><a href="#[4b9]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mad_bit_nextbyte
 <LI><a href="#[4ba]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mad_stream_sync
 <LI><a href="#[448]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;decode_header
+<LI><a href="#[2bf]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mad_bit_skip
 <LI><a href="#[1bb]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_memcpy4
 </UL>
-<BR>[Called By]<UL><LI><a href="#[51c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mad_header_decode
+<BR>[Called By]<UL><LI><a href="#[51d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mad_header_decode
 </UL>
 
 <P><STRONG><a name="[aa]"></a>error_default</STRONG> (Thumb, 46 bytes, Stack size 24 bytes, decoder.o(i.error_default))
@@ -11681,13 +11683,13 @@ Local Symbols
 <BR><BR>[Stack]<UL><LI>Max Depth = 304 + Unknown Stack Size
 <LI>Call Chain = run_sync &rArr; mad_frame_decode &rArr; mad_header_decode &rArr; free_bitrate &rArr; decode_header &rArr; mad_bit_crc &rArr; mad_bit_read
 </UL>
-<BR>[Calls]<UL><LI><a href="#[525]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mad_stream_init
-<LI><a href="#[524]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mad_stream_finish
-<LI><a href="#[51c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mad_header_decode
-<LI><a href="#[51f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mad_frame_init
-<LI><a href="#[51e]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mad_frame_finish
-<LI><a href="#[51b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mad_frame_decode
-<LI><a href="#[526]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mad_synth_init
+<BR>[Calls]<UL><LI><a href="#[526]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mad_stream_init
+<LI><a href="#[525]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mad_stream_finish
+<LI><a href="#[51d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mad_header_decode
+<LI><a href="#[520]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mad_frame_init
+<LI><a href="#[51f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mad_frame_finish
+<LI><a href="#[51c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mad_frame_decode
+<LI><a href="#[527]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mad_synth_init
 <LI><a href="#[5a3]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mad_synth_frame
 </UL>
 <BR>[Address Reference Count : 1]<UL><LI> decoder.o(i.mad_decoder_run)
@@ -11703,21 +11705,21 @@ Local Symbols
 <BR>[Calls]<UL><LI><a href="#[5a2]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;gcd
 <LI><a href="#[1b6]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;abort
 </UL>
-<BR>[Called By]<UL><LI><a href="#[528]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;scale_rational
+<BR>[Called By]<UL><LI><a href="#[529]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;scale_rational
 </UL>
 
-<P><STRONG><a name="[529]"></a>reduce_timer</STRONG> (Thumb, 30 bytes, Stack size 0 bytes, timer.o(i.reduce_timer))
-<BR><BR>[Called By]<UL><LI><a href="#[521]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mad_timer_set
+<P><STRONG><a name="[52a]"></a>reduce_timer</STRONG> (Thumb, 30 bytes, Stack size 0 bytes, timer.o(i.reduce_timer))
+<BR><BR>[Called By]<UL><LI><a href="#[522]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mad_timer_set
 </UL>
 
-<P><STRONG><a name="[528]"></a>scale_rational</STRONG> (Thumb, 136 bytes, Stack size 16 bytes, timer.o(i.scale_rational))
+<P><STRONG><a name="[529]"></a>scale_rational</STRONG> (Thumb, 136 bytes, Stack size 16 bytes, timer.o(i.scale_rational))
 <BR><BR>[Stack]<UL><LI>Max Depth = 80 + Unknown Stack Size
 <LI>Call Chain = scale_rational &rArr; reduce_rational &rArr; abort &rArr; __rt_SIGABRT &rArr; __rt_SIGABRT_inner &rArr; __default_signal_display &rArr; _ttywrch
 </UL>
 <BR>[Calls]<UL><LI><a href="#[5a1]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;reduce_rational
 <LI><a href="#[1b6]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;abort
 </UL>
-<BR>[Called By]<UL><LI><a href="#[521]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mad_timer_set
+<BR>[Called By]<UL><LI><a href="#[522]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mad_timer_set
 </UL>
 
 <P><STRONG><a name="[73]"></a>MC0_MCI_SignalEvent</STRONG> (Thumb, 6 bytes, Stack size 0 bytes, fs_config.o(i.MC0_MCI_SignalEvent))
@@ -11730,50 +11732,50 @@ Local Symbols
 <P><STRONG><a name="[cf]"></a>mc0_DevCtrl</STRONG> (Thumb, 6 bytes, Stack size 0 bytes, fs_config.o(i.mc0_DevCtrl))
 <BR><BR>[Stack]<UL><LI>Max Depth = 384<LI>Call Chain = mc0_DevCtrl &rArr; mc_mci_DevCtrl &rArr; mc_mci_Init &rArr; mc_native_init &rArr; mc_control_lock &rArr; mc_set_block_len &rArr; mc_wfe &rArr; fs_get_sys_tick_us &rArr; osKernelGetSysTimerFreq &rArr; svcRtxKernelGetSysTimerFreq &rArr; EvrRtxKernelGetSysTimerFreq &rArr; EventRecord2 &rArr; EventRecordItem
 </UL>
-<BR>[Calls]<UL><LI><a href="#[52e]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc_mci_DevCtrl
+<BR>[Calls]<UL><LI><a href="#[52f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc_mci_DevCtrl
 </UL>
 <BR>[Address Reference Count : 1]<UL><LI> fs_config.o(.constdata)
 </UL>
 <P><STRONG><a name="[ca]"></a>mc0_Init</STRONG> (Thumb, 6 bytes, Stack size 0 bytes, fs_config.o(i.mc0_Init))
 <BR><BR>[Stack]<UL><LI>Max Depth = 336<LI>Call Chain = mc0_Init &rArr; mc_mci_Init &rArr; mc_native_init &rArr; mc_control_lock &rArr; mc_set_block_len &rArr; mc_wfe &rArr; fs_get_sys_tick_us &rArr; osKernelGetSysTimerFreq &rArr; svcRtxKernelGetSysTimerFreq &rArr; EvrRtxKernelGetSysTimerFreq &rArr; EventRecord2 &rArr; EventRecordItem
 </UL>
-<BR>[Calls]<UL><LI><a href="#[52f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc_mci_Init
+<BR>[Calls]<UL><LI><a href="#[530]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc_mci_Init
 </UL>
 <BR>[Address Reference Count : 1]<UL><LI> fs_config.o(.constdata)
 </UL>
 <P><STRONG><a name="[ce]"></a>mc0_RdInfo</STRONG> (Thumb, 6 bytes, Stack size 0 bytes, fs_config.o(i.mc0_RdInfo))
 <BR><BR>[Stack]<UL><LI>Max Depth = 96<LI>Call Chain = mc0_RdInfo &rArr; mc_mci_ReadInfo &rArr; EventRecord2 &rArr; EventRecordItem
 </UL>
-<BR>[Calls]<UL><LI><a href="#[530]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc_mci_ReadInfo
+<BR>[Calls]<UL><LI><a href="#[531]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc_mci_ReadInfo
 </UL>
 <BR>[Address Reference Count : 1]<UL><LI> fs_config.o(.constdata)
 </UL>
 <P><STRONG><a name="[cc]"></a>mc0_RdSect</STRONG> (Thumb, 6 bytes, Stack size 0 bytes, fs_config.o(i.mc0_RdSect))
 <BR><BR>[Stack]<UL><LI>Max Depth = 256<LI>Call Chain = mc0_RdSect &rArr; mc_mci_ReadSector &rArr; mc_select_tran_state &rArr; mc_stop_transmission &rArr; mc_wfe &rArr; fs_get_sys_tick_us &rArr; osKernelGetSysTimerFreq &rArr; svcRtxKernelGetSysTimerFreq &rArr; EvrRtxKernelGetSysTimerFreq &rArr; EventRecord2 &rArr; EventRecordItem
 </UL>
-<BR>[Calls]<UL><LI><a href="#[531]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc_mci_ReadSector
+<BR>[Calls]<UL><LI><a href="#[532]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc_mci_ReadSector
 </UL>
 <BR>[Address Reference Count : 1]<UL><LI> fs_config.o(.constdata)
 </UL>
 <P><STRONG><a name="[cb]"></a>mc0_UnInit</STRONG> (Thumb, 6 bytes, Stack size 0 bytes, fs_config.o(i.mc0_UnInit))
 <BR><BR>[Stack]<UL><LI>Max Depth = 96<LI>Call Chain = mc0_UnInit &rArr; mc_mci_UnInit &rArr; EventRecord2 &rArr; EventRecordItem
 </UL>
-<BR>[Calls]<UL><LI><a href="#[532]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc_mci_UnInit
+<BR>[Calls]<UL><LI><a href="#[533]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc_mci_UnInit
 </UL>
 <BR>[Address Reference Count : 1]<UL><LI> fs_config.o(.constdata)
 </UL>
 <P><STRONG><a name="[cd]"></a>mc0_WrSect</STRONG> (Thumb, 6 bytes, Stack size 0 bytes, fs_config.o(i.mc0_WrSect))
 <BR><BR>[Stack]<UL><LI>Max Depth = 256<LI>Call Chain = mc0_WrSect &rArr; mc_mci_WriteSector &rArr; mc_select_tran_state &rArr; mc_stop_transmission &rArr; mc_wfe &rArr; fs_get_sys_tick_us &rArr; osKernelGetSysTimerFreq &rArr; svcRtxKernelGetSysTimerFreq &rArr; EvrRtxKernelGetSysTimerFreq &rArr; EventRecord2 &rArr; EventRecordItem
 </UL>
-<BR>[Calls]<UL><LI><a href="#[533]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc_mci_WriteSector
+<BR>[Calls]<UL><LI><a href="#[534]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc_mci_WriteSector
 </UL>
 <BR>[Address Reference Count : 1]<UL><LI> fs_config.o(.constdata)
 </UL>
-<P><STRONG><a name="[556]"></a>IsIrqMasked</STRONG> (Thumb, 24 bytes, Stack size 0 bytes, rtx_delay.o(i.IsIrqMasked))
+<P><STRONG><a name="[557]"></a>IsIrqMasked</STRONG> (Thumb, 24 bytes, Stack size 0 bytes, rtx_delay.o(i.IsIrqMasked))
 <BR><BR>[Called By]<UL><LI><a href="#[326]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;osDelay
 </UL>
 
-<P><STRONG><a name="[555]"></a>IsIrqMode</STRONG> (Thumb, 16 bytes, Stack size 0 bytes, rtx_delay.o(i.IsIrqMode))
+<P><STRONG><a name="[556]"></a>IsIrqMode</STRONG> (Thumb, 16 bytes, Stack size 0 bytes, rtx_delay.o(i.IsIrqMode))
 <BR><BR>[Called By]<UL><LI><a href="#[326]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;osDelay
 </UL>
 
@@ -11805,13 +11807,13 @@ Local Symbols
 <LI><a href="#[86]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;svcRtxEventFlagsSet
 </UL>
 
-<P><STRONG><a name="[558]"></a>IsIrqMasked</STRONG> (Thumb, 24 bytes, Stack size 0 bytes, rtx_evflags.o(i.IsIrqMasked))
+<P><STRONG><a name="[559]"></a>IsIrqMasked</STRONG> (Thumb, 24 bytes, Stack size 0 bytes, rtx_evflags.o(i.IsIrqMasked))
 <BR><BR>[Called By]<UL><LI><a href="#[49c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;osEventFlagsWait
 <LI><a href="#[1fd]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;osEventFlagsSet
 <LI><a href="#[4e7]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;osEventFlagsNew
 </UL>
 
-<P><STRONG><a name="[557]"></a>IsIrqMode</STRONG> (Thumb, 16 bytes, Stack size 0 bytes, rtx_evflags.o(i.IsIrqMode))
+<P><STRONG><a name="[558]"></a>IsIrqMode</STRONG> (Thumb, 16 bytes, Stack size 0 bytes, rtx_evflags.o(i.IsIrqMode))
 <BR><BR>[Called By]<UL><LI><a href="#[49c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;osEventFlagsWait
 <LI><a href="#[1fd]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;osEventFlagsSet
 <LI><a href="#[4e7]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;osEventFlagsNew
@@ -11856,8 +11858,8 @@ Local Symbols
 </UL>
 <P><STRONG><a name="[55b]"></a>IsIrqMasked</STRONG> (Thumb, 24 bytes, Stack size 0 bytes, rtx_kernel.o(i.IsIrqMasked))
 <BR><BR>[Called By]<UL><LI><a href="#[55d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;osKernelGetTickCount
-<LI><a href="#[559]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;osKernelGetState
-<LI><a href="#[52d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;osKernelStart
+<LI><a href="#[50f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;osKernelGetState
+<LI><a href="#[52e]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;osKernelStart
 <LI><a href="#[3b6]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;osKernelInitialize
 <LI><a href="#[45f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;osKernelSuspend
 <LI><a href="#[325]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;osKernelGetTickFreq
@@ -11867,8 +11869,8 @@ Local Symbols
 
 <P><STRONG><a name="[55a]"></a>IsIrqMode</STRONG> (Thumb, 16 bytes, Stack size 0 bytes, rtx_kernel.o(i.IsIrqMode))
 <BR><BR>[Called By]<UL><LI><a href="#[55d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;osKernelGetTickCount
-<LI><a href="#[559]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;osKernelGetState
-<LI><a href="#[52d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;osKernelStart
+<LI><a href="#[50f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;osKernelGetState
+<LI><a href="#[52e]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;osKernelStart
 <LI><a href="#[3b6]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;osKernelInitialize
 <LI><a href="#[45f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;osKernelSuspend
 <LI><a href="#[325]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;osKernelGetTickFreq
@@ -11877,7 +11879,7 @@ Local Symbols
 </UL>
 
 <P><STRONG><a name="[55c]"></a>IsPrivileged</STRONG> (Thumb, 16 bytes, Stack size 0 bytes, rtx_kernel.o(i.IsPrivileged))
-<BR><BR>[Called By]<UL><LI><a href="#[559]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;osKernelGetState
+<BR><BR>[Called By]<UL><LI><a href="#[50f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;osKernelGetState
 </UL>
 
 <P><STRONG><a name="[2c8]"></a>KernelBlock</STRONG> (Thumb, 60 bytes, Stack size 8 bytes, rtx_kernel.o(i.KernelBlock))
@@ -11889,7 +11891,7 @@ Local Symbols
 </UL>
 
 <P><STRONG><a name="[88]"></a>svcRtxKernelGetState</STRONG> (Thumb, 10 bytes, Stack size 0 bytes, rtx_kernel.o(i.svcRtxKernelGetState))
-<BR><BR>[Called By]<UL><LI><a href="#[559]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;osKernelGetState
+<BR><BR>[Called By]<UL><LI><a href="#[50f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;osKernelGetState
 </UL>
 <BR>[Address Reference Count : 1]<UL><LI> rtx_kernel.o(i.osKernelGetState)
 </UL>
@@ -11979,7 +11981,7 @@ Local Symbols
 <P><STRONG><a name="[3ac]"></a>os_kernel_is_active</STRONG> (Thumb, 28 bytes, Stack size 8 bytes, rtx_lib.o(i.os_kernel_is_active))
 <BR><BR>[Stack]<UL><LI>Max Depth = 16<LI>Call Chain = os_kernel_is_active &rArr; osKernelGetState
 </UL>
-<BR>[Calls]<UL><LI><a href="#[559]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;osKernelGetState
+<BR>[Calls]<UL><LI><a href="#[50f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;osKernelGetState
 </UL>
 <BR>[Called By]<UL><LI><a href="#[12d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;_mutex_release
 <LI><a href="#[12a]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;_mutex_acquire
@@ -12606,7 +12608,7 @@ Local Symbols
 </UL>
 
 <P><STRONG><a name="[f3]"></a>I2C1_Control</STRONG> (Thumb, 18 bytes, Stack size 16 bytes, i2c_stm32f4xx.o(i.I2C1_Control))
-<BR><BR>[Stack]<UL><LI>Max Depth = 2512 + Unknown Stack Size
+<BR><BR>[Stack]<UL><LI>Max Depth = 2520 + Unknown Stack Size
 <LI>Call Chain = I2C1_Control &rArr; I2C_Control &rArr; HAL_Delay &rArr; HAL_GetTick &rArr; tbErr &rArr; USBmode &rArr; logPowerUp &rArr; NLogShowStatus &rArr; logEvtNININI &rArr; logEvtS &rArr;  tbErr (Cycle)
 </UL>
 <BR>[Calls]<UL><LI><a href="#[28c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;I2C_Control
@@ -12628,7 +12630,7 @@ Local Symbols
 <BR>[Address Reference Count : 1]<UL><LI> i2c_stm32f4xx.o(.constdata)
 </UL>
 <P><STRONG><a name="[eb]"></a>I2C1_Initialize</STRONG> (Thumb, 14 bytes, Stack size 8 bytes, i2c_stm32f4xx.o(i.I2C1_Initialize))
-<BR><BR>[Stack]<UL><LI>Max Depth = 2496 + Unknown Stack Size
+<BR><BR>[Stack]<UL><LI>Max Depth = 2504 + Unknown Stack Size
 <LI>Call Chain = I2C1_Initialize &rArr; I2C_Initialize &rArr; HAL_DMA_Init &rArr; HAL_GetTick &rArr; tbErr &rArr; USBmode &rArr; logPowerUp &rArr; NLogShowStatus &rArr; logEvtNININI &rArr; logEvtS &rArr;  tbErr (Cycle)
 </UL>
 <BR>[Calls]<UL><LI><a href="#[291]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;I2C_Initialize
@@ -12650,7 +12652,7 @@ Local Symbols
 <BR>[Address Reference Count : 1]<UL><LI> i2c_stm32f4xx.o(.constdata)
 </UL>
 <P><STRONG><a name="[ed]"></a>I2C1_PowerControl</STRONG> (Thumb, 14 bytes, Stack size 8 bytes, i2c_stm32f4xx.o(i.I2C1_PowerControl))
-<BR><BR>[Stack]<UL><LI>Max Depth = 2464 + Unknown Stack Size
+<BR><BR>[Stack]<UL><LI>Max Depth = 2472 + Unknown Stack Size
 <LI>Call Chain = I2C1_PowerControl &rArr; I2C_PowerControl &rArr; HAL_DMA_Abort &rArr; HAL_GetTick &rArr; tbErr &rArr; USBmode &rArr; logPowerUp &rArr; NLogShowStatus &rArr; logEvtNININI &rArr; logEvtS &rArr;  tbErr (Cycle)
 </UL>
 <BR>[Calls]<UL><LI><a href="#[294]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;I2C_PowerControl
@@ -12687,7 +12689,7 @@ Local Symbols
 <BR>[Address Reference Count : 1]<UL><LI> i2c_stm32f4xx.o(.constdata)
 </UL>
 <P><STRONG><a name="[28c]"></a>I2C_Control</STRONG> (Thumb, 790 bytes, Stack size 56 bytes, i2c_stm32f4xx.o(i.I2C_Control))
-<BR><BR>[Stack]<UL><LI>Max Depth = 2496 + Unknown Stack Size
+<BR><BR>[Stack]<UL><LI>Max Depth = 2504 + Unknown Stack Size
 <LI>Call Chain = I2C_Control &rArr; HAL_Delay &rArr; HAL_GetTick &rArr; tbErr &rArr; USBmode &rArr; logPowerUp &rArr; NLogShowStatus &rArr; logEvtNININI &rArr; logEvtS &rArr;  tbErr (Cycle)
 </UL>
 <BR>[Calls]<UL><LI><a href="#[288]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_RCC_GetPCLK1Freq
@@ -12701,7 +12703,7 @@ Local Symbols
 </UL>
 
 <P><STRONG><a name="[28d]"></a>I2C_ER_IRQHandler</STRONG> (Thumb, 350 bytes, Stack size 24 bytes, i2c_stm32f4xx.o(i.I2C_ER_IRQHandler))
-<BR><BR>[Stack]<UL><LI>Max Depth = 2464 + Unknown Stack Size
+<BR><BR>[Stack]<UL><LI>Max Depth = 2472 + Unknown Stack Size
 <LI>Call Chain = I2C_ER_IRQHandler &rArr; HAL_DMA_Abort &rArr; HAL_GetTick &rArr; tbErr &rArr; USBmode &rArr; logPowerUp &rArr; NLogShowStatus &rArr; logEvtNININI &rArr; logEvtS &rArr;  tbErr (Cycle)
 </UL>
 <BR>[Calls]<UL><LI><a href="#[1fe]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_DMA_Abort
@@ -12724,7 +12726,7 @@ Local Symbols
 </UL>
 
 <P><STRONG><a name="[291]"></a>I2C_Initialize</STRONG> (Thumb, 444 bytes, Stack size 40 bytes, i2c_stm32f4xx.o(i.I2C_Initialize))
-<BR><BR>[Stack]<UL><LI>Max Depth = 2488 + Unknown Stack Size
+<BR><BR>[Stack]<UL><LI>Max Depth = 2496 + Unknown Stack Size
 <LI>Call Chain = I2C_Initialize &rArr; HAL_DMA_Init &rArr; HAL_GetTick &rArr; tbErr &rArr; USBmode &rArr; logPowerUp &rArr; NLogShowStatus &rArr; logEvtNININI &rArr; logEvtS &rArr;  tbErr (Cycle)
 </UL>
 <BR>[Calls]<UL><LI><a href="#[29a]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;Enable_GPIO_Clock
@@ -12752,7 +12754,7 @@ Local Symbols
 </UL>
 
 <P><STRONG><a name="[294]"></a>I2C_PowerControl</STRONG> (Thumb, 666 bytes, Stack size 16 bytes, i2c_stm32f4xx.o(i.I2C_PowerControl))
-<BR><BR>[Stack]<UL><LI>Max Depth = 2456 + Unknown Stack Size
+<BR><BR>[Stack]<UL><LI>Max Depth = 2464 + Unknown Stack Size
 <LI>Call Chain = I2C_PowerControl &rArr; HAL_DMA_Abort &rArr; HAL_GetTick &rArr; tbErr &rArr; USBmode &rArr; logPowerUp &rArr; NLogShowStatus &rArr; logEvtNININI &rArr; logEvtS &rArr;  tbErr (Cycle)
 </UL>
 <BR>[Calls]<UL><LI><a href="#[29c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_NVIC_EnableIRQ
@@ -12788,7 +12790,7 @@ Local Symbols
 </UL>
 
 <P><STRONG><a name="[ff]"></a>AbortTransfer</STRONG> (Thumb, 144 bytes, Stack size 16 bytes, mci_stm32f4xx.o(i.AbortTransfer))
-<BR><BR>[Stack]<UL><LI>Max Depth = 2456 + Unknown Stack Size
+<BR><BR>[Stack]<UL><LI>Max Depth = 2464 + Unknown Stack Size
 <LI>Call Chain = AbortTransfer &rArr; HAL_DMA_Abort &rArr; HAL_GetTick &rArr; tbErr &rArr; USBmode &rArr; logPowerUp &rArr; NLogShowStatus &rArr; logEvtNININI &rArr; logEvtS &rArr;  tbErr (Cycle)
 </UL>
 <BR>[Calls]<UL><LI><a href="#[1fe]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_DMA_Abort
@@ -12825,7 +12827,7 @@ Local Symbols
 <BR>[Address Reference Count : 1]<UL><LI> mci_stm32f4xx.o(.constdata)
 </UL>
 <P><STRONG><a name="[f7]"></a>Initialize</STRONG> (Thumb, 346 bytes, Stack size 40 bytes, mci_stm32f4xx.o(i.Initialize))
-<BR><BR>[Stack]<UL><LI>Max Depth = 2488 + Unknown Stack Size
+<BR><BR>[Stack]<UL><LI>Max Depth = 2496 + Unknown Stack Size
 <LI>Call Chain = Initialize &rArr; HAL_DMA_Init &rArr; HAL_GetTick &rArr; tbErr &rArr; USBmode &rArr; logPowerUp &rArr; NLogShowStatus &rArr; logEvtNININI &rArr; logEvtS &rArr;  tbErr (Cycle)
 </UL>
 <BR>[Calls]<UL><LI><a href="#[2c7]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;Enable_GPIO_Clock
@@ -12891,7 +12893,7 @@ Local Symbols
 </UL>
 
 <P><STRONG><a name="[10c]"></a>SPI1_Control</STRONG> (Thumb, 18 bytes, Stack size 16 bytes, spi_stm32f4xx.o(i.SPI1_Control))
-<BR><BR>[Stack]<UL><LI>Max Depth = 2512 + Unknown Stack Size
+<BR><BR>[Stack]<UL><LI>Max Depth = 2520 + Unknown Stack Size
 <LI>Call Chain = SPI1_Control &rArr; SPI_Control &rArr; HAL_DMA_Abort &rArr; HAL_GetTick &rArr; tbErr &rArr; USBmode &rArr; logPowerUp &rArr; NLogShowStatus &rArr; logEvtNININI &rArr; logEvtS &rArr;  tbErr (Cycle)
 </UL>
 <BR>[Calls]<UL><LI><a href="#[2ef]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SPI_Control
@@ -12955,7 +12957,7 @@ Local Symbols
 <BR>[Address Reference Count : 1]<UL><LI> spi_stm32f4xx.o(.constdata)
 </UL>
 <P><STRONG><a name="[115]"></a>SPI4_Control</STRONG> (Thumb, 18 bytes, Stack size 16 bytes, spi_stm32f4xx.o(i.SPI4_Control))
-<BR><BR>[Stack]<UL><LI>Max Depth = 2512 + Unknown Stack Size
+<BR><BR>[Stack]<UL><LI>Max Depth = 2520 + Unknown Stack Size
 <LI>Call Chain = SPI4_Control &rArr; SPI_Control &rArr; HAL_DMA_Abort &rArr; HAL_GetTick &rArr; tbErr &rArr; USBmode &rArr; logPowerUp &rArr; NLogShowStatus &rArr; logEvtNININI &rArr; logEvtS &rArr;  tbErr (Cycle)
 </UL>
 <BR>[Calls]<UL><LI><a href="#[2ef]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SPI_Control
@@ -13027,7 +13029,7 @@ Local Symbols
 <BR>[Address Reference Count : 1]<UL><LI> spi_stm32f4xx.o(.constdata)
 </UL>
 <P><STRONG><a name="[2ef]"></a>SPI_Control</STRONG> (Thumb, 1132 bytes, Stack size 56 bytes, spi_stm32f4xx.o(i.SPI_Control))
-<BR><BR>[Stack]<UL><LI>Max Depth = 2496 + Unknown Stack Size
+<BR><BR>[Stack]<UL><LI>Max Depth = 2504 + Unknown Stack Size
 <LI>Call Chain = SPI_Control &rArr; HAL_DMA_Abort &rArr; HAL_GetTick &rArr; tbErr &rArr; USBmode &rArr; logPowerUp &rArr; NLogShowStatus &rArr; logEvtNININI &rArr; logEvtS &rArr;  tbErr (Cycle)
 </UL>
 <BR>[Calls]<UL><LI><a href="#[2f9]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;Enable_GPIO_Clock
@@ -13155,7 +13157,7 @@ Local Symbols
 <BR>[Address Reference Count : 1]<UL><LI> usbd_fs_stm32f4xx.o(.constdata)
 </UL>
 <P><STRONG><a name="[11f]"></a>USBD_DeviceRemoteWakeup</STRONG> (Thumb, 48 bytes, Stack size 8 bytes, usbd_fs_stm32f4xx.o(i.USBD_DeviceRemoteWakeup))
-<BR><BR>[Stack]<UL><LI>Max Depth = 2448 + Unknown Stack Size
+<BR><BR>[Stack]<UL><LI>Max Depth = 2456 + Unknown Stack Size
 <LI>Call Chain = USBD_DeviceRemoteWakeup &rArr; HAL_Delay &rArr; HAL_GetTick &rArr; tbErr &rArr; USBmode &rArr; logPowerUp &rArr; NLogShowStatus &rArr; logEvtNININI &rArr; logEvtS &rArr;  tbErr (Cycle)
 </UL>
 <BR>[Calls]<UL><LI><a href="#[287]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_Delay
@@ -13257,7 +13259,7 @@ Local Symbols
 <BR>[Address Reference Count : 1]<UL><LI> usbd_fs_stm32f4xx.o(.constdata)
 </UL>
 <P><STRONG><a name="[11b]"></a>USBD_PowerControl</STRONG> (Thumb, 702 bytes, Stack size 16 bytes, usbd_fs_stm32f4xx.o(i.USBD_PowerControl))
-<BR><BR>[Stack]<UL><LI>Max Depth = 2456 + Unknown Stack Size
+<BR><BR>[Stack]<UL><LI>Max Depth = 2464 + Unknown Stack Size
 <LI>Call Chain = USBD_PowerControl &rArr; HAL_Delay &rArr; HAL_GetTick &rArr; tbErr &rArr; USBmode &rArr; logPowerUp &rArr; NLogShowStatus &rArr; logEvtNININI &rArr; logEvtS &rArr;  tbErr (Cycle)
 </UL>
 <BR>[Calls]<UL><LI><a href="#[327]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;dbgEVR
@@ -13366,9 +13368,9 @@ Local Symbols
 </UL>
 <BR>[Calls]<UL><LI><a href="#[227]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;EventRecord4
 </UL>
-<BR>[Called By]<UL><LI><a href="#[531]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc_mci_ReadSector
-<LI><a href="#[54d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc_switch_func
-<LI><a href="#[54a]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc_send_ext_csd
+<BR>[Called By]<UL><LI><a href="#[532]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc_mci_ReadSector
+<LI><a href="#[54e]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc_switch_func
+<LI><a href="#[54b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc_send_ext_csd
 </UL>
 
 <P><STRONG><a name="[23d]"></a>EvrFsMcMCI_SendCommandError</STRONG> (Thumb, 22 bytes, Stack size 8 bytes, fs_mc_mci.o(i.EvrFsMcMCI_SendCommandError))
@@ -13376,21 +13378,21 @@ Local Symbols
 </UL>
 <BR>[Calls]<UL><LI><a href="#[227]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;EventRecord4
 </UL>
-<BR>[Called By]<UL><LI><a href="#[533]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc_mci_WriteSector
-<LI><a href="#[531]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc_mci_ReadSector
-<LI><a href="#[52e]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc_mci_DevCtrl
-<LI><a href="#[54d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc_switch_func
-<LI><a href="#[54b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc_switch
-<LI><a href="#[546]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc_stop_transmission
-<LI><a href="#[539]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc_sleep_awake
-<LI><a href="#[535]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc_set_block_len
-<LI><a href="#[54a]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc_send_ext_csd
-<LI><a href="#[53c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc_select_deselect
-<LI><a href="#[54c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc_select_bus_width
-<LI><a href="#[537]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc_read_status
-<LI><a href="#[545]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc_native_init
-<LI><a href="#[53a]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc_enable_acmd
-<LI><a href="#[534]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc_control_lock
+<BR>[Called By]<UL><LI><a href="#[534]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc_mci_WriteSector
+<LI><a href="#[532]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc_mci_ReadSector
+<LI><a href="#[52f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc_mci_DevCtrl
+<LI><a href="#[54e]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc_switch_func
+<LI><a href="#[54c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc_switch
+<LI><a href="#[547]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc_stop_transmission
+<LI><a href="#[53a]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc_sleep_awake
+<LI><a href="#[536]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc_set_block_len
+<LI><a href="#[54b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc_send_ext_csd
+<LI><a href="#[53d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc_select_deselect
+<LI><a href="#[54d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc_select_bus_width
+<LI><a href="#[538]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc_read_status
+<LI><a href="#[546]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc_native_init
+<LI><a href="#[53b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc_enable_acmd
+<LI><a href="#[535]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc_control_lock
 </UL>
 
 <P><STRONG><a name="[23e]"></a>EvrFsMcMCI_WriteXferSetupError</STRONG> (Thumb, 20 bytes, Stack size 8 bytes, fs_mc_mci.o(i.EvrFsMcMCI_WriteXferSetupError))
@@ -13398,286 +13400,286 @@ Local Symbols
 </UL>
 <BR>[Calls]<UL><LI><a href="#[227]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;EventRecord4
 </UL>
-<BR>[Called By]<UL><LI><a href="#[533]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc_mci_WriteSector
-<LI><a href="#[534]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc_control_lock
+<BR>[Called By]<UL><LI><a href="#[534]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc_mci_WriteSector
+<LI><a href="#[535]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc_control_lock
 </UL>
 
-<P><STRONG><a name="[53d]"></a>fill_cid</STRONG> (Thumb, 118 bytes, Stack size 0 bytes, fs_mc_mci.o(i.fill_cid))
-<BR><BR>[Called By]<UL><LI><a href="#[52e]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc_mci_DevCtrl
-<LI><a href="#[545]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc_native_init
+<P><STRONG><a name="[53e]"></a>fill_cid</STRONG> (Thumb, 118 bytes, Stack size 0 bytes, fs_mc_mci.o(i.fill_cid))
+<BR><BR>[Called By]<UL><LI><a href="#[52f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc_mci_DevCtrl
+<LI><a href="#[546]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc_native_init
 </UL>
 
-<P><STRONG><a name="[548]"></a>get_block_number</STRONG> (Thumb, 160 bytes, Stack size 12 bytes, fs_mc_mci.o(i.get_block_number))
+<P><STRONG><a name="[549]"></a>get_block_number</STRONG> (Thumb, 160 bytes, Stack size 12 bytes, fs_mc_mci.o(i.get_block_number))
 <BR><BR>[Stack]<UL><LI>Max Depth = 12<LI>Call Chain = get_block_number
 </UL>
-<BR>[Called By]<UL><LI><a href="#[545]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc_native_init
+<BR>[Called By]<UL><LI><a href="#[546]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc_native_init
 </UL>
 
-<P><STRONG><a name="[534]"></a>mc_control_lock</STRONG> (Thumb, 360 bytes, Stack size 64 bytes, fs_mc_mci.o(i.mc_control_lock))
+<P><STRONG><a name="[535]"></a>mc_control_lock</STRONG> (Thumb, 360 bytes, Stack size 64 bytes, fs_mc_mci.o(i.mc_control_lock))
 <BR><BR>[Stack]<UL><LI>Max Depth = 224<LI>Call Chain = mc_control_lock &rArr; mc_set_block_len &rArr; mc_wfe &rArr; fs_get_sys_tick_us &rArr; osKernelGetSysTimerFreq &rArr; svcRtxKernelGetSysTimerFreq &rArr; EvrRtxKernelGetSysTimerFreq &rArr; EventRecord2 &rArr; EventRecordItem
 </UL>
 <BR>[Calls]<UL><LI><a href="#[224]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;EventRecord2
-<LI><a href="#[536]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc_wfe
-<LI><a href="#[535]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc_set_block_len
-<LI><a href="#[537]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc_read_status
+<LI><a href="#[537]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc_wfe
+<LI><a href="#[536]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc_set_block_len
+<LI><a href="#[538]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc_read_status
 <LI><a href="#[23e]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;EvrFsMcMCI_WriteXferSetupError
 <LI><a href="#[23d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;EvrFsMcMCI_SendCommandError
 <LI><a href="#[1aa]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_memclr4
 <LI><a href="#[1bd]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_memcpy
 </UL>
-<BR>[Called By]<UL><LI><a href="#[52e]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc_mci_DevCtrl
-<LI><a href="#[545]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc_native_init
+<BR>[Called By]<UL><LI><a href="#[52f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc_mci_DevCtrl
+<LI><a href="#[546]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc_native_init
 </UL>
 
-<P><STRONG><a name="[538]"></a>mc_control_sleep</STRONG> (Thumb, 200 bytes, Stack size 24 bytes, fs_mc_mci.o(i.mc_control_sleep))
+<P><STRONG><a name="[539]"></a>mc_control_sleep</STRONG> (Thumb, 200 bytes, Stack size 24 bytes, fs_mc_mci.o(i.mc_control_sleep))
 <BR><BR>[Stack]<UL><LI>Max Depth = 184<LI>Call Chain = mc_control_sleep &rArr; mc_sleep_awake &rArr; mc_wfe &rArr; fs_get_sys_tick_us &rArr; osKernelGetSysTimerFreq &rArr; svcRtxKernelGetSysTimerFreq &rArr; EvrRtxKernelGetSysTimerFreq &rArr; EventRecord2 &rArr; EventRecordItem
 </UL>
 <BR>[Calls]<UL><LI><a href="#[4ca]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;fs_set_rtos_delay
 <LI><a href="#[224]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;EventRecord2
-<LI><a href="#[539]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc_sleep_awake
-<LI><a href="#[537]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc_read_status
+<LI><a href="#[53a]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc_sleep_awake
+<LI><a href="#[538]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc_read_status
 </UL>
-<BR>[Called By]<UL><LI><a href="#[52e]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc_mci_DevCtrl
+<BR>[Called By]<UL><LI><a href="#[52f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc_mci_DevCtrl
 </UL>
 
-<P><STRONG><a name="[53a]"></a>mc_enable_acmd</STRONG> (Thumb, 70 bytes, Stack size 24 bytes, fs_mc_mci.o(i.mc_enable_acmd))
+<P><STRONG><a name="[53b]"></a>mc_enable_acmd</STRONG> (Thumb, 70 bytes, Stack size 24 bytes, fs_mc_mci.o(i.mc_enable_acmd))
 <BR><BR>[Stack]<UL><LI>Max Depth = 160<LI>Call Chain = mc_enable_acmd &rArr; mc_wfe &rArr; fs_get_sys_tick_us &rArr; osKernelGetSysTimerFreq &rArr; svcRtxKernelGetSysTimerFreq &rArr; EvrRtxKernelGetSysTimerFreq &rArr; EventRecord2 &rArr; EventRecordItem
 </UL>
-<BR>[Calls]<UL><LI><a href="#[536]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc_wfe
+<BR>[Calls]<UL><LI><a href="#[537]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc_wfe
 <LI><a href="#[23d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;EvrFsMcMCI_SendCommandError
 </UL>
-<BR>[Called By]<UL><LI><a href="#[54c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc_select_bus_width
-<LI><a href="#[545]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc_native_init
+<BR>[Called By]<UL><LI><a href="#[54d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc_select_bus_width
+<LI><a href="#[546]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc_native_init
 </UL>
 
-<P><STRONG><a name="[545]"></a>mc_native_init</STRONG> (Thumb, 1450 bytes, Stack size 96 bytes, fs_mc_mci.o(i.mc_native_init))
+<P><STRONG><a name="[546]"></a>mc_native_init</STRONG> (Thumb, 1450 bytes, Stack size 96 bytes, fs_mc_mci.o(i.mc_native_init))
 <BR><BR>[Stack]<UL><LI>Max Depth = 320<LI>Call Chain = mc_native_init &rArr; mc_control_lock &rArr; mc_set_block_len &rArr; mc_wfe &rArr; fs_get_sys_tick_us &rArr; osKernelGetSysTimerFreq &rArr; svcRtxKernelGetSysTimerFreq &rArr; EvrRtxKernelGetSysTimerFreq &rArr; EventRecord2 &rArr; EventRecordItem
 </UL>
 <BR>[Calls]<UL><LI><a href="#[4ca]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;fs_set_rtos_delay
 <LI><a href="#[4c3]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;fs_get_sys_tick_us
 <LI><a href="#[4c1]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;fs_get_sys_tick
 <LI><a href="#[224]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;EventRecord2
-<LI><a href="#[544]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mci_idle_clock
-<LI><a href="#[541]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mci_data_timeout
-<LI><a href="#[547]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mci_cmd_bus_mode
-<LI><a href="#[540]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mci_bus_speed_mode
-<LI><a href="#[542]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mci_bus_speed
-<LI><a href="#[536]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc_wfe
-<LI><a href="#[54d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc_switch_func
-<LI><a href="#[54b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc_switch
-<LI><a href="#[535]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc_set_block_len
-<LI><a href="#[54a]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc_send_ext_csd
-<LI><a href="#[53c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc_select_deselect
-<LI><a href="#[54c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc_select_bus_width
-<LI><a href="#[537]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc_read_status
-<LI><a href="#[53a]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc_enable_acmd
-<LI><a href="#[534]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc_control_lock
-<LI><a href="#[548]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;get_block_number
-<LI><a href="#[53d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;fill_cid
+<LI><a href="#[545]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mci_idle_clock
+<LI><a href="#[542]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mci_data_timeout
+<LI><a href="#[548]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mci_cmd_bus_mode
+<LI><a href="#[541]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mci_bus_speed_mode
+<LI><a href="#[543]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mci_bus_speed
+<LI><a href="#[537]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc_wfe
+<LI><a href="#[54e]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc_switch_func
+<LI><a href="#[54c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc_switch
+<LI><a href="#[536]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc_set_block_len
+<LI><a href="#[54b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc_send_ext_csd
+<LI><a href="#[53d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc_select_deselect
+<LI><a href="#[54d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc_select_bus_width
+<LI><a href="#[538]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc_read_status
+<LI><a href="#[53b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc_enable_acmd
+<LI><a href="#[535]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc_control_lock
+<LI><a href="#[549]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;get_block_number
+<LI><a href="#[53e]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;fill_cid
 <LI><a href="#[23d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;EvrFsMcMCI_SendCommandError
-<LI><a href="#[549]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;fs_mc_lock_unlock
+<LI><a href="#[54a]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;fs_mc_lock_unlock
 </UL>
-<BR>[Called By]<UL><LI><a href="#[52f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc_mci_Init
+<BR>[Called By]<UL><LI><a href="#[530]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc_mci_Init
 </UL>
 
-<P><STRONG><a name="[537]"></a>mc_read_status</STRONG> (Thumb, 62 bytes, Stack size 16 bytes, fs_mc_mci.o(i.mc_read_status))
+<P><STRONG><a name="[538]"></a>mc_read_status</STRONG> (Thumb, 62 bytes, Stack size 16 bytes, fs_mc_mci.o(i.mc_read_status))
 <BR><BR>[Stack]<UL><LI>Max Depth = 152<LI>Call Chain = mc_read_status &rArr; mc_wfe &rArr; fs_get_sys_tick_us &rArr; osKernelGetSysTimerFreq &rArr; svcRtxKernelGetSysTimerFreq &rArr; EvrRtxKernelGetSysTimerFreq &rArr; EventRecord2 &rArr; EventRecordItem
 </UL>
-<BR>[Calls]<UL><LI><a href="#[536]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc_wfe
+<BR>[Calls]<UL><LI><a href="#[537]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc_wfe
 <LI><a href="#[23d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;EvrFsMcMCI_SendCommandError
 </UL>
-<BR>[Called By]<UL><LI><a href="#[533]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc_mci_WriteSector
-<LI><a href="#[52e]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc_mci_DevCtrl
-<LI><a href="#[53e]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc_select_tran_state
-<LI><a href="#[54c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc_select_bus_width
-<LI><a href="#[545]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc_native_init
-<LI><a href="#[538]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc_control_sleep
-<LI><a href="#[534]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc_control_lock
+<BR>[Called By]<UL><LI><a href="#[534]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc_mci_WriteSector
+<LI><a href="#[52f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc_mci_DevCtrl
+<LI><a href="#[53f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc_select_tran_state
+<LI><a href="#[54d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc_select_bus_width
+<LI><a href="#[546]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc_native_init
+<LI><a href="#[539]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc_control_sleep
+<LI><a href="#[535]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc_control_lock
 </UL>
 
-<P><STRONG><a name="[54c]"></a>mc_select_bus_width</STRONG> (Thumb, 228 bytes, Stack size 32 bytes, fs_mc_mci.o(i.mc_select_bus_width))
+<P><STRONG><a name="[54d]"></a>mc_select_bus_width</STRONG> (Thumb, 228 bytes, Stack size 32 bytes, fs_mc_mci.o(i.mc_select_bus_width))
 <BR><BR>[Stack]<UL><LI>Max Depth = 192<LI>Call Chain = mc_select_bus_width &rArr; mc_switch &rArr; mc_wfe &rArr; fs_get_sys_tick_us &rArr; osKernelGetSysTimerFreq &rArr; svcRtxKernelGetSysTimerFreq &rArr; EvrRtxKernelGetSysTimerFreq &rArr; EventRecord2 &rArr; EventRecordItem
 </UL>
 <BR>[Calls]<UL><LI><a href="#[4ca]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;fs_set_rtos_delay
 <LI><a href="#[4c3]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;fs_get_sys_tick_us
 <LI><a href="#[4c1]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;fs_get_sys_tick
-<LI><a href="#[53f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mci_bus_width
-<LI><a href="#[536]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc_wfe
-<LI><a href="#[54b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc_switch
-<LI><a href="#[537]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc_read_status
-<LI><a href="#[53a]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc_enable_acmd
+<LI><a href="#[540]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mci_bus_width
+<LI><a href="#[537]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc_wfe
+<LI><a href="#[54c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc_switch
+<LI><a href="#[538]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc_read_status
+<LI><a href="#[53b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc_enable_acmd
 <LI><a href="#[23d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;EvrFsMcMCI_SendCommandError
 </UL>
-<BR>[Called By]<UL><LI><a href="#[545]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc_native_init
+<BR>[Called By]<UL><LI><a href="#[546]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc_native_init
 </UL>
 
-<P><STRONG><a name="[53c]"></a>mc_select_deselect</STRONG> (Thumb, 76 bytes, Stack size 16 bytes, fs_mc_mci.o(i.mc_select_deselect))
+<P><STRONG><a name="[53d]"></a>mc_select_deselect</STRONG> (Thumb, 76 bytes, Stack size 16 bytes, fs_mc_mci.o(i.mc_select_deselect))
 <BR><BR>[Stack]<UL><LI>Max Depth = 152<LI>Call Chain = mc_select_deselect &rArr; mc_wfe &rArr; fs_get_sys_tick_us &rArr; osKernelGetSysTimerFreq &rArr; svcRtxKernelGetSysTimerFreq &rArr; EvrRtxKernelGetSysTimerFreq &rArr; EventRecord2 &rArr; EventRecordItem
 </UL>
-<BR>[Calls]<UL><LI><a href="#[536]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc_wfe
+<BR>[Calls]<UL><LI><a href="#[537]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc_wfe
 <LI><a href="#[23d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;EvrFsMcMCI_SendCommandError
 </UL>
-<BR>[Called By]<UL><LI><a href="#[533]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc_mci_WriteSector
-<LI><a href="#[531]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc_mci_ReadSector
-<LI><a href="#[52e]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc_mci_DevCtrl
-<LI><a href="#[53e]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc_select_tran_state
-<LI><a href="#[545]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc_native_init
+<BR>[Called By]<UL><LI><a href="#[534]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc_mci_WriteSector
+<LI><a href="#[532]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc_mci_ReadSector
+<LI><a href="#[52f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc_mci_DevCtrl
+<LI><a href="#[53f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc_select_tran_state
+<LI><a href="#[546]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc_native_init
 </UL>
 
-<P><STRONG><a name="[53e]"></a>mc_select_tran_state</STRONG> (Thumb, 222 bytes, Stack size 40 bytes, fs_mc_mci.o(i.mc_select_tran_state))
+<P><STRONG><a name="[53f]"></a>mc_select_tran_state</STRONG> (Thumb, 222 bytes, Stack size 40 bytes, fs_mc_mci.o(i.mc_select_tran_state))
 <BR><BR>[Stack]<UL><LI>Max Depth = 192<LI>Call Chain = mc_select_tran_state &rArr; mc_stop_transmission &rArr; mc_wfe &rArr; fs_get_sys_tick_us &rArr; osKernelGetSysTimerFreq &rArr; svcRtxKernelGetSysTimerFreq &rArr; EvrRtxKernelGetSysTimerFreq &rArr; EventRecord2 &rArr; EventRecordItem
 </UL>
 <BR>[Calls]<UL><LI><a href="#[227]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;EventRecord4
 <LI><a href="#[4c3]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;fs_get_sys_tick_us
 <LI><a href="#[4c1]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;fs_get_sys_tick
 <LI><a href="#[224]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;EventRecord2
-<LI><a href="#[546]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc_stop_transmission
-<LI><a href="#[53c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc_select_deselect
-<LI><a href="#[537]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc_read_status
+<LI><a href="#[547]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc_stop_transmission
+<LI><a href="#[53d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc_select_deselect
+<LI><a href="#[538]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc_read_status
 </UL>
-<BR>[Called By]<UL><LI><a href="#[533]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc_mci_WriteSector
-<LI><a href="#[531]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc_mci_ReadSector
-<LI><a href="#[52e]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc_mci_DevCtrl
+<BR>[Called By]<UL><LI><a href="#[534]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc_mci_WriteSector
+<LI><a href="#[532]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc_mci_ReadSector
+<LI><a href="#[52f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc_mci_DevCtrl
 </UL>
 
-<P><STRONG><a name="[54a]"></a>mc_send_ext_csd</STRONG> (Thumb, 112 bytes, Stack size 24 bytes, fs_mc_mci.o(i.mc_send_ext_csd))
+<P><STRONG><a name="[54b]"></a>mc_send_ext_csd</STRONG> (Thumb, 112 bytes, Stack size 24 bytes, fs_mc_mci.o(i.mc_send_ext_csd))
 <BR><BR>[Stack]<UL><LI>Max Depth = 160<LI>Call Chain = mc_send_ext_csd &rArr; mc_wfe &rArr; fs_get_sys_tick_us &rArr; osKernelGetSysTimerFreq &rArr; svcRtxKernelGetSysTimerFreq &rArr; EvrRtxKernelGetSysTimerFreq &rArr; EventRecord2 &rArr; EventRecordItem
 </UL>
-<BR>[Calls]<UL><LI><a href="#[536]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc_wfe
+<BR>[Calls]<UL><LI><a href="#[537]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc_wfe
 <LI><a href="#[23d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;EvrFsMcMCI_SendCommandError
 <LI><a href="#[23c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;EvrFsMcMCI_ReadXferSetupError
 </UL>
-<BR>[Called By]<UL><LI><a href="#[545]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc_native_init
+<BR>[Called By]<UL><LI><a href="#[546]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc_native_init
 </UL>
 
-<P><STRONG><a name="[535]"></a>mc_set_block_len</STRONG> (Thumb, 70 bytes, Stack size 24 bytes, fs_mc_mci.o(i.mc_set_block_len))
+<P><STRONG><a name="[536]"></a>mc_set_block_len</STRONG> (Thumb, 70 bytes, Stack size 24 bytes, fs_mc_mci.o(i.mc_set_block_len))
 <BR><BR>[Stack]<UL><LI>Max Depth = 160<LI>Call Chain = mc_set_block_len &rArr; mc_wfe &rArr; fs_get_sys_tick_us &rArr; osKernelGetSysTimerFreq &rArr; svcRtxKernelGetSysTimerFreq &rArr; EvrRtxKernelGetSysTimerFreq &rArr; EventRecord2 &rArr; EventRecordItem
 </UL>
-<BR>[Calls]<UL><LI><a href="#[536]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc_wfe
+<BR>[Calls]<UL><LI><a href="#[537]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc_wfe
 <LI><a href="#[23d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;EvrFsMcMCI_SendCommandError
 </UL>
-<BR>[Called By]<UL><LI><a href="#[52e]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc_mci_DevCtrl
-<LI><a href="#[545]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc_native_init
-<LI><a href="#[534]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc_control_lock
+<BR>[Called By]<UL><LI><a href="#[52f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc_mci_DevCtrl
+<LI><a href="#[546]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc_native_init
+<LI><a href="#[535]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc_control_lock
 </UL>
 
-<P><STRONG><a name="[539]"></a>mc_sleep_awake</STRONG> (Thumb, 76 bytes, Stack size 24 bytes, fs_mc_mci.o(i.mc_sleep_awake))
+<P><STRONG><a name="[53a]"></a>mc_sleep_awake</STRONG> (Thumb, 76 bytes, Stack size 24 bytes, fs_mc_mci.o(i.mc_sleep_awake))
 <BR><BR>[Stack]<UL><LI>Max Depth = 160<LI>Call Chain = mc_sleep_awake &rArr; mc_wfe &rArr; fs_get_sys_tick_us &rArr; osKernelGetSysTimerFreq &rArr; svcRtxKernelGetSysTimerFreq &rArr; EvrRtxKernelGetSysTimerFreq &rArr; EventRecord2 &rArr; EventRecordItem
 </UL>
-<BR>[Calls]<UL><LI><a href="#[536]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc_wfe
+<BR>[Calls]<UL><LI><a href="#[537]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc_wfe
 <LI><a href="#[23d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;EvrFsMcMCI_SendCommandError
 </UL>
-<BR>[Called By]<UL><LI><a href="#[538]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc_control_sleep
+<BR>[Called By]<UL><LI><a href="#[539]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc_control_sleep
 </UL>
 
-<P><STRONG><a name="[546]"></a>mc_stop_transmission</STRONG> (Thumb, 60 bytes, Stack size 16 bytes, fs_mc_mci.o(i.mc_stop_transmission))
+<P><STRONG><a name="[547]"></a>mc_stop_transmission</STRONG> (Thumb, 60 bytes, Stack size 16 bytes, fs_mc_mci.o(i.mc_stop_transmission))
 <BR><BR>[Stack]<UL><LI>Max Depth = 152<LI>Call Chain = mc_stop_transmission &rArr; mc_wfe &rArr; fs_get_sys_tick_us &rArr; osKernelGetSysTimerFreq &rArr; svcRtxKernelGetSysTimerFreq &rArr; EvrRtxKernelGetSysTimerFreq &rArr; EventRecord2 &rArr; EventRecordItem
 </UL>
-<BR>[Calls]<UL><LI><a href="#[536]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc_wfe
+<BR>[Calls]<UL><LI><a href="#[537]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc_wfe
 <LI><a href="#[23d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;EvrFsMcMCI_SendCommandError
 </UL>
-<BR>[Called By]<UL><LI><a href="#[533]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc_mci_WriteSector
-<LI><a href="#[531]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc_mci_ReadSector
-<LI><a href="#[53e]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc_select_tran_state
+<BR>[Called By]<UL><LI><a href="#[534]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc_mci_WriteSector
+<LI><a href="#[532]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc_mci_ReadSector
+<LI><a href="#[53f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc_select_tran_state
 </UL>
 
-<P><STRONG><a name="[54b]"></a>mc_switch</STRONG> (Thumb, 70 bytes, Stack size 24 bytes, fs_mc_mci.o(i.mc_switch))
+<P><STRONG><a name="[54c]"></a>mc_switch</STRONG> (Thumb, 70 bytes, Stack size 24 bytes, fs_mc_mci.o(i.mc_switch))
 <BR><BR>[Stack]<UL><LI>Max Depth = 160<LI>Call Chain = mc_switch &rArr; mc_wfe &rArr; fs_get_sys_tick_us &rArr; osKernelGetSysTimerFreq &rArr; svcRtxKernelGetSysTimerFreq &rArr; EvrRtxKernelGetSysTimerFreq &rArr; EventRecord2 &rArr; EventRecordItem
 </UL>
-<BR>[Calls]<UL><LI><a href="#[536]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc_wfe
+<BR>[Calls]<UL><LI><a href="#[537]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc_wfe
 <LI><a href="#[23d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;EvrFsMcMCI_SendCommandError
 </UL>
-<BR>[Called By]<UL><LI><a href="#[54c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc_select_bus_width
-<LI><a href="#[545]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc_native_init
+<BR>[Called By]<UL><LI><a href="#[54d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc_select_bus_width
+<LI><a href="#[546]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc_native_init
 </UL>
 
-<P><STRONG><a name="[54d]"></a>mc_switch_func</STRONG> (Thumb, 144 bytes, Stack size 24 bytes, fs_mc_mci.o(i.mc_switch_func))
+<P><STRONG><a name="[54e]"></a>mc_switch_func</STRONG> (Thumb, 144 bytes, Stack size 24 bytes, fs_mc_mci.o(i.mc_switch_func))
 <BR><BR>[Stack]<UL><LI>Max Depth = 160<LI>Call Chain = mc_switch_func &rArr; mc_wfe &rArr; fs_get_sys_tick_us &rArr; osKernelGetSysTimerFreq &rArr; svcRtxKernelGetSysTimerFreq &rArr; EvrRtxKernelGetSysTimerFreq &rArr; EventRecord2 &rArr; EventRecordItem
 </UL>
-<BR>[Calls]<UL><LI><a href="#[536]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc_wfe
+<BR>[Calls]<UL><LI><a href="#[537]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc_wfe
 <LI><a href="#[23d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;EvrFsMcMCI_SendCommandError
 <LI><a href="#[23c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;EvrFsMcMCI_ReadXferSetupError
 </UL>
-<BR>[Called By]<UL><LI><a href="#[545]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc_native_init
+<BR>[Called By]<UL><LI><a href="#[546]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc_native_init
 </UL>
 
-<P><STRONG><a name="[536]"></a>mc_wfe</STRONG> (Thumb, 44 bytes, Stack size 24 bytes, fs_mc_mci.o(i.mc_wfe))
+<P><STRONG><a name="[537]"></a>mc_wfe</STRONG> (Thumb, 44 bytes, Stack size 24 bytes, fs_mc_mci.o(i.mc_wfe))
 <BR><BR>[Stack]<UL><LI>Max Depth = 136<LI>Call Chain = mc_wfe &rArr; fs_get_sys_tick_us &rArr; osKernelGetSysTimerFreq &rArr; svcRtxKernelGetSysTimerFreq &rArr; EvrRtxKernelGetSysTimerFreq &rArr; EventRecord2 &rArr; EventRecordItem
 </UL>
 <BR>[Calls]<UL><LI><a href="#[4c3]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;fs_get_sys_tick_us
 <LI><a href="#[4c1]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;fs_get_sys_tick
 </UL>
-<BR>[Called By]<UL><LI><a href="#[533]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc_mci_WriteSector
-<LI><a href="#[531]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc_mci_ReadSector
-<LI><a href="#[52e]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc_mci_DevCtrl
-<LI><a href="#[54d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc_switch_func
-<LI><a href="#[54b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc_switch
-<LI><a href="#[546]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc_stop_transmission
-<LI><a href="#[539]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc_sleep_awake
-<LI><a href="#[535]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc_set_block_len
-<LI><a href="#[54a]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc_send_ext_csd
-<LI><a href="#[53c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc_select_deselect
-<LI><a href="#[54c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc_select_bus_width
-<LI><a href="#[537]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc_read_status
-<LI><a href="#[545]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc_native_init
-<LI><a href="#[53a]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc_enable_acmd
-<LI><a href="#[534]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc_control_lock
+<BR>[Called By]<UL><LI><a href="#[534]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc_mci_WriteSector
+<LI><a href="#[532]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc_mci_ReadSector
+<LI><a href="#[52f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc_mci_DevCtrl
+<LI><a href="#[54e]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc_switch_func
+<LI><a href="#[54c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc_switch
+<LI><a href="#[547]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc_stop_transmission
+<LI><a href="#[53a]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc_sleep_awake
+<LI><a href="#[536]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc_set_block_len
+<LI><a href="#[54b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc_send_ext_csd
+<LI><a href="#[53d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc_select_deselect
+<LI><a href="#[54d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc_select_bus_width
+<LI><a href="#[538]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc_read_status
+<LI><a href="#[546]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc_native_init
+<LI><a href="#[53b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc_enable_acmd
+<LI><a href="#[535]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc_control_lock
 </UL>
 
-<P><STRONG><a name="[542]"></a>mci_bus_speed</STRONG> (Thumb, 10 bytes, Stack size 0 bytes, fs_mc_mci.o(i.mci_bus_speed))
-<BR><BR>[Called By]<UL><LI><a href="#[52f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc_mci_Init
-<LI><a href="#[545]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc_native_init
+<P><STRONG><a name="[543]"></a>mci_bus_speed</STRONG> (Thumb, 10 bytes, Stack size 0 bytes, fs_mc_mci.o(i.mci_bus_speed))
+<BR><BR>[Called By]<UL><LI><a href="#[530]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc_mci_Init
+<LI><a href="#[546]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc_native_init
 </UL>
 
-<P><STRONG><a name="[540]"></a>mci_bus_speed_mode</STRONG> (Thumb, 22 bytes, Stack size 8 bytes, fs_mc_mci.o(i.mci_bus_speed_mode))
+<P><STRONG><a name="[541]"></a>mci_bus_speed_mode</STRONG> (Thumb, 22 bytes, Stack size 8 bytes, fs_mc_mci.o(i.mci_bus_speed_mode))
 <BR><BR>[Stack]<UL><LI>Max Depth = 8<LI>Call Chain = mci_bus_speed_mode
 </UL>
-<BR>[Called By]<UL><LI><a href="#[52f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc_mci_Init
-<LI><a href="#[545]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc_native_init
+<BR>[Called By]<UL><LI><a href="#[530]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc_mci_Init
+<LI><a href="#[546]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc_native_init
 </UL>
 
-<P><STRONG><a name="[53f]"></a>mci_bus_width</STRONG> (Thumb, 22 bytes, Stack size 8 bytes, fs_mc_mci.o(i.mci_bus_width))
+<P><STRONG><a name="[540]"></a>mci_bus_width</STRONG> (Thumb, 22 bytes, Stack size 8 bytes, fs_mc_mci.o(i.mci_bus_width))
 <BR><BR>[Stack]<UL><LI>Max Depth = 8<LI>Call Chain = mci_bus_width
 </UL>
-<BR>[Called By]<UL><LI><a href="#[52f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc_mci_Init
-<LI><a href="#[54c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc_select_bus_width
+<BR>[Called By]<UL><LI><a href="#[530]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc_mci_Init
+<LI><a href="#[54d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc_select_bus_width
 </UL>
 
-<P><STRONG><a name="[543]"></a>mci_card_power</STRONG> (Thumb, 62 bytes, Stack size 8 bytes, fs_mc_mci.o(i.mci_card_power))
+<P><STRONG><a name="[544]"></a>mci_card_power</STRONG> (Thumb, 62 bytes, Stack size 8 bytes, fs_mc_mci.o(i.mci_card_power))
 <BR><BR>[Stack]<UL><LI>Max Depth = 32<LI>Call Chain = mci_card_power &rArr; fs_set_rtos_delay &rArr; osDelay
 </UL>
 <BR>[Calls]<UL><LI><a href="#[4ca]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;fs_set_rtos_delay
 </UL>
-<BR>[Called By]<UL><LI><a href="#[532]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc_mci_UnInit
-<LI><a href="#[52f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc_mci_Init
+<BR>[Called By]<UL><LI><a href="#[533]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc_mci_UnInit
+<LI><a href="#[530]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc_mci_Init
 </UL>
 
-<P><STRONG><a name="[547]"></a>mci_cmd_bus_mode</STRONG> (Thumb, 22 bytes, Stack size 8 bytes, fs_mc_mci.o(i.mci_cmd_bus_mode))
+<P><STRONG><a name="[548]"></a>mci_cmd_bus_mode</STRONG> (Thumb, 22 bytes, Stack size 8 bytes, fs_mc_mci.o(i.mci_cmd_bus_mode))
 <BR><BR>[Stack]<UL><LI>Max Depth = 8<LI>Call Chain = mci_cmd_bus_mode
 </UL>
-<BR>[Called By]<UL><LI><a href="#[545]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc_native_init
+<BR>[Called By]<UL><LI><a href="#[546]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc_native_init
 </UL>
 
-<P><STRONG><a name="[541]"></a>mci_data_timeout</STRONG> (Thumb, 30 bytes, Stack size 8 bytes, fs_mc_mci.o(i.mci_data_timeout))
+<P><STRONG><a name="[542]"></a>mci_data_timeout</STRONG> (Thumb, 30 bytes, Stack size 8 bytes, fs_mc_mci.o(i.mci_data_timeout))
 <BR><BR>[Stack]<UL><LI>Max Depth = 8<LI>Call Chain = mci_data_timeout
 </UL>
-<BR>[Called By]<UL><LI><a href="#[52f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc_mci_Init
-<LI><a href="#[545]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc_native_init
+<BR>[Called By]<UL><LI><a href="#[530]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc_mci_Init
+<LI><a href="#[546]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc_native_init
 </UL>
 
-<P><STRONG><a name="[544]"></a>mci_idle_clock</STRONG> (Thumb, 22 bytes, Stack size 8 bytes, fs_mc_mci.o(i.mci_idle_clock))
+<P><STRONG><a name="[545]"></a>mci_idle_clock</STRONG> (Thumb, 22 bytes, Stack size 8 bytes, fs_mc_mci.o(i.mci_idle_clock))
 <BR><BR>[Stack]<UL><LI>Max Depth = 8<LI>Call Chain = mci_idle_clock
 </UL>
-<BR>[Called By]<UL><LI><a href="#[52f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc_mci_Init
-<LI><a href="#[545]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc_native_init
+<BR>[Called By]<UL><LI><a href="#[530]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc_mci_Init
+<LI><a href="#[546]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc_native_init
 </UL>
 
-<P><STRONG><a name="[53b]"></a>mci_update_sw_state</STRONG> (Thumb, 136 bytes, Stack size 8 bytes, fs_mc_mci.o(i.mci_update_sw_state))
+<P><STRONG><a name="[53c]"></a>mci_update_sw_state</STRONG> (Thumb, 136 bytes, Stack size 8 bytes, fs_mc_mci.o(i.mci_update_sw_state))
 <BR><BR>[Stack]<UL><LI>Max Depth = 88<LI>Call Chain = mci_update_sw_state &rArr; EventRecord2 &rArr; EventRecordItem
 </UL>
 <BR>[Calls]<UL><LI><a href="#[224]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;EventRecord2
 </UL>
-<BR>[Called By]<UL><LI><a href="#[52e]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc_mci_DevCtrl
+<BR>[Called By]<UL><LI><a href="#[52f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mc_mci_DevCtrl
 </UL>
 
 <P><STRONG><a name="[25c]"></a>EvrUSBD_Core_ConfigureEp0Failed</STRONG> (Thumb, 12 bytes, Stack size 0 bytes, usbd_lib_core.o(i.EvrUSBD_Core_ConfigureEp0Failed))
@@ -14456,10 +14458,10 @@ Local Symbols
 <LI><a href="#[395]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;fat_close
 </UL>
 
-<P><STRONG><a name="[553]"></a>char_validate</STRONG> (Thumb, 96 bytes, Stack size 0 bytes, fs_fat.o(i.char_validate))
+<P><STRONG><a name="[554]"></a>char_validate</STRONG> (Thumb, 96 bytes, Stack size 0 bytes, fs_fat.o(i.char_validate))
 <BR><BR>[Called By]<UL><LI><a href="#[48a]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;name_validate
-<LI><a href="#[554]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;name_basis_gen
-<LI><a href="#[552]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;name_analyse
+<LI><a href="#[555]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;name_basis_gen
+<LI><a href="#[553]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;name_analyse
 </UL>
 
 <P><STRONG><a name="[423]"></a>clear_clus</STRONG> (Thumb, 68 bytes, Stack size 16 bytes, fs_fat.o(i.clear_clus))
@@ -14593,7 +14595,7 @@ Local Symbols
 <BR><BR>[Called By]<UL><LI><a href="#[477]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;fat_ffind
 </UL>
 
-<P><STRONG><a name="[514]"></a>fat_crc32</STRONG> (Thumb, 42 bytes, Stack size 12 bytes, fs_fat.o(i.fat_crc32))
+<P><STRONG><a name="[515]"></a>fat_crc32</STRONG> (Thumb, 42 bytes, Stack size 12 bytes, fs_fat.o(i.fat_crc32))
 <BR><BR>[Stack]<UL><LI>Max Depth = 12<LI>Call Chain = fat_crc32
 </UL>
 <BR>[Called By]<UL><LI><a href="#[4b4]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;short_ent_hash
@@ -14806,7 +14808,7 @@ Local Symbols
 <P><STRONG><a name="[4b1]"></a>long_ent_hash</STRONG> (Thumb, 34 bytes, Stack size 32 bytes, fs_fat.o(i.long_ent_hash))
 <BR><BR>[Stack]<UL><LI>Max Depth = 44<LI>Call Chain = long_ent_hash &rArr; fat_crc32
 </UL>
-<BR>[Calls]<UL><LI><a href="#[514]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;fat_crc32
+<BR>[Calls]<UL><LI><a href="#[515]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;fat_crc32
 </UL>
 <BR>[Called By]<UL><LI><a href="#[472]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;frec_next
 <LI><a href="#[4af]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;frec_find
@@ -14835,19 +14837,19 @@ Local Symbols
 <BR>[Called By]<UL><LI><a href="#[47a]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;fat_format
 </UL>
 
-<P><STRONG><a name="[552]"></a>name_analyse</STRONG> (Thumb, 176 bytes, Stack size 40 bytes, fs_fat.o(i.name_analyse))
+<P><STRONG><a name="[553]"></a>name_analyse</STRONG> (Thumb, 176 bytes, Stack size 40 bytes, fs_fat.o(i.name_analyse))
 <BR><BR>[Stack]<UL><LI>Max Depth = 40<LI>Call Chain = name_analyse
 </UL>
-<BR>[Calls]<UL><LI><a href="#[553]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;char_validate
+<BR>[Calls]<UL><LI><a href="#[554]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;char_validate
 </UL>
 <BR>[Called By]<UL><LI><a href="#[470]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;path_open
 <LI><a href="#[488]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;path_create
 </UL>
 
-<P><STRONG><a name="[554]"></a>name_basis_gen</STRONG> (Thumb, 180 bytes, Stack size 40 bytes, fs_fat.o(i.name_basis_gen))
+<P><STRONG><a name="[555]"></a>name_basis_gen</STRONG> (Thumb, 180 bytes, Stack size 40 bytes, fs_fat.o(i.name_basis_gen))
 <BR><BR>[Stack]<UL><LI>Max Depth = 40<LI>Call Chain = name_basis_gen
 </UL>
-<BR>[Calls]<UL><LI><a href="#[553]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;char_validate
+<BR>[Calls]<UL><LI><a href="#[554]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;char_validate
 </UL>
 <BR>[Called By]<UL><LI><a href="#[488]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;path_create
 </UL>
@@ -14855,7 +14857,7 @@ Local Symbols
 <P><STRONG><a name="[48b]"></a>name_hash</STRONG> (Thumb, 8 bytes, Stack size 0 bytes, fs_fat.o(i.name_hash))
 <BR><BR>[Stack]<UL><LI>Max Depth = 12<LI>Call Chain = name_hash &rArr; fat_crc32
 </UL>
-<BR>[Calls]<UL><LI><a href="#[514]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;fat_crc32
+<BR>[Calls]<UL><LI><a href="#[515]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;fat_crc32
 </UL>
 <BR>[Called By]<UL><LI><a href="#[489]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;fat_rename
 <LI><a href="#[488]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;path_create
@@ -14879,7 +14881,7 @@ Local Symbols
 <BR><BR>[Stack]<UL><LI>Max Depth = 104<LI>Call Chain = name_validate &rArr; EventRecord2 &rArr; EventRecordItem
 </UL>
 <BR>[Calls]<UL><LI><a href="#[224]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;EventRecord2
-<LI><a href="#[553]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;char_validate
+<LI><a href="#[554]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;char_validate
 </UL>
 <BR>[Called By]<UL><LI><a href="#[489]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;fat_rename
 <LI><a href="#[46d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;path_validate
@@ -14896,8 +14898,8 @@ Local Symbols
 <LI><a href="#[597]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;name_strip
 <LI><a href="#[598]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;name_nt_gen
 <LI><a href="#[48b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;name_hash
-<LI><a href="#[554]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;name_basis_gen
-<LI><a href="#[552]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;name_analyse
+<LI><a href="#[555]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;name_basis_gen
+<LI><a href="#[553]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;name_analyse
 <LI><a href="#[4b6]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;frec_find_elink
 <LI><a href="#[4af]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;frec_find
 <LI><a href="#[4ab]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;frec_allocate
@@ -14935,7 +14937,7 @@ Local Symbols
 <BR>[Calls]<UL><LI><a href="#[471]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;elink_dir
 <LI><a href="#[224]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;EventRecord2
 <LI><a href="#[597]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;name_strip
-<LI><a href="#[552]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;name_analyse
+<LI><a href="#[553]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;name_analyse
 <LI><a href="#[4b6]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;frec_find_elink
 <LI><a href="#[4af]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;frec_find
 <LI><a href="#[3d7]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;get_u16
@@ -14997,7 +14999,7 @@ Local Symbols
 <BR><BR>[Stack]<UL><LI>Max Depth = 36<LI>Call Chain = short_ent_hash &rArr; fat_crc32
 </UL>
 <BR>[Calls]<UL><LI><a href="#[4b3]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;sfn_extract
-<LI><a href="#[514]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;fat_crc32
+<LI><a href="#[515]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;fat_crc32
 </UL>
 <BR>[Called By]<UL><LI><a href="#[488]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;path_create
 <LI><a href="#[472]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;frec_next

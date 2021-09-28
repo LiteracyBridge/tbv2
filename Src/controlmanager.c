@@ -588,7 +588,9 @@ void 									initControlManager( void ){				// initialize control manager
 		TBook.iMsg = 1;
 		
 		// don't init power timer-- it is set to do 1st check at 15sec, then resets from TB_Config
-		//setPowerCheckTimer( TB_Config.powerCheckMS );		
+		//setPowerCheckTimer( TB_Config.powerCheckMS );	
+        if ( !RunQCTest )
+            PowerChecksEnabled = true;
         
 		setVolume( TB_Config.default_volume );					// set initial volume
 		

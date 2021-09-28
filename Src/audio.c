@@ -358,6 +358,7 @@ void 								audStopAudio( void ){													// abort any leftover operation
   if (st == Ready ) return;
 
   if (st == Recording ){
+    logEvtNI( "recLeft", "state", pSt.state );
     if ( pSt.state==pbRecording ){
       dbgLog( "8 audStop Rec %x\n", pSt.audF );
       haltRecord();		// shut down dev, update timestamps
@@ -365,7 +366,6 @@ void 								audStopAudio( void ){													// abort any leftover operation
     }
     freeBuffs();
     pSt.state = pbIdle;
-    logEvt( "recLeft" );
     return;
   }
 

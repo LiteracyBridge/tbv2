@@ -21,6 +21,8 @@ extern bool						firstBoot;						// true if 1st run after data loaded
 
 enum PwrStat { TEMPFAULT=0, xxx=1, CHARGING=2, LOWBATT=3, CHARGED=4, xxy=5, NOLITH=6, NOUSBPWR=7 };
 
+bool    PowerChecksEnabled = false;
+
 static osTimerId_t				pwrCheckTimer = NULL;
 static osEventFlagsId_t 	pwrEvents = NULL;
 static osThreadAttr_t 		pm_thread_attr;
@@ -434,7 +436,8 @@ void											setupRTC( fsTime time ){				// init RTC & set based on fsTime
 // ========================================================
 //    periodic power checks --  osTimer calls checkPowerTimer(), which signals powerThread() to call powerCheck()
 void											checkPowerTimer( void *arg ){		// timer to signal periodic power status check
-	osEventFlagsSet( pwrEvents, PM_PWRCHK );						// wakeup powerThread for power status check
+    if ( PowerChecksEnabled )
+        osEventFlagsSet( pwrEvents, PM_PWRCHK );						// wakeup powerThread for power status check
 	if ( currPwrTimerMS != TB_Config.powerCheckMS ){		// update delay (after initial check)
 		currPwrTimerMS = TB_Config.powerCheckMS;
 		setPowerCheckTimer( currPwrTimerMS );

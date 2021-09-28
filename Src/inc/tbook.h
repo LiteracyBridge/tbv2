@@ -46,6 +46,7 @@ extern bool 			FirstSysBoot;					// defined in logger
 extern bool 			RunQCTest;						// defined in tbook.c -- if no /system/QC_PASS.txt  or Circle boot
 extern bool 			PrecompiledCSM;				    // defined in tbook.c
 extern char             BootKey;                        // set in main.c, used in tbook.c
+extern bool				PowerChecksEnabled;				// set true for normal operation 
 
 extern void 			initIDs( void );
 extern void				loadTBookName( void );													// load TBookName with string matching ID from /system/tbook_names.txt

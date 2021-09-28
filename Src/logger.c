@@ -190,7 +190,9 @@ void						logPowerUp( bool reboot ){											// re-init logger after reboot, U
 	if ( reboot ){
 		totLogCh = 0;			// tot chars appended
 		if (logF!=NULL) fprintf( logF, "\n" );
-		logEvt(   "REBOOT--------" );
+        char bkey[10] = "";
+        if (BootKey!=' ') sprintf( bkey, "Key= %c", BootKey );
+		logEvtS(   "REBOOT--------", bkey );
     gotRtc = showRTC();
 		logEvtNS( "TB_V2", "Firmware", TBV2_Version );
 		logEvtFmt( "BUILT", "On %s at %s", __DATE__, __TIME__);  // date & time LOGGER.C last compiled -- link date?
@@ -394,7 +396,7 @@ void						logEvtS( const char *evtID, const char *args ){		// write log entry: '
 //	addHist( evtBuff, args );
 	dbgLog( " %s %s\n", evtBuff, args );
 	
-	if ( osMutexAcquire( logLock, osWaitForever )!=osOK ){
+	if (( osKernelGetState()== osKernelRunning) && osMutexAcquire( logLock, osWaitForever )!=osOK ){
 		dbgLog( "! logLock lost %s \n", evtID );
 		return;
 		//tbErr("logLock");
@@ -412,7 +414,7 @@ void						logEvtS( const char *evtID, const char *args ){		// write log entry: '
 		if ( err<0 ) 
 			dbgLog( "! Log flush err %d \n", err );
 	}
-	if ( osMutexRelease( logLock )!=osOK )	tbErr("logLock!");
+	if (( osKernelGetState()== osKernelRunning) &&  osMutexRelease( logLock )!=osOK )	tbErr("logLock!");
 }
 
 void logEvtFmt(const char *evtID, const char *fmt, ...) {

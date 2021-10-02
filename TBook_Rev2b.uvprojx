@@ -651,6 +651,11 @@
               <FileType>1</FileType>
               <FilePath>.\Src\fs_get_time.c</FilePath>
             </File>
+            <File>
+              <FileName>packageData.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\Src\packageData.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>

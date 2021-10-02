@@ -8,6 +8,8 @@
 #include "inputMgr.h"			// osMsg_TBEvents
 #include "fileOps.h"			// decodeAudio
 
+#include "packageData.h"
+
 const char *  			bgPulse		 			= "_49G";				// brief green flash every 5 seconds
 const char *  			fgPlaying 			= "G!";
 const char *  			fgPlayPaused		= "G2_3!";
@@ -581,6 +583,8 @@ void 									initControlManager( void ){				// initialize control manager
 		if ( RunQCTest ){
 			nPackages = 0;
 		} else {			// don't load package for qcTest
+            if ( !loadPackageData() ) errLog("load pkgdata failed");
+            
 			findPackages( );		// sets iPkg & TBPackage to shortest name
 		}
 		

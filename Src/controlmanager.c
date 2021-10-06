@@ -224,7 +224,7 @@ void									svQCresult( char * arg ){  					// save 'arg' to system/QC_PASS.txt
 
 void 									USBmode( bool start ){						// start (or stop) USB storage mode
 	if ( start ){
-		playSqrTune( "CEGG" );
+		playSqrTune( "G/+G/+" );
 		logEvt( "enterUSB" );
 		logPowerDown();				// flush & shut down logs
 		setDbgFlag('F', false);
@@ -232,7 +232,7 @@ void 									USBmode( bool start ){						// start (or stop) USB storage mode
 	} else {	
 		disableMassStorage();      //TODO?  just reboot?
 		ledFg( "_" );
-		playSqrTune( "GECC" );
+		playSqrTune( "G/+" );
 		logEvt( "exitUSB" );
 //	    NVIC_SystemReset();			// soft reboot?
 		logPowerUp( false );

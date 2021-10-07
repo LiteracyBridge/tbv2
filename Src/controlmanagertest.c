@@ -12,10 +12,10 @@
 extern bool FSysPowerAlways;
 extern bool SleepWhenIdle;
 
-static uint32_t 			startPlayingTS;
-static uint32_t 			PlayLoopBattCheck = 30*60*1000;		// 30min
+//static uint32_t 			startPlayingTS;
+//static uint32_t 			PlayLoopBattCheck = 30*60*1000;		// 30min
 void 					controlTest(  ){									// CSM test procedure
-	TB_Event *evt;
+/*	TB_Event *evt;
 	osStatus_t status;
 	assertValidState(TB_Config.initState );
 	TBook.iCurrSt = TB_Config.initState;
@@ -198,6 +198,7 @@ void 					controlTest(  ){									// CSM test procedure
 		}
 		osMemoryPoolFree( TBEvent_pool, evt );
 	}
+*/
 }
 
 const int padLEN = 22;

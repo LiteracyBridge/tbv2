@@ -68,7 +68,7 @@ char *				getStrFld( TknID listObj, const char *nm, char *defVal ){ // copy stri
 	toStr( buff, v );
 	return allocStr( buff );
 }
-void					findPackages( void ){						// scan for M0:/package*/  directories
+/* void					findPackages( void ){						// scan for M0:/package* /  directories
 	const char *packageDirPatt = "M0:/package*";		//TODO:  "M0:/packages/packages.list"
 
 	fsFileInfo fInfo;
@@ -145,6 +145,7 @@ TBPackage_t * readContent( const char * pkgPath, int pkgIdx ){		// parse list_of
 	tbCloseFile( inFile );  //fclose( inFile );	// done with list_of_subjects.txt
 	return Pkg;
 }
+*/
 static short	asStIdx( TknID stNm ){			// => idx of csmState with this 'stNm', or alloc
 	for( short i=0; i<nCSMstates; i++ ){
 		if ( TBookCSM[i]->nmTknID == stNm.tknID ) 

@@ -159,16 +159,16 @@
           <Type>0</Type>
           <LineNumber>338</LineNumber>
           <EnabledFlag>1</EnabledFlag>
-          <Address>134345876</Address>
+          <Address>0</Address>
           <ByteObject>0</ByteObject>
           <HtxType>0</HtxType>
           <ManyObjects>0</ManyObjects>
           <SizeOfObject>0</SizeOfObject>
           <BreakByAccess>0</BreakByAccess>
-          <BreakIfRCount>1</BreakIfRCount>
+          <BreakIfRCount>0</BreakIfRCount>
           <Filename>.\Src\packageData.c</Filename>
           <ExecCommand></ExecCommand>
-          <Expression>\\TBookRev2b\Src/packageData.c\338</Expression>
+          <Expression></Expression>
         </Bp>
         <Bp>
           <Number>1</Number>
@@ -191,7 +191,7 @@
           <Type>0</Type>
           <LineNumber>72</LineNumber>
           <EnabledFlag>0</EnabledFlag>
-          <Address>134334772</Address>
+          <Address>134334900</Address>
           <ByteObject>0</ByteObject>
           <HtxType>0</HtxType>
           <ManyObjects>0</ManyObjects>
@@ -223,7 +223,7 @@
           <Type>0</Type>
           <LineNumber>114</LineNumber>
           <EnabledFlag>0</EnabledFlag>
-          <Address>134372630</Address>
+          <Address>134372854</Address>
           <ByteObject>0</ByteObject>
           <HtxType>0</HtxType>
           <ManyObjects>0</ManyObjects>
@@ -239,7 +239,7 @@
           <Type>0</Type>
           <LineNumber>127</LineNumber>
           <EnabledFlag>0</EnabledFlag>
-          <Address>134338358</Address>
+          <Address>134338522</Address>
           <ByteObject>0</ByteObject>
           <HtxType>0</HtxType>
           <ManyObjects>0</ManyObjects>
@@ -255,7 +255,7 @@
           <Type>0</Type>
           <LineNumber>84</LineNumber>
           <EnabledFlag>0</EnabledFlag>
-          <Address>134372910</Address>
+          <Address>134373134</Address>
           <ByteObject>0</ByteObject>
           <HtxType>0</HtxType>
           <ManyObjects>0</ManyObjects>
@@ -271,7 +271,7 @@
           <Type>0</Type>
           <LineNumber>221</LineNumber>
           <EnabledFlag>0</EnabledFlag>
-          <Address>134362714</Address>
+          <Address>134362894</Address>
           <ByteObject>0</ByteObject>
           <HtxType>0</HtxType>
           <ManyObjects>0</ManyObjects>
@@ -285,25 +285,9 @@
         <Bp>
           <Number>8</Number>
           <Type>0</Type>
-          <LineNumber>288</LineNumber>
-          <EnabledFlag>1</EnabledFlag>
-          <Address>134345402</Address>
-          <ByteObject>0</ByteObject>
-          <HtxType>0</HtxType>
-          <ManyObjects>0</ManyObjects>
-          <SizeOfObject>0</SizeOfObject>
-          <BreakByAccess>0</BreakByAccess>
-          <BreakIfRCount>1</BreakIfRCount>
-          <Filename>.\Src\packageData.c</Filename>
-          <ExecCommand></ExecCommand>
-          <Expression>\\TBookRev2b\Src/packageData.c\288</Expression>
-        </Bp>
-        <Bp>
-          <Number>9</Number>
-          <Type>0</Type>
           <LineNumber>17</LineNumber>
           <EnabledFlag>1</EnabledFlag>
-          <Address>134346052</Address>
+          <Address>134346236</Address>
           <ByteObject>0</ByteObject>
           <HtxType>0</HtxType>
           <ManyObjects>0</ManyObjects>
@@ -313,22 +297,6 @@
           <Filename>.\Src\packageData.c</Filename>
           <ExecCommand></ExecCommand>
           <Expression>\\TBookRev2b\Src/packageData.c\17</Expression>
-        </Bp>
-        <Bp>
-          <Number>10</Number>
-          <Type>0</Type>
-          <LineNumber>339</LineNumber>
-          <EnabledFlag>1</EnabledFlag>
-          <Address>0</Address>
-          <ByteObject>0</ByteObject>
-          <HtxType>0</HtxType>
-          <ManyObjects>0</ManyObjects>
-          <SizeOfObject>0</SizeOfObject>
-          <BreakByAccess>0</BreakByAccess>
-          <BreakIfRCount>0</BreakIfRCount>
-          <Filename>.\Src\packageData.c</Filename>
-          <ExecCommand></ExecCommand>
-          <Expression></Expression>
         </Bp>
       </Breakpoint>
       <WatchWindow1>
@@ -590,7 +558,7 @@
         <Ww>
           <count>51</count>
           <WinNumber>1</WinNumber>
-          <ItemText>CSM</ItemText>
+          <ItemText>CSM,0x0A</ItemText>
         </Ww>
         <Ww>
           <count>52</count>

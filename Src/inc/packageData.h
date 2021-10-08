@@ -147,6 +147,11 @@ extern CSM_t *          CSM;                                            // exter
 extern char *           ANms[];                                         // IMPORT from tknTable.h -- to translate string to enum Action
 // CSM loading & access interface
 extern bool             loadControlDef( void );                         // load structured Control State Machine
-
+extern CState_t *       gCSt( int idx );                                // return ptr to CState[ idx ]
+extern char *           gStNm( CState_t *st );                          // return name of CSt
+extern int              nActs( CState_t *st );                          // # of actions for CState
+extern csmAction_t *    gAct( CState_t * st, int idx );                 // return Action[idx] of CState
+extern int              nSysAud( void );                                // return # of SysAudio names used by CSM
+extern char *           gSysAud( int idx );                             // return SysAudio[ idx ]
 #endif           // PACKAGE_DATA_H
 

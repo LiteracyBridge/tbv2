@@ -3,6 +3,7 @@
 #ifndef CONTROL_MGR_H
 #define CONTROL_MGR_H
 #include "tbook.h"
+#include "packageData.h"
 
 // define LOAD_CSM_DYNAMICALLY to load CSM from system/control.def
 //  #define LOAD_CSM_DYNAMICALLY
@@ -104,7 +105,7 @@ typedef struct {						// CSM state variables
 	short		iSubj;					// index of current Subj
 	short		iMsg;					// index of current Msg within Subj
 
-	csmState *  cSt;					// -> TBookCSM[ iCurrSt ]	
+	CState_t *  cSt;					// -> TBookCSM[ iCurrSt ]	
 }	TBook_t;
 
 extern TBook_t TBook;

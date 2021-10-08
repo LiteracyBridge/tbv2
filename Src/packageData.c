@@ -306,8 +306,7 @@ CState_t *      loadCState( FILE *inF, int idx ){               // load & return
 
 
 //
-// public routine to load the CSM from /system/control_def.txt
-
+// public routines to load & access the CSM from /system/control_def.txt
 bool            loadControlDef( void ){                         // load structured Control State Machine 
     errType = "CSM";
     errCount = 0;
@@ -340,4 +339,41 @@ bool            loadControlDef( void ){                         // load structur
     if ( errCount > 0 ){ errLog( "control_def: %s parse errors", errCount ); return false; }
     return true;
 }
+int             nSysAud( void ){                                // return # of SysAudio names used by CSM
+    if ( CSM==NULL || CSM->SysAudio==NULL ){
+        errLog( "bad SysAudio" );
+        return 0;
+    }
+    return CSM->SysAudio->nSysA;
+}
+char *          gSysAud( int idx ){                             // return SysAudio[ idx ]
+    if ( idx<0 || idx >= nSysAud() )
+        errLog( "gSysAud(%d) bad idx", idx );
+    return CSM->SysAudio->sysA[ idx ];
+}
+CState_t *      gCSt( int idx ){                                // return ptr to CState[ idx ]
+    if ( idx<0 || idx >= CSM->CsmDef->nCS )
+        errLog( "gCst(%d) bad idx", idx );
+    return CSM->CsmDef->CS[ idx ];
+}
+char *          gStNm( CState_t *st ){                          // return name of CSt
+    if ( st==NULL ){
+        errLog( "bad CState" );
+        return "bad";
+    }
+    return st->nm;
+}
+int             nActs( CState_t *st ){                          // # of actions for CState
+    if ( st==NULL || st->Actions==NULL ){
+        errLog( "CSt bad Actions" );
+        return 0;
+    }
+    return st->Actions->nActs;
+}
+csmAction_t *   gAct( CState_t * st, int idx ){                 // return Action[idx] of CState
+    if ( idx<0 || idx >= nActs(st) )
+        errLog( "gCst(%d) bad idx", idx );
+    return st->Actions->Act[ idx ];
+}
+
 // packageData.c 

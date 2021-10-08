@@ -29,8 +29,8 @@ const char *  			fgDFU						= "O3_5O3_3O3_2O3_1O3";  // length: 2.6sec
 extern TBConfig_t 					TB_Config;			// defined in tbook_csm.c
 
 // TBook Control State Machine
-extern int 	 								nCSMstates;			// defined in tbook_csm.c
-extern csmState *						TBookCSM[ ];		// TBook state machine definition -- defined in tbook_csm.c
+//extern int 	 								nCSMstates;			// defined in tbook_csm.c
+//extern csmState *						TBookCSM[ ];		// TBook state machine definition -- defined in tbook_csm.c
 
 int				    iPkg = 0;			// current package index 
 Package_t *         currPkg = NULL;	// TBook content package in use
@@ -148,8 +148,8 @@ void 									playSysAudio( char *arg ){				// play system file 'arg'
 	resetAudio();
 	char path[MAX_PATH];
     
-	for (int i=0; i<nPlaySys; i++)
-		if ( strcmp( SysAudio[i].sysNm, arg )==0 ){
+	for ( int i=0; i< nSysAud(); i++ )
+		if ( strcmp( gSysAud(i), arg )==0 ){
             findAudioPath( path, currPkg->prompt_paths, arg );  // find path based on current Package promptPaths
 			playAudio( path, NULL );        
 		//	logEvtNS( "PlaySys", "file", arg );
@@ -253,7 +253,7 @@ void 									USBmode( bool start ){						// start (or stop) USB storage mode
 }
 
 void assertValidState(int stateIndex) {
-	if ( stateIndex < 0 || stateIndex >= nCSMstates )
+	if ( stateIndex < 0 || stateIndex >= CSM->CsmDef->nCS ) //nCSMstates )
 		tbErr("invalid state index");
 }	
 
@@ -281,9 +281,9 @@ void 									setCurrState( short iSt ){				// set iCurrSt & iPrevSt (& DBG stri
 	TBook.prevStateName = TBook.currStateName;					//DEBUG -- update prevSt string
 	
 	TBook.iCurrSt = iSt;												// now 'in' (executing) state nSt
-	TBook.cSt = TBookCSM[ TBook.iCurrSt ];			// state definition for current state
+	TBook.cSt = gCSt( TBook.iCurrSt ); //TBookCSM[ TBook.iCurrSt ];			// state definition for current state
 
-	TBook.currStateName = TBookCSM[ TBook.iCurrSt ]->nm;					//DEBUG -- update currSt string
+	TBook.currStateName = gStNm( TBook.cSt ); //TBookCSM[ TBook.iCurrSt ]->nm;					//DEBUG -- update currSt string
 	//dbgLog( "C %s(%d) => %s(%d) \n",  TBook.prevStateName, TBook.iPrevSt, TBook.currStateName, TBook.iCurrSt );
 }
 
@@ -444,14 +444,15 @@ static void						changeCSMstate( short nSt, short lastEvtTyp ){
 	for (int e=eNull; e < eUNDEF; e++){  				//DBG: fill in dynamic parts of transition table for current state
 		short iState = TBook.cSt->evtNxtState[ e ];//DBG:
 		TBook.evtNxtSt[e].nxtSt = iState;
-		TBook.evtNxtSt[e].nstStNm = TBookCSM[ iState ]->nm;
+		TBook.evtNxtSt[e].nstStNm = gStNm( gCSt( iState ));
 	}
 	/*END DEBUG*/
 	
-	int nActs = TBook.cSt->nActions;
-	for ( short i=0; i<nActs; i++ ){					// For each action defined on the state...
-		Action act = TBook.cSt->Actions[i].act;  // unpack action, and arg
-		char * arg = TBook.cSt->Actions[i].arg;
+	int nA = nActs( TBook.cSt );
+	for ( short i=0; i<nA; i++ ){					// For each action defined on the state...
+        csmAction_t * action = gAct( TBook.cSt, i );
+		Action act = action->act;  // unpack action, and arg
+		char * arg = action->arg;
 		if (arg==NULL) arg = ""; 								// make sure its a string for digit test
 		int iarg = arg[0]=='-' || isdigit( arg[0] )? atoi( arg ) : 0;		// Parse the argument if it looks like it might be numeric.
 
@@ -588,7 +589,7 @@ void 									initControlManager( void ){				// initialize control manager
 			readControlDef( );						// reads TB_Config settings
 	}
 
-	if ( nCSMstates > 0 ) {    // have a CSM definition
+	if ( CSM != NULL ){  //nCSMstates > 0 ) {    // have a CSM definition
 		ledBg( TB_Config.bgPulse );		// reset background pulse according to TB_Config
 
 		iPkg = 0;

@@ -1,5 +1,5 @@
-// TB CSM 2021-10-05: V12 QC tune changes, longer recording (Bill)
-CSMcompile 7(2021-10-7) from C:\Users\geneb\Documents\CSMcompile\data\control_def.txt of 2021-10-08 14:16:09
+// TB CSM 2021-09-23: V11 QC test-- skip on Star after Home
+CSMcompile 7(2021-10-7) from C:\Users\geneb\Documents\CSMcompile\data\control_def.txt of 2021-09-25 13:34:41
 6
 300000
 5000
@@ -37,7 +37,7 @@ stQcTest
  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0, 47,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0, 
 1
 playTune
-C/
+C.
 1
 stWakeup
 45
@@ -308,7 +308,7 @@ stQcSysTest
 33, 32, 33, 33, 33, 33, 33, 33, 33, 31,  0, 33, 33, 33, 33, 33, 33, 33, 33, 33, 33, 33, 33, 33, 33, 33, 33, 33, 33, 33, 33, 33, 33, 33, 33, 33, 33, 33, 33, 33, 33, 33, 33, 33, 33, 
 1
 playTune
-CG/.FDEH.G/
+CG..FDEH.G.
 34
 stWelcoming
 45
@@ -413,7 +413,7 @@ stQc2
 bgLED
 G3_3
 playTune
-C/C/
+G.
 49
 stQcErrFiles
 45
@@ -442,7 +442,7 @@ stQc3
 bgLED
 R3_3
 playTune
-D/
+E.
 52
 stQcErrGrn
 45
@@ -464,7 +464,7 @@ _
 LED
 G3
 playTune
-E/
+C.
 54
 stQcErrRed
 45
@@ -484,7 +484,7 @@ stQc5
 startRec
 _
 setTimer
-4000
+2000
 56
 stQcErrNoMi
 45
@@ -502,7 +502,7 @@ stQcSkip
 57, 57, 57, 57, 57, 57, 57, 57, 57, 57, 57, 57, 57, 57, 57, 57, 57, 57, 57, 57, 57, 57, 57, 57, 57, 57, 57, 57, 57, 57, 57, 57, 77, 57, 57, 57, 57, 57, 57, 57, 57, 57, 57, 57, 57, 
 1
 playTune
-G/C
+G.C.*
 58
 stQc6
 45
@@ -511,11 +511,11 @@ stQc6
 finishRec
 _
 playTune
-F/
+E.
 59
 stQc6b
 45
-59, 59, 59, 59, 59, 60, 59, 59, 59, 59, 61, 59, 59, 59, 59, 60, 59, 59, 59, 59, 61, 59, 59, 59, 59, 59, 59, 59, 59, 59, 59, 59, 59, 59, 59, 59, 59, 59, 59, 59, 59, 59, 59, 59, 59, 
+59, 50, 50, 50, 50, 60, 50, 50, 50, 50, 61, 50, 50, 50, 50, 60, 50, 50, 50, 50, 61, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50, 59, 59, 59, 59, 59, 59, 59, 59, 59, 59, 59, 59, 59, 59, 
 0
 60
 stQc7
@@ -545,7 +545,7 @@ stQc7b
 LED
 _
 playTune
-G/
+G.
 63
 stQc8
 45
@@ -559,7 +559,7 @@ stQc9
 LED
 G3
 playTune
-A/A/
+C.
 65
 stQcErrPlay
 45
@@ -579,7 +579,7 @@ stQc10
 LED
 G3
 playTune
-G/
+D.
 67
 stQcErrNoLh
 45
@@ -599,7 +599,7 @@ stQc11
 LED
 G3
 playTune
-F/
+E.
 69
 stQcErrNoPo
 45
@@ -619,7 +619,7 @@ stQc12
 LED
 G3
 playTune
-E/
+F.
 71
 stQcErrNoRh
 45
@@ -639,7 +639,7 @@ stQc13
 LED
 G3
 playTune
-D/
+G.
 73
 stQcErrNoSt
 45
@@ -657,7 +657,7 @@ stQc14
 74, 74, 74, 74, 74, 74, 74, 74, 74, 74, 74, 74, 74, 74, 74, 74, 74, 74, 74, 74, 74, 74, 74, 74, 74, 74, 74, 74, 74, 74, 74, 74, 76, 74, 74, 74, 74, 74, 74, 74, 74, 74, 74, 74, 74, 
 1
 playTune
-C/C*
+E.C.*
 75
 stQcErrNoTa
 45

@@ -1,0 +1,24 @@
+packages_data.txt deployment of 29-Sep-2021 testing...
+5
+M0:/content/local/en/
+M0:/content/prompts/en/
+M0:/content/messages/en/
+M0:/content/messages/en/health/
+M0:/content/messages/en/talkingbook/
+1
+Sep2021
+2 package.wav
+0;1
+2
+health
+3 health.wav
+3 to_learn_health.wav
+3
+3 right_now_your_baby_is_safe.wav
+3 when_your_little_one_does_arrive.wav
+3 you_may_now_be_just_waiting.wav
+talkingbook
+4 talking_book.wav
+4 to_learn_tbook.wav
+1
+4 the_TB_is_a_durable.wav

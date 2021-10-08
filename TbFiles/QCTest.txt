@@ -1,0 +1,11 @@
+-   Boot. Various red and green flashing. Single beep. Pause. Blinking green LED. Wait for a double beep.
+-   Press the PLUS. Blinking red LED. Wait for a beep.
+-   Press HOME. Single green flash. Wait for a beep.
+-   Press MINUS. Steady red LED. *RECORDING* Press the MINUS again within 4 seconds. Wait for a beep.
+-   Press TREE. *PLAYBACK* Wait for a beep.
+-   Press CIRCLE. Green flash. Wait for a double beep.
+-   Press LEFT HAND. Green flash. Wait for a beep.
+-   Press POT. Green flash. Wait for a beep.
+-   Press RIGHT HAND. Green flash. Wait for a beep.
+-   Press STAR. Green flash. Wait for a beep.
+-   Press TABLE. "Ta-da" beep means test passed.

@@ -1,0 +1,8 @@
+ To Erase entire NOR flash and restart with tbLog_0:
+   1) rename this file ( M0:/system/dontEraseNorFlash.txt ) to EraseNorFlash.txt, 
+   2) delete M0:/system/bootcnt.txt,
+   3) reboot the TalkingBook  --  LED will flash Red/Green about 1/second while erasing ( up to several minutes )
+   4) after TalkingBook resumes normal operation,
+   5) go to UsbMode (Star_Plus) and 
+   6) rename EraseNorFlash.txt back to dontEraseNorFlash.txt
+   

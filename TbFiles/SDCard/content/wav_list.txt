@@ -1,0 +1,16 @@
+/content/messages/en/package.wav
+/content/messages/en/health/health.wav
+/content/messages/en/health/to_learn_health.wav
+/content/messages/en/health/right_now_your_baby_is_safe.wav
+/content/messages/en/health/when_your_little_one_does_arrive.wav
+/content/messages/en/health/you_may_now_be_just_waiting.wav
+/content/messages/en/talkingbook/talking_book.wav
+/content/messages/en/talkingbook/to_learn_tbook.wav
+/content/messages/en/talkingbook/the_TB_is_a_durable.wav
+/content/prompts/en/cir_record_ideas.wav
+/content/prompts/en/louder.wav
+/content/prompts/en/rh_for_nxt_subj.wav
+/content/prompts/en/rh_for_subj.wav
+/content/prompts/en/rh_things_to_do.wav
+/content/prompts/en/softer.wav
+/content/prompts/en/welcome.wav

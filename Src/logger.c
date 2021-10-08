@@ -163,7 +163,7 @@ void 						dateStr( char *s, fsTime dttm ){
 void						logPowerUp( bool reboot ){											// re-init logger after reboot, USB or sleeping
 	char line[200];
 	char dt[30];
-	fsTime verDt, bootDt, rtcDt;
+	fsTime bootDt, rtcDt;
 
 	logF = NULL;
 	//checkLog();	//DEBUG
@@ -209,8 +209,10 @@ void						logPowerUp( bool reboot ){											// re-init logger after reboot, U
 	dbgEvt( TB_bootCnt, bootcnt, 0,0,0);
 	NLogShowStatus();
 	
+/*
 	fsFileInfo fAttr;
 	fAttr.fileID = 0;
+
 	if ( nCSMstates == 0 ){  // will need to parse control.def to define CSM
 		fsStatus fStat = ffind( TBP[ pCSM_DEF ], &fAttr );
 		if ( fStat != fsOK ){
@@ -225,6 +227,8 @@ void						logPowerUp( bool reboot ){											// re-init logger after reboot, U
 		}
 	}
 	logEvtNS( "TB_CSM", "ver", CSM_Version );		// log CSM version comment
+*/
+
 
   // IF a file SetRTC.txt exists, use it's timestamp to set the RTC. The timestamp will likely be at least
   // several seconds in the past, but should be "good enough".`

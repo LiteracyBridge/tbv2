@@ -144,7 +144,6 @@ extern char *           subjNm( Subject_t *subj );                      // retur
 
 // ControlStateMachine  data from  control_def.txt
 extern CSM_t *          CSM;                                            // extern ptr to definition of CSM
-extern char *           ANms[];                                         // IMPORT from tknTable.h -- to translate string to enum Action
 // CSM loading & access interface
 extern bool             loadControlDef( void );                         // load structured Control State Machine
 extern CState_t *       gCSt( int idx );                                // return ptr to CState[ idx ]

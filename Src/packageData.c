@@ -3,11 +3,57 @@
 
 #include "tbook.h"
 #include "packageData.h"
-//#include "controlmanager.h"
+/********************************************* Symbol Definitions coordinated with CSMcompile  ***********************/
+// MUST MATCH:  typedef Action in tknTable.h 
+// MUST MATCH:  CsmToken.java -- enum TknAction 
+char *  ANms[] = { "aNull",
+		"LED", 				"bgLED", 		"playSys", 		
+		"playSubj", 		"pausePlay", 	"resumePlay", 
+		"stopPlay", 		"volAdj", 		"spdAdj", 
+		"posAdj",			"startRec", 	"pauseRec", 
+		"resumeRec", 		"finishRec", 	"playRec", 		
+		"saveRec", 			"writeMsg",		"goPrevSt", 
+		"saveSt", 			"goSavedSt", 	"subjAdj", 		
+		"msgAdj", 			"setTimer", 	"resetTimer", 
+		"showCharge",		"startUSB", 	"endUSB", 	
+		"powerDown", 		"sysBoot", 		"sysTest", 		
+		"playNxtPkg", 	    "changePkg",	"playTune",
+        "filesTest",
+    NULL
+};
+char *	actionNm( Action a ){ return ANms[ (int)a ]; }
 
-// --------   read package_data.txt to get structure & audio files for loaded content
+// MUST MATCH:  typedef Event in tknTable.h  
+// MUST MATCH:  CsmToken.java -- enum TknEvent 
+char *  ENms[] = { 
+		"eNull", 
+        "Home",     "Circle",     "Plus",     "Minus",     "Tree",     "Lhand",     "Rhand",     "Pot",     "Star",     "Table",     //=10
+        "Home__",   "Circle__",   "Plus__",   "Minus__",   "Tree__",   "Lhand__",   "Rhand__",   "Pot__",   "Star__",   "Table__",   //=20
+		"starHome", "starCircle", "starPlus", "starMinus", "starTree", "starLhand", "starRhand", "starPot", "starStar", "starTable", //=30
+		"AudioStart",             "AudioDone",             "ShortIdle",             "LongIdle",             "LowBattery",            //=35 
+        "BattCharging",           "BattCharged",           "FirmwareUpdate",        "Timer",                "ChargeFault",           //=40
+        "LithiumHot",             "MpuHot",                "FilesSuccess",          "FilesFail",            "anyKey",                //=45
+        "eUNDEF", //=46
+    NULL    // end of list marker
+};
+// MUST MATCH:  typedef Event in tknTable.h
+char *  shENms[] = { "eN",
+	"Ho", "Ci", "Pl", "Mi", "Tr", "Lh", "Rh", "po", "St", "ta",
+	"H_", "C_", "P_", "M_", "T_", "L_", "R_", "p_", "S_", "t_",
+	"sH", "sC", "sP", "sM", "sT", "sL", "sR", "sp", "sS", "st",
+	"aS", "aD", "sI", "lI", "bL", "bc", "bC", "fU", "Ti", "cF", 
+	"LH", "MH", "fS", "fF", "aK", "eU",
+    NULL
+};
+char *	eventNm( Event e )	{ return ENms[ (int)e ];; }
+char *	shEvntNm( Event e )	{ return shENms[ (int)e ];; }
+//
+//
+/***************************   read package_data.txt to get structure & audio files for loaded content  ***********************/
 Deployment_t *  Deployment = NULL;          // extern cnt & ptrs to info for each loaded content Package
 CSM_t *         CSM = NULL;                 // extern ptr to definition of CSM
+TBConfig_t *	TB_Config;			        // TBook configuration variables
+
 //
 // local shared utilities
 char            line[200];                  // internal text line buffer shared by all packageData routines
@@ -192,7 +238,8 @@ Package_t *     loadPackage( FILE *inF, int pkgIdx ){           // parse one con
     pkg->subjects->nSubjs = nSubjs;
     for ( int i=0; i<nSubjs; i++){
         pkg->subjects->subj[i] = loadSubject( inF );
-    }       
+    } 
+    logEvtNSNI("LdPkg", "nm", pkg->packageName, "nSubj", pkg->subjects->nSubjs );
     return pkg;
 }
 //
@@ -208,7 +255,7 @@ bool            loadPackageData( void ){                        // load structur
 
 	if ( fscanf( inFile, "%[^\n]\n", line )==1  ){    // version string can have white space
         Deployment->Version = allocStr( line, "deployVer" );
-        dbgLog("! Package_data: %s",  Deployment->Version );
+        logEvtNS("Deploymt", "Ver", Deployment->Version );
     } else loadErr( "Version" );        
          
     Deployment->AudioPaths = loadAudioPaths( inFile );
@@ -317,14 +364,14 @@ bool            loadControlDef( void ){                         // load structur
 
 	if ( fscanf( inFile, "%[^\n]\n", line )==1  ){     // allow whitespace in Version
         CSM->Version = allocStr( line, "csmVer" );
-        dbgLog("! Csm_data: %s",  CSM->Version );
+        logEvtNS( "TB_CSM", "ver", CSM->Version );		// log CSM version comment
     } else loadErr( "Version" ); 
     
 	if ( fscanf( inFile, "%[^\n]\n", line )==1  ){     // allow whitespace in CsmCompileVersion
         // throw CsmCompileVersion away 
     } else loadErr( "Version" );        
     
-    CSM->TBConfig = (TBConfig_t *) loadTbConfig( inFile );
+    TB_Config = CSM->TBConfig = (TBConfig_t *) loadTbConfig( inFile );
     
     CSM->SysAudio = (AudioList_t *) loadSysAudio( inFile );
     

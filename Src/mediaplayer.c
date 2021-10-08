@@ -124,12 +124,12 @@ void					playRecording( ){	// play back just recorded audio
 }
 void					saveRecording( ){	// encrypt recorded audio & delete original
 	if ( mRecordFilePath[0] == 0 ) return;
-	ledFg( TB_Config.fgSaveRec );	
+	ledFg( TB_Config->fgSaveRec );	
 	osEventFlagsSet( mMediaEventId, MEDIA_SAVE_RECORD );	
 }
 void					cancelRecording(){ // delete recorded message
 	if ( mRecordFilePath[0] == 0 ) return;
-	ledFg( TB_Config.fgCancelRec );	
+	ledFg( TB_Config->fgCancelRec );	
 	osEventFlagsSet( mMediaEventId, MEDIA_DEL_RECORD );	
 }
 void 					adjPlayPosition( int sec ){					// skip playback forward/back 'sec' seconds

@@ -26,11 +26,10 @@ const char *  			fgPowerDown			= "G_3G_3G_9G_3G_9G_3";  // length: 3.5sec
 const char *  			fgDFU						= "O3_5O3_3O3_2O3_1O3";  // length: 2.6sec
 
 // TBook configuration variables
-extern TBConfig_t 					TB_Config;			// defined in tbook_csm.c
+//extern TBConfig_t 					TB_Config;			// defined in tbook_csm.c
 
 // TBook Control State Machine
 //extern int 	 								nCSMstates;			// defined in tbook_csm.c
-//extern csmState *						TBookCSM[ ];		// TBook state machine definition -- defined in tbook_csm.c
 
 int				    iPkg = 0;			// current package index 
 Package_t *         currPkg = NULL;	// TBook content package in use
@@ -140,7 +139,7 @@ void									changePackage(){											// switch to last played package name
 	TBook.iSubj = -1; // makes "next subject" go to the first subject.
 	TBook.iMsg = 0;
 	logEvtNS( "ChgPkg", "Pkg", pkgNm() );  
-	showPkg();
+	//showPkg();
 }
 
 
@@ -258,19 +257,19 @@ void assertValidState(int stateIndex) {
 }	
 
 char * 								ledStr( char * s ){			// lookup TBConfig LED sequences
-	if ( strcasecmp( s, "bgPulse" )==0 ) 				return TB_Config.bgPulse;					// set by CSM (background while navigating)						default: _49G
-	if ( strcasecmp( s, "fgPlaying" )==0 ) 			return TB_Config.fgPlaying;				// set by startPlayback() 					 									default: G!
-	if ( strcasecmp( s, "fgPlayPaused" )==0 ) 	return TB_Config.fgPlayPaused;		// set by audPauseResumeAudio() when playback paused  default: G2_3!
-	if ( strcasecmp( s, "fgRecording" )==0 ) 		return TB_Config.fgRecording;			// set by startRecord() while recording user feedback default: R!
-	if ( strcasecmp( s, "fgRecordPaused" )==0 ) return TB_Config.fgRecordPaused;	// set by audPauseResumeAudio() when recording paused default: R2_3!
-	if ( strcasecmp( s, "fgSavingRec" )==0 ) 		return TB_Config.fgSavingRec;			// set by haltRecord while saving recording  					default: O!
-	if ( strcasecmp( s, "fgSaveRec" )==0 ) 			return TB_Config.fgSaveRec;				// set by saveRecording() while encrypting recording  default: G3_3G3
-	if ( strcasecmp( s, "fgCancelRec" )==0 ) 		return TB_Config.fgCancelRec;			// set by media.cancelRecording()  										default: R3_3R3
-	if ( strcasecmp( s, "fgUSB_MSC" )==0 ) 			return TB_Config.fgUSB_MSC;				// set by USBD_MSC0_Init() when USB host connects  		default: O5o5!
-	if ( strcasecmp( s, "fgUSBconnect" )==0 ) 	return TB_Config.fgUSBconnect;		// set by enableMassStorage() when starting USB		  	default: G5g5!
-	if ( strcasecmp( s, "fgTB_Error" )==0 ) 		return TB_Config.fgTB_Error;			// set by TBErr() to signal software error  					default: R8_2R8_2R8_20!
-	if ( strcasecmp( s, "fgNoUSBcable" )==0 ) 	return TB_Config.fgNoUSBcable;		// set by enableMassStorage() if noUSBpower  					default: _3R3_3R3_3R3_5!
-	if ( strcasecmp( s, "fgPowerDown" )==0 ) 		return TB_Config.fgPowerDown;			// set??  powerDownTBook() G_3G_3G_9G_3G_9G_3
+	if ( strcasecmp( s, "bgPulse" )==0 ) 				return TB_Config->bgPulse;					// set by CSM (background while navigating)						default: _49G
+	if ( strcasecmp( s, "fgPlaying" )==0 ) 			return TB_Config->fgPlaying;				// set by startPlayback() 					 									default: G!
+	if ( strcasecmp( s, "fgPlayPaused" )==0 ) 	return TB_Config->fgPlayPaused;		// set by audPauseResumeAudio() when playback paused  default: G2_3!
+	if ( strcasecmp( s, "fgRecording" )==0 ) 		return TB_Config->fgRecording;			// set by startRecord() while recording user feedback default: R!
+	if ( strcasecmp( s, "fgRecordPaused" )==0 ) return TB_Config->fgRecordPaused;	// set by audPauseResumeAudio() when recording paused default: R2_3!
+	if ( strcasecmp( s, "fgSavingRec" )==0 ) 		return TB_Config->fgSavingRec;			// set by haltRecord while saving recording  					default: O!
+	if ( strcasecmp( s, "fgSaveRec" )==0 ) 			return TB_Config->fgSaveRec;				// set by saveRecording() while encrypting recording  default: G3_3G3
+	if ( strcasecmp( s, "fgCancelRec" )==0 ) 		return TB_Config->fgCancelRec;			// set by media.cancelRecording()  										default: R3_3R3
+	if ( strcasecmp( s, "fgUSB_MSC" )==0 ) 			return TB_Config->fgUSB_MSC;				// set by USBD_MSC0_Init() when USB host connects  		default: O5o5!
+	if ( strcasecmp( s, "fgUSBconnect" )==0 ) 	return TB_Config->fgUSBconnect;		// set by enableMassStorage() when starting USB		  	default: G5g5!
+	if ( strcasecmp( s, "fgTB_Error" )==0 ) 		return TB_Config->fgTB_Error;			// set by TBErr() to signal software error  					default: R8_2R8_2R8_20!
+	if ( strcasecmp( s, "fgNoUSBcable" )==0 ) 	return TB_Config->fgNoUSBcable;		// set by enableMassStorage() if noUSBpower  					default: _3R3_3R3_3R3_5!
+	if ( strcasecmp( s, "fgPowerDown" )==0 ) 		return TB_Config->fgPowerDown;			// set??  powerDownTBook() G_3G_3G_9G_3G_9G_3
   return s;
 }
 void 									setCurrState( short iSt ){				// set iCurrSt & iPrevSt (& DBG strings)
@@ -280,11 +279,10 @@ void 									setCurrState( short iSt ){				// set iCurrSt & iPrevSt (& DBG stri
 	TBook.iPrevSt = TBook.iCurrSt;
 	TBook.prevStateName = TBook.currStateName;					//DEBUG -- update prevSt string
 	
-	TBook.iCurrSt = iSt;												// now 'in' (executing) state nSt
-	TBook.cSt = gCSt( TBook.iCurrSt ); //TBookCSM[ TBook.iCurrSt ];			// state definition for current state
+	TBook.iCurrSt = iSt;						// now 'in' (executing) state nSt
+	TBook.cSt = gCSt( TBook.iCurrSt ); 			// state definition for current state
 
-	TBook.currStateName = gStNm( TBook.cSt ); //TBookCSM[ TBook.iCurrSt ]->nm;					//DEBUG -- update currSt string
-	//dbgLog( "C %s(%d) => %s(%d) \n",  TBook.prevStateName, TBook.iPrevSt, TBook.currStateName, TBook.iCurrSt );
+	TBook.currStateName = gStNm( TBook.cSt ); 	//DEBUG -- update currSt string
 }
 
 static void 					doAction( Action act, char *arg, int iarg ){	// execute one csmAction
@@ -409,8 +407,6 @@ static void 					doAction( Action act, char *arg, int iarg ){	// execute one csm
 			break;
 	  case sysTest:
             playSqrTune("CDEF_**C*D*E*F*_**C*D*E*F*_***C**G**FDEH**G**");
-			dbgLog( "writing tbook_csm.c \n" );
-			writeCSM(); //controlTest();
 			break;
 	  case playNxtPkg:
 			playNxtPackage();
@@ -432,12 +428,12 @@ static void 					doAction( Action act, char *arg, int iarg ){	// execute one csm
 static void						changeCSMstate( short nSt, short lastEvtTyp ){
 	dbgEvt( TB_csmChSt, nSt, 0,0,0 );
 	if (nSt==TBook.iCurrSt){  // no-op transition -- (default for events that weren't defined in control.def) 
-		//dbgLog( "C %s(%d): %s => %s \n", TBook.cSt->nm, TBook.iCurrSt, eventNm( (Event)lastEvtTyp), TBookCSM[nSt]->nm );
+		//dbgLog( "C %s(%d): %s => %s \n", TBook.cSt->nm, TBook.iCurrSt, eventNm( (Event)lastEvtTyp), gCSt(nSt)->nm );
 		//logEvtNSNS( "Noop_evt", "state",TBook.cSt->nm, "evt", eventNm( (Event)lastEvtTyp) ); //DEBUG
 		return;
 	}
 
-	setCurrState( nSt );    // .iPrevSt = .iCurrSt, .iCurrSt = nSt, .cSt=TBookCSM[nSt]
+	setCurrState( nSt ); 
 	// now 'in' (executing) state nSt
 
 	/*DEBUG*/  // Update status strings inside TBook -- solely for visibility in the debugger
@@ -474,7 +470,7 @@ void 									executeCSM( void ){								// execute TBook control state machine
 	TB_Event *evt;
 	osStatus_t status;
 	
-	TBook.volume = TB_Config.default_volume;
+	TBook.volume = TB_Config->default_volume;
 	TBook.iSubj = -1; // makes "next subject" go to the first subject.
 	TBook.iMsg = 0;
 
@@ -483,9 +479,9 @@ void 									executeCSM( void ){								// execute TBook control state machine
 	TBook.currStateName = "<start>";
 	
 	if ( RunQCTest )
-		changeCSMstate( TB_Config.qcTestState, 0 );
+		changeCSMstate( TB_Config->qcTestState, 0 );
 	else
-		changeCSMstate( TB_Config.initState, 0 );
+		changeCSMstate( TB_Config->initState, 0 );
     int asCnt = 0;
 	
 	while (true){
@@ -499,8 +495,8 @@ void 									executeCSM( void ){								// execute TBook control state machine
 //		logEvtNSNI( "csmEvent", "typ", TBook.lastEventName, "dnMS", evt->arg );
 		switch ( evt->typ ){
 			case AudioDone:
-				osTimerStart( timers[0], TB_Config.shortIdleMS );
-				osTimerStart( timers[1], TB_Config.longIdleMS );
+				osTimerStart( timers[0], TB_Config->shortIdleMS );
+				osTimerStart( timers[1], TB_Config->longIdleMS );
 				break;
 			case ShortIdle:			// events that don't reset idle timers
 			case LowBattery:
@@ -520,7 +516,7 @@ void 									executeCSM( void ){								// execute TBook control state machine
 		short nSt = TBook.cSt->evtNxtState[ TBook.lastEvent ];
 		assertValidState( nSt );
 		if ( nSt != TBook.iCurrSt ) // state is changing (unless goPrevSt or goSavedSt undoes it)
-			logEvtNSNSNS( "csmEvt", "st", TBook.cSt->nm, "evt", TBook.lastEventName, "nSt", TBookCSM[ nSt ]->nm );
+			logEvtNSNSNS( "csmEvt", "st", TBook.cSt->nm, "evt", TBook.lastEventName, "nSt", gCSt( nSt )->nm );
 
 		osMemoryPoolFree( TBEvent_pool, evt );
 		changeCSMstate( nSt, TBook.lastEvent );	// only changes if different
@@ -544,9 +540,9 @@ static void 					eventTest(  ){										// report Events until DFU (pot table)
 		logEvtNS( "evtTest", "nm",eventNm( evt->typ) );
 
 		if ( evt->typ == Tree ) 
-			osTimerStart( timers[0], TB_Config.shortIdleMS );
+			osTimerStart( timers[0], TB_Config->shortIdleMS );
 		if ( evt->typ == Pot ) 
-			osTimerStart( timers[1], TB_Config.longIdleMS );
+			osTimerStart( timers[1], TB_Config->longIdleMS );
 		if ( evt->typ == Table ) 
 			osTimerStart( timers[2], 20000 );	// 20 sec
 
@@ -559,38 +555,38 @@ void 									initControlManager( void ){				// initialize control manager
 	EventRecorderDisable( evrAOD, 			EvtFsCore_No,   EvtFsMcSPI_No );  //FileSys library 
 	EventRecorderDisable( evrAOD, 	 		EvtUsbdCore_No, EvtUsbdEnd_No ); 	//USB library 
 
-    if ( loadControlDef() )
-        dbgLog("! control_def %s \n", CSM->Version );
+    if ( !loadControlDef() )
+        USBmode( true );
     
-	if ( !PrecompiledCSM ){
-		TB_Config.default_volume = 5; 		// lower for TB_V2_R3
-		TB_Config.powerCheckMS = 10000;				// set by setPowerCheckTimer()
-		TB_Config.shortIdleMS = 3000;
-		TB_Config.longIdleMS = 11000;
-		TB_Config.systemAudio = "M0:/system/audio/";			// path to system audio files
-		TB_Config.minShortPressMS = 30;				// used by inputmanager.c
-		TB_Config.minLongPressMS = 900;				// used by inputmanager.c
-		TB_Config.bgPulse 				= (char *) bgPulse;
-		TB_Config.fgPlaying 			= (char *) fgPlaying;
-		TB_Config.fgPlayPaused		= (char *) fgPlayPaused;
-		TB_Config.fgRecording			= (char *) fgRecording;
-		TB_Config.fgRecordPaused	= (char *) fgRecordPaused;
-		TB_Config.fgSavingRec			= (char *) fgSavingRec;
-		TB_Config.fgSaveRec				= (char *) fgSaveRec;
-		TB_Config.fgCancelRec			= (char *) fgCancelRec;
-		TB_Config.fgUSB_MSC				= (char *) fgUSB_MSC;
-		TB_Config.fgUSBconnect		= (char *) fgUSBconnect;
-		TB_Config.fgTB_Error			= (char *) fgTB_Error;
-		TB_Config.fgNoUSBcable		= (char *) fgNoUSBcable;
-		TB_Config.fgPowerDown			= (char *) fgPowerDown;
+/*	if ( !PrecompiledCSM ){
+		TB_Config->default_volume = 5; 		// lower for TB_V2_R3
+		TB_Config->powerCheckMS = 10000;				// set by setPowerCheckTimer()
+		TB_Config->shortIdleMS = 3000;
+		TB_Config->longIdleMS = 11000;
+		TB_Config->systemAudio = "M0:/system/audio/";			// path to system audio files
+		TB_Config->minShortPressMS = 30;				// used by inputmanager.c
+		TB_Config->minLongPressMS = 900;				// used by inputmanager.c
+		TB_Config->bgPulse 				= (char *) bgPulse;
+		TB_Config->fgPlaying 			= (char *) fgPlaying;
+		TB_Config->fgPlayPaused		= (char *) fgPlayPaused;
+		TB_Config->fgRecording			= (char *) fgRecording;
+		TB_Config->fgRecordPaused	= (char *) fgRecordPaused;
+		TB_Config->fgSavingRec			= (char *) fgSavingRec;
+		TB_Config->fgSaveRec				= (char *) fgSaveRec;
+		TB_Config->fgCancelRec			= (char *) fgCancelRec;
+		TB_Config->fgUSB_MSC				= (char *) fgUSB_MSC;
+		TB_Config->fgUSBconnect		= (char *) fgUSBconnect;
+		TB_Config->fgTB_Error			= (char *) fgTB_Error;
+		TB_Config->fgNoUSBcable		= (char *) fgNoUSBcable;
+		TB_Config->fgPowerDown			= (char *) fgPowerDown;
 		
 		initTknTable();
 		if ( TBDataOK )		// control.def exists
 			readControlDef( );						// reads TB_Config settings
-	}
+	}    */
 
 	if ( CSM != NULL ){  //nCSMstates > 0 ) {    // have a CSM definition
-		ledBg( TB_Config.bgPulse );		// reset background pulse according to TB_Config
+		ledBg( TB_Config->bgPulse );		// reset background pulse according to TB_Config
 
 		iPkg = 0;
 		if ( RunQCTest ){
@@ -604,11 +600,11 @@ void 									initControlManager( void ){				// initialize control manager
 		TBook.iMsg = 1;
 		
 		// don't init power timer-- it is set to do 1st check at 15sec, then resets from TB_Config
-		//setPowerCheckTimer( TB_Config.powerCheckMS );	
+		//setPowerCheckTimer( TB_Config->powerCheckMS );	
         if ( !RunQCTest )
             PowerChecksEnabled = true;
         
-		setVolume( TB_Config.default_volume );					// set initial volume
+		setVolume( TB_Config->default_volume );					// set initial volume
 		
 		for ( int it=0; it<3; it++ ){
 			timers[it] = osTimerNew( tbTimer, osTimerOnce, (void *)it, NULL );

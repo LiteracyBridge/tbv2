@@ -455,7 +455,7 @@ void 								audPauseResumeAudio( void ){									// signal playback to request 
       // pausing '
       haltPlayback();		// shut down device & update timestamps
       pSt.state = pbPaused;
-      ledFg( TB_Config.fgPlayPaused );	// blink green: while paused
+      ledFg( TB_Config->fgPlayPaused );	// blink green: while paused
         // subsequent call to audPauseResumeAudio() will start playing at pSt.msPlayed msec
       pct = audPlayPct();
       dbgEvt( TB_audPause, pct, pSt.msPlayed, pSt.nPlayed, 0);
@@ -483,7 +483,7 @@ void 								audPauseResumeAudio( void ){									// signal playback to request 
 
       dbgEvt( TB_recPause, 0,0,0,0);
       dbgLog( "8 pauseRec at %d ms \n", pSt.msRecorded );
-      ledFg( TB_Config.fgRecordPaused );	// blink red: while paused
+      ledFg( TB_Config->fgRecordPaused );	// blink red: while paused
         // subsequent call to audPauseResumeAudio() will append new recording
       logEvtNINI( "recPause", "ms", pSt.msRecorded, "nS", pSt.nSaved );
       pSt.stats->RecPause++;
@@ -643,7 +643,7 @@ static void 				startPlayback( void ){										// power up codec, preload buffe
   if ( !pSt.SqrWAVE )     // no LED for playTune -- let CSM decide
   #endif
   {
-      ledFg( TB_Config.fgPlaying );  // Turn ON green LED: audio file playing (except for tunes)
+      ledFg( TB_Config->fgPlaying );  // Turn ON green LED: audio file playing (except for tunes)
   }
   pSt.state = pbPlaying;
   cdc_SetMute( false );		// unmute
@@ -751,7 +751,7 @@ static void 				startRecord( void ){													// preload buffers & start reco
   if ( pSt.tsRecord==0 )
    pSt.tsRecord = pSt.tsResume;		// start of file recording
 
-  ledFg( TB_Config.fgRecording ); 	// Turn ON red LED: audio file recording
+  ledFg( TB_Config->fgRecording ); 	// Turn ON red LED: audio file recording
   pSt.Buff[1]->state = bRecording;
   Driver_SAI0.Receive( pSt.Buff[1]->data, BuffWds );		// set up next buffer & start recording
   dbgEvt( TB_stRecord, (int)pSt.Buff[0], (int)pSt.Buff[1],0,0);
@@ -774,7 +774,7 @@ static void 				haltRecord( void ){														// ISR callable: stop audio inp
   dbgEvt( TB_audRecDn, pSt.msRecorded, 0, 0,0 );
 
   ledFg( NULL );		// cancel fgRecording
-  ledFg( TB_Config.fgSavingRec );				// Switch foreground LED to saving
+  ledFg( TB_Config->fgSavingRec );				// Switch foreground LED to saving
 }
 
 

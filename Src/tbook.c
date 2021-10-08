@@ -7,7 +7,7 @@
 #include "fs_evr.h"					// FileSys components
 #include "fileOps.h"				// decode & encrypt audio files
 
-const char * 	TBV2_Version 				= "V3.04 of 23-Sep-2021";
+const char * 	TBV2_Version 				= "V3.1 of 8-Oct-2021";
 
 //
 // Thread stack sizes
@@ -136,14 +136,13 @@ void talking_book( void  *tbAttr ) {		// talking book initialization & control m
 		for ( int i = 0; i <= pLAST; i++ ){		// change paths to fsDevs[0]
 			setDev( TBP[ i ], fsDevs[0] );
 		}
-		PrecompiledCSM = ( nCSMstates > 0 );   // CSM definition compiled in, don't load "control.def"
 		
 		if ( BootKey=='C' || !fexists( TBP[ pQC_PASS ] )){
 			RunQCTest = true;
 		}
 		
-		if ( BootKey=='M' || !fexists( TBP[pLIST_OF_SUBJS] ))			// better file to detect TBook system not present?
-			debugLoop( true );	// if no TBook system (or Minus boot) -- go straight to USB mode
+		if ( BootKey=='M' || !fexists( TBP[pCSM_DEF] ))	
+			debugLoop( true );	// if no TBook CSM (or Minus boot) -- go straight to USB mode
 	}
 
 

@@ -28,7 +28,7 @@
 	#include "eventrecorder.h"   
 #endif
 
-#include "tknTable.h"			// GrpID, Event, Action
+#include "tb_enum.h"			// GrpID, Event, Action
 #include "log.h"				// logEvt...
 #include "ledMgr.h"				// ledFg, ledBg
 #include "powerMgr.h"			// registerPowerEventHandler
@@ -44,7 +44,6 @@ extern char 			CPU_ID[20], TB_ID[20], TBookName[20];
 extern bool 			NO_OS_DEBUG;					// set in main.c, used in tbook.c
 extern bool 			FirstSysBoot;					// defined in logger
 extern bool 			RunQCTest;						// defined in tbook.c -- if no /system/QC_PASS.txt  or Circle boot
-extern bool 			PrecompiledCSM;				    // defined in tbook.c
 extern char             BootKey;                        // set in main.c, used in tbook.c
 extern bool				PowerChecksEnabled;				// set true for normal operation 
 
@@ -219,7 +218,7 @@ typedef struct TBConfig {			// TBConfig
 	char *	fgPowerDown;
 }	TBConfig_t;
 
-extern TBConfig_t 	TB_Config;		// global TBook configuration
+extern TBConfig_t *	    TB_Config;		// global TBook configuration
 
 // for tbUtil.c
 #define	dbgLns  				80

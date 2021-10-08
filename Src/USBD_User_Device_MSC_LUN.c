@@ -117,9 +117,9 @@ bool		enableMassStorage( char *drv0, char *drv1, char *drv2, char *drv3 ){	// in
 	if ( usbProvidingMassStorage ) return true;
 	ledFg( NULL );
 	if ( !haveUSBpower() )
-		ledFg( TB_Config.fgNoUSBcable ); // no USB cable!
+		ledFg( TB_Config->fgNoUSBcable ); // no USB cable!
 	else				
-  	ledFg( TB_Config.fgUSBconnect );	
+  	ledFg( TB_Config->fgUSBconnect );	
 	
 	// initialize LUN[] array for specified drives
 	addLUN( drv0==NULL? "M0:" : drv0 ); 
@@ -256,7 +256,7 @@ void	 	USBD_MSC0_Initialize( void ){										// callback from USBD_Initialize t
 		initLUN( i );
 	usbProvidingMassStorage = true;
 	ledFg( NULL );		// stop USBconnect
-	ledFg( TB_Config.fgUSB_MSC );			// connected
+	ledFg( TB_Config->fgUSB_MSC );			// connected
 }
 void 		USBD_MSC0_Uninitialize( void ){									// callback from USBD_Uninitialize to de-init all Logical Units of the USB MSC class instance.
 	dbgEvt( TB_usbM0Uninit, 0,0,0,0);

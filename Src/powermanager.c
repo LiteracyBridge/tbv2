@@ -438,8 +438,8 @@ void											setupRTC( fsTime time ){				// init RTC & set based on fsTime
 void											checkPowerTimer( void *arg ){		// timer to signal periodic power status check
     if ( PowerChecksEnabled )
         osEventFlagsSet( pwrEvents, PM_PWRCHK );						// wakeup powerThread for power status check
-	if ( currPwrTimerMS != TB_Config.powerCheckMS ){		// update delay (after initial check)
-		currPwrTimerMS = TB_Config.powerCheckMS;
+	if ( currPwrTimerMS != TB_Config->powerCheckMS ){		// update delay (after initial check)
+		currPwrTimerMS = TB_Config->powerCheckMS;
 		setPowerCheckTimer( currPwrTimerMS );
 	}
 }

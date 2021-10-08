@@ -1244,7 +1244,7 @@ void 						cdc_Init( ){ 																								// Init codec & I2C (i2s_stm32f4
 	#endif
 
 	if ( LastVolume == 0 ){ // first time-- set to default_volume
-		LastVolume = TB_Config.default_volume;
+		LastVolume = TB_Config->default_volume;
 		if (LastVolume==0) LastVolume = 5;
 	}
 	cdc_SetVolume( LastVolume );						// set to LastVolume used

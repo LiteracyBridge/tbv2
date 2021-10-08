@@ -5,13 +5,6 @@
 #include "tbook.h"
 #include "packageData.h"
 
-// define LOAD_CSM_DYNAMICALLY to load CSM from system/control.def
-//  #define LOAD_CSM_DYNAMICALLY
-
-//  ifdef LOAD_CSM_DYNAMICALLY controls:
-//    in tbook_csm.c  --  allocation of space for: CSM_Version, nCSMstates,	TB_Config, TBookCSM[],	nPlaySys, &	SysAudio[]
-//    in tknTable.c -- code & storage tables for parsing:  
-
 typedef struct {
 	Action	act;
 	char *	arg;

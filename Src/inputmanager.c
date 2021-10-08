@@ -277,7 +277,7 @@ void					startKeypadTest(){
 }
 
 void 					keypadTestKey( KEY evt, int dntime ) {		// verify function of keypad   
-	bool longPress = dntime > TB_Config.minLongPressMS;
+	bool longPress = dntime > TB_Config->minLongPressMS;
 	if ( longPress ){
 		dbgEvt( TB_ktReset, evt, dntime, 0, 0 );
 		dbgLog("Kpad RESET %dms \n", dntime );
@@ -318,14 +318,14 @@ void 					inputThread( void *arg ){			// converts signals from keypad ISR's to e
 			
 			if ( KSt.detectedUpKey != kINVALID ){		// keyUp transition on detectedUpKey
 				int dntime = keydef[ KSt.detectedUpKey ].dntime;
-				if ( dntime < TB_Config.minShortPressMS ){	// ignore (de-bounce) if down less than this 
+				if ( dntime < TB_Config->minShortPressMS ){	// ignore (de-bounce) if down less than this 
 					dbgEvt( TB_keyBnc, KSt.detectedUpKey, dntime, 0, 0 );
 				} else {
 					if ( KSt.starDown && KSt.detectedUpKey!=kSTAR ){  //  <STAR-x> xUp transition (ignore duration)
 						KSt.starAltUsed = true;			// prevent LONG_PRESS for Star used as Alt
 						dbgEvt( TB_keyStar, KSt.detectedUpKey, dntime, 0, 0 );
 						eTyp = toStarEvt( KSt.detectedUpKey );
-					} else if ( dntime > TB_Config.minLongPressMS ){	// LONGPRESS if down more longer than this
+					} else if ( dntime > TB_Config->minLongPressMS ){	// LONGPRESS if down more longer than this
 						dbgEvt( TB_keyLong, KSt.detectedUpKey, dntime, 0, 0 );
 						eTyp = toLongEvt( KSt.detectedUpKey );
 					} else { // short press
@@ -352,7 +352,7 @@ void 					initInputManager( void ){ 			// initializes keypad & starts thread
 	Dbg.KeyTest = &KTest;
 	Dbg.KeyPadStatus = &KSt;
 	Dbg.KeyPadDef = &keydef;
-	Dbg.TBookConfig = &TB_Config;
+	Dbg.TBookConfig = TB_Config;
 	resetKeypadTest();
 	
 	osFlag_InpThr = osEventFlagsNew(NULL);	// os flag ID -- used so ISR can wakeup inputThread

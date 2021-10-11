@@ -1,24 +1,42 @@
-packages_data.txt deployment of 29-Sep-2021 testing...
-5
-M0:/content/local/en/
-M0:/content/prompts/en/
-M0:/content/messages/en/
-M0:/content/messages/en/health/
-M0:/content/messages/en/talkingbook/
-1
-Sep2021
-2 package.wav
-0;1
-2
-health
-3 health.wav
-3 to_learn_health.wav
-3
-3 right_now_your_baby_is_safe.wav
-3 when_your_little_one_does_arrive.wav
-3 you_may_now_be_just_waiting.wav
-talkingbook
-4 talking_book.wav
-4 to_learn_tbook.wav
-1
-4 the_TB_is_a_durable.wav
+  # packages_data.txt Talking Book Deployment description
+#  Text file with comments from # character to end of line
+#  <deployment>         ::= <format_version> <deployment_version> <path_list> <#packages> <package>*
+#  <format_version>     ::= <int>
+#  <deployment_version> ::= <text_line>
+#  <path_list>          ::= <#paths> <path>*
+#  <package>            ::= <package_name> <package_prompt> <prompts_paths> <#subjects> <subject>*
+#  <package_name>       ::= <text_name>
+#  <package_prompt>     ::= <audio_file>
+#  <prompts_paths>      ::=  <pathIndex> [ ; <pathIndex> ]*10                   # up to 10 <pathIndex>s -- all on one line
+#  <subject>            ::= <subj_name> <subj_prompt> <subj_invite> <#messages> <message>*
+#  <subj_name>          ::= <text_name>
+#  <subj_prompt>        ::= <audio_file>
+#  <subj_invite>        ::= <audio_file>
+#  <message>            ::= <audio_file>
+#  <audio_file>         ::= <pathIndex> <filename>      # must be on one line
+#..
+  1                                                     # <format_version> 
+packages_data.txt deployment of 29-Sep-2021 testing...  # <deployment_version>
+  5                                                     # <#paths>
+    /content/local/en/                                  # D0 <path>
+    /content/prompts/en/                                # D1 <path>
+    /content/messages/en/                               # D2 <path>
+    /content/messages/en/health/                        # D3 <path>
+    /content/messages/en/talkingbook/                   # D4 <path>
+  1                                                     # <#packages>
+    Sep2021                                             # P0 <package_name>
+    2 package.wav                                       # P0 <package_prompt>
+    0;1                                                 # P0 <prompts_paths>
+      2                                                 # P0 <#subjects>
+        health                                          # P0 S0 <subject_name>
+        3 health.wav                                    # P0 S0 <subj_prompt>
+        3 to_learn_health.wav                           # P0 S0 <subj_invite>
+          3                                             # P0 S0 <#messages>
+            3 right_now_your_baby_is_safe.wav           # P0 S0 M0 <message>
+            3 when_your_little_one_does_arrive.wav      # P0 S0 M1 <message>
+            3 you_may_now_be_just_waiting.wav           # P0 S0 M2 <message>
+        talkingbook                                     # P0 S1 <subject_name>
+        4 talking_book.wav                              # P0 S1 <subject_prompt>
+        4 to_learn_tbook.wav                            # P0 S1 <subject_invite>
+          1                                             # P0 S1 <#messages>
+            4 the_TB_is_a_durable.wav                   # P0 S1 M0 <message>

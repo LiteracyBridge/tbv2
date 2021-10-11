@@ -55,12 +55,15 @@ CSM_t *         CSM = NULL;                 // extern ptr to definition of CSM
 TBConfig_t *	TB_Config;			        // TBook configuration variables
 
 //
-// local shared utilities
+// local shared variables
 char            line[200];                  // internal text line buffer shared by all packageData routines
 int             errCount;                   // # errors while parsing this file
 char *          errType;                    // name of file type being loaded, for error messages
-void *          loadErr( const char * msg ){
+
+// local shared utilities
+void *          loadErr( const char * msg ){                    // report & count error in 'errType' file, when parsing 'msg'
     errLog( "%s: %s", errType, msg ); 
+    errCount++;
     return NULL;
 }
 void		    appendIf( char * path, const char *suffix ){	// append 'suffix' if not there
@@ -82,6 +85,7 @@ int             loadInt( FILE *inF, const char *typ ){          // read 'typ' in
     } else
         return v;
 }
+
 char *          loadStr( FILE *inF, const char *typ ){          // read 'typ' string from inF, alloc & return ptr -- loadErr if fails
     if ( fscanf( inF, "%s\n", line )==1  )
         return allocStr( line, typ );
@@ -89,6 +93,40 @@ char *          loadStr( FILE *inF, const char *typ ){          // read 'typ' st
         loadErr( typ );
         return NULL;
     }
+}
+
+void          ldDepLn( FILE *inF, const char *typ ){         // load next text line from deployment inF, trim comments & lead/trail whitespace, repeat if empty
+    while ( fscanf( inF, "%[^\n]\n", line )==1  ){
+        char *hash = strchr( line, '#' );
+        if ( hash!=NULL ) *hash = '\0';   // terminate line at first '#'
+        for ( int i=0; i<strlen(line); i++ )
+          if ( line[i] != ' ' && line[i] != '\t' ){
+              if ( i>0 ) strcpy( &line[0], &line[i] );   // skip leading whitespace
+              
+              for (int j=strlen(line)-1; j>i; j-- ){
+                  if ( line[j] == ' ' || line[j] == '\t' ){
+                      line[j] = '\0';  // truncate trailing whitespace 
+                  } else {
+                      break;   // last non-whitespace char
+                  }
+              }
+              return; // non-empty line -- so return  
+          }              
+    }
+    loadErr( typ );  // no str found (EOF)
+}
+char *          ldDepStr( FILE *inF, const char *typ ){         // allocate & return next string from inF (ignoring comments & whitespace)
+    ldDepLn( inF, typ );                // load next string into line[]
+    return allocStr( line, typ );       // allocate & return it
+}
+int             ldDepInt( FILE *inF, const char *typ ){         // read 'typ' string from inF, alloc & return ptr -- loadErr if fails
+    ldDepLn( inF, typ );    // line  gets next line (no comments, or lead/trail white space)  
+    int v;
+    if ( sscanf( line, "%d", &v )==1  )
+        return v;
+    
+    loadErr( typ );
+    return 0;
 }
 
 //
@@ -174,18 +212,19 @@ char *          findAudioPath( char * path, PathList_t * srchpaths, char * nm ){
 //
 // private Deployment routines
 AudioPaths_t *  loadAudioPaths( FILE *inF ){                    // parse pkg_dat list of Content directories
-    int dirCnt = loadInt( inF, "pkg_dat dirCnt" );
+    int dirCnt = ldDepInt( inF, "pkg_dat dirCnt" );
     AudioPaths_t * dirs = (AudioPaths_t *) tbAlloc( sizeof(int) + dirCnt * sizeof(char *), "AudioPaths" );
  
     dirs->nPaths = dirCnt;
     for ( int i=0; i<dirCnt; i++ ){
-        dirs->audPath[i] = loadStr( inF, "audPath" );
+        dirs->audPath[i] = ldDepStr( inF, "audPath" );
     }
     return dirs;
 }
 PathList_t *    loadSearchPath( FILE *inF ){                    // parse next pkg_dat line as list of ContentPath indices
     int d[10];
-    int dcnt = fscanf( inF, "%d;%d;%d;%d;%d;%d;%d;%d;%d;%d;", &d[0], &d[1], &d[2], &d[3], &d[4], &d[5], &d[6], &d[7], &d[8], &d[9] );
+    ldDepLn( inF, "prompts_paths" );
+    int dcnt = sscanf( line, "%d;%d;%d;%d;%d;%d;%d;%d;%d;%d; \n", &d[0], &d[1], &d[2], &d[3], &d[4], &d[5], &d[6], &d[7], &d[8], &d[9] );
     PathList_t * plist = tbAlloc( sizeof( PathList_t ), "pathList" );        // always allocate space for 10  (only 1 per package)
     plist->PathLen = dcnt;
     for (int i=0; i<dcnt; i++ ){
@@ -193,47 +232,42 @@ PathList_t *    loadSearchPath( FILE *inF ){                    // parse next pk
     }
     return plist;
 }
-AudioFile_t *   loadAudio( FILE *inF ){                         // load dirIdx & filename from pkg_dat line
+AudioFile_t *   loadAudio( FILE *inF, const char *typ ){        // load dirIdx & filename from pkg_dat line
     AudioFile_t * audfile = tbAlloc( sizeof(AudioFile_t), "audFile" );
-    if ( fscanf( inF, "%d %s\n", &audfile->pathIdx, line )==2  ){
-        audfile->filename = allocStr( line, "audFilename" );
-    } else errLog( "pkg_dat audFile fail" );        
-   
+    ldDepLn( inF, typ );
+    char fname[100];
+    if ( sscanf( line, "%d %s ", &audfile->pathIdx, fname )==2  ){
+        audfile->filename = allocStr( fname, "audFilename" );
+    } else loadErr( typ );        
     return audfile;
 }
 Subject_t *     loadSubject( FILE *inF ){                       // parse content subject from pkg_dat 
     Subject_t * subj = tbAlloc( sizeof( Subject_t ), "subject" ); 
-    if ( fscanf( inF, "%s\n", line )==1  ){
-            subj->subjName = allocStr( line, "subjName" );
-        } else { errLog( "pkg_dat Subj.name fail" );  return NULL; }   
+    
+    subj->subjName = ldDepStr( inF, "subjName" );
 
-    subj->shortPrompt = loadAudio( inF );
-    subj->invitation = loadAudio( inF );
+    subj->shortPrompt = loadAudio( inF, "subj_pr" );
+    subj->invitation = loadAudio( inF, "subj_inv" );
 
-    int nMsgs;
-    if ( fscanf( inF, "%d\n", &nMsgs )!= 1 ) { errLog( "pkg_dat nMsgs fail" ); return NULL; }
+    int nMsgs = ldDepInt( inF, "nMsgs" );
 
     subj->messages = (MsgList_t *) tbAlloc( sizeof(int) + nMsgs* sizeof(void *), "subjList" );
     subj->stats = tbAlloc( sizeof(MsgStats), "stats" );
     subj->messages->nMsgs = nMsgs;            
     for ( int i=0; i<nMsgs; i++ ){
-        subj->messages->msg[i] = loadAudio( inF );
+        subj->messages->msg[i] = loadAudio( inF, "msg" );
     }
     return subj;
 }
 Package_t *     loadPackage( FILE *inF, int pkgIdx ){           // parse one content package from pkg_dat 
     Package_t * pkg = ( Package_t * ) tbAlloc( sizeof( Package_t ), "package" ); 
-    
-    if ( fscanf( inF, "%s\n", line )==1  ){
-            pkg->packageName = allocStr( line, "pkgName" );
-        } else { errLog( "pkg_dat Pkg[%d].name fail", pkgIdx );  return NULL; }   
-    
-    pkg->pkg_prompt = loadAudio( inF );                // audio prompt for package
+
+    pkg->pkgIdx = pkgIdx;
+    pkg->packageName = ldDepStr( inF, "pkgName" );
+    pkg->pkg_prompt = loadAudio( inF, "pkg_pr" );      // audio prompt for package
     pkg->prompt_paths = loadSearchPath( inF );         // search path for prompts
 
-	int nSubjs;                                         // number of subjects in package
-    if ( fscanf( inF, "%d\n", &nSubjs )!= 1 ){ errLog( "pkg_dat nSubjects fail" ); return NULL; }
-        
+	int nSubjs = ldDepInt( inF, "nSubjs" );            // number of subjects in package
     pkg->subjects = (SubjList_t *) tbAlloc( sizeof(int) + nSubjs* sizeof(void *), "subj_list" );
     pkg->subjects->nSubjs = nSubjs;
     for ( int i=0; i<nSubjs; i++){
@@ -242,6 +276,8 @@ Package_t *     loadPackage( FILE *inF, int pkgIdx ){           // parse one con
     logEvtNSNI("LdPkg", "nm", pkg->packageName, "nSubj", pkg->subjects->nSubjs );
     return pkg;
 }
+//
+const int PACKAGE_FORMAT_VERSION = 1;                 // format of Oct 2021
 //
 // public routine to load a full Deployment from  /content/packages_data.txt
 bool            loadPackageData( void ){                        // load structured TBook package contents 
@@ -253,14 +289,18 @@ bool            loadPackageData( void ){                        // load structur
 	if ( inFile == NULL ){ errLog( "package_data.txt not found\n" );  return false;  }
     // /content/package_data.txt  structure:
 
-	if ( fscanf( inFile, "%[^\n]\n", line )==1  ){    // version string can have white space
+    int fmtVer = ldDepInt( inFile, "fmt_ver" );
+    if ( fmtVer != PACKAGE_FORMAT_VERSION )
+        errLog("pkg_dat file version: expected %d got %d", PACKAGE_FORMAT_VERSION, fmtVer );
+
+	if ( fscanf( inFile, "%[^\n]\n", line )==1  ){    // version string-- entire line, can have white space
         Deployment->Version = allocStr( line, "deployVer" );
         logEvtNS("Deploymt", "Ver", Deployment->Version );
     } else loadErr( "Version" );        
          
     Deployment->AudioPaths = loadAudioPaths( inFile );
     
-    int nPkgs = loadInt( inFile, "nPkgs" );
+    int nPkgs = ldDepInt( inFile, "nPkgs" );
     Deployment->packages = (PackageList_t *) tbAlloc( sizeof(int) + nPkgs* sizeof(void *), "deployment" ); 
     Deployment->packages->nPkgs = nPkgs;
     for ( int i=0; i<nPkgs; i++ ){

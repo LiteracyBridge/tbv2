@@ -56,13 +56,14 @@ TBConfig_t *	TB_Config;			        // TBook configuration variables
 
 //
 // local shared variables
-char            line[200];                  // internal text line buffer shared by all packageData routines
+char            line[202];                  // internal text line buffer shared by all packageData routines
 int             errCount;                   // # errors while parsing this file
+int             lineNum = 0;
 char *          errType;                    // name of file type being loaded, for error messages
 
 // local shared utilities
 void *          loadErr( const char * msg ){                    // report & count error in 'errType' file, when parsing 'msg'
-    errLog( "%s: %s", errType, msg ); 
+    errLog( "%s:L%d %s ", errType, lineNum, msg ); 
     errCount++;
     return NULL;
 }
@@ -77,26 +78,14 @@ char *	        allocStr( const char * s, const char * strType ){ // allocate & c
 	strcpy( pStr, s );	
 	return pStr;
 }
-int             loadInt( FILE *inF, const char *typ ){          // read 'typ' int from inF -- loadErr if fails
-    int v;
-    if ( fscanf( inF, "%d\n", &v )!= 1 ){ 
-        loadErr( typ ); 
-        return 0; 
-    } else
-        return v;
-}
-
-char *          loadStr( FILE *inF, const char *typ ){          // read 'typ' string from inF, alloc & return ptr -- loadErr if fails
-    if ( fscanf( inF, "%s\n", line )==1  )
-        return allocStr( line, typ );
-    else {
-        loadErr( typ );
-        return NULL;
-    }
-}
-
-void          ldDepLn( FILE *inF, const char *typ ){         // load next text line from deployment inF, trim comments & lead/trail whitespace, repeat if empty
-    while ( fscanf( inF, "%[^\n]\n", line )==1  ){
+void            ldDepLn( FILE *inF, const char *typ ){         // load next text line from deployment inF, trim comments & lead/trail whitespace, repeat if empty
+    if ( errCount > 0 ) { line[0]='\0'; return; }
+    
+    while ( fscanf( inF, "%201[^\n]%*[\n]", line )==1  ){
+        lineNum++;
+        if ( strlen(line) > 200 ) loadErr("Line too long");
+        char *cret = strchr( line, '\r' );
+        if ( cret!=NULL ) *cret = '\0';
         char *hash = strchr( line, '#' );
         if ( hash!=NULL ) *hash = '\0';   // terminate line at first '#'
         for ( int i=0; i<strlen(line); i++ )
@@ -212,6 +201,7 @@ char *          findAudioPath( char * path, PathList_t * srchpaths, char * nm ){
 //
 // private Deployment routines
 AudioPaths_t *  loadAudioPaths( FILE *inF ){                    // parse pkg_dat list of Content directories
+    if ( errCount > 0 ) return NULL;
     int dirCnt = ldDepInt( inF, "pkg_dat dirCnt" );
     AudioPaths_t * dirs = (AudioPaths_t *) tbAlloc( sizeof(int) + dirCnt * sizeof(char *), "AudioPaths" );
  
@@ -222,6 +212,7 @@ AudioPaths_t *  loadAudioPaths( FILE *inF ){                    // parse pkg_dat
     return dirs;
 }
 PathList_t *    loadSearchPath( FILE *inF ){                    // parse next pkg_dat line as list of ContentPath indices
+    if ( errCount > 0 ) return NULL;
     int d[10];
     ldDepLn( inF, "prompts_paths" );
     int dcnt = sscanf( line, "%d;%d;%d;%d;%d;%d;%d;%d;%d;%d; \n", &d[0], &d[1], &d[2], &d[3], &d[4], &d[5], &d[6], &d[7], &d[8], &d[9] );
@@ -233,6 +224,7 @@ PathList_t *    loadSearchPath( FILE *inF ){                    // parse next pk
     return plist;
 }
 AudioFile_t *   loadAudio( FILE *inF, const char *typ ){        // load dirIdx & filename from pkg_dat line
+    if ( errCount > 0 ) return NULL;
     AudioFile_t * audfile = tbAlloc( sizeof(AudioFile_t), "audFile" );
     ldDepLn( inF, typ );
     char fname[100];
@@ -242,6 +234,7 @@ AudioFile_t *   loadAudio( FILE *inF, const char *typ ){        // load dirIdx &
     return audfile;
 }
 Subject_t *     loadSubject( FILE *inF ){                       // parse content subject from pkg_dat 
+    if ( errCount > 0 ) return NULL;
     Subject_t * subj = tbAlloc( sizeof( Subject_t ), "subject" ); 
     
     subj->subjName = ldDepStr( inF, "subjName" );
@@ -260,6 +253,7 @@ Subject_t *     loadSubject( FILE *inF ){                       // parse content
     return subj;
 }
 Package_t *     loadPackage( FILE *inF, int pkgIdx ){           // parse one content package from pkg_dat 
+    if ( errCount > 0 ) return NULL;
     Package_t * pkg = ( Package_t * ) tbAlloc( sizeof( Package_t ), "package" ); 
 
     pkg->pkgIdx = pkgIdx;
@@ -283,21 +277,20 @@ const int PACKAGE_FORMAT_VERSION = 1;                 // format of Oct 2021
 bool            loadPackageData( void ){                        // load structured TBook package contents 
     errType = "Deployment";
     errCount = 0;
+    lineNum = 0;
     Deployment = (Deployment_t *) tbAlloc( sizeof(Deployment_t), "Deployment" );
     
 	FILE *inFile = tbOpenRead( TBP[ pPKG_DAT ] ); 
-	if ( inFile == NULL ){ errLog( "package_data.txt not found\n" );  return false;  }
-    // /content/package_data.txt  structure:
+	if ( inFile == NULL ) loadErr( "package_data.txt not found" ); 
 
     int fmtVer = ldDepInt( inFile, "fmt_ver" );
     if ( fmtVer != PACKAGE_FORMAT_VERSION )
-        errLog("pkg_dat file version: expected %d got %d", PACKAGE_FORMAT_VERSION, fmtVer );
+        loadErr("bad format_version" );
 
-	if ( fscanf( inFile, "%[^\n]\n", line )==1  ){    // version string-- entire line, can have white space
-        Deployment->Version = allocStr( line, "deployVer" );
-        logEvtNS("Deploymt", "Ver", Deployment->Version );
-    } else loadErr( "Version" );        
-         
+    ldDepLn( inFile, "version" );
+    Deployment->Version = allocStr( line, "deployVer" );
+    logEvtNS("Deploymt", "Ver", Deployment->Version );    
+
     Deployment->AudioPaths = loadAudioPaths( inFile );
     
     int nPkgs = ldDepInt( inFile, "nPkgs" );
@@ -308,59 +301,61 @@ bool            loadPackageData( void ){                        // load structur
     }
     
 	tbCloseFile( inFile );
-    if ( errCount > 0 ){ errLog( "packages_data: %s parse errors", errCount ); return false; }
+    if ( errCount > 0 ){ errLog( "packages_data: %d parse errors", errCount ); return false; }
     return true;
 }
 
 //
 // private ControlStateMachine loading routines
 TBConfig_t *    loadTbConfig( FILE *inF ){                      // load & return CSM configuration variables
+    if ( errCount > 0 ) return NULL;
     TBConfig_t * cfg = (TBConfig_t *) tbAlloc( sizeof(TBConfig_t), "TBConfig" );
 
-    cfg->default_volume     = (short) loadInt( inF, "def_vol" );
-    cfg->powerCheckMS       = loadInt( inF, "powerChk" ); 
-    cfg->shortIdleMS        = loadInt( inF, "shortIdle" ); 
-    cfg->longIdleMS         = loadInt( inF, "longIdle" ); 
-    cfg->minShortPressMS    = loadInt( inF, "shortPr" );
-    cfg->minLongPressMS     = loadInt( inF, "longPr" ); 
-    cfg->qcTestState        = loadInt( inF, "qcState" );
-    cfg->initState          = loadInt( inF, "initState" );
+    cfg->default_volume     = (short) ldDepInt( inF, "def_vol" );
+    cfg->powerCheckMS       = ldDepInt( inF, "powerChk" ); 
+    cfg->shortIdleMS        = ldDepInt( inF, "shortIdle" ); 
+    cfg->longIdleMS         = ldDepInt( inF, "longIdle" ); 
+    cfg->minShortPressMS    = ldDepInt( inF, "shortPr" );
+    cfg->minLongPressMS     = ldDepInt( inF, "longPr" ); 
+    cfg->qcTestState        = ldDepInt( inF, "qcState" );
+    cfg->initState          = ldDepInt( inF, "initState" );
 
-    cfg->systemAudio    = loadStr( inF, "sysAud" ); 
-    cfg->bgPulse        = loadStr( inF, "bgPulse" ); 
-    cfg->fgPlaying      = loadStr( inF, "fgPlaying" ); 
-    cfg->fgPlayPaused   = loadStr( inF, "fgPlayPaused" ); 
-    cfg->fgRecording    = loadStr( inF, "fgRecording" ); 
-    cfg->fgRecordPaused = loadStr( inF, "fgRecordPaused" ); 
-    cfg->fgSavingRec    = loadStr( inF, "fgSavingRec" ); 
-    cfg->fgSaveRec      = loadStr( inF, "fgSaveRec" ); 
-    cfg->fgCancelRec    = loadStr( inF, "fgCancelRec" ); 
-    cfg->fgUSB_MSC      = loadStr( inF, "fgUSB_MSC" ); 
-    cfg->fgTB_Error     = loadStr( inF, "fgTB_Error" ); 
-    cfg->fgNoUSBcable   = loadStr( inF, "fgNoUSBcable" ); 
-    cfg->fgUSBconnect   = loadStr( inF, "fgUSBconnect" ); 
-    cfg->fgPowerDown    = loadStr( inF, "fgPowerDown" );  
+    cfg->systemAudio    = ldDepStr( inF, "sysAud" ); 
+    cfg->bgPulse        = ldDepStr( inF, "bgPulse" ); 
+    cfg->fgPlaying      = ldDepStr( inF, "fgPlaying" ); 
+    cfg->fgPlayPaused   = ldDepStr( inF, "fgPlayPaused" ); 
+    cfg->fgRecording    = ldDepStr( inF, "fgRecording" ); 
+    cfg->fgRecordPaused = ldDepStr( inF, "fgRecordPaused" ); 
+    cfg->fgSavingRec    = ldDepStr( inF, "fgSavingRec" ); 
+    cfg->fgSaveRec      = ldDepStr( inF, "fgSaveRec" ); 
+    cfg->fgCancelRec    = ldDepStr( inF, "fgCancelRec" ); 
+    cfg->fgUSB_MSC      = ldDepStr( inF, "fgUSB_MSC" ); 
+    cfg->fgTB_Error     = ldDepStr( inF, "fgTB_Error" ); 
+    cfg->fgNoUSBcable   = ldDepStr( inF, "fgNoUSBcable" ); 
+    cfg->fgUSBconnect   = ldDepStr( inF, "fgUSBconnect" ); 
+    cfg->fgPowerDown    = ldDepStr( inF, "fgPowerDown" );  
     return cfg;
 }
 AudioList_t *   loadSysAudio( FILE *inF ){                      // load & return list of all PlaySys names used in CSM
-    int cnt = loadInt( inF, "nSysAudio" );
+    if ( errCount > 0 ) return NULL;
+    int cnt = ldDepInt( inF, "nSysAudio" );
     AudioList_t * lst = (AudioList_t *) tbAlloc( sizeof(int) + cnt * sizeof(char *), "SysAudio" );
  
     lst->nSysA = cnt;
     for ( int i=0; i<cnt; i++ ){
-        lst->sysA[i] = loadStr(inF, "sysAud");
+        lst->sysA[i] = ldDepStr(inF, "sysAud");
     }
     return lst;
 }
 csmAction_t *   loadAction( FILE *inF ){                        // load & return enum Action & string arg
-    if ( fscanf( inF, "%s ", line )!=1  ){
-        loadErr( "Action" );
-    }
+    if ( errCount > 0 ) return NULL;
+    ldDepLn( inF, "action" );
+ 
     csmAction_t *a = (csmAction_t *) tbAlloc( sizeof(csmAction_t), "csmAct" );
     for ( int i=0; ANms[i]!=NULL; i++ ){
         if ( strcasecmp( line, ANms[i] )==0 ){
             a->act = (Action) i;
-            a->arg = (char *) loadStr( inF, "act_arg" );
+            a->arg = (char *) ldDepStr( inF, "act_arg" );
             return a;
         }
     }
@@ -369,20 +364,21 @@ csmAction_t *   loadAction( FILE *inF ){                        // load & return
     return NULL;
 }
 CState_t *      loadCState( FILE *inF, int idx ){               // load & return definition of one CSM state
+    if ( errCount > 0 ) return NULL;
     CState_t * st = tbAlloc( sizeof( CState_t ), "CState" );
     
-    st->idx         = (short) loadInt( inF, "st.Idx");
+    st->idx         = (short) ldDepInt( inF, "st.Idx");
     if ( st->idx != idx )
         errLog("CSM sync st %d!=%d", idx, st->idx );
-    st->nm          = loadStr( inF, "st.nm");
-    st->nNxtStates  = (short) loadInt( inF, "st.nNxt");
+    st->nm          = ldDepStr( inF, "st.nm");
+    st->nNxtStates  = (short) ldDepInt( inF, "st.nNxt");
     st->evtNxtState = (short *) tbAlloc( st->nNxtStates * sizeof(short), "evtNxtSt" );
     for ( int i=0; i<st->nNxtStates; i++ ){
         if ( fscanf( inF, "%hd,", &st->evtNxtState[i] )!= 1 ){ 
-            errLog( "load evtNxtSt err" );
+            loadErr( "load evtNxtSt" );  return NULL;
         }            
     }
-    int nA = (short) loadInt( inF, "st.nActs" );
+    int nA = (short) ldDepInt( inF, "st.nActs" );
     st->Actions = (ActionList_t *) tbAlloc( sizeof(int) + nA * sizeof(csmAction_t *), "st.Actions" );
     st->Actions->nActs = nA;
     for ( int i=0; i<nA; i++ )
@@ -397,33 +393,34 @@ CState_t *      loadCState( FILE *inF, int idx ){               // load & return
 bool            loadControlDef( void ){                         // load structured Control State Machine 
     errType = "CSM";
     errCount = 0;
+    lineNum = 0;
 	CSM = (CSM_t *) tbAlloc( sizeof( CSM_t ), "CSM" );
     
 	FILE *inFile = tbOpenRead( TBP[ pCSM_DEF ] ); 
-	if ( inFile == NULL ){ errLog( "csm_data.txt not found\n" );  return false;  }
-
-	if ( fscanf( inFile, "%[^\n]\n", line )==1  ){     // allow whitespace in Version
-        CSM->Version = allocStr( line, "csmVer" );
-        logEvtNS( "TB_CSM", "ver", CSM->Version );		// log CSM version comment
-    } else loadErr( "Version" ); 
+	if ( inFile == NULL ){ 
+        errLog( "csm_data.txt not found" ); 
+        return false; 
+    }
+    ldDepLn( inFile, "version" );
+    CSM->Version = allocStr( line, "csmVer" );
+    logEvtNS( "TB_CSM", "ver", CSM->Version );		    // log CSM version comment
     
-	if ( fscanf( inFile, "%[^\n]\n", line )==1  ){     // allow whitespace in CsmCompileVersion
-        // throw CsmCompileVersion away 
-    } else loadErr( "Version" );        
+    ldDepLn( inFile, "csmCompVer" );     // allow whitespace in CsmCompileVersion
+    // throw CsmCompileVersion away 
     
     TB_Config = CSM->TBConfig = (TBConfig_t *) loadTbConfig( inFile );
     
     CSM->SysAudio = (AudioList_t *) loadSysAudio( inFile );
     
-    int nS = loadInt( inFile, "nStates" );
+    int nS = ldDepInt( inFile, "nStates" );
     CSM->CsmDef = (CSList_t *) tbAlloc( sizeof(int) + nS * sizeof(void *), "CsmDef" );
     CSM->CsmDef->nCS = nS;
     for (int i=0; i<nS; i++){
         CSM->CsmDef->CS[i] = loadCState( inFile, i );
     }
      
-	tbCloseFile( inFile );	
-    if ( errCount > 0 ){ errLog( "control_def: %s parse errors", errCount ); return false; }
+	if ( inFile != NULL ) tbCloseFile( inFile );	
+    if ( errCount > 0 ){ errLog( "csm_data: %d parse errors", errCount ); return false; }
     return true;
 }
 int             nSysAud( void ){                                // return # of SysAudio names used by CSM
@@ -462,5 +459,4 @@ csmAction_t *   gAct( CState_t * st, int idx ){                 // return Action
         errLog( "gCst(%d) bad idx", idx );
     return st->Actions->Act[ idx ];
 }
-
 // packageData.c 

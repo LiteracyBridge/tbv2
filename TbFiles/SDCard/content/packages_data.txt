@@ -14,7 +14,6 @@
 #  <subj_invite>        ::= <audio_file>
 #  <message>            ::= <audio_file>
 #  <audio_file>         ::= <pathIndex> <filename>      # must be on one line
-#..
   1                                                     # <format_version> 
 packages_data.txt deployment of 29-Sep-2021 testing...  # <deployment_version>
   5                                                     # <#paths>

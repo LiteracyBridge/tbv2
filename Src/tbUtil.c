@@ -359,7 +359,7 @@ void 										loadTBookName(){
 	if ( f == NULL ) return;
 	
 	char fid[20], fnm[20];
-	while ( fscanf( f, "%s %s \n", fid, fnm )==2 ){
+	while ( fscanf( f, "%20s %20s \n", fid, fnm )==2 ){
 		if ( strcmp(fid, TB_ID)==0 ){
 			strcpy( TBookName, fnm );
 			break;

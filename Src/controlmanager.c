@@ -10,21 +10,6 @@
 
 #include "packageData.h"
 
-const char *  			bgPulse		 			= "_49G";				// brief green flash every 5 seconds
-const char *  			fgPlaying 			= "G!";
-const char *  			fgPlayPaused		= "G2_3!";
-const char *  			fgRecording			= "R!";
-const char *  			fgRecordPaused	= "R2_3!";
-const char *				fgSavingRec			= "O!";
-const char *				fgSaveRec				= "G3_3G3";
-const char *				fgCancelRec			= "R3_3R3";
-const char *  			fgUSB_MSC				= "O5o5!";
-const char *  			fgTB_Error			= "R8_2R8_2R8_20!";		// repeat: 4.8sec
-const char *  			fgNoUSBcable		= "_3R3_3R3_3R3_5!";  // repeat: 2.3sec
-const char *				fgUSBconnect		= "G5g5!";
-const char *  			fgPowerDown			= "G_3G_3G_9G_3G_9G_3";  // length: 3.5sec
-const char *  			fgDFU						= "O3_5O3_3O3_2O3_1O3";  // length: 2.6sec
-
 // TBook configuration variables
 //extern TBConfig_t 					TB_Config;			// defined in tbook_csm.c
 
@@ -555,45 +540,23 @@ void 									initControlManager( void ){				// initialize control manager
 	EventRecorderDisable( evrAOD, 			EvtFsCore_No,   EvtFsMcSPI_No );  //FileSys library 
 	EventRecorderDisable( evrAOD, 	 		EvtUsbdCore_No, EvtUsbdEnd_No ); 	//USB library 
 
-    if ( !loadControlDef() )
-        USBmode( true );
+    bool onlyQcLoaded = false;
+    if ( !loadControlDef() ){   // load csm_data.txt if it's there
+        preloadCSM();           // or use the preloaded version for QcTest
+        logEvtNS( "TB_CSM", "Ver", CSM->Version );		    // log CSM version comment
+        onlyQcLoaded = true;
+    }
     
-/*	if ( !PrecompiledCSM ){
-		TB_Config->default_volume = 5; 		// lower for TB_V2_R3
-		TB_Config->powerCheckMS = 10000;				// set by setPowerCheckTimer()
-		TB_Config->shortIdleMS = 3000;
-		TB_Config->longIdleMS = 11000;
-		TB_Config->systemAudio = "M0:/system/audio/";			// path to system audio files
-		TB_Config->minShortPressMS = 30;				// used by inputmanager.c
-		TB_Config->minLongPressMS = 900;				// used by inputmanager.c
-		TB_Config->bgPulse 				= (char *) bgPulse;
-		TB_Config->fgPlaying 			= (char *) fgPlaying;
-		TB_Config->fgPlayPaused		= (char *) fgPlayPaused;
-		TB_Config->fgRecording			= (char *) fgRecording;
-		TB_Config->fgRecordPaused	= (char *) fgRecordPaused;
-		TB_Config->fgSavingRec			= (char *) fgSavingRec;
-		TB_Config->fgSaveRec				= (char *) fgSaveRec;
-		TB_Config->fgCancelRec			= (char *) fgCancelRec;
-		TB_Config->fgUSB_MSC				= (char *) fgUSB_MSC;
-		TB_Config->fgUSBconnect		= (char *) fgUSBconnect;
-		TB_Config->fgTB_Error			= (char *) fgTB_Error;
-		TB_Config->fgNoUSBcable		= (char *) fgNoUSBcable;
-		TB_Config->fgPowerDown			= (char *) fgPowerDown;
-		
-		initTknTable();
-		if ( TBDataOK )		// control.def exists
-			readControlDef( );						// reads TB_Config settings
-	}    */
-
-	if ( CSM != NULL ){  //nCSMstates > 0 ) {    // have a CSM definition
+	if ( CSM != NULL ){     // have a CSM definition
 		ledBg( TB_Config->bgPulse );		// reset background pulse according to TB_Config
 
 		iPkg = 0;
 		if ( RunQCTest ){
 			Deployment = NULL; 
 		} else {			// don't load package for qcTest
-            if ( !loadPackageData() ) 
-                errLog("load pkgdata failed");
+            if ( !loadPackageData() || onlyQcLoaded ){ 
+                USBmode( true );    // go to USB unless successfully loaded CSM & packages_data
+            }
 		}
 		
         TBook.iSubj = -1; // makes "next subject" go to the first subject.

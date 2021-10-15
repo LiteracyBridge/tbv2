@@ -111,7 +111,7 @@ typedef	struct CState {	// CState_t --  Control State definition
 
 typedef	struct CSList {	// CSList_t --  cnt & ptrs to each ControlState
 	int nCS;            // number of different ControlStates
-	CState_t * CS[10];  // ptr to ControlState def  
+	CState_t * CS[35];  // ptr to ControlState def  
 } CSList_t;
 
 typedef	struct CSM {
@@ -146,6 +146,7 @@ extern char *           subjNm( Subject_t *subj );                      // retur
 extern CSM_t *          CSM;                                            // extern ptr to definition of CSM
 // CSM loading & access interface
 extern bool             loadControlDef( void );                         // load structured Control State Machine
+extern void             preloadCSM( void );	                           	// load pre-defined CSM for empty filesys-- QcTest
 extern CState_t *       gCSt( int idx );                                // return ptr to CState[ idx ]
 extern char *           gStNm( CState_t *st );                          // return name of CSt
 extern int              nActs( CState_t *st );                          // # of actions for CState

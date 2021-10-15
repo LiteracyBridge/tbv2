@@ -529,6 +529,11 @@
               <FileType>1</FileType>
               <FilePath>.\Src\packageData.c</FilePath>
             </File>
+            <File>
+              <FileName>preloadCSM.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\Src\preloadCSM.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>

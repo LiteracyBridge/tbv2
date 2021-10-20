@@ -1,3 +1,5 @@
+// TB CSM 2021-10-20: V13 Star_Tree
+// TB CSM 2021-10-05: V12 QC tune changes, longer recording (Bill)
 // TB CSM 2021-09-23: V11 QC test-- skip on Star after Home
 // TB CSM 2021-05-19: V10 QC test-- each key beeps
 // TB CSM 2021-05-19: V9 rewrote QC test
@@ -40,6 +42,7 @@
     whenNav:       { Lhand:      stOnPrevSubj,
                      Rhand:      stOnNextSubj,
                      Tree:       stOnNextMsg,
+                     starTree:   stOnRepeatMsg,
                      Table:      stOnPrevMsg,
                      AudioDone:  stWait,
                      ShortIdle:  stWait,
@@ -85,9 +88,11 @@
     stAnnouncing:   {                                                           CGroups:[ whenAwake, whenPlaying, whenNav ], AudioDone: stInvitation },
     stInvitation:   { Actions: [ playSubj(pr) ],                                CGroups:[ whenAwake, whenPlaying, whenNav ], AudioDone: stPromptNextSubj },
     stPromptNextSubj:{ Actions: [ playSys(rh_for_nxt_subj) ],                   CGroups:[ whenAwake, whenPlaying, whenNav ] },
-    stOnPrevMsg:    { Actions: [ msgAdj( -1),  playSubj(msg) ],                 CGroups:[ whenAwake, whenPlaying, whenNav ] AudioStart: stPlaying },
-    stOnNextMsg:    { Actions: [ msgAdj(  1),  playSubj(msg) ],                 CGroups:[ whenAwake, whenPlaying, whenNav ] AudioStart: stPlaying },
+    stOnPrevMsg:    { Actions: [ msgAdj( -1),  playSubj(msg) ],                 CGroups:[ whenAwake, whenPlaying, whenNav ], AudioStart: stPlaying },
+    stOnNextMsg:    { Actions: [ msgAdj(  1),  playSubj(msg) ],                 CGroups:[ whenAwake, whenPlaying, whenNav ], AudioStart: stPlaying },
     stPlaying:      {                                                           CGroups:[ whenAwake, whenPlaying, whenNav ] },
+    stOnRepeatMsg:  { Actions: [ playSubj(msg) ],                               CGroups:[ whenAwake, whenPlaying, whenNav ], AudioStart: stRepeating },
+    stRepeating:    {                                                           CGroups:[ whenAwake, whenPlaying, whenNav ], AudioDone: stOnRepeatMsg },
 
     stOnFeedback:   { Actions: [ playSys(cir_record_ideas) ],                   CGroups:[ whenAwake, whenFeedback ] },
     stFbOptions:    { Actions: [ playSys(rh_things_to_do) ],                    CGroups:[ whenAwake ] },
@@ -114,47 +119,47 @@
 
     //************************************** QC Acceptance Test ***********************************
     // QC-test: C G, Pl:E, Hm:C, Mi:(rec) E,  Tr: (ply) G, Ci: C, Lh: D, Po: E, Rh: F, St: G, Ta: E C
-    //  0)          playTune(C.)
+    //  0)          playTune(C/)
     //  1)  File:   filesTest, read & check system/QC_Test.txt         Error(filesTest) if doesn't match
-    //  2)  LED G:  tune(G.), flashing G     till Plus                 or Table => Error(no_Green)  (or Green or Plus failed)
-    //  3)  LED R:  tune(E.), flashing R     till Home                 or Table => Error(no_Red)    (if Red or Home failed)
+    //  2)  LED G:  tune(G/), flashing G     till Plus                 or Table => Error(no_Green)  (or Green or Plus failed)
+    //  3)  LED R:  tune(E/), flashing R     till Home                 or Table => Error(no_Red)    (if Red or Home failed)
     //  4)  Record: flash G once:         till Minus  or Star => Skip  or Table => Error(no_Minus)
     //  5)  Record: Red for 2 sec  while recording
     //  6)  Play:   flash G once:            till Tree  to play back   or Table => Error(no_Tree)
     //  7)  Play:   Green while playing 
-    //  8)  Keys:   flash G once, tune(G.)   till Circle               or Table => Error(rec_play) (if record/playback  or Circle failed)
-    //  9)  Keys:   flash G once, tune(C.)   till Lhand                or Table => Error(no_Lhand)
-    // 10)  Keys:   flash G once, tune(D.)   till Pot                  or Table => Error(no_Pot)
-    // 11)  Keys:   flash G once, tune(E.)   till Rhand                or Table => Error(no_Rhand)
-    // 12)  Keys:   flash G once, tune(F.)   till Star                 or Table => Error(no_Star)
-	// 13)  Keys:   flash G once, tune(G.)   till Table                or Star  => Error(no_Table)
-	// 14)  Complete:  tune(E.C.*)
-	// on Skip:   tune(G.C.*)  
+    //  8)  Keys:   flash G once, tune(G/)   till Circle               or Table => Error(rec_play) (if record/playback  or Circle failed)
+    //  9)  Keys:   flash G once, tune(C/)   till Lhand                or Table => Error(no_Lhand)
+    // 10)  Keys:   flash G once, tune(D/)   till Pot                  or Table => Error(no_Pot)
+    // 11)  Keys:   flash G once, tune(E/)   till Rhand                or Table => Error(no_Rhand)
+    // 12)  Keys:   flash G once, tune(F/)   till Star                 or Table => Error(no_Star)
+	// 13)  Keys:   flash G once, tune(G/)   till Table                or Star  => Error(no_Table)
+	// 14)  Complete:  tune(E/C)
+	// on Skip:   tune(G/C)
 	// on Error: (filesTest failed or Table pressed early) tune(H.*_H.*_H.*_H.*_) flashing Red, write QC_FAIL.txt with reason, test complete
 	// on Test complete: flashing G till
 	//        Star:  USB mode,  Table: restart Qc test,  Home: Reboot,  Pot: play tune
 	// 
-    stQcTest:       { Actions: [ playTune(C.)                      ]  AudioDone: stQc1 } 
+    stQcTest:       { Actions: [ playTune(C/)                      ]  AudioDone: stQc1 }
     stQc1:          { Actions: [ filesTest(),bgLED(G3_3)           ]  FilesSuccess: stQc2, FilesFail: stQcErrFiles, anyKey: stQcBeep }
-    stQc2:          { Actions: [ bgLED(G3_3), playTune(G.)         ]  Plus:  stQc3,  Table: stQcErrGrn,  Plus__:  stQc3,  Table__: stQcErrGrn,  anyKey: stQcBeep }
-    stQc3:          { Actions: [ bgLED(R3_3), playTune(E.)         ]  Home:  stQc4,  Table: stQcErrRed,  Home__:  stQc4,  Table__: stQcErrRed,  anyKey: stQcBeep }
-    stQc4:          { Actions: [ bgLED(_), LED(G3), playTune(C.)   ]  Minus: stQc5,  Table: stQcErrNoMi, Minus__: stQc5,  Table__: stQcErrNoMi, Star: stQcSkip, Star__:stQcSkip, anyKey: stQcBeep }
-    stQc5:          { Actions: [ startRec, setTimer(2000)          ]  Timer: stQc6,  anyKey: stQc6  }
-    stQc6:          { Actions: [ finishRec, playTune(E.)           ]  AudioDone: stQc6b  }
+    stQc2:          { Actions: [ bgLED(G3_3), playTune(C/C/)       ]  Plus:  stQc3,  Table: stQcErrGrn,  Plus__:  stQc3,  Table__: stQcErrGrn,  anyKey: stQcBeep }
+    stQc3:          { Actions: [ bgLED(R3_3), playTune(D/)         ]  Home:  stQc4,  Table: stQcErrRed,  Home__:  stQc4,  Table__: stQcErrRed,  anyKey: stQcBeep }
+    stQc4:          { Actions: [ bgLED(_), LED(G3), playTune(E/)   ]  Minus: stQc5,  Table: stQcErrNoMi, Minus__: stQc5,  Table__: stQcErrNoMi, Star: stQcSkip, Star__:stQcSkip, anyKey: stQcBeep }
+    stQc5:          { Actions: [ startRec, setTimer(4000)          ]  Timer: stQc6,  anyKey: stQc6  }
+    stQc6:          { Actions: [ finishRec, playTune(F/)           ]  AudioDone: stQc6b  }
     stQc6b:         { Actions: [                                   ]  Tree:  stQc7,  Table: stQcErrNoTr, Tree__:  stQc7,  Table__: stQcErrNoTr  }
     stQc7:          { Actions: [ LED(G!), playRec                  ]  AudioDone: stQc7b  }
-    stQc7b:         { Actions: [ LED(_),  playTune(G.)             ]  AudioDone: stQc8  }
+    stQc7b:         { Actions: [ LED(_),  playTune(G/)             ]  AudioDone: stQc8  }
     stQc8:          { Actions: [                                   ]  Circle: stQc9, Table: stQcErrPlay, Circle__: stQc9, Table__: stQcErrPlay, anyKey: stQcBeep }
-    stQc9:          { Actions: [ LED(G3), playTune(C.)             ]  Lhand: stQc10, Table: stQcErrNoLh, Lhand__: stQc10, Table__: stQcErrNoLh, anyKey: stQcBeep }
-    stQc10:         { Actions: [ LED(G3), playTune(D.)             ]  Pot:   stQc11, Table: stQcErrNoPo, Pot__:   stQc11, Table__: stQcErrNoPo, anyKey: stQcBeep }
-    stQc11:         { Actions: [ LED(G3), playTune(E.)             ]  Rhand: stQc12, Table: stQcErrNoRh, Rhand__: stQc12, Table__: stQcErrNoRh, anyKey: stQcBeep }
-    stQc12:         { Actions: [ LED(G3), playTune(F.)             ]  Star:  stQc13, Table: stQcErrNoSt, Star__:  stQc13, Table__: stQcErrNoSt, anyKey: stQcBeep }
-    stQc13:         { Actions: [ LED(G3), playTune(G.)             ]  Table: stQc14, Star:  stQcErrNoTa, Table__: stQc14, Star__:  stQcErrNoTa, anyKey: stQcBeep }
-    stQc14:         { Actions: [ playTune(E.C.*)                   ]  AudioDone:  stQc15 }
+    stQc9:          { Actions: [ LED(G3), playTune(A/A/)           ]  Lhand: stQc10, Table: stQcErrNoLh, Lhand__: stQc10, Table__: stQcErrNoLh, anyKey: stQcBeep }
+    stQc10:         { Actions: [ LED(G3), playTune(G/)             ]  Pot:   stQc11, Table: stQcErrNoPo, Pot__:   stQc11, Table__: stQcErrNoPo, anyKey: stQcBeep }
+    stQc11:         { Actions: [ LED(G3), playTune(F/)             ]  Rhand: stQc12, Table: stQcErrNoRh, Rhand__: stQc12, Table__: stQcErrNoRh, anyKey: stQcBeep }
+    stQc12:         { Actions: [ LED(G3), playTune(E/)             ]  Star:  stQc13, Table: stQcErrNoSt, Star__:  stQc13, Table__: stQcErrNoSt, anyKey: stQcBeep }
+    stQc13:         { Actions: [ LED(G3), playTune(D/)             ]  Table: stQc14, Star:  stQcErrNoTa, Table__: stQc14, Star__:  stQcErrNoTa, anyKey: stQcBeep }
+    stQc14:         { Actions: [ playTune(C/C*)                    ]  AudioDone:  stQc15 }
     stQc15:         { Actions: [ writeMsg(QC_OK), bgLED(G2_8)]        CGroups: [ whenTestDone ] }
-    stQcSkip:       { Actions: [ playTune(G.C.*)                   ]  AudioDone:  stQcSkip2 }
+    stQcSkip:       { Actions: [ playTune(G/C)                     ]  AudioDone:  stQcSkip2 }
 	stQcSkip2:      { Actions: [ writeMsg(QC_OK_short), bgLED(G2_8)]  CGroups: [ whenTestDone ] }
-	
+
     stQcBeep:       { Actions: [ playTune(H_H), goPrevSt  ]   }
     stQcErrFiles:   { Actions: [ writeMsg(filesTest),bgLED(R9_6), playTune(H.*_H.*_H.*_H.*_) ], CGroups: [ whenTestDone ] }
     stQcErrGrn:     { Actions: [ writeMsg(no_Green), bgLED(R9_6), playTune(H.*_H.*_H.*_H.*_) ], CGroups: [ whenTestDone ] }
@@ -170,7 +175,7 @@
 
     stQcUSB:        { Actions: [ bgLED(O2_8), startUSB ], CGroups: [ whenTestDone ] } 
     stQcReboot:     { Actions: [ sysBoot ] }  
-    stQcSysTest:    { Actions: [ playTune(CG..FDEH.G.) ], CGroups: [ whenTestDone ] } 
+    stQcSysTest:    { Actions: [ playTune(CG/.FDEH.G/) ], CGroups: [ whenTestDone ] }
   }   // CStates
 }     // control.def
 

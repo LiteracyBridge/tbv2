@@ -25,6 +25,11 @@ osTimerId_t  	timers[3]; 	// ShortIdle, LongIdle, Timer
 void									setCSMcurrState( short iSt );  // set TBook.iCurrSt & dependent fields
 	
 // ------------  CSM Action execution
+static void                     clearIdle( ){       // clear timers started by AudioDone to generate shortIdle & longIdle
+    osTimerStop( timers[0] );
+    osTimerStop( timers[1] );
+}
+
 static void 					adjSubj( int adj ){								// adjust current Subj # in TBook
 	short nS = TBook.iSubj + adj;
 	short numS = nSubjs();
@@ -78,6 +83,7 @@ void 									playSubjAudio( char *arg ){				// play current Subject: arg must b
   	stats = loadStats( subj->subjName, TBook.iSubj, TBook.iMsg );	// load stats for message
 	}
     getAudioPath( path, aud );
+    clearIdle();
 	playAudio( path, stats );
 }
 
@@ -90,10 +96,12 @@ void 									playNxtPackage( ){										// play name of next available Package
 	logEvtNSNI( "PlayPkg", "Pkg", pkg->packageName, "Idx", iPkg ); 
     char path[MAX_PATH];
     getAudioPath( path, pkg->pkg_prompt );
+    clearIdle();
 	playAudio( path, NULL );
 }
 
 void									playSqrTune( char *notes ){				// play seq of notes as sqrwaves
+    clearIdle();
 	playNotes( notes );		// mediaPlayer op -- switch threads
 }
 
@@ -135,6 +143,7 @@ void 									playSysAudio( char *arg ){				// play system file 'arg'
 	for ( int i=0; i< nSysAud(); i++ )
 		if ( strcmp( gSysAud(i), arg )==0 ){
             findAudioPath( path, currPkg->prompt_paths, arg );  // find path based on current Package promptPaths
+            clearIdle();
 			playAudio( path, NULL );        
 		//	logEvtNS( "PlaySys", "file", arg );
             logEvtFmt("PlayAudio", "start, system: '%s', file: '%s'", arg, path);
@@ -157,11 +166,13 @@ void									startRecAudio( char *arg ){         	// record user message into te
 	char * fNm = logMsgName( path, subj->subjName, TBook.iSubj, TBook.iMsg, ".wav", &mCnt ); //".ogg" );		// build file path for next audio msg for S<iS>M<iM>
 	logEvtNSNINI( "Record", "Subj", subj->subjName, "iM", TBook.iMsg, "cnt", mCnt );
 	MsgStats *stats = loadStats( subj->subjName, TBook.iSubj, TBook.iMsg );	// load stats for message
+    clearIdle();
 	recordAudio( fNm, stats );
 }
 
 
 void   								playRecAudio(){                             // play back recorded temp .wav
+    clearIdle();
 	playRecording();
 }
 
@@ -218,6 +229,7 @@ void									svQCresult( char * arg ){  					// save 'arg' to system/QC_PASS.txt
 }
 
 void 									USBmode( bool start ){						// start (or stop) USB storage mode
+    clearIdle();
 	if ( start ){
 		playSqrTune( "G/+G/+" );
 		logEvt( "enterUSB" );
@@ -494,8 +506,7 @@ void 									executeCSM( void ){								// execute TBook control state machine
 				asCnt++;
 				break;
 			default:
-				osTimerStop( timers[0] );
-				osTimerStop( timers[1] );
+                clearIdle();
 				break;
 		}
 		short nSt = TBook.cSt->evtNxtState[ TBook.lastEvent ];

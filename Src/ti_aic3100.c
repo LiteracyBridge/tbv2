@@ -130,7 +130,7 @@ AIC_REG					codec_regs[] = {	// array of info for codec registers in use -- must
 	 0,	107, 0x00, 0x00, 0xff, "rsv",				0, 0x00,	// 93=0.107 // reserved-- reset = XX, can1=0x00, must1=0xff 
 	 // dup 108..115
 	 0,	116, 0x00, 0xf7, 0x00, "mdet_vol",	0, 0x00,	// 94=0.116 
-	 0,	117, 0x40, 0x80, 0x00, "mdet_gn",	  0, 0x00,  // actual: 0:117  0x40 not 0x00	 
+	 0,	117, 0xFF, 0x80, 0x00, "mdet_gn",	  0, 0x00,  // reset: 0xxx xxxx 	 
 	 0,	118, 0x00, 0x00, 0xff, "rsv",				0, 0x00,	// 96=0.118 // reserved-- reset = XX, can1=0x00, must1=0xff 
 	 // dup 119..127
 
@@ -561,8 +561,10 @@ void 						i2c_CheckRegs(){																						// Debug -- read codec regs
 			codec_regs[i].curr_val = val;
 			codec_regs[i].prev_val = val;
 			
-			cntErr( Cdc_DefReg, defval, val, i, 9 );	
-			if (defval != val) nErrs++;
+			if (defval!=0xFF){
+                cntErr( Cdc_DefReg, defval, val, i, 9 );	
+                if (defval != val) nErrs++;
+            }
 //			tbDelay_ms(10);  // dbgLog
 		}
 		WatchReg = svWReg;

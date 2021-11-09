@@ -1,5 +1,8 @@
 /system/ directory for TalkingBook
 
+device_ID.txt
+   -- written with Unique Processor ID for this device 
+   
 tbook_names.txt
    -- associations between Unique Processor ID and a more meaningful names
    -- lines of the form  xxxx.xxxx.x.Qxxxxxx Name_for_talking_book
@@ -31,7 +34,7 @@ csm_data.txt
       first line describes the version of this file
       e.g. // TB CSM 2021-05-12: V8 with QC test
       ( see Amplio document: "Talking Book V2" )
-control_def.txt
+control_def_vXX.txt
    Source file for csm_data.txt  (not referenced by TBook firmware)
    
 dontEraseNorLog.txt

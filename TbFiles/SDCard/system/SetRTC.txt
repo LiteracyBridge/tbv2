@@ -1,4 +1,4 @@
  To set the TalkingBook RTC clock:
    1) rename this file ( M0:/system/dontSetRTC.txt ) to SetRTC.txt, 
    2) reboot the TalkingBook  -- RTC will be set from creation date/time of SetRTC.txt
- 
+  

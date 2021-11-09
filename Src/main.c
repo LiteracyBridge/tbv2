@@ -61,7 +61,7 @@ char BootKey;
 // if FileSys, but no /system/QC_PASS.txt 	    => run acceptance test
 // if QC_PASS.txt, but no package_dat.txt 	    => enter USBmode
 // 'C'  										=> force running QC acceptance test
-
+// 'R'                                          => show power check details
 // calls to DbgPwrDown( cd ):
 //   if cd==BootMode, flash cd on LED & fastPowerDown()
 

@@ -58,6 +58,7 @@ typedef struct {
 	bool									hadPrimary;					// previous was > 2000: saved by startPowerCheck()
 } PwrState;
 static PwrState 					pS;				// state of powermanager
+extern int 				  mAudioVolume;             // current audio volume 
 
 extern void 							ADC_IRQHandler( void );					// override default (weak) ADC_Handler
 extern void               EXTI2_IRQHandler( void );       // override default (weak) EXTI2 handler for PowerFail
@@ -100,6 +101,8 @@ void                      initPowerMgr( void ){           // initialize PowerMgr
 	dbgLog( "4 PowerMgr OK \n" );
 }
 void                      setPowerCheckTimer( int timerMs ){ // set msec between powerChecks	osTimerStop( pwrCheckTimer );
+    osTimerStop( pwrCheckTimer );       // OS fails to reset timer->load value if running!
+    if ( BootKey=='R' ) timerMs = 60000;  // once a minute
 	osTimerStart( pwrCheckTimer, timerMs );
 }
 void 											initPwrSignals( void ){					// configure power GPIO pins, & EXTI on NOPWR 	
@@ -478,6 +481,13 @@ bool                      powerChanged(){    // compare previous power status wi
 		dbgLog( "5 Primary %d \n", pS.PrimaryMV );
 		changed = true;
 	}
+    if (BootKey == 'R'){
+		logEvtNI("Batt", "Stat",  pS.Stat ); 
+		logEvtNI("PriBatt", "mV", pS.PrimaryMV ); 
+		logEvtNI("LithBatt", "mV", pS.LiMV ); 
+        logEvtNI("Volume", "lev", mAudioVolume );
+        return true;
+    }
 	return changed;
 }
 
@@ -532,7 +542,7 @@ void 											checkPower( ){				// check and report power status
 		if (pstat==TEMPFAULT) sCh = 'X';
 
 		char pwrStat[10];
-		sprintf(pwrStat, "%c L%c%c%c P%c B%c T%c", sUsb, sLi,sCh,sLt, sPr, sBk, sMt); 
+		sprintf(pwrStat, "%c L%c%c%c P%c B%c T%c V%d", sUsb, sLi,sCh,sLt, sPr, sBk, sMt, mAudioVolume ); 
 		logEvtNS( "PwrCheck","Stat",	pwrStat ); 
 
 		dbgLog( "5 srTB: %d %4d %3d %4d\n", pstat, pS.VRefMV, pS.MpuTempMV, pS.VBatMV );

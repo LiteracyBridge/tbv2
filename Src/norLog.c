@@ -82,10 +82,15 @@ void						norErr(const char * fmt, ...){
 	tbErr( s );
 }
 void						NLogShowStatus(){														// write event with NorLog status details
-		logEvtNININI( "NorLog", "Idx", NLg.currLogIdx, "Sz", NLg.Nxt-NLg.logBase, "Free%", (NLg.MAX_ADDR-NLg.Nxt)*100/NLg.MAX_ADDR );
+    logEvtNINININI( "NorLog", "Idx", NLg.currLogIdx, "Sz", NLg.Nxt-NLg.logBase, "Max", (NLg.MAX_ADDR-NLg.PGSZ)/N_SADDR, "Free%", (NLg.MAX_ADDR-NLg.Nxt)*100/NLg.MAX_ADDR );
 }
 int							NLogIdx(){  																// => index of log section currently in use
 		return NLg.currLogIdx;
+}
+bool                        LogSizeOk(){                                     // TRUE if log below 1/64 of NLog
+	int logSz = NLg.Nxt-NLg.logBase;
+	int maxLogSz = (NLg.MAX_ADDR - NLg.PGSZ)/ N_SADDR;  // 1/64th of capacity
+    return ( logSz < maxLogSz );
 }
 bool						isValidChar( uint8_t ch ){									// TRUE for text & newline
 	if ( ch > 0x7E ) return false;
@@ -417,7 +422,6 @@ void						initNorLog( bool startNewLog ){							// init driver for W25Q64JV NOR 
 	
 	int logSz = NLg.Nxt-NLg.logBase;
 	dbgLog( "6 NorLog: cLogSz=%d NorFilled=%d%% \n", logSz, NLg.Nxt*100/NLg.MAX_ADDR );
-	
 	
 /*		lg_thread_attr.name = "Log Erase Thread";	
 	lg_thread_attr.stack_size = LOG_STACK_SIZE; 

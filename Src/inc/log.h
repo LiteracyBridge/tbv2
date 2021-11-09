@@ -39,7 +39,7 @@ extern void			initLogger( void );												// init tbLog file on bootup
 extern void			logPowerUp( bool reboot );								// re-init logger after USB or sleeping
 extern char *		loadLine( char * line, char * fpath, fsTime *tm );		// => 1st 200 chars of 'fpath' & *tm to lastAccessed
 extern void			logPowerDown( void );											// save & shut down logger for USB or sleeping
-extern void         writeLine( char * line, char * fpath );                         // write one line to file
+extern void         writeLine( char * line, const char * fpath );                   // write one line to file
 extern void			saveStats( MsgStats *st ); 										// save statistics block to file
 extern char *		logMsgName( char *path, const char * sNm, short iSubj, short iMsg, const char *ext, int *pcnt );	// build & => file path for next msg for Msg_<sNm>_S<iS>_M<iM>.<ext>
 extern void			flushStats( void );												// save all cached stats files
@@ -50,6 +50,7 @@ extern void			logEvtS( const char *evtID, const char *args );					// write log e
 extern void			logEvtNI( const char *evtID, const char *nm, int val );			// write log entry: "EVENT, at:    d.ddd, NM: VAL "
 extern void			logEvtNINI( const char *evtID, const char *nm, int val, const char *nm2, int val2 );	// write log entry
 extern void 		logEvtNININI( const char *evtID, const char *nm,  int val, const char *nm2, int val2, const char *nm3, int val3 );
+extern void 		logEvtNINININI( const char *evtID, const char *nm,  int val, const char *nm2, int val2, const char *nm3, int val3, const char*nm4, int val4 );
 extern void			logEvtNS( const char *evtID, const char *nm, const char *val );	// write log entry: "EVENT, at:    d.ddd, NM: 'VAL' "
 extern void			logEvtNINS( const char *evtID, const char *nm, int val, const char *nm2, const char * val2 );	// write log entry
 extern void			logEvtNSNI( const char *evtID, const char *nm, const char *val, const char *nm2, int val2 );	// write log entry
@@ -66,30 +67,31 @@ extern void			initNorLog( bool startNewLog );						// init driver for W25Q64JV N
 extern void			eraseNorFlash( bool svCurrLog );					// erase entire chip & re-init with fresh log (or copy of current)
 extern void			NLogShowStatus( void );
 extern int			NLogIdx( void );
+extern bool         LogSizeOk( void );                                  // TRUE if log below 1/64 of NLog
 
 // User-level event logging
-#define AUDIO_EVENT "PlayAudio"
+#define AUDIO_EVENT "PlayMsg"
 #define LOG_AUDIO_PLAY_ERRORS(errorCount, lastError) \
           logEvtFmt(AUDIO_EVENT, "errors, count: %d, last: %x")
 
 #define LOG_AUDIO_PLAY_SPROMPT(playlist, filename) \
-          logEvtFmt(AUDIO_EVENT, "sprompt: '%s', file: '%s'", playlist, filename)
+//          logEvtFmt(AUDIO_EVENT, "sprompt: '%s', file: '%s'", playlist, filename)
 
 #define LOG_AUDIO_PLAY_LPROMPT(playlist, filename) \
-          logEvtFmt(AUDIO_EVENT, "lprompt: '%s', file: '%s'", playlist, filename)
+//          logEvtFmt(AUDIO_EVENT, "lprompt: '%s', file: '%s'", playlist, filename)
 
 #define LOG_AUDIO_PLAY_MESSAGE(position,playlist, filename) \
           logEvtFmt(AUDIO_EVENT, "message#: %d, playlist: '%s', file: '%s'", position, playlist, filename)
 
 #define LOG_AUDIO_PLAY_SYSTEM(prompt, filename) \
-          logEvtFmt(AUDIO_EVENT, "system: '%s', file: '%s'", prompt, filename)
+//          logEvtFmt(AUDIO_EVENT, "system: '%s', file: '%s'", prompt, filename)
 
 #define LOG_AUDIO_PLAY_WAVE(filename, lenMs, lenBytes, samplesPerSec, isMono) \
           logEvtFmt(AUDIO_EVENT, "wave file: '%s', length: %d ms, size: %d, samples/sec: %d, isMono: %s", \
               filename, lenMs, lenBytes, samplesPerSec, isMono?"t":"f")
 
 #define LOG_AUDIO_PLAY_STOP(lenMs, playedMs, playedPct) \
-          logEvtFmt(AUDIO_EVENT, "stop, length: %d ms, played: %d ms, completion%%: %d", lenMs, playedMs, playedPct)
+          logEvtFmt(AUDIO_EVENT, "cut-off, length: %d ms, played: %d ms, completion%%: %d", lenMs, playedMs, playedPct)
 
 #define LOG_AUDIO_PLAY_PAUSE(lenMs, playedMs, playedPct) \
           logEvtFmt(AUDIO_EVENT, "pause, length: %d ms, played: %d ms, completion%%: %d", lenMs, playedMs, playedPct)

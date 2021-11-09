@@ -23,6 +23,7 @@ static short		lastRef[ MAX_STATS_CACHED ];
 static short		touched[ MAX_STATS_CACHED ];
 static MsgStats	sStats[ MAX_STATS_CACHED ];
 const int				STAT_SIZ = sizeof( MsgStats );
+const char *        deviceIdFile = "/system/device_ID.txt";
 const char *		norEraseFile = "M0:/system/EraseNorLog.txt";			// flag file to force full erase of NOR flash
 char *					rtcSetFile = "M0:/system/SetRTC.txt";							// flag file to force setting RTC to last modification time of SetRTC.txt
 char *					rtcDontSetFile = "dontSetRTC.txt";  							// renamed version of SetRTC.txt
@@ -105,7 +106,7 @@ bool getFileTime(char *path, fsTime *time) {
   return false;
 }
 
-void 						writeLine( char * line, char * fpath ){
+void 						writeLine( char * line, const char * fpath ){
 	FILE *stF = tbOpenWriteBinary( fpath ); //fopen( fpath, "wb" );
 	if ( stF!=NULL ){
 		int nch = fprintf( stF, "%s\n", line );
@@ -174,7 +175,10 @@ void						logPowerUp( bool reboot ){											// re-init logger after reboot, U
 	int bootcnt = 1;		// if file not there-- first boot
 	if ( boot!=NULL ) sscanf( boot, " %d", &bootcnt );
 	FirstSysBoot = (bootcnt==1);
-	
+
+    if ( !LogSizeOk() )     // advance boot idx automatically if Log has grown too large
+        FirstSysBoot = true;
+    
 	if ( FirstSysBoot ){  // FirstBoot after install
 		bool eraseNor = fexists( norEraseFile );
 		if ( eraseNor )  // if M0:/system/EraseNorLog.txt exists-- erase 
@@ -198,6 +202,8 @@ void						logPowerUp( bool reboot ){											// re-init logger after reboot, U
 		logEvtFmt( "BUILT", "On %s at %s", __DATE__, __TIME__);  // date & time LOGGER.C last compiled -- link date?
 		logEvtS(  "CPU",  CPU_ID );
 		logEvtS(  "TB_ID",  TB_ID );
+        if ( !fexists( deviceIdFile ))
+            writeLine( TB_ID, deviceIdFile );
 		loadTBookName();
 		logEvtS(  "TB_NM",  TBookName );
 		logEvtNI( "CPU_CLK", "MHz", SystemCoreClock/1000000 );
@@ -462,6 +468,11 @@ void 						logEvtNSNININS( const char *evtID, const char *nm, const char *val, c
 void 						logEvtNININI( const char *evtID, const char *nm,  int val, const char *nm2, int val2, const char *nm3, int val3 ){
 	char args[300];
 	sprintf( args, "%s: %d, %s: %d, %s: %d", nm, val, nm2, val2, nm3, val3 );
+	logEvtS( evtID, args );
+}
+void 						logEvtNINININI( const char *evtID, const char *nm,  int val, const char *nm2, int val2, const char *nm3, int val3, const char*nm4, int val4 ){
+	char args[300];
+	sprintf( args, "%s: %d, %s: %d, %s: %d, %s: %d", nm, val, nm2, val2, nm3, val3, nm4, val4 );
 	logEvtS( evtID, args );
 }
 void						logEvtNSNI( const char *evtID, const char *nm, const char *val, const char *nm2, int val2 ){	// write log entry

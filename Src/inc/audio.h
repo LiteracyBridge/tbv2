@@ -91,6 +91,17 @@ typedef enum {				// playback_state_t		-- audio playback state codes
 
 } playback_state_t;
 
+typedef enum {   // playback_type_t            sys/pkg/msg/nm/pr
+    ptUNDEF,    // reset value
+    ptPkg,      // package prompt
+    ptSys,      // system prompt
+    ptNm,       // subject name
+    ptInv,      // subject invitation
+    ptMsg,      // subject message
+    ptRec,      // recorded file
+    ptTone      // tone
+} playback_type_t;
+    
 
 
 // functions called from mediaplayer.c
@@ -101,7 +112,7 @@ extern uint16_t 		audAdjVolume( int16_t adj );								// change volume by 'adj' 
 extern int32_t 			audPlayPct( void );													// => current playback pct of file
 extern void 				audAdjPlayPos( int32_t adj );								// shift current playback position +/- by 'adj' seconds
 extern void 				audAdjPlaySpeed( int16_t adj );							// change playback speed by 'adj' * 10%
-extern void 				audPlayAudio( const char* audioFileName, MsgStats *stats ); // start playing from file
+extern void 				audPlayAudio( const char* audioFileName, MsgStats *stats, playback_type_t typ ); // start playing from file typ=sys/pkg/msg/nm/pr/rec
 extern void					audPlayTone( int i, int freq, int nEighths );		// play 'i'th note: 'freq' sqr wave tone for 'nEighths' 128 msec buffers
 extern void 				audStopAudio( void );												// signal playback loop to stop
 extern void 				audStartRecording( FILE *outFP, MsgStats *stats );	// start recording into file -- TBV2_REV1 version

@@ -65,6 +65,7 @@ static struct { 			// PlaybackFile_t			-- audio state block
   uint32_t							tsRecord;				// timestamp at recording start
 
   playback_state_t  		state;					// current (overly detailed) playback state
+  playback_type_t                   playbackTyp;
   bool 									monoMode;				// true if data is 1 channel (duplicate on send)
   uint32_t 							nPerBuff;				// samples per buffer (always stereo)
   uint32_t 							LastError;			// last audio error code
@@ -176,12 +177,16 @@ void 								audSquareWav( int nEighths, int hz ){						// preload wavHdr & setu
 
 void								audInitState( void ){													// set up playback State in pSt
   pSt.audType = audUNDEF;
-  if ( !pSt.SqrWAVE ){
+  pSt.playbackTyp = ptUNDEF;
+    if ( !pSt.SqrWAVE ){
       // TODO: WAVE_FormatTypeDef
       //memset( pSt.wavHdr, 0x00, WaveHdrBytes );
       memset(&pSt.fmtData, 0, sizeof(WavFmtData_t));
   }
-
+  if ( pSt.state != pbIdle && pSt.state != pbDone ){  // starting new operation before previous completes
+      dbgLog( "! audInit: in state %d \n", pSt.state );    
+  }
+  
   if ( nFreeBuffs != MxBuffs )
     dbgLog( "! audInit: missing buffs %d \n", nFreeBuffs );
   if ( pSt.audF != NULL ){
@@ -294,9 +299,11 @@ void 								audAdjPlaySpeed( int16_t adj ){								// change playback speed by 
   logEvtNI( "adjSpd", "byAdj", adj );
 }
 
-void 								audPlayAudio( const char* audioFileName, MsgStats *stats ){ // start playing from file
+void 								audPlayAudio( const char* audioFileName, MsgStats *stats, playback_type_t typ ){ // start playing from file
+  audInitState();
   pSt.stats = stats;
   stats->Start++;
+  pSt.playbackTyp = typ;        // current type of file being played
 
   #ifdef _SQUARE_WAVE_SIMULATOR
   pSt.SqrWAVE = false;
@@ -321,6 +328,7 @@ void								audPlayTone( int i, int freq, int nEighths ){		// play 'i'th note: '
 	
     audInitState();
 	audSquareWav( nEighths, freq ); // set up to play tone: pSt.SQRwave==true
+    pSt.playbackTyp = ptTone;
     pSt.audType = audTONE;  
     pSt.nSamples = pSt.sqrSamples;
     pSt.msecLength = pSt.nSamples*1000 / pSt.samplesPerSec;
@@ -359,7 +367,7 @@ void 								audStopAudio( void ){													// abort any leftover operation
 
   if (st == Recording ){
     logEvtNI( "recLeft", "state", pSt.state );
-    if ( pSt.state==pbRecording ){
+    if ( pSt.state==pbRecording || pSt.state==pbRecStop ){
       dbgLog( "8 audStop Rec %x\n", pSt.audF );
       haltRecord();		// shut down dev, update timestamps
       audRecordComplete();  // close file, report errors
@@ -370,21 +378,23 @@ void 								audStopAudio( void ){													// abort any leftover operation
   }
 
   if (st == Playing ){
+    playback_type_t playtyp = pSt.playbackTyp;   // remember across reset
+      
     if (pSt.state==pbPlaying ){
       haltPlayback();			// stop device & update timestamps
       audPlayDone();
     }
     freeBuffs();
     pSt.stats->Left++;		// update stats for interrupted operation
-    //TODO: Not sure what's wrong with the "pct" here, but it is coming up "0" when played is a
-    // significant fractin of msecLength.
-    int pct = audPlayPct();
+    
+    int pct = 100 * pSt.msPlayed / pSt.msecLength;     // already stopped, so calc final pct
     dbgLog( "D audStop play %d \n", pct );
     pSt.stats->LeftSumPct += pct;
     if ( pct < pSt.stats->LeftMinPct ) pSt.stats->LeftMinPct = pct;
     if ( pct > pSt.stats->LeftMaxPct ) pSt.stats->LeftMaxPct = pct;
     logEvtNININI("Left", "ms", pSt.msPlayed, "pct", pct, "nS", pSt.nPlayed );
-    LOG_AUDIO_PLAY_STOP(pSt.msecLength, pSt.msPlayed, 100*pSt.msPlayed/pSt.msecLength);
+    if ( playtyp==ptMsg )
+        LOG_AUDIO_PLAY_STOP( pSt.msecLength, pSt.msPlayed, pct );
   }
 }
 
@@ -451,7 +461,8 @@ void 								audPauseResumeAudio( void ){									// signal playback to request 
       #ifdef _SQUARE_WAVE_SIMULATOR
       if ( pSt.SqrWAVE )  break;    // ignore pause while playTone
       #endif
-        
+       if ( pSt.playbackTyp!=ptMsg ) break;     // ignore pause in prompts
+    
       // pausing '
       haltPlayback();		// shut down device & update timestamps
       pSt.state = pbPaused;
@@ -548,7 +559,8 @@ void 								audPlaybackComplete( void ) {									// shut down after completed 
       pct = audPlayPct();
       dbgEvt( TB_audDone, pSt.msPlayed, pct, pSt.msPlayed, pSt.msecLength );
       logEvtNININI( "playDn", "ms", pSt.msPlayed, "pct", pct, "nS", pSt.nPlayed );
-      LOG_AUDIO_PLAY_DONE(pSt.msecLength, pSt.msPlayed, 100*pSt.msPlayed/pSt.msecLength);
+      if ( pSt.playbackTyp==ptMsg )
+        LOG_AUDIO_PLAY_DONE(pSt.msecLength, pSt.msPlayed, 100*pSt.msPlayed/pSt.msecLength);
   }
   sendEvent( AudioDone, pct );				// end of file playback-- generate CSM event
   pSt.stats->Finish++;
@@ -556,6 +568,11 @@ void 								audPlaybackComplete( void ) {									// shut down after completed 
 
 
 void 								audRecordComplete( void ){										// last buff recorded, finish saving file
+  // redundant call possible-- if mediaplayer audioStop() is called before mediaplayer processes CODEC_RECORD_DN message from saiEvent
+  if (pSt.state != pbRecStop && pSt.state != pbRecording ){
+      dbgLog( "! audRecComp: state %d \n", pSt.state );
+      return;
+  }
   freeBuffs( );
   audSaveBuffs();			// write all filled SvBuff[]
   tbCloseFile( pSt.audF );  //int err = fclose( pSt.audF );
@@ -635,9 +652,6 @@ static void 				startPlayback( void ){										// power up codec, preload buffe
   audLoadBuffs();					// preload nPlyBuffs of data -- at curr position ( nLoaded & msPos )
 
   pSt.state = pbFull;
-  pSt.tsResume = tbTimeStamp();		// start of this playing
-  if ( pSt.tsPlay==0 )
-    pSt.tsPlay = pSt.tsResume;		// start of file playback
 
   #ifdef _SQUARE_WAVE_SIMULATOR
   if ( !pSt.SqrWAVE )     // no LED for playTune -- let CSM decide
@@ -650,6 +664,10 @@ static void 				startPlayback( void ){										// power up codec, preload buffe
 
   Driver_SAI0.Send( pSt.Buff[0]->data, BuffWds );		// start first buffer
   Driver_SAI0.Send( pSt.Buff[1]->data, BuffWds );		// & set up next buffer
+
+  pSt.tsResume = tbTimeStamp();		// 1st buffer has actually started-- start of this playing
+  if ( pSt.tsPlay==0 )
+    pSt.tsPlay = pSt.tsResume;		// start of file playback
 
   // buffer complete for cBuff calls saiEvent, which:
   //   1) Sends Buff2
@@ -768,7 +786,7 @@ static void 				haltRecord( void ){														// ISR callable: stop audio inp
   Driver_SAI0.Control( ARM_SAI_ABORT_RECEIVE, 0, 0 );	// shut down I2S device
   Driver_SAI0.PowerControl( ARM_POWER_OFF );					// shut off I2S & I2C devices entirely
 
-  pSt.state = pbIdle;   // might get switched back to pbRecPaused
+  //pSt.state -- changed by caller   pSt.state = pbIdle;   // might get switched back to pbRecPaused
   pSt.tsPause = tbTimeStamp();
   pSt.msRecorded += (pSt.tsPause - pSt.tsResume);  		// (tsResume == tsRecord, if never paused)
   dbgEvt( TB_audRecDn, pSt.msRecorded, 0, 0,0 );
@@ -855,7 +873,6 @@ extern bool 				playWave( const char *fname ){ 					// play WAV file, true if st
 
     int dataChunkSize;
     int fLen = 0;
-    audInitState();
     pSt.audType = audWave;
     pSt.state = pbLdHdr;
 
@@ -911,7 +928,8 @@ extern bool 				playWave( const char *fname ){ 					// play WAV file, true if st
     pSt.msecLength = pSt.nSamples*1000 / pSt.samplesPerSec;
     pSt.dataStartPos = ftell( pSt.audF );    // remember start of wav data, for setWavPos()
     pSt.state = pbGotHdr;
-    LOG_AUDIO_PLAY_WAVE(fname, pSt.msecLength, fLen, pSt.samplesPerSec, pSt.monoMode);
+    if ( pSt.playbackTyp==ptMsg )   // details only for content messages
+        LOG_AUDIO_PLAY_WAVE(fname, pSt.msecLength, fLen, pSt.samplesPerSec, pSt.monoMode);
 
     startPlayback();       // power up codec, preload buffers from current file pos, & start I2S transfers
     return true;
@@ -975,11 +993,11 @@ extern void 				saiEvent( uint32_t event ){										// called by ISR on buffer 
         break;
       }
     dbgEvt( TB_saiRXDN, (int)pFull, 0, 0, 0 );
-    osEventFlagsSet( mMediaEventId, CODEC_DATA_RX_DN );		// tell mediaThread to save
+    osEventFlagsSet( mMediaEventId, CODEC_DATA_RX_DN );		// tell mediaThread to save buffer
 
     if (pSt.state == pbRecStop ){
       haltRecord();		// stop audio input
-      osEventFlagsSet( mMediaEventId, CODEC_RECORD_DN );		// tell mediaThread to save
+      osEventFlagsSet( mMediaEventId, CODEC_RECORD_DN );		// tell mediaThread to finish recording
       freeBuffs();						// free buffers waiting to record -- pSt.Buff[*]
     } else {
       pSt.Buff[ nPlyBuffs-1 ] = allocBuff( true );		// add new empty buff for reception

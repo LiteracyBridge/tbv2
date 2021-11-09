@@ -25,7 +25,7 @@ static 	osThreadAttr_t 				thread_attr;
 osEventFlagsId_t							mMediaEventId;			// for signals to mediaThread
 
 // communication variables shared with mediaThread
-static volatile int 					mAudioVolume		= 7;			// current volume, overwritten from CSM config (setVolume)
+volatile int 				        	mAudioVolume		= 7;			// current volume, overwritten from CSM config (setVolume)    (external for powermanager)
 static volatile int 					mAudioSpeed			= 5;			// current speed, NYI
 
 const int MAX_NOTE_CNT = 80;
@@ -36,6 +36,7 @@ static volatile int						mNoteDur [ MAX_NOTE_CNT ];  // duration in buffers (~1/
 
 static volatile int 					mAdjPosSec;
 static volatile char					mPlaybackFilePath[ MAX_PATH ];
+static volatile playback_type_t         mPlayType;              //  sys/pkg/msg/nm/pr
 static volatile MsgStats *		mPlaybackStats;
 static volatile char 					mRecordFilePath[ MAX_PATH ];
 static volatile MsgStats *		mRecordStats;
@@ -69,9 +70,10 @@ void					mediaPowerDown( void ){			// not called currently
 // external methods for  controlManager executeActions
 //
 //**** Operations signaled to complete on media thread
-void 					playAudio( const char * fileName, MsgStats *stats ){ // start playback from fileName
+void 					playAudio( const char * fileName, MsgStats *stats, playback_type_t typ ){ // start playback from fileName 
 	strcpy( (char *)mPlaybackFilePath, fileName );
 	mPlaybackStats = stats==NULL? sysStats : stats;
+    mPlayType = typ;
 	osEventFlagsSet( mMediaEventId, MEDIA_PLAY_EVENT );
 }
 void					playNotes( char *notes ){			// play square tones for 1/4 sec per 'notes' 
@@ -220,7 +222,7 @@ static void 	mediaThread( void *arg ){						// communicates with audio codec for
 		if ( (flags & MEDIA_PLAY_EVENT) != 0 ){		// request to start playback
 			if ( mPlaybackFilePath[0] == 0 ) continue;
 			resetAudio();
-			audPlayAudio( (const char *)mPlaybackFilePath, (MsgStats *) mPlaybackStats );
+			audPlayAudio( (const char *)mPlaybackFilePath, (MsgStats *) mPlaybackStats, mPlayType );
 		} 
 		if ( (flags & MEDIA_PLAY_TUNE) != 0 ){					// 1b) request to start tune-- playNotes()
 			resetAudio();
@@ -243,7 +245,7 @@ static void 	mediaThread( void *arg ){						// communicates with audio codec for
 		
 		if ( (flags & MEDIA_PLAY_RECORD) != 0 ){	// R4) request to play recording
 			resetAudio();
-			audPlayAudio( (const char *)mRecordFilePath, (MsgStats *) sysStats );
+			audPlayAudio( (const char *)mRecordFilePath, (MsgStats *) sysStats, ptRec );
 		}
 		
 		if ( (flags & MEDIA_SAVE_RECORD) != 0 ){	// R5) request to save recording

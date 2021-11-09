@@ -67,24 +67,28 @@ void 									playSubjAudio( char *arg ){				// play current Subject: arg must b
 	char path[MAX_PATH];
     AudioFile_t * aud = NULL;
 	MsgStats *stats = NULL;
+    playback_type_t playtyp;
 	resetAudio();
 	if ( strcasecmp( arg, "nm" )==0 ){
 		aud = subj->shortPrompt; 
+        playtyp = ptNm;
 		logEvtNSNS( "PlayNm", "Subj", subj->subjName, "nm", aud->filename ); 
     LOG_AUDIO_PLAY_SPROMPT(subj->subjName, aud->filename);
 	} else if ( strcasecmp( arg, "pr" )==0 ){
 		aud = subj->invitation;
-		logEvtNSNS( "Play", "Subj", subj->subjName, "pr", aud->filename ); 
+        playtyp = ptInv;
+		logEvtNSNS( "PlayInv", "Subj", subj->subjName, "pr", aud->filename ); 
     LOG_AUDIO_PLAY_LPROMPT(subj->subjName, aud->filename);
 	} else if ( strcasecmp( arg, "msg" )==0 ){
 		aud = gMsg( subj, TBook.iMsg );
-		logEvtNSNI( "Play", "Subj", subj->subjName, "iM", TBook.iMsg ); //, "aud", nm ); 
+        playtyp = ptMsg;
+		logEvtNSNI( "PlayMsg", "Subj", subj->subjName, "iM", TBook.iMsg ); //, "aud", nm ); 
 	  LOG_AUDIO_PLAY_MESSAGE(TBook.iSubj, subj->subjName, aud->filename);
   	stats = loadStats( subj->subjName, TBook.iSubj, TBook.iMsg );	// load stats for message
 	}
     getAudioPath( path, aud );
     clearIdle();
-	playAudio( path, stats );
+	playAudio( path, stats, playtyp );
 }
 
 
@@ -97,7 +101,7 @@ void 									playNxtPackage( ){										// play name of next available Package
     char path[MAX_PATH];
     getAudioPath( path, pkg->pkg_prompt );
     clearIdle();
-	playAudio( path, NULL );
+	playAudio( path, NULL, ptPkg );
 }
 
 void									playSqrTune( char *notes ){				// play seq of notes as sqrwaves
@@ -144,7 +148,7 @@ void 									playSysAudio( char *arg ){				// play system file 'arg'
 		if ( strcmp( gSysAud(i), arg )==0 ){
             findAudioPath( path, currPkg->prompt_paths, arg );  // find path based on current Package promptPaths
             clearIdle();
-			playAudio( path, NULL );        
+			playAudio( path, NULL, ptSys );        
 		//	logEvtNS( "PlaySys", "file", arg );
             logEvtFmt("PlayAudio", "start, system: '%s', file: '%s'", arg, path);
             LOG_AUDIO_PLAY_SYSTEM(arg, path);

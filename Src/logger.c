@@ -24,6 +24,7 @@ static short		touched[ MAX_STATS_CACHED ];
 static MsgStats	sStats[ MAX_STATS_CACHED ];
 const int				STAT_SIZ = sizeof( MsgStats );
 const char *        deviceIdFile = "/system/device_ID.txt";
+const char *    firmwareIdFile = "/system/firmware_ID.txt";
 const char *		norEraseFile = "M0:/system/EraseNorLog.txt";			// flag file to force full erase of NOR flash
 char *					rtcSetFile = "M0:/system/SetRTC.txt";							// flag file to force setting RTC to last modification time of SetRTC.txt
 char *					rtcDontSetFile = "dontSetRTC.txt";  							// renamed version of SetRTC.txt
@@ -199,6 +200,7 @@ void						logPowerUp( bool reboot ){											// re-init logger after reboot, U
 		logEvtS(   "REBOOT--------", bkey );
     gotRtc = showRTC();
 		logEvtNS( "TB_V2", "Firmware", TBV2_Version );
+    writeLine( (char *)TBV2_Version, firmwareIdFile);
 		logEvtFmt( "BUILT", "On %s at %s", __DATE__, __TIME__);  // date & time LOGGER.C last compiled -- link date?
 		logEvtS(  "CPU",  CPU_ID );
 		logEvtS(  "TB_ID",  TB_ID );

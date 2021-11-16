@@ -459,13 +459,13 @@ void 										getRTC( struct _fsTime *fsTime ) {
 	
     // This is going suck in the year 2100. But it would break in 2107 anyway.
     // The time format allows years 1980 to 2107. The RTC only allows years % 100.
-    fsTime->year = ((Dt>>20) & 0xF)*10 + ((Dt>>16) & 0xF) + 2000;
-    fsTime->mon = ((Dt>>12) & 0x1)*10 + ((Dt>>8) & 0xF);
-    fsTime->day =((Dt>> 4) & 0x3)*10 + (Dt & 0xF);
+    fsTime->year = ((Dt >> 20) & 0xF)*10 + ((Dt >> 16) & 0xF) + 2000;
+    fsTime->mon = ((Dt >> 12) & 0x1)*10 + ((Dt >> 8) & 0xF);
+    fsTime->day =((Dt >>  4) & 0x3)*10 + (Dt & 0xF);
 
-    fsTime->hr = ((Tm>>20) & 0x3)*10 + ((Tm>>16) & 0xF);
-    fsTime->min = ((Tm>>12) & 0x7)*10 + ((Tm>>8) & 0xF);
-    fsTime->sec = ((Tm>> 4) & 0x7)*10 + (Tm & 0xF);
+    fsTime->hr = ((Tm >> 22) & 0x1)*12 + ((Tm >> 20) & 0x3)*10 + ((Tm >> 16) & 0xF);
+    fsTime->min = ((Tm >> 12) & 0x7)*10 + ((Tm >> 8) & 0xF);
+    fsTime->sec = ((Tm >>  4) & 0x7)*10 + (Tm & 0xF);
 }
 
 uint32_t 								tbRtcStamp(){   // returns millisecond timestamp based on RTC instead of OS Tic

@@ -32,10 +32,20 @@ Objects/*.iex
 Objects/*.lnp
 Objects/*.axf
 Objects/*._ia
+Listings/*.map
+Objects/*.hex
+Objects/*.dep
+Objects/*.htm
+*.geneb
+*.uvoptx
 old/*
+
 
 # uVision duplicates files in RTE/* (even though I'm using copies in Keil/
 RTE/*
+
+# .wav files
+*.wav
 
 # OS generated files #
 ######################

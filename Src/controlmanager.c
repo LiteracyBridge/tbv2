@@ -54,7 +54,7 @@ static void 					adjMsg( int adj ){								// adjust current Msg # in TBook
 		nM = numM-1;
 	if ( nM >= numM )
 		nM = 0;
-	logEvtNI( "changeMsg", "iMsg", nM );
+	logEvtNI( "chgMsg", "iMsg", nM );
 	TBook.iMsg = nM;
 }
 
@@ -150,7 +150,7 @@ void 									playSysAudio( char *arg ){				// play system file 'arg'
             clearIdle();
 			playAudio( path, NULL, ptSys );        
 		//	logEvtNS( "PlaySys", "file", arg );
-            logEvtFmt("PlayAudio", "start, system: '%s', file: '%s'", arg, path);
+            logEvtFmt("PlayAud", "system: '%s', file: '%s'", arg, path);
             LOG_AUDIO_PLAY_SYSTEM(arg, path);
 			return;
 		}

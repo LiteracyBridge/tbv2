@@ -195,21 +195,21 @@ void						logPowerUp( bool reboot ){											// re-init logger after reboot, U
 	if ( reboot ){
 		totLogCh = 0;			// tot chars appended
 		if (logF!=NULL) fprintf( logF, "\n" );
-        char bkey[10] = "";
-        if (BootKey!=' ') sprintf( bkey, "Key= %c", BootKey );
-		logEvtS(   "REBOOT--------", bkey );
+        char bkey[2] = { BootKey, 0 };
+  //      if (BootKey!=' ') sprintf( bkey, "Key= %c", BootKey );
+		logEvtNS(   "REBOOT --------", "BootKey", bkey );
     gotRtc = showRTC();
 		logEvtNS( "TB_V2", "Firmware", TBV2_Version );
     writeLine( (char *)TBV2_Version, firmwareIdFile);
-		logEvtFmt( "BUILT", "On %s at %s", __DATE__, __TIME__);  // date & time LOGGER.C last compiled -- link date?
-		logEvtS(  "CPU",  CPU_ID );
-		logEvtS(  "TB_ID",  TB_ID );
+		logEvtFmt( "BUILT", "on: %s, at: %s", __DATE__, __TIME__);  // date & time LOGGER.C last compiled -- link date?
+		logEvtNS(  "CPU", "Id", CPU_ID );
+		logEvtNS(  "TB_ID", "Id", TB_ID );
         if ( !fexists( deviceIdFile ))
             writeLine( TB_ID, deviceIdFile );
 		loadTBookName();
-		logEvtS(  "TB_NM",  TBookName );
+		logEvtNS(  "TB_NM", "Nm", TBookName );
 		logEvtNI( "CPU_CLK", "MHz", SystemCoreClock/1000000 );
-		logEvtNINI("BUS_CLKS", "APB2", APB2_clock, "APB1", APB1_clock );
+		logEvtNINI("BUS_CLK", "APB2", APB2_clock, "APB1", APB1_clock );
 	} else
 		logEvt(   "RESUME--");
 	
@@ -401,10 +401,10 @@ void						logEvtS( const char *evtID, const char *args ){		// write log entry: '
 	int 		ts = tbTimeStamp();
 	char 		evtBuff[ MAX_EVT_LEN1 ];
 	int tsec = ts/100, sec = tsec/10, min = sec/60, hr = min/60;
-	if ( hr > 0 )
-		sprintf( evtBuff,  "%d_%02d_%02d.%d: %8s", hr, min %60, sec % 60, tsec % 10, evtID );
-	else
-		sprintf( evtBuff,  "%d_%02d.%d: %8s", min %60, sec % 60, tsec % 10, evtID );
+//	if ( hr > 0 )
+	sprintf( evtBuff,  "%d_%02d_%02d.%d: %8s", hr, min %60, sec % 60, tsec % 10, evtID );
+//	else
+//		sprintf( evtBuff,  "%d_%02d.%d: %8s", min %60, sec % 60, tsec % 10, evtID );
 //	addHist( evtBuff, args );
 	dbgLog( " %s %s\n", evtBuff, args );
 	

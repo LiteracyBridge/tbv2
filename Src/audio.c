@@ -2,7 +2,9 @@
 
 #include "audio.h"
 #include "mediaPlyr.h"
+#include "controlmanager.h"
 
+extern TBook_t TBook;
 
 #define _SQUARE_WAVE_SIMULATOR
 
@@ -66,6 +68,12 @@ static struct { 			// PlaybackFile_t			-- audio state block
 
   playback_state_t  		state;					// current (overly detailed) playback state
   playback_type_t                   playbackTyp;
+  int32_t playSubj;
+  int32_t playMsg;
+  uint32_t nPauses;
+  uint32_t msFwd;
+  uint32_t msBack;
+
   bool 									monoMode;				// true if data is 1 channel (duplicate on send)
   uint32_t 							nPerBuff;				// samples per buffer (always stereo)
   uint32_t 							LastError;			// last audio error code
@@ -111,6 +119,11 @@ static Buffer_t 						audio_buffers[ MxBuffs ];
 static MsgStats *						sysStats;
 const int SAI_OutOfBuffs		= 1 << 8;			// bigger than ARM_SAI_EVENT_FRAME_ERROR
 static int nFreeBuffs = 0, cntFreeBuffs = 0, minFreeBuffs = MxBuffs;
+
+static int msCompleteErr = 0;
+static int msCompleteCnt = 0;
+
+
 
 // forward decls for internal functions
 void 								initBuffs( void );														// create audio buffers
@@ -178,6 +191,11 @@ void 								audSquareWav( int nEighths, int hz ){						// preload wavHdr & setu
 void								audInitState( void ){													// set up playback State in pSt
   pSt.audType = audUNDEF;
   pSt.playbackTyp = ptUNDEF;
+  pSt.playSubj = -1;
+  pSt.playMsg = -1;
+  pSt.nPauses = 0;
+  pSt.msFwd = 0;
+  pSt.msBack = 0;
     if ( !pSt.SqrWAVE ){
       // TODO: WAVE_FormatTypeDef
       //memset( pSt.wavHdr, 0x00, WaveHdrBytes );
@@ -287,6 +305,8 @@ void 								audAdjPlayPos( int32_t adj ){									// shift current playback pos
 
   if ( pSt.audType==audWave ){
     int newMS = pSt.msPlayed + adj*1000;
+    if ( adj > 0 ) pSt.msFwd += adj*1000;
+    if ( adj < 0 ) pSt.msBack -= adj*1000;
     logEvtNINI( "adjPos", "bySec", adj, "newMs", newMS );
     LOG_AUDIO_PLAY_JUMP(pSt.msecLength, pSt.msPlayed, adj*1000);
     setWavPos( newMS  );
@@ -304,6 +324,10 @@ void 								audPlayAudio( const char* audioFileName, MsgStats *stats, playback_
   pSt.stats = stats;
   stats->Start++;
   pSt.playbackTyp = typ;        // current type of file being played
+  if ( typ == ptMsg ){
+    pSt.playSubj = TBook.iSubj;
+    pSt.playMsg = TBook.iMsg;
+  }
 
   #ifdef _SQUARE_WAVE_SIMULATOR
   pSt.SqrWAVE = false;
@@ -345,6 +369,12 @@ void								audPlayTone( int i, int freq, int nEighths ){		// play 'i'th note: '
 #endif
 }
 
+void logPlayMsg( void ){
+    if ( pSt.playbackTyp != ptMsg ) return;
+    
+    logEvtFmt("MsgPlay", "S:%d, M:%d, L_ms:%d, P_ms:%d, nPaus:%d, Fwd_ms:%d, Bk_ms:%d", 
+    pSt.playSubj, pSt.playMsg, pSt.msecLength, pSt.msPlayed, pSt.nPauses, pSt.msFwd, pSt.msBack );
+}
 void								audPlayDone(){																// close, report errs, => idle
   if ( pSt.audF!=NULL ){ // normally closed by loadBuff
     tbCloseFile( pSt.audF );  //int res = fclose( pSt.audF );
@@ -394,10 +424,10 @@ void 								audStopAudio( void ){													// abort any leftover operation
     if ( pct > pSt.stats->LeftMaxPct ) pSt.stats->LeftMaxPct = pct;
     logEvtNININI("Left", "ms", pSt.msPlayed, "pct", pct, "nS", pSt.nPlayed );
     if ( playtyp==ptMsg )
-        LOG_AUDIO_PLAY_STOP( pSt.msecLength, pSt.msPlayed, pct );
+        LOG_AUDIO_PLAY_STOP( pSt.msecLength, pSt.msPlayed, pct, pSt.playSubj, pSt.playMsg );
+    logPlayMsg();
   }
 }
-
 
 void 								audStartRecording( FILE *outFP, MsgStats *stats ){	// start recording into file
 //	EventRecorderEnable( evrEAO, 		EvtFsCore_No,  EvtFsCore_No );
@@ -469,6 +499,7 @@ void 								audPauseResumeAudio( void ){									// signal playback to request 
       ledFg( TB_Config->fgPlayPaused );	// blink green: while paused
         // subsequent call to audPauseResumeAudio() will start playing at pSt.msPlayed msec
       pct = audPlayPct();
+      pSt.nPauses++;
       dbgEvt( TB_audPause, pct, pSt.msPlayed, pSt.nPlayed, 0);
       dbgLog( "D pausePlay at %d ms \n", pSt.msPlayed );
       logEvtNININI( "plPause", "ms", pSt.msPlayed, "pct", pct, "nS", pSt.nPlayed  );
@@ -556,11 +587,18 @@ void 								audPlaybackComplete( void ) {									// shut down after completed 
   } else
   #endif
   {
-      pct = audPlayPct();
+      msCompleteErr += (pSt.msecLength - pSt.msPlayed);    // playback completed, record difference between measured & expected elapsed time
+      msCompleteCnt++;
+      pct = 100; //pSt.msPlayed * 100 / pSt.msecLength;
+      // complete, so msPlayed == msecLength
       dbgEvt( TB_audDone, pSt.msPlayed, pct, pSt.msPlayed, pSt.msecLength );
       logEvtNININI( "playDn", "ms", pSt.msPlayed, "pct", pct, "nS", pSt.nPlayed );
       if ( pSt.playbackTyp==ptMsg )
         LOG_AUDIO_PLAY_DONE(pSt.msecLength, pSt.msPlayed, 100*pSt.msPlayed/pSt.msecLength);
+      logPlayMsg( );
+      
+    //  if (msCompleteCnt % 10==0) 
+          logEvtNINI("Play_Tot", "err_ms", msCompleteErr, "err_cnt", msCompleteCnt );
   }
   sendEvent( AudioDone, pct );				// end of file playback-- generate CSM event
   pSt.stats->Finish++;
@@ -678,20 +716,20 @@ static void 				startPlayback( void ){										// power up codec, preload buffe
 
 static void					haltPlayback(){																// shutdown device, free buffs & update timestamps
   int msec;
+  if ( pSt.state == pbPlaying || pSt.state == pbDone ){
+    if ( pSt.state == pbPlaying )   // record timestamp before shutdown
+      pSt.tsPause = tbTimeStamp();  // if pbDone, was saved by saiEvent
+
+    msec = (pSt.tsPause - pSt.tsResume);		// (tsResume == tsPlay, if 1st pause)
+    pSt.msPlayed += msec;  	// update position
+    pSt.state = pbPaused;
+  } 
+
   cdc_SetMute( true );	// (redundant) mute
   cdc_SpeakerEnable( false );	// turn off speaker
   Driver_SAI0.Control( ARM_SAI_ABORT_SEND, 0, 0 );	// shut down I2S device
   Driver_SAI0.PowerControl( ARM_POWER_OFF );		// power off I2S (& codec & I2C)
   freeBuffs();
-
-  if ( pSt.state == pbPlaying || pSt.state == pbDone ){
-    if ( pSt.state == pbPlaying )
-      pSt.tsPause = tbTimeStamp();  // if pbDone, saved by saiEvent
-
-    msec = (pSt.tsPause - pSt.tsResume);		// (tsResume == tsPlay, if 1st pause)
-    pSt.msPlayed += msec;  	// update position
-    pSt.state = pbPaused;
-  }
 }
 
 

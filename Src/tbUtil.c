@@ -470,7 +470,7 @@ bool 										showRTC( ){
 	if ((Tm>>22) & 0x1) hour += 12;
 
 	char * wkdy[] = { "", "Mon","Tue","Wed","Thu","Fri","Sat","Sun" };
-	logEvtFmt( "RTC", "20%02d-%02d-%02d %02d:%02d:%02d (%s)", year, month, day, hour, minute, second, wkdy[dayOfWeek]  );
+	logEvtFmt( "RTC", "Dt: 20%02d-%02d-%02d (%s), Tm: %02d_%02d_%02d", year, month, day, wkdy[dayOfWeek], hour, minute, second  );
 	return true;
 }
 
@@ -502,6 +502,7 @@ static uint32_t lastTmStmp = 0;
 static uint32_t lastHalTick = 0, HalSameCnt = 0;
 static uint32_t nDelays = 0, totDelay = 0;
 uint32_t 								tbTimeStamp(){																	// return msecs since boot
+ //   int msPerTick = 1000 / osKernelGetTickFreq();	
 	osKernelState_t st = osKernelGetState();
 	if ( st == osKernelRunning )
 		lastTmStmp =  osKernelGetTickCount();
@@ -667,7 +668,7 @@ void 										usrLog( const char * fmt, ... ){
 }
 
 const char *DbgFlags = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";  // flags 0..35
-char DebugMask[40] =  "! C";  // add 'X' to enable dbgLog() calls starting with 'X'
+char DebugMask[40] =  "! ";  // add 'X' to enable dbgLog() calls starting with 'X'
 /* DEFINED DEBUG FLAGS:
     //  '1' system clock
 	//	'2' audio codec debugging

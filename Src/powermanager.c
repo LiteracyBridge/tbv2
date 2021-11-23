@@ -541,6 +541,18 @@ void 											checkPower( ){				// check and report power status
 		if (pstat==CHARGED) 	sCh = 'C';
 		if (pstat==TEMPFAULT) sCh = 'X';
 
+/*=========== Power Status -- Log message interpretation ================================
+PwrCheck, stat:  'u Lxct Pp Bb Tm Vv'
+                  |  |||  |  |  |  |
+                  |  |||  |  |  | Vv   v = current audio volume
+                  |  |||  |  | Tm      m = -/0/1/2/.../9/+ = MPU temp  (m+2)* 100mV, - if <200mV, + if >1200mV
+                  |  |||  | Bb         b = -/0/1/2/.../9/+ = Backup  batt voltage 2+b*.2V, - if <2.0V, + if >3.9V 
+                  |  ||| Pp            p = -/0/1/2/.../9/+ = Primary batt voltage 2+p*.2V, - if <2.0V, + if >3.9V 
+                  |  ||t               t = -/0/1/2/.../9/+ = Lithium thermistor  (t+2)* 100mV, - if <200mV, + if >1200mV
+                  |  |c                c =  /c/C/X  c=charging, C=charged, X=temp fault
+                  | Lx                 x = -/0/1/2/.../9/+ = Lithium voltage 3.xV, - if <3.0V, + if >3.9V 
+                  u                    u = U/u, U if Usb power is present
+========================================================================================*/
 		char pwrStat[10];
 		sprintf(pwrStat, "%c L%c%c%c P%c B%c T%c V%d", sUsb, sLi,sCh,sLt, sPr, sBk, sMt, mAudioVolume ); 
 		logEvtNS( "PwrCheck","Stat",	pwrStat ); 

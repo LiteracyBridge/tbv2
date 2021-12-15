@@ -47,9 +47,12 @@ static void 					adjMsg( int adj ){								// adjust current Msg # in TBook
 	// If no subject is selected, do nothing.
     if (TBook.iSubj < 0 || TBook.iSubj >= nSubjs() ) 
 		return;
+    // adj must be +1 or -1
 	short nM = TBook.iMsg + adj;
     Subject_t * subj = gSubj( TBook.iSubj );
 	short numM = nMsgs( subj ); 
+    if ( numM == 1 )
+        nm = 0;
 	if ( nM < 0 ) 
 		nM = numM-1;
 	if ( nM >= numM )
@@ -72,18 +75,18 @@ void 									playSubjAudio( char *arg ){				// play current Subject: arg must b
 	if ( strcasecmp( arg, "nm" )==0 ){
 		aud = subj->shortPrompt; 
         playtyp = ptNm;
-		logEvtNSNS( "PlayNm", "Subj", subj->subjName, "nm", aud->filename ); 
-    LOG_AUDIO_PLAY_SPROMPT(subj->subjName, aud->filename);
+		if ( BootKey=='L' ) logEvtNSNS( "PlayNm", "Subj", subj->subjName, "nm", aud->filename ); 
+        if ( BootKey=='L' ) LOG_AUDIO_PLAY_SPROMPT(subj->subjName, aud->filename);
 	} else if ( strcasecmp( arg, "pr" )==0 ){
 		aud = subj->invitation;
         playtyp = ptInv;
-		logEvtNSNS( "PlayInv", "Subj", subj->subjName, "pr", aud->filename ); 
-    LOG_AUDIO_PLAY_LPROMPT(subj->subjName, aud->filename);
+		if ( BootKey=='L' ) logEvtNSNS( "PlayInv", "Subj", subj->subjName, "pr", aud->filename ); 
+        if ( BootKey=='L' ) LOG_AUDIO_PLAY_LPROMPT(subj->subjName, aud->filename);
 	} else if ( strcasecmp( arg, "msg" )==0 ){
 		aud = gMsg( subj, TBook.iMsg );
         playtyp = ptMsg;
-		logEvtNSNI( "PlayMsg", "Subj", subj->subjName, "iM", TBook.iMsg ); //, "aud", nm ); 
-	  LOG_AUDIO_PLAY_MESSAGE(TBook.iSubj, subj->subjName, aud->filename);
+		logEvtNSNI( "PlayMsg", "Subj", subj->subjName, "iM", TBook.iMsg ); 
+	    if ( BootKey=='L' ) LOG_AUDIO_PLAY_MESSAGE(TBook.iMsg, subj->subjName, aud->filename);
   	stats = loadStats( subj->subjName, TBook.iSubj, TBook.iMsg );	// load stats for message
 	}
     getAudioPath( path, aud );
@@ -150,7 +153,7 @@ void 									playSysAudio( char *arg ){				// play system file 'arg'
             clearIdle();
 			playAudio( path, NULL, ptSys );        
 		//	logEvtNS( "PlaySys", "file", arg );
-            logEvtFmt("PlayAud", "system: '%s', file: '%s'", arg, path);
+            if ( BootKey == 'L' ) logEvtFmt("PlayAud", "system: '%s', file: '%s'", arg, path);
             LOG_AUDIO_PLAY_SYSTEM(arg, path);
 			return;
 		}
@@ -288,7 +291,7 @@ void 									setCurrState( short iSt ){				// set iCurrSt & iPrevSt (& DBG stri
 
 static void 					doAction( Action act, char *arg, int iarg ){	// execute one csmAction
 	dbgEvt( TB_csmDoAct, act, arg[0],arg[1],iarg );
-	logEvtNSNS( "Action", "nm", actionNm(act), "arg", arg ); //DEBUG
+	if (BootKey=='L') logEvtNSNS( "Action", "nm", actionNm(act), "arg", arg ); //DEBUG
 	if (isMassStorageEnabled()){		// if USB MassStorage running: ignore actions referencing files
 		switch ( act ){
 			case playSys:			
@@ -516,7 +519,7 @@ void 									executeCSM( void ){								// execute TBook control state machine
 		short nSt = TBook.cSt->evtNxtState[ TBook.lastEvent ];
 		assertValidState( nSt );
 		if ( nSt != TBook.iCurrSt ) // state is changing (unless goPrevSt or goSavedSt undoes it)
-			logEvtNSNSNS( "csmEvt", "st", TBook.cSt->nm, "evt", TBook.lastEventName, "nSt", gCSt( nSt )->nm );
+			logEvtNSNS( "csmEvt", "evt", TBook.lastEventName, "nSt", gCSt( nSt )->nm );
 
 		osMemoryPoolFree( TBEvent_pool, evt );
 		changeCSMstate( nSt, TBook.lastEvent );	// only changes if different

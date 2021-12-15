@@ -120,10 +120,6 @@ static MsgStats *						sysStats;
 const int SAI_OutOfBuffs		= 1 << 8;			// bigger than ARM_SAI_EVENT_FRAME_ERROR
 static int nFreeBuffs = 0, cntFreeBuffs = 0, minFreeBuffs = MxBuffs;
 
-static int msCompleteErr = 0;
-static int msCompleteCnt = 0;
-
-
 
 // forward decls for internal functions
 void 								initBuffs( void );														// create audio buffers
@@ -372,7 +368,7 @@ void								audPlayTone( int i, int freq, int nEighths ){		// play 'i'th note: '
 void logPlayMsg( void ){
     if ( pSt.playbackTyp != ptMsg ) return;
     
-    logEvtFmt("MsgPlay", "S:%d, M:%d, L_ms:%d, P_ms:%d, nPaus:%d, Fwd_ms:%d, Bk_ms:%d", 
+    logEvtFmt("MsgDone", "S:%d, M:%d, L_ms:%d, P_ms:%d, nPaus:%d, Fwd_ms:%d, Bk_ms:%d", 
     pSt.playSubj, pSt.playMsg, pSt.msecLength, pSt.msPlayed, pSt.nPauses, pSt.msFwd, pSt.msBack );
 }
 void								audPlayDone(){																// close, report errs, => idle
@@ -396,7 +392,7 @@ void 								audStopAudio( void ){													// abort any leftover operation
   if (st == Ready ) return;
 
   if (st == Recording ){
-    logEvtNI( "recLeft", "state", pSt.state );
+    logEvtNI( "CutRec", "state", pSt.state );
     if ( pSt.state==pbRecording || pSt.state==pbRecStop ){
       dbgLog( "8 audStop Rec %x\n", pSt.audF );
       haltRecord();		// shut down dev, update timestamps
@@ -422,7 +418,7 @@ void 								audStopAudio( void ){													// abort any leftover operation
     pSt.stats->LeftSumPct += pct;
     if ( pct < pSt.stats->LeftMinPct ) pSt.stats->LeftMinPct = pct;
     if ( pct > pSt.stats->LeftMaxPct ) pSt.stats->LeftMaxPct = pct;
-    logEvtNININI("Left", "ms", pSt.msPlayed, "pct", pct, "nS", pSt.nPlayed );
+    logEvtNININI("CutPlay", "ms", pSt.msPlayed, "pct", pct, "nSamp", pSt.nPlayed );
     if ( playtyp==ptMsg )
         LOG_AUDIO_PLAY_STOP( pSt.msecLength, pSt.msPlayed, pct, pSt.playSubj, pSt.playMsg );
     logPlayMsg();
@@ -587,18 +583,16 @@ void 								audPlaybackComplete( void ) {									// shut down after completed 
   } else
   #endif
   {
-      msCompleteErr += (pSt.msecLength - pSt.msPlayed);    // playback completed, record difference between measured & expected elapsed time
-      msCompleteCnt++;
-      pct = 100; //pSt.msPlayed * 100 / pSt.msecLength;
+       pct = 100; //pSt.msPlayed * 100 / pSt.msecLength;
       // complete, so msPlayed == msecLength
       dbgEvt( TB_audDone, pSt.msPlayed, pct, pSt.msPlayed, pSt.msecLength );
-      logEvtNININI( "playDn", "ms", pSt.msPlayed, "pct", pct, "nS", pSt.nPlayed );
+      if ( BootKey=='L' ) logEvtNININI( "playDn", "ms", pSt.msPlayed, "pct", pct, "nS", pSt.nPlayed );
       if ( pSt.playbackTyp==ptMsg )
         LOG_AUDIO_PLAY_DONE(pSt.msecLength, pSt.msPlayed, 100*pSt.msPlayed/pSt.msecLength);
       logPlayMsg( );
       
-    //  if (msCompleteCnt % 10==0) 
-          logEvtNINI("Play_Tot", "err_ms", msCompleteErr, "err_cnt", msCompleteCnt );
+      // playback completed, report difference between measured & expected elapsed time
+      if ( BootKey=='L' ) logEvtNI("Play_Tim", "dif_ms", pSt.msecLength - pSt.msPlayed );
   }
   sendEvent( AudioDone, pct );				// end of file playback-- generate CSM event
   pSt.stats->Finish++;

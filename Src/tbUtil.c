@@ -445,19 +445,23 @@ void getRTC(struct _fsTime *fsTime) {
     fsTime->sec = ((Tm>> 4) & 0x7)*10 + (Tm & 0xF);
 }
 
-
+uint32_t init_msRTC= 0, init_msTS;
 bool 										showRTC( ){
-	int pDt=0,Dt=1, pTm=0,Tm=1;
+	int pDt=0,Dt=1, pTm=0,Tm=1, SubSec=1;
 	while (pDt != Dt || pTm != Tm){
 		pDt = Dt;
 		pTm = Tm;
 		Dt = RTC->DR;
 		Tm = RTC->TR;
+        SubSec = RTC->SSR;
 	}
-  // The magic number must mean some flavor of "uninitialized".
-	if ( Dt == 0x02101 ) return false;        //TODO: should be 0x0c101 ??
+    const int PREDIV_S = 255;    // RTC prescaler default value
+    const int ACT_DATE_RESET = 0x0c101;    // reset value of RTC Date Register = Saturday, 1-Jan-2000 
+    const int DOC_DATE_RESET = 0x02101;    // reset value of RTC Date Register = Monday, 1-Jan-00  (according to RM0402)
+	if ( Dt == DOC_DATE_RESET || Dt == ACT_DATE_RESET ) 
+        return false;    //  RTC is uninitialized
 	
-	uint8_t year, month, day, hour, minute, second, dayOfWeek;
+	uint8_t year, month, day, hour, minute, second, dayOfWeek, milliSec;
 	year =  ((Dt>>20) & 0xF)*10 + ((Dt>>16) & 0xF);
 	dayOfWeek = ((Dt>>13) & 0x7);
 	month = ((Dt>>12) & 0x1)*10 + ((Dt>>8) & 0xF);
@@ -466,12 +470,21 @@ bool 										showRTC( ){
 	hour =  ((Tm>>20) & 0x3)*10 + ((Tm>>16) & 0xF);
 	minute = ((Tm>>12) & 0x7)*10 + ((Tm>>8) & 0xF);
 	second  = ((Tm>> 4) & 0x7)*10 + (Tm & 0xF);
+    milliSec = (PREDIV_S - SubSec)*1000/(PREDIV_S + 1);   // in ~4mSec steps
 
 	if ((Tm>>22) & 0x1) hour += 12;
 
 	char * wkdy[] = { "", "Mon","Tue","Wed","Thu","Fri","Sat","Sun" };
-	logEvtFmt( "RTC", "Dt: 20%02d-%02d-%02d (%s), Tm: %02d_%02d_%02d", year, month, day, wkdy[dayOfWeek], hour, minute, second  );
-	return true;
+	logEvtFmt( "RTC", "Dt: 20%02d-%02d-%02d (%s), Tm: %02d_%02d_%02d.%03d", year, month, day, wkdy[dayOfWeek], hour, minute, second, milliSec  );
+    uint32_t msRTC = (hour * 3600 + minute * 60 + second)*1000 + milliSec;
+    uint32_t tsNow = tbTimeStamp();
+    if ( init_msRTC==0 ){
+        init_msTS = tsNow;
+        init_msRTC = msRTC;
+    }
+    if ( BootKey=='L' ) logEvtFmt( "Clocks", "ts_ms: %d,  rtc_ms: %d", tsNow, init_msTS + msRTC - init_msRTC );
+    
+	return true;    // RTC is initialized, and value has been logged
 }
 
 

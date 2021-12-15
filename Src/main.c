@@ -57,6 +57,7 @@ char BootKey;
 
 // 'P'  										=> call talking_book() before starting OS, then debugLoop()
 // 'M'  										=> call debugLoop() in talking_book() thread
+// 'L'                                          => verbose log messages
 // no FileSys found 							=> call debugLoop( false ) in talking_book() thread
 // if FileSys, but no /system/QC_PASS.txt 	    => run acceptance test
 // if QC_PASS.txt, but no package_dat.txt 	    => enter USBmode

@@ -51,6 +51,8 @@ void tglUSBmode(){
 	} else if ( fsNDevs > 0){  // HOME => if have a filesystem but no data -- try USB MSC
 		gSet( gGREEN, 1 );	gSet( gRED, 1 );
 		for ( int i=fsNDevs; fsDevs[i]!=NULL; i++ ) fsDevs[i] = NULL;
+		logEvt( "enterUSB" );
+		logPowerDown();				// flush & shut down logs
 		enableMassStorage( fsDevs[0], fsDevs[1], fsDevs[2], fsDevs[3] );		// just put 1st device on USB
 	}	
 }

@@ -260,6 +260,7 @@ void                      enterStopMode( void ){                    // put STM32
 	NVIC_SystemReset();			// soft reboot
 }
 void                      powerDownTBook( void ){                   // TBook orderly shut down -- copy NLog to disk
+    if ( BootKey == 'L' ) showRTC();
 	logEvt( "PwrDown" );
 	logPowerDown();        // flush & close logs, copy NorLog to eMMC
 	ledBg( NULL );
@@ -528,6 +529,7 @@ void 											checkPower( ){				// check and report power status
 	
 	readAllADC();
 	
+    if ( BootKey == 'L' || BootKey == 'R' ) showRTC();
 	if ( powerChanged() ){	// update pS state & => true if significant change
 		char sUsb = PwrGood_N==0? 'U' : 'u';
 		char sLi = RngChar( 3000, 4000, pS.LiMV ); 				// range from charge='0' to charge='9' to '!' > 4000

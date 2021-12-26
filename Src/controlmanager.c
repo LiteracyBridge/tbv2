@@ -52,7 +52,7 @@ static void 					adjMsg( int adj ){								// adjust current Msg # in TBook
     Subject_t * subj = gSubj( TBook.iSubj );
 	short numM = nMsgs( subj ); 
     if ( numM == 1 )
-        nm = 0;
+        numM = 0;
 	if ( nM < 0 ) 
 		nM = numM-1;
 	if ( nM >= numM )

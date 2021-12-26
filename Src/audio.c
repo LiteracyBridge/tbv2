@@ -284,7 +284,7 @@ int32_t 						audPlayPct( void ){														// => current playback pct of fil
   if ( pSt.state == pbDone ) return 100;	// completed
 
   if ( pSt.state == pbPlaying ){
-    uint32_t now = tbTimeStamp();
+    uint32_t now = tbRtcStamp();
     uint32_t played = pSt.msPlayed + (now - pSt.tsResume);	// elapsed since last Play
     return played*100 / pSt.msecLength;
   }
@@ -697,7 +697,7 @@ static void 				startPlayback( void ){										// power up codec, preload buffe
   Driver_SAI0.Send( pSt.Buff[0]->data, BuffWds );		// start first buffer
   Driver_SAI0.Send( pSt.Buff[1]->data, BuffWds );		// & set up next buffer
 
-  pSt.tsResume = tbTimeStamp();		// 1st buffer has actually started-- start of this playing
+  pSt.tsResume = tbRtcStamp();		// 1st buffer has actually started-- start of this playing
   if ( pSt.tsPlay==0 )
     pSt.tsPlay = pSt.tsResume;		// start of file playback
 
@@ -712,7 +712,7 @@ static void					haltPlayback(){																// shutdown device, free buffs & 
   int msec;
   if ( pSt.state == pbPlaying || pSt.state == pbDone ){
     if ( pSt.state == pbPlaying )   // record timestamp before shutdown
-      pSt.tsPause = tbTimeStamp();  // if pbDone, was saved by saiEvent
+      pSt.tsPause = tbRtcStamp();  // if pbDone, was saved by saiEvent
 
     msec = (pSt.tsPause - pSt.tsResume);		// (tsResume == tsPlay, if 1st pause)
     pSt.msPlayed += msec;  	// update position
@@ -797,7 +797,7 @@ static void 				startRecord( void ){													// preload buffers & start reco
   Driver_SAI0.Receive( pSt.Buff[0]->data, BuffWds );		// set first buffer
 
   pSt.state = pbRecording;
-  pSt.tsResume = tbTimeStamp();		// start of this record
+  pSt.tsResume = tbRtcStamp();		// start of this record
   if ( pSt.tsRecord==0 )
    pSt.tsRecord = pSt.tsResume;		// start of file recording
 
@@ -819,7 +819,7 @@ static void 				haltRecord( void ){														// ISR callable: stop audio inp
   Driver_SAI0.PowerControl( ARM_POWER_OFF );					// shut off I2S & I2C devices entirely
 
   //pSt.state -- changed by caller   pSt.state = pbIdle;   // might get switched back to pbRecPaused
-  pSt.tsPause = tbTimeStamp();
+  pSt.tsPause = tbRtcStamp();
   pSt.msRecorded += (pSt.tsPause - pSt.tsResume);  		// (tsResume == tsRecord, if never paused)
   dbgEvt( TB_audRecDn, pSt.msRecorded, 0, 0,0 );
 
@@ -988,7 +988,7 @@ extern void 				saiEvent( uint32_t event ){										// called by ISR on buffer 
       osEventFlagsSet( mMediaEventId, CODEC_DATA_TX_DN );
     } else if ( pSt.audioEOF ){  // done, close up shop
       pSt.state = pbDone;
-      pSt.tsPause = tbTimeStamp();		// timestamp end of playback
+      pSt.tsPause = tbRtcStamp();		// timestamp end of playback
       Driver_SAI0.Control( ARM_SAI_ABORT_SEND, 0, 0 );	// shut down I2S device, arg1==0 => Abort
       #ifdef _SQUARE_WAVE_SIMULATOR
 	  if ( pSt.SqrWAVE )	freeBuffs();  // make sure buffers are freed in multi-tone sequences

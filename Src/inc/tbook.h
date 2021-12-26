@@ -85,7 +85,10 @@ extern osMutexId_t		logLock;																		// mutex for access to NorFlash
 extern void 			talking_book( void *tbAttr );			// talking book initialization & control manager thread 
 extern void 			getRTC( struct _fsTime *fsTime );							// load current RTC into fsTime
 extern bool 			showRTC( void );
-extern uint32_t 	tbTimeStamp( void );
+extern uint32_t 	tbTimeStamp( void );  // returns millisecond timestamp based on OS Tic
+extern uint32_t 	tbRtcStamp( void );   // returns millisecond timestamp based on RTC instead of OS Tic
+extern void 			fetchRtc( uint32_t *pDt, uint32_t *pTm, uint32_t *pMSec );   // read RTC values into *pDt, *pTm, *pMSec
+
 extern void 			tbDelay_ms( int ms ); 					//  Delay execution for a specified number of milliseconds
 extern void *			tbAlloc( int nbytes, const char *msg );
 extern void             checkMem( void );

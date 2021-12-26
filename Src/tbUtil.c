@@ -410,6 +410,22 @@ void 										initIDs(){																		// initialize CPU_ID & TB_ID strings
 
 //
 // timestamps & RTC, allocation, fexists
+
+void fetchRtc( uint32_t *pDt, uint32_t *pTm, uint32_t *pMSec ){   // read RTC values into *pDt, *pTm, *pMSec
+   const int PREDIV_S = 255;    // RTC prescaler default value
+   uint32_t prvDt=0,Dt=1, prvTm=0,Tm=1, SubSec=1;
+   while (prvDt != Dt || prvTm != Tm){
+        prvDt = Dt;
+        prvTm = Tm;
+        Dt = RTC->DR;
+        Tm = RTC->TR;
+				SubSec = RTC->SSR;
+    }
+	  *pDt = Dt;
+		*pTm = Tm;
+		*pMSec = (PREDIV_S - SubSec)*1000/(PREDIV_S + 1);   // in ~4mSec steps
+}
+
 struct {
 	uint8_t		yr;
 	uint8_t		mon;
@@ -425,15 +441,22 @@ struct {
 
 /// \brief Gets the current time from RTC into a fsTime structure.
 /// \param[out] fsTime      fsTime structure to be filled in.
-void getRTC(struct _fsTime *fsTime) {
-    int pDt=0,Dt=1, pTm=0,Tm=1;
+void 										getRTC( struct _fsTime *fsTime ) {
+  uint32_t Dt=1, Tm=1, mSec=1;
+	fetchRtc( &Dt, &Tm, &mSec );  // get valid RTC register values 
+	
+ /*   int pDt=0,Dt=1, pTm=0,Tm=1, SubSec=1;
     while (pDt != Dt || pTm != Tm){
         pDt = Dt;
         pTm = Tm;
         Dt = RTC->DR;
         Tm = RTC->TR;
+				SubSec = RTC->SSR;
     }
-
+    const int PREDIV_S = 255;    // RTC prescaler default value
+    uint32_t milliSec = (PREDIV_S - SubSec)*1000/(PREDIV_S + 1);   // in ~4mSec steps
+*/
+	
     // This is going suck in the year 2100. But it would break in 2107 anyway.
     // The time format allows years 1980 to 2107. The RTC only allows years % 100.
     fsTime->year = ((Dt>>20) & 0xF)*10 + ((Dt>>16) & 0xF) + 2000;
@@ -445,9 +468,22 @@ void getRTC(struct _fsTime *fsTime) {
     fsTime->sec = ((Tm>> 4) & 0x7)*10 + (Tm & 0xF);
 }
 
+uint32_t 								tbRtcStamp(){   // returns millisecond timestamp based on RTC instead of OS Tic
+  uint32_t Dt=1, Tm=1, mSec=1;
+	fetchRtc( &Dt, &Tm, &mSec );  // get valid RTC register values 
+	uint8_t hour =  ((Tm>>20) & 0x3)*10 + ((Tm>>16) & 0xF);
+	uint8_t minute = ((Tm>>12) & 0x7)*10 + ((Tm>>8) & 0xF);
+	uint8_t second  = ((Tm>> 4) & 0x7)*10 + (Tm & 0xF);
+  uint32_t msRTC = (hour * 3600 + minute * 60 + second)*1000 + mSec;
+	return msRTC;   // wraps at midnight
+}
+
 uint32_t init_msRTC= 0, init_msTS;
 bool 										showRTC( ){
-	int pDt=0,Dt=1, pTm=0,Tm=1, SubSec=1;
+  uint32_t Dt=1, Tm=1, mSec=1;
+	fetchRtc( &Dt, &Tm, &mSec );  // get valid RTC register values 
+	
+ /*	int pDt=0,Dt=1, pTm=0,Tm=1, SubSec=1;
 	while (pDt != Dt || pTm != Tm){
 		pDt = Dt;
 		pTm = Tm;
@@ -456,12 +492,15 @@ bool 										showRTC( ){
         SubSec = RTC->SSR;
 	}
     const int PREDIV_S = 255;    // RTC prescaler default value
+	*/
+	
     const int ACT_DATE_RESET = 0x0c101;    // reset value of RTC Date Register = Saturday, 1-Jan-2000 
     const int DOC_DATE_RESET = 0x02101;    // reset value of RTC Date Register = Monday, 1-Jan-00  (according to RM0402)
 	if ( Dt == DOC_DATE_RESET || Dt == ACT_DATE_RESET ) 
         return false;    //  RTC is uninitialized
 	
-	uint8_t year, month, day, hour, minute, second, dayOfWeek, milliSec;
+	uint8_t year, month, day, hour, minute, second, dayOfWeek;
+	uint32_t milliSec;
 	year =  ((Dt>>20) & 0xF)*10 + ((Dt>>16) & 0xF);
 	dayOfWeek = ((Dt>>13) & 0x7);
 	month = ((Dt>>12) & 0x1)*10 + ((Dt>>8) & 0xF);
@@ -470,13 +509,13 @@ bool 										showRTC( ){
 	hour =  ((Tm>>20) & 0x3)*10 + ((Tm>>16) & 0xF);
 	minute = ((Tm>>12) & 0x7)*10 + ((Tm>>8) & 0xF);
 	second  = ((Tm>> 4) & 0x7)*10 + (Tm & 0xF);
-    milliSec = (PREDIV_S - SubSec)*1000/(PREDIV_S + 1);   // in ~4mSec steps
+//    milliSec = (PREDIV_S - SubSec)*1000/(PREDIV_S + 1);   // in ~4mSec steps
 
 	if ((Tm>>22) & 0x1) hour += 12;
 
 	char * wkdy[] = { "", "Mon","Tue","Wed","Thu","Fri","Sat","Sun" };
 	logEvtFmt( "RTC", "Dt: 20%02d-%02d-%02d (%s), Tm: %02d_%02d_%02d.%03d", year, month, day, wkdy[dayOfWeek], hour, minute, second, milliSec  );
-    uint32_t msRTC = (hour * 3600 + minute * 60 + second)*1000 + milliSec;
+    uint32_t msRTC = (hour * 3600 + minute * 60 + second)*1000 + mSec;
     uint32_t tsNow = tbTimeStamp();
     if ( init_msRTC==0 ){
         init_msTS = tsNow;

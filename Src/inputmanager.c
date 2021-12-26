@@ -17,6 +17,7 @@ osMemoryPoolId_t					TBEvent_pool 	= NULL;		// memory pool for TBEvents
 
 static osThreadAttr_t 		thread_attr;
 static osEventFlagsId_t		osFlag_InpThr;		// osFlag to signal a keyUp event from ISR
+static osTimerId_t				keyDownTimer = NULL;
 uint16_t									KeypadIMR = 0;					// interrupt mask register bits for keypad (also set in main() for MarcDebug)
 
 // structs defined in tbook.h for Debugging visibility
@@ -94,6 +95,7 @@ void 					enableInputs( bool fromThread ){							// check for any unprocessed In
 	}
 	EXTI->IMR |= KeypadIMR;		// re-enable keypad EXTI interrupts
 }						   					
+
 bool 					updateKeyState( KEY k ){		// read keypad pin, update keydef[k] if changed, & generate osEvt if UP transition
 	bool keydown = gGet( keydef[k].id ); 
 	Dbg.keypad[ k ] = keydown? keyNm[k] : '_';	//DEBUG
@@ -102,9 +104,22 @@ bool 					updateKeyState( KEY k ){		// read keypad pin, update keydef[k] if chan
 	if ( keydef[k].down != keydown ){	// state has changed 
 		keydef[k].down = keydown;
 		if ( keydown ){		// keyDown transition -- remember starttime
+			if ( KSt.DownKey==kINVALID ){ // first key down
+				osTimerStart( keyDownTimer, TB_Config->minLongPressMS );  // interrupts if key down that long
+			} else { // multiple keys down-- disable long press timer
+				osTimerStop( keyDownTimer );
+			}
 			keydef[k].tstamp = tbTimeStamp(); 
 			dbgEvt( TB_keyDn, k, keydef[k].tstamp, 0, 0 );
-		} else { 
+		} else {  // keyUp transition
+			if ( KSt.LongPressKey == k ){   // already reported long press, so ignore actual up transition
+				KSt.LongPressKey = kINVALID;
+				return false;
+			}
+			if ( KSt.DownKey==k ){
+				osTimerStop( keyDownTimer );
+				KSt.DownKey = kINVALID;
+			}
 			if ( k==kSTAR && KSt.starAltUsed ){	// no event for Star UP, if it was used for <star-X>
 				KSt.starAltUsed = false;
 				dbgEvt( TB_keyStUp, k,0, 0, 0 );
@@ -123,7 +138,14 @@ bool 					updateKeyState( KEY k ){		// read keypad pin, update keydef[k] if chan
 }
 
 extern bool 	RebootOnKeyInt;		// from powermanager -- reboot if interrupt
-
+void 					checkKeyTimer( void * arg ){
+// called by OS when keyDownTimer expires ==> key has been down more than TB_Config->minLongPressMS
+	//osTimerStop( keyDownTimer );			// needed?
+	KSt.detectedUpKey = KSt.DownKey; 	// treat like up after long press
+	KSt.LongPressKey = KSt.DownKey;   // remember -- ignore actual up transition
+	KSt.DownKey = kINVALID; 
+	osEventFlagsSet( osFlag_InpThr, KEYPAD_EVT );		// wakeup for inputThread
+}
 void 					handleInterrupt( bool fromThread ){					// called for external interrupt on specified keypad pin
 /* external interrupts for GPIO pins call one of the EXTIx_IRQHandler's below:
 // cycle through the keypad keys, and clear any set EXTI Pending Bits, and their NVIC pending IRQs
@@ -248,6 +270,8 @@ void 					initializeInterrupts(){			// configure each keypad GPIO pin to input, 
 		keydef[k].tstamp = tbTimeStamp(); 
 	}
 	KSt.detectedUpKey = kINVALID;
+	KSt.DownKey = kINVALID;
+	KSt.LongPressKey = kINVALID;
 /*	if ( keydef[kSTAR].down ){		// STAR held down on restart?
 		if (keydef[kHOME].down ){   // STAR-HOME => USB
 //			RebootToDFU();				// perform reboot into system memory to invoke Device Firmware Update bootloader
@@ -256,6 +280,8 @@ void 					initializeInterrupts(){			// configure each keypad GPIO pin to input, 
 		}
 	}
     */
+
+
 }
 
 //
@@ -372,6 +398,18 @@ void 					initInputManager( void ){ 			// initializes keypad & starts thread
 	Dbg.thread[4] = (osRtxThread_t *) osThreadNew( inputThread, NULL, &thread_attr );
 	if ( Dbg.thread[4] == NULL )
 		tbErr( "inputThread spawn failed" );	
+
+	osTimerAttr_t 	timer_attr;
+	timer_attr.name = "Key Timer";
+	timer_attr.attr_bits = 0;
+	timer_attr.cb_mem = 0;
+	timer_attr.cb_size = 0;
+	keyDownTimer = osTimerNew(	checkKeyTimer, osTimerOnce, 0, &timer_attr );
+	if ( keyDownTimer == NULL ) 
+		tbErr( "keyDownTimer not alloc'd" );
+	
+//	osTimerStart( keyDownTimer, currPwrTimerMS );
+//	osTimerStop( keyDownTimer );
 
 	//PowerManager::getInstance()->registerPowerEventHandler( handlePowerEvent );
 	//registerPowerEventHandler( handlePowerEvent );	

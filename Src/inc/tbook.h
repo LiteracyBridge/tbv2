@@ -239,6 +239,8 @@ typedef  struct {
 	bool					starDown;					// flags to prevent STAR keypress on key-up after STAR-key alt sequence
 	bool					starAltUsed;
 	char 					keyState[11];
+	KEY 					DownKey;					// key currently down
+	KEY 					LongPressKey;			// key reported as long press -- shared ISR & thread
 } KeyPadState_t;
 typedef KeyPadKey_t 	 KeyPadKey_arr[ NUM_KEYPADS ];		// so Dbg knows array size
 

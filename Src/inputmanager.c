@@ -105,6 +105,7 @@ bool 					updateKeyState( KEY k ){		// read keypad pin, update keydef[k] if chan
 		keydef[k].down = keydown;
 		if ( keydown ){		// keyDown transition -- remember starttime
 			if ( KSt.DownKey==kINVALID ){ // first key down
+				// ((osRtxTimer_t *) keyDownTimer )-> 
 				osTimerStart( keyDownTimer, TB_Config->minLongPressMS );  // interrupts if key down that long
 			} else { // multiple keys down-- disable long press timer
 				osTimerStop( keyDownTimer );
@@ -141,6 +142,7 @@ extern bool 	RebootOnKeyInt;		// from powermanager -- reboot if interrupt
 void 					checkKeyTimer( void * arg ){
 // called by OS when keyDownTimer expires ==> key has been down more than TB_Config->minLongPressMS
 	//osTimerStop( keyDownTimer );			// needed?
+	dbgEvt( TB_keyTmr, KSt.DownKey, 0, 0, 0 );
 	KSt.detectedUpKey = KSt.DownKey; 	// treat like up after long press
 	KSt.LongPressKey = KSt.DownKey;   // remember -- ignore actual up transition
 	KSt.DownKey = kINVALID; 

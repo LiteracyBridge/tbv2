@@ -202,7 +202,8 @@ extern void 			dbgEvtS( int id, const char *d );
 #define TB_keyStUp					EventID(EventLevelDetail, 		TBkey_no, 0x0d)
 #define TB_keyUp						EventID(EventLevelDetail, 		TBkey_no, 0x0e)
 #define TB_keyWk						EventID(EventLevelDetail, 		TBkey_no, 0x0f)
-#define TBkeyMismatch				EventID(EventLevelError, 		  TBkey_no, 0x10)
+#define TB_keyTmr						EventID(EventLevelDetail, 		TBkey_no, 0x10)
+#define TBkeyMismatch				EventID(EventLevelError, 		  TBkey_no, 0x11)
 //#define TB_keyX						EventID(EventLevelAPI, 				TBkey_no, 0x0a)
 
 #define TBnor_no						(0x08)

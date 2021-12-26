@@ -1385,8 +1385,12 @@ void		 				cdc_SetVolume( uint8_t Volume ){														// sets volume 0..10  (
 	dbgLog( "2 cdcSetVol v=%d cdcV=0x%x \n", v, cdcFmtVolume );
 	#if defined( AIC3100 )
 		// AIC3100 -- left channel volume:  -127..48 => -63.5dB .. 24dB
+//HACK to avoid Volume GLITCH
+		bool paused = false;	//HACK
+		if ( audGetState()==Playing )	{	audPauseResumeAudio(); paused=true; }	//HACK
 		aicSetReg( P0_R65_DAC_Left_Volume_Control, cdcFmtVolume	 ); 		 // P0_R65: -127..48 (0x81..0x30)
 		dbgLog( "2 AIC Lvol %d \n", cdcFmtVolume );
+		if ( paused ) audPauseResumeAudio();	//HACK
 	#endif
 	#if defined( AK4343 )
 		Codec_WrReg( AK_Lch_Digital_Volume_Control, akFmtVolume );  // Left Channel Digital Volume control

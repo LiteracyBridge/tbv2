@@ -4,7 +4,8 @@
 #include	"tbook.h"
 
 // TalkingBook keypad has 10 keys, each connected to a line of the keypad cable
-typedef enum {	kHOME=0, kCIRCLE, kPLUS, kMINUS, kTREE, kLHAND, kRHAND, kPOT, kSTAR, kTABLE, kINVALID  } KEY;
+//  plus kINVALID for no key value, & kTIMER for long press timer elapsed
+typedef enum {	kHOME=0, kCIRCLE, kPLUS, kMINUS, kTREE, kLHAND, kRHAND, kPOT, kSTAR, kTABLE, kINVALID, kTIMER } KEY;
 
 typedef struct	{	// KeyPadKey -- assignments to GPIO pins, in inputManager.cpp
 	GPIO_ID				id;			// idx in gpio_def
@@ -30,6 +31,12 @@ typedef struct	{	// KeyPadKey -- assignments to GPIO pins, in inputManager.cpp
 	uint32_t		dntime;		// num tbTicks it was down
 }	KeyState;
 */
+
+typedef struct {	// TB_Key --  msg for key Q from ISR to InputThread
+	KEY		     k;     		// keyboard key that changed (or kTIMER)
+	bool			 down;  		// down transition
+	uint32_t	 tstamp;		// timestamp
+} TB_Key;
 
 typedef struct {	// TB_Event --  event & downMS for event Q
 	Event		 typ;

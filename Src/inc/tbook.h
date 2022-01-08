@@ -230,17 +230,29 @@ typedef  char DbgScr[dbgLns][dbgChs];
 #define	NUM_KEYPADS 		10
 
 typedef  struct {
+	// state updated by keypad ISR in handleInterrupt()
 	int 					eventTS;					// TStamp of most recent input interrupt
 	int						lastTS;						// TStamp of previous input interrupt 
 	int						msecSince;				// msec between prev & this
+	int						downCnt;					// # keys currently depressed
+	char 					keyState[11];
+	
+	// state updated by inputThread in response to keyTransition msgs
+	KEY						firstDown;				// kINVALID or 1st key to go down
+	int						firstDownTS;
+	KEY						secondDown;			  // kINVALID or 2nd key to go down
+	int						secondDownTS;
+  bool					multipleDown;     // true if third key goes down-- reset when all are up
+  bool					starUsed;					// true if STAR used as shift-- Star up is ignored
+/*
 	KEY						detectedUpKey;		// shared variable between ISR and thread
 	bool					DFUkeysDown;			// TRUE if special DFU keypair down: TABLE + POT
 	bool					keytestKeysDown;	// TRUE if special keytest pair down: HOME + POT
 	bool					starDown;					// flags to prevent STAR keypress on key-up after STAR-key alt sequence
 	bool					starAltUsed;
-	char 					keyState[11];
 	KEY 					DownKey;					// key currently down
 	KEY 					LongPressKey;			// key reported as long press -- shared ISR & thread
+*/
 } KeyPadState_t;
 typedef KeyPadKey_t 	 KeyPadKey_arr[ NUM_KEYPADS ];		// so Dbg knows array size
 

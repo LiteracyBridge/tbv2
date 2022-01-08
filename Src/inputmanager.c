@@ -9,11 +9,15 @@
 
 const int					KEYPAD_EVT 		=	1;
 const int					TB_EVT_QSIZE	=	4;
+const int					TB_KEY_QSIZE  = 4;
 
 #define count(x) sizeof(x)/sizeof(x[0])
 
 osMessageQueueId_t 				osMsg_TBEvents 	= NULL;     // os message queue id	for TB_Events
 osMemoryPoolId_t					TBEvent_pool 	= NULL;		// memory pool for TBEvents 
+
+osMessageQueueId_t 				osMsg_KeyTransitions 	= NULL;     // os message queue id for KeyTransitions
+osMemoryPoolId_t					KeyTransition_pool 	= NULL;		// memory pool for KeyTransitions
 
 static osThreadAttr_t 		thread_attr;
 static osEventFlagsId_t		osFlag_InpThr;		// osFlag to signal a keyUp event from ISR
@@ -25,7 +29,7 @@ KeyPadState_t				KSt;
 KeyTestState_t			KTest;		
 
 const char *				keyName[] = { "k0H", "k1C", "k2+", "k3-", "k4T", "k5P", "k6S", "k7t", "k8", "k9", "k10I" };
-const char 					keyNm[] = {'H', 'C', '+', '-', 'T', 'L', 'R', 'P', 'S', 'B', 'I' };	// used for Debug ouput
+const char 					keyNm[] = {'H', 'C', '+', '-', 'T', 'L', 'R', 'P', 'S', 't', 'I', '=' };	// used for Debug ouput
 const char *				keyTestGood = "GgGg_";
 const char *				keyTestBad = "RrRr_"; 
 const char *				keyTestReset = "R8_3 R8_3 R8_3";	// 3 long red pulses
@@ -84,7 +88,7 @@ void 					enableInputs( bool fromThread ){							// check for any unprocessed In
 		bool kdn = gGet( keydef[k].id );	// gets LOGICAL value of port/pin
 		if ( kdn != keydef[k].down ){			// should == current state
 			char *sig = keydef[k].signal; 
-			dbgLog( "! %s K%d %s dn%d \n", fromThread?"*":"I", k, sig, keydef[k].down );
+			dbgLog( "! %s K%c %s dn=%c %dDn \n", fromThread?"*":"I", keyNm[k], sig, keydef[k].down?'t':'f', KSt.downCnt );
 			int pendR = EXTI->PR, iw = keydef[k].intq >> 5UL, irq = NVIC->ICPR[iw];
 			dbgEvt(TBkeyMismatch, k, (fromThread<<8) + kdn, pendR, irq );
 			if (irq != 0 || pendR!= 0) 
@@ -96,7 +100,7 @@ void 					enableInputs( bool fromThread ){							// check for any unprocessed In
 	EXTI->IMR |= KeypadIMR;		// re-enable keypad EXTI interrupts
 }						   					
 
-bool 					updateKeyState( KEY k ){		// read keypad pin, update keydef[k] if changed, & generate osEvt if UP transition
+/*bool 					updateKeyState( KEY k ){		// read keypad pin, update keydef[k] if changed, & generate osEvt if UP transition
 	bool keydown = gGet( keydef[k].id ); 
 	Dbg.keypad[ k ] = keydown? keyNm[k] : '_';	//DEBUG
 	
@@ -136,17 +140,23 @@ bool 					updateKeyState( KEY k ){		// read keypad pin, update keydef[k] if chan
 		}
 	}
 	return false;
-}
+} */
 
 extern bool 	RebootOnKeyInt;		// from powermanager -- reboot if interrupt
-void 					checkKeyTimer( void * arg ){
-// called by OS when keyDownTimer expires ==> key has been down more than TB_Config->minLongPressMS
-	//osTimerStop( keyDownTimer );			// needed?
-	dbgEvt( TB_keyTmr, KSt.DownKey, 0, 0, 0 );
-	KSt.detectedUpKey = KSt.DownKey; 	// treat like up after long press
-	KSt.LongPressKey = KSt.DownKey;   // remember -- ignore actual up transition
-	KSt.DownKey = kINVALID; 
-	osEventFlagsSet( osFlag_InpThr, KEYPAD_EVT );		// wakeup for inputThread
+
+void					sendKeyTran( KEY k, uint32_t ts, bool down ){		// send transition message to input thread
+	TB_Key *trn = (TB_Key *)osMemoryPoolAlloc( KeyTransition_pool, 0 );
+	if (trn==NULL) tbErr( "out of KeyTransitions" );
+	trn->k = k;
+	trn->down = down;
+	trn->tstamp = ts;
+			
+	if ( osMessageQueuePut( osMsg_KeyTransitions, &trn, 0, 0 ) != osOK )	// Priority 0, no wait
+		tbErr( "failed to enQ key transition" );
+}
+void 					checkKeyTimer( void * arg ){  // called by OS when keyDownTimer expires ==> key down for minLongPressMS
+	osTimerStop( keyDownTimer );  // reset necessary?
+	sendKeyTran( kTIMER, tbTimeStamp(), false );  // treat similarly to key up
 }
 void 					handleInterrupt( bool fromThread ){					// called for external interrupt on specified keypad pin
 /* external interrupts for GPIO pins call one of the EXTIx_IRQHandler's below:
@@ -165,28 +175,37 @@ void 					handleInterrupt( bool fromThread ){					// called for external interru
 	KSt.lastTS 	= KSt.eventTS; 									// for next one
 	dbgEvt( TB_keyIRQ, KSt.msecSince, fromThread, 0, 0 );
 	
+	int downCnt = 0;
 	for ( k = kHOME; k < kINVALID; k++ ){		// process key transitions
 		if ( (EXTI->PR & keydef[ k ].extiBit) != 0 ){  // pending bit for this key set?
 			EXTI->PR = keydef[ k ].extiBit;						// clear pending bit
 			NVIC_ClearPendingIRQ( keydef[ k ].intq ); // and the corresponding interrupt
 		}
-		if ( updateKeyState( k ))  
-			return; 		// if UP transition sent Event-- return without clearing other interrupts or re-enabling	
+		
+		bool keydown = gGet( keydef[k].id ); 
+		KSt.keyState[ k ] = keydown? keyNm[k] : '_';	//DEBUG
+		if ( keydown ) downCnt++;
+    if ( keydef[k].down != keydown ){	 // transition occurred
+			keydef[k].down = keydown;		// remember new key state
+			sendKeyTran( k, KSt.eventTS, keydown );
+		}
 	}
+	KSt.downCnt = downCnt;
 	
 	// TABLE TREE 		-- hardware forces reset
 	// TABLE TREE POT -- reset with Boot0 => DFU
 		
 	// POT HOME -- start keytest
 	// POT TABLE -- software DFU?
+	/*
 	if ( keydef[kPOT].down ){	// detect keytest sequence
 		KSt.keytestKeysDown = keydef[kHOME].down;  		// POT HOME => keytest
 		KSt.DFUkeysDown = keydef[kTABLE].down;				// POT TABLE => reboot
 		if ( KSt.keytestKeysDown || KSt.DFUkeysDown ){
 			osEventFlagsSet( osFlag_InpThr, KEYPAD_EVT );		// wakeup for inputThread
 			return;
-		}
 	}
+	*/
 	enableInputs( fromThread );			// no detectedUpKey -- re-enable interrupts
 }
 // STM3210E_EVAL  EXTI ints 0 Wk, 				3 JDn, 				5-9 JCe/Key, 					10-15 Tam&JRi/JLe/JUp
@@ -271,9 +290,14 @@ void 					initializeInterrupts(){			// configure each keypad GPIO pin to input, 
 		keydef[k].down = gGet( keydef[k].id ); 
 		keydef[k].tstamp = tbTimeStamp(); 
 	}
-	KSt.detectedUpKey = kINVALID;
-	KSt.DownKey = kINVALID;
-	KSt.LongPressKey = kINVALID;
+	KSt.firstDown = kINVALID;
+	KSt.secondDown = kINVALID;
+	KSt.multipleDown = false;
+	KSt.starUsed = false;
+	
+//	KSt.detectedUpKey = kINVALID;
+//	KSt.DownKey = kINVALID;
+//	KSt.LongPressKey = kINVALID;
 /*	if ( keydef[kSTAR].down ){		// STAR held down on restart?
 		if (keydef[kHOME].down ){   // STAR-HOME => USB
 //			RebootToDFU();				// perform reboot into system memory to invoke Device Firmware Update bootloader
@@ -288,8 +312,8 @@ void 					initializeInterrupts(){			// configure each keypad GPIO pin to input, 
 
 //
 // keypadTest -- 
-//    STAR-TABLE to start -- green for each new key pressed, red if duplicate, G_G_G when all have been clicked, long press to restart test
-void 					resetKeypadTest(){
+//     -- green for each new key pressed, red if duplicate, G_G_G when all have been clicked, long press to restart test
+/*void 					resetKeypadTest(){
 	for ( KEY k = kHOME; k < kINVALID; k++ )
 		KTest.Status[ k ] = '_';
 	KTest.Status[ kINVALID ] = 0;  // so its a string
@@ -326,10 +350,124 @@ void 					keypadTestKey( KEY evt, int dntime ) {		// verify function of keypad
 		dbgEvt( TB_ktRepeat, evt, dntime, 0, 0 );
 		ledFg( keyTestBad );
 	}
-}
+} */
+
+static  bool KeypadTestActive = false;
 // 
-// inputManager-- manager thread
-void 					inputThread( void *arg ){			// converts signals from keypad ISR's to events on controlManager queue
+// inputThread-- thread to process key transitions & timeouts => TBook Event messages
+void 					inputThread( void *arg ){			// converts TB_Key msgs from keypad ISR's to TB Event msgs to controlManager queue
+	dbgLog( "4 inThr: 0x%x 0x%x \n", &arg, &arg + INPUT_STACK_SIZE );
+	TB_Key *transition;
+	while (true){
+		transition = NULL;
+	  osStatus_t status = osMessageQueueGet( osMsg_KeyTransitions, &transition, NULL, osWaitForever );  // wait for key transition or timeout
+		if (status != osOK) 
+			tbErr("keyTransition QGet error");
+		KEY k = transition->k;
+		uint32_t ts = transition->tstamp;
+		bool keydown = transition->down;
+		osMemoryPoolFree( KeyTransition_pool, transition );		
+
+		dbgLog( "A keyTr: %c%c %d \n", keyNm[k], keydown? 'v':'^', ts	);
+		if ( (KSt.keyState[kPOT]!='_') && (KSt.keyState[kHOME]!='_')){
+			KeypadTestActive = !KeypadTestActive;
+			dbgLog("A KeypadTestMode %s \n", KeypadTestActive? "on":"off" );
+		}
+				
+		int dntime = 0;
+		if ( keydown ){   //****************** KEY DOWN TRANSITION
+			if ( KSt.firstDown == kINVALID ){
+				KSt.firstDown = k;
+				KSt.firstDownTS = ts;
+				osTimerStart( keyDownTimer, TB_Config->minLongPressMS );  // start long press timer
+			} 
+			else if ( KSt.secondDown == kINVALID ){
+				KSt.secondDown = k;
+				KSt.secondDownTS = ts;
+				osTimerStop( keyDownTimer );  // cancel long press timer
+			} 
+			else
+			  KSt.multipleDown = true;
+		} 
+		else if ( !KSt.multipleDown )  // ignore everything until all keys are up
+		{	//****************** KEY UP TRANSITION
+			if ( (k == kSTAR) && KSt.starUsed ){  // ignore Star up after StarX was sent
+				KSt.starUsed = false; 
+				KSt.firstDown = kINVALID;
+			} 
+			else if ( k == kTIMER ){  // pseudo up for longPress
+				if ( (KSt.firstDown == kINVALID) || (KSt.secondDown != kINVALID) ) 
+						dbgLog("bad timer state\n");  
+				else {
+					sendEvent( toLongEvt(KSt.firstDown), ts-KSt.firstDownTS );			// add event to queue
+				  KSt.firstDown = kINVALID;    // so actual key-up will be ignored
+				}
+			}
+			else if ( (k == KSt.firstDown) && (KSt.secondDown == kINVALID) ){   // only one key was down & it came up
+				osTimerStop( keyDownTimer );  // cancel long press timer
+				dntime = ts - KSt.firstDownTS;
+				if ( dntime >= TB_Config->minShortPressMS ) // legal click
+					sendEvent( toShortEvt( KSt.firstDown ), dntime );  // so send TB Event
+				KSt.firstDown = kINVALID;   // reset to all keys up
+			} 
+			else if ( (KSt.firstDown == kSTAR) && (k == KSt.secondDown) ){  // star-K & K came up
+				dntime = ts - KSt.secondDownTS;
+				if ( dntime >= TB_Config->minShortPressMS ) // legal click
+					sendEvent( toStarEvt( KSt.secondDown ), dntime );  // so send TB star-Event
+				KSt.starUsed = true;					// so star-up will be ignored
+				KSt.secondDown = kINVALID;    // back to just STAR down
+			}
+		}
+		if ( KSt.downCnt==0 ){  // reset state
+			KSt.firstDown = kINVALID;
+			KSt.secondDown = kINVALID;
+			KSt.multipleDown = false;
+		}
+		dbgLog( "A %dDn 1K:%c 2K:%c mK:%c sU:%c dnT:%d \n", KSt.downCnt, keyNm[KSt.firstDown], keyNm[KSt.secondDown], KSt.multipleDown? 'T':'f', KSt.starUsed? 'T':'f', dntime );
+	} //while
+/*		
+//		uint32_t wkup = osEventFlagsWait( osFlag_InpThr, KEYPAD_EVT, osFlagsWaitAny, osWaitForever );
+//		dbgEvt( TB_keyWk, wkup, 0, 0, 0 );
+		if ( wkup == KEYPAD_EVT ){  
+			if ( KSt.keytestKeysDown && !KTest.Active) // start a new test
+				startKeypadTest();	
+	
+			if ( KSt.DFUkeysDown ){
+				dbgEvt( TB_keyDFU, 0, 0, 0, 0 );
+				sendEvent( FirmwareUpdate, 0 );
+			}
+			
+			if ( KSt.detectedUpKey != kINVALID ){		// keyUp transition on detectedUpKey
+				int dntime = keydef[ KSt.detectedUpKey ].dntime;
+				if ( dntime < TB_Config->minShortPressMS ){	// ignore (de-bounce) if down less than this 
+					dbgEvt( TB_keyBnc, KSt.detectedUpKey, dntime, 0, 0 );
+				} else {
+					if ( KSt.starDown && KSt.detectedUpKey!=kSTAR ){  //  <STAR-x> xUp transition (ignore duration)
+						KSt.starAltUsed = true;			// prevent LONG_PRESS for Star used as Alt
+						dbgEvt( TB_keyStar, KSt.detectedUpKey, dntime, 0, 0 );
+						eTyp = toStarEvt( KSt.detectedUpKey );
+					} else if ( dntime > TB_Config->minLongPressMS ){	// LONGPRESS if down more longer than this
+						dbgEvt( TB_keyLong, KSt.detectedUpKey, dntime, 0, 0 );
+						eTyp = toLongEvt( KSt.detectedUpKey );
+					} else { // short press
+						dbgEvt( TB_keyShort, KSt.detectedUpKey, dntime, 0, 0 );
+						eTyp = toShortEvt( KSt.detectedUpKey );
+					}
+					if ( KTest.Active ){
+						keypadTestKey( KSt.detectedUpKey, dntime );
+					} else {
+						dbgLog( "A key: %s\n", eventNm( eTyp ));
+						sendEvent( eTyp, dntime );			// add event to queue
+					}
+				}
+			}
+		}
+		KSt.detectedUpKey = kINVALID;
+		handleInterrupt( true );	// re-call INT in case there were other pending keypad transitions
+	} */
+}
+/*
+void 					oldinputThread( void *arg ){			// converts signals from keypad ISR's to events on controlManager queue
 	dbgLog( "4 inThr: 0x%x 0x%x \n", &arg, &arg + INPUT_STACK_SIZE );
 	Event eTyp;
 	while (true){
@@ -372,7 +510,7 @@ void 					inputThread( void *arg ){			// converts signals from keypad ISR's to e
 		KSt.detectedUpKey = kINVALID;
 		handleInterrupt( true );	// re-call INT in case there were other pending keypad transitions
 	}
-}
+} */
 // 
 //PUBLIC:  inputManager-- API functions
 void 					initInputManager( void ){ 			// initializes keypad & starts thread
@@ -381,12 +519,22 @@ void 					initInputManager( void ){ 			// initializes keypad & starts thread
 	Dbg.KeyPadStatus = &KSt;
 	Dbg.KeyPadDef = &keydef;
 	Dbg.TBookConfig = TB_Config;
-	resetKeypadTest();
+//	resetKeypadTest();
 	
 	osFlag_InpThr = osEventFlagsNew(NULL);	// os flag ID -- used so ISR can wakeup inputThread
 	if ( osFlag_InpThr == NULL)
 		tbErr( "osFlag_InpThr alloc failed" );	
 
+	// set up queue for key transition messages from ISR to inputThread
+	osMsg_KeyTransitions = osMessageQueueNew( TB_KEY_QSIZE, sizeof(TB_Key), NULL );
+	if ( osMsg_KeyTransitions==NULL ) 
+		tbErr( "failed to create KeyTransition queue" );
+
+	KeyTransition_pool = osMemoryPoolNew( 8, sizeof(TB_Key), NULL );
+	if ( KeyTransition_pool==NULL ) 
+		tbErr( "failed to create KeyTransition pool" );
+
+	// and set up queue for TBook Events from inputThread to controlManager
 	osMsg_TBEvents = osMessageQueueNew( TB_EVT_QSIZE, sizeof(TB_Event), NULL );
 	if ( osMsg_TBEvents==NULL ) 
 		tbErr( "failed to create TB_Event queue" );
@@ -422,6 +570,9 @@ void 					sendEvent( Event key, int32_t arg ){	// log & send TB_Event to CSM
 		tbErr( "bad event" );
 	if (TBEvent_pool==NULL) return; //DEBUG
 	dbgEvt( TB_keyEvt, key, arg, 0, 0 );
+	dbgLog( "A Evt: %s %d \n", eventNm(key), arg );
+	
+	if ( KeypadTestActive ) return;
 	
 	TB_Event *evt = (TB_Event *)osMemoryPoolAlloc( TBEvent_pool, osWaitForever );
 	evt->typ = key;

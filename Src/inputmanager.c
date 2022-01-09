@@ -81,18 +81,19 @@ void 					enableInputs( bool fromThread ){							// check for any unprocessed In
 	// I think the following problem occurs when a key change triggers an interrupt, but then the key changes back before 
 	// the ISR has finished -- so the 2nd transition never triggers an interrupt.
 	//
-	//BUG CHECK-- sometimes this is called when the keydef[].down state doesn't match the IDR state, which shouldn't happen
-	// e.g. handleInterrupts is called & doesn't set detectedUpKey, with key[x].down==1, but IDR[x]==0
+	//BUG CHECK-- sometimes this is called when the keydef[].down state doesn't match the IDR state
+    // which can happen if a transitions occurs while interrupts are disabled -- seems more common than one would expect
+    // AND new interrupt doesn't happen when re-enabled! 
 	for ( KEY k = kHOME; k < kINVALID; k++ ){		// process key transitions
-		int idr = keydef[k].port->IDR;		// port Input data register
+//		int idr = keydef[k].port->IDR;		// port Input data register
 		bool kdn = gGet( keydef[k].id );	// gets LOGICAL value of port/pin
 		if ( kdn != keydef[k].down ){			// should == current state
-			char *sig = keydef[k].signal; 
-			dbgLog( "! %s K%c %s dn=%c %dDn \n", fromThread?"*":"I", keyNm[k], sig, keydef[k].down?'t':'f', KSt.downCnt );
 			int pendR = EXTI->PR, iw = keydef[k].intq >> 5UL, irq = NVIC->ICPR[iw];
 			dbgEvt(TBkeyMismatch, k, (fromThread<<8) + kdn, pendR, irq );
-			if (irq != 0 || pendR!= 0) 
-				dbgLog( "! pR%04x ICPR[%d]%04x \n", pendR, iw, irq );
+			//if (irq != 0 || pendR!= 0) 
+			//	dbgLog( "! pR%04x ICPR[%d]%04x \n", pendR, iw, irq );
+			dbgLog( "A %s K%c%c %dDn pR%x irq%x \n", fromThread?"*":"I", keyNm[k], keydef[k].down?'d':'u', KSt.downCnt, pendR, irq );
+
 			handleInterrupt( true );		// re-invoke, to process missed transition
 			return;
 		}
@@ -256,7 +257,7 @@ void					configInputKey( KEY k ){		// set up GPIO & external interrupt
 		int pin = keydef[k].pin;
 		int iWd = pin >> 2, iPos = (pin & 0x3), fbit = iPos<<2;
 		int msk = (0xF << fbit), val = (portCode << fbit);
-		dbgLog( "A K%d %s ICR[%d] m%04x v%04x \n", k, keydef[ k ].signal, iWd, msk, val );
+	//	dbgLog( "A K%d %s ICR[%d] m%04x v%04x \n", k, keydef[ k ].signal, iWd, msk, val );
 #if defined( STM3210E_EVAL )		
 		AFIO->EXTICR[ iWd ] = ( AFIO->EXTICR[ iWd ] & ~msk ) | val;		// replace bits <fbit..fbit+3> with portCode
 #endif
@@ -368,7 +369,8 @@ void 					inputThread( void *arg ){			// converts TB_Key msgs from keypad ISR's 
 		bool keydown = transition->down;
 		osMemoryPoolFree( KeyTransition_pool, transition );		
 
-		dbgLog( "A keyTr: %c%c %d \n", keyNm[k], keydown? 'v':'^', ts	);
+		dbgLog( "A keyTr: %c%c %d %dDn 1:%c 2:%c %c%c \n", 
+                keyNm[k], keydown? 'v':'^', ts, KSt.downCnt, keyNm[KSt.firstDown], keyNm[KSt.secondDown], KSt.multipleDown? '_':'M', KSt.starUsed? '_':'S'	);
 		if ( (KSt.keyState[kPOT]!='_') && (KSt.keyState[kHOME]!='_')){
 			KeypadTestActive = !KeypadTestActive;
 			dbgLog("A KeypadTestMode %s \n", KeypadTestActive? "on":"off" );
@@ -423,7 +425,7 @@ void 					inputThread( void *arg ){			// converts TB_Key msgs from keypad ISR's 
 			KSt.secondDown = kINVALID;
 			KSt.multipleDown = false;
 		}
-		dbgLog( "A %dDn 1K:%c 2K:%c mK:%c sU:%c dnT:%d \n", KSt.downCnt, keyNm[KSt.firstDown], keyNm[KSt.secondDown], KSt.multipleDown? 'T':'f', KSt.starUsed? 'T':'f', dntime );
+		// dbgLog( "A %dDn 1K:%c 2K:%c mK:%c sU:%c dnT:%d \n", KSt.downCnt, keyNm[KSt.firstDown], keyNm[KSt.secondDown], KSt.multipleDown? 'T':'f', KSt.starUsed? 'T':'f', dntime );
 	} //while
 /*		
 //		uint32_t wkup = osEventFlagsWait( osFlag_InpThr, KEYPAD_EVT, osFlagsWaitAny, osWaitForever );

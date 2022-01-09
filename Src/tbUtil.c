@@ -1066,8 +1066,9 @@ void 										RebootToDFU( void ){													// reboot into SystemMemory -- D
   Reboot();						 																	// jump to offset 0x4 (in SysMem)
   while (1);
 }
+static void * osRtxObjID = 0;
 uint32_t 								osRtxErrorNotify (uint32_t code, void *object_id) {	// osRtx error callback
-  (void)object_id;
+  osRtxObjID = object_id;
 
   switch (code) {
     case osRtxErrorStackUnderflow:

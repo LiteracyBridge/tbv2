@@ -23,19 +23,9 @@
 # compiler outputs #
 ######################
 *.__i
-Listings/*.lst
-Listings/*.txt
-Objects/*.o
-Objects/*.crf
-Objects/*.d
-Objects/*.iex
-Objects/*.lnp
-Objects/*.axf
-Objects/*._ia
-Listings/*.map
-Objects/*.hex
-Objects/*.dep
-Objects/*.htm
+Objects/*
+Listings/*
+Artifacts/*
 *.geneb
 *.uvoptx
 old/*

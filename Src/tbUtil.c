@@ -720,7 +720,7 @@ void 										usrLog( const char * fmt, ... ){
 }
 
 const char *DbgFlags = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";  // flags 0..35
-char DebugMask[40] =  "!A ";  // add 'X' to enable dbgLog() calls starting with 'X'
+char DebugMask[40] =  "! ";  //  add 'X' to enable dbgLog() calls starting with 'X'
 /* DEFINED DEBUG FLAGS:
     //  '1' system clock
 	//	'2' audio codec debugging
@@ -1090,7 +1090,7 @@ uint32_t 								osRtxErrorNotify (uint32_t code, void *object_id) {	// osRtx er
       tbErr("osErr unknown");// Reserved
       break;
 	}
-	return 0;
+	return (uint32_t) osRtxObjID;      // suppress var unused warning
 }
 
 

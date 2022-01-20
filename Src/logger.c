@@ -61,7 +61,7 @@ static void			addHist( const char * s1, const char * s2 ){			// DEBUG:  prepend 
 }
 */
 
-char *					loadLine( char * line, char * fpath, fsTime *tm ){		// => 1st line of 'fpath'
+char *					loadLine( char * line, const char * fpath, fsTime *tm ){		// => 1st line of 'fpath'
 	const fsTime nullTm = { 0,0,0,1,1, 2020 };  // midnight 1-Jan-2020
 	if (tm!=NULL)  *tm = nullTm;
 	strcpy(line, "---");
@@ -198,10 +198,14 @@ void						logPowerUp( bool reboot ){											// re-init logger after reboot, U
         char bkey[2] = { BootKey, 0 };
   //      if (BootKey!=' ') sprintf( bkey, "Key= %c", BootKey );
 		logEvtNS(   "REBOOT --------", "BootKey", bkey );
-    gotRtc = showRTC();
-		logEvtNS( "TB_V2", "Firmware", TBV2_Version );
-    writeLine( (char *)TBV2_Version, firmwareIdFile);
-		logEvtFmt( "BUILT", "on: %s, at: %s", __DATE__, __TIME__);  // date & time LOGGER.C last compiled -- link date?
+        gotRtc = showRTC();
+        char * oldFW = loadLine( line, firmwareIdFile, &bootDt );
+        bool haveNewFW = strcmp(oldFW, TBV2_Version)!= 0;
+
+		logEvtNS( "TB_V2", (haveNewFW? "NEW_Firmware" : "Firmware"), TBV2_Version );
+        
+        writeLine( (char *)TBV2_Version, firmwareIdFile);
+	//	logEvtFmt( "BUILT", "on: %s, at: %s", __DATE__, __TIME__);  // date & time LOGGER.C last compiled -- link date?
 		logEvtNS(  "CPU", "Id", CPU_ID );
 		logEvtNS(  "TB_ID", "Id", TB_ID );
         if ( !fexists( deviceIdFile ))
@@ -245,7 +249,8 @@ void						logPowerUp( bool reboot ){											// re-init logger after reboot, U
     if (haveTime) {
       dateStr( dt, rtcDt );
       logEvtNS( "setRTC", "DtTm", dt );
-      setupRTC( rtcDt );      
+      setupRTC( rtcDt );   
+      gotRtc = true;
       // rename setRTC.txt to dontSetRTC.txt 
       // TODO: why not simply remove it?
       uint32_t stat = frename( rtcSetFile, rtcDontSetFile );    

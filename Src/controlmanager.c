@@ -486,8 +486,8 @@ void 									executeCSM( void ){								// execute TBook control state machine
 		changeCSMstate( TB_Config->qcTestState, 0 );
 	else
 		changeCSMstate( TB_Config->initState, 0 );
-    int asCnt = 0;
-	
+    
+    bool audioIdle = true;
 	while (true){
 		evt = NULL;
 	    status = osMessageQueueGet( osMsg_TBEvents, &evt, NULL, osWaitForever );  // wait for next TB_Event
@@ -499,8 +499,13 @@ void 									executeCSM( void ){								// execute TBook control state machine
 //		logEvtNSNI( "csmEvent", "typ", TBook.lastEventName, "dnMS", evt->arg );
 		switch ( evt->typ ){
 			case AudioDone:
-				osTimerStart( timers[0], TB_Config->shortIdleMS );
-				osTimerStart( timers[1], TB_Config->longIdleMS );
+                if ( audioIdle ) 
+                    logEvtNS( "error", "msg", "AudioDone without AudioStart" );
+                else {
+                    audioIdle = true;
+                    osTimerStart( timers[0], TB_Config->shortIdleMS );
+                    osTimerStart( timers[1], TB_Config->longIdleMS );
+                }
 				break;
 			case ShortIdle:			// events that don't reset idle timers
 			case LowBattery:
@@ -510,7 +515,7 @@ void 									executeCSM( void ){								// execute TBook control state machine
 			case FilesFail:
 				break;
 			case AudioStart:
-				asCnt++;
+                audioIdle = false;
 				break;
 			default:
                 clearIdle();

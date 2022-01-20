@@ -767,7 +767,7 @@ void 										dbgLog( const char * fmt, ... ){
 	if (show){
 		vprintf( fmt, arg_ptr );
 		va_end( arg_ptr );
-		tbDelay_ms(100);            // add delay to reduce debugLog buffer overrun
+		//tbDelay_ms(100);            // add delay to reduce debugLog buffer overrun
 	}
 	disableLCD();
 }

@@ -190,16 +190,25 @@ int playCnt = 0;  // DEBUG**********************************
 ***************/
 static void 	mediaThread( void *arg ){						// communicates with audio codec for playback & recording		
 	dbgLog( "4 mediaThr: 0x%x 0x%x \n", &arg, &arg + MEDIA_STACK_SIZE );
+    bool SetVolumePending = false;
+    const int BUF_DN = CODEC_DATA_TX_DN | CODEC_DATA_RX_DN;
+    
 	while (true){		
 		uint32_t flags = osEventFlagsWait( mMediaEventId, MEDIA_EVENTS,  osFlagsWaitAny, osWaitForever );
 		
 		dbgEvt( TB_mediaEvt, flags, 0,0,0);
-		if ( (flags & CODEC_DATA_TX_DN) != 0 ){		// buffer transmission complete from SAI_event
-			audLoadBuffs();															// preload any empty audio buffers
+        if ( (flags & BUF_DN) !=0 ){      // EITHER Tx or Rx buffer done -- process, then check for pending volume change
+            if ( (flags & CODEC_DATA_TX_DN) != 0 )		// buffer transmission complete from SAI_event
+                audLoadBuffs();							// preload any empty audio buffers
+                
+            if ( (flags & CODEC_DATA_RX_DN) != 0 )		// R2) recording buffer complete from SAI_event
+                audSaveBuffs();
+            
+            if ( SetVolumePending ){            // volume change during last buffer, change now (so it won't overlap next buffer ISR)
+                cdc_SetVolume( mAudioVolume );
+                SetVolumePending = false;
+            }
 		}
-			
-		if ( (flags & CODEC_DATA_RX_DN) != 0 )		// R2) recording buffer complete from SAI_event
-			audSaveBuffs();
 			
 		if ( (flags & CODEC_PLAYBACK_DN) != 0 ){		// playback complete
 			if ( mNoteCnt==0 ){  											
@@ -261,8 +270,13 @@ static void 	mediaThread( void *arg ){						// communicates with audio codec for
 		
 	    //******* set volume
 	    if ( (flags & MEDIA_SET_VOL) != 0 ){			// request to set volume
-			logEvtNI( "setVol", "vol", mAudioVolume );
-			cdc_SetVolume( mAudioVolume );
+            if ( audGetState() == Ready ){         // no audio active-- do now
+                logEvtNI( "setVol", "vol", mAudioVolume );
+                cdc_SetVolume( mAudioVolume );
+            } else {    // audio active-- postpone till next buffer complete
+                logEvtNI( "pndVol", "vol", mAudioVolume );
+                SetVolumePending = true;
+            }
 		}
 		
 //		if ( (flags & MEDIA_SET_SPD) != 0 )				// request to set speed (NYI)

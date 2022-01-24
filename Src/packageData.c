@@ -280,28 +280,41 @@ bool            loadPackageData( void ){                        // load structur
     lineNum = 0;
     Deployment = (Deployment_t *) tbAlloc( sizeof(Deployment_t), "Deployment" );
     
-	FILE *inFile = tbOpenRead( TBP[ pPKG_DAT ] ); 
-	if ( inFile == NULL ) loadErr( "package_data.txt not found" ); 
+	  FILE *inFile = tbOpenRead( TBP[ pPKG_DAT ] );
+    if (inFile == NULL) {
+        loadErr( "package_data.txt not found" );
+    } else {
+        int fmtVer = ldDepInt( inFile, "fmt_ver" );
+        if (fmtVer != PACKAGE_FORMAT_VERSION) {
+            loadErr( "bad format_version" );
+        } else {
+            ldDepLn( inFile, "version" );
+            Deployment->Version = allocStr( line, "deployVer" );
+            logEvtNS( "Deploymt", "Ver", Deployment->Version );
 
-    int fmtVer = ldDepInt( inFile, "fmt_ver" );
-    if ( fmtVer != PACKAGE_FORMAT_VERSION )
-        loadErr("bad format_version" );
+            Deployment->AudioPaths = loadAudioPaths( inFile );
 
-    ldDepLn( inFile, "version" );
-    Deployment->Version = allocStr( line, "deployVer" );
-    logEvtNS("Deploymt", "Ver", Deployment->Version );    
-
-    Deployment->AudioPaths = loadAudioPaths( inFile );
-    
-    int nPkgs = ldDepInt( inFile, "nPkgs" );
-    Deployment->packages = (PackageList_t *) tbAlloc( sizeof(int) + nPkgs* sizeof(void *), "deployment" ); 
-    Deployment->packages->nPkgs = nPkgs;
-    for ( int i=0; i<nPkgs; i++ ){
-        Deployment->packages->pkg[i] = loadPackage( inFile, i );
+            int nPkgs = ldDepInt( inFile, "nPkgs" );
+            Deployment->packages        = (PackageList_t *) tbAlloc( sizeof( int ) + nPkgs * sizeof( void * ),
+                                                                     "deployment" );
+            Deployment->packages->nPkgs = nPkgs;
+            for (int i = 0; i < nPkgs; i++) {
+                Deployment->packages->pkg[i] = loadPackage( inFile, i );
+            }
+        }
     }
-    
-	tbCloseFile( inFile );
-    if ( errCount > 0 ){ errLog( "packages_data: %d parse errors", errCount ); return false; }
+
+    if (inFile != NULL) {
+        tbCloseFile( inFile );
+        if (errCount == 0) {
+            errLog("null file but errCount is 0", errCount);
+            errCount = 1;
+        }
+    }
+    if (errCount > 0) {
+        errLog( "packages_data: %d parse errors", errCount );
+        return false;
+    }
     return true;
 }
 

@@ -386,7 +386,8 @@ void 					inputThread( void *arg ){			// converts TB_Key msgs from keypad ISR's 
 			else if ( KSt.secondDown == kINVALID ){
 				KSt.secondDown = k;
 				KSt.secondDownTS = ts;
-				osTimerStop( keyDownTimer );  // cancel long press timer
+				if ( KSt.firstDown == kSTAR ) 
+                    osTimerStop( keyDownTimer );  // cancel Star__ timer, to allow StarX events
 			} 
 			else
 			  KSt.multipleDown = true;
@@ -398,7 +399,7 @@ void 					inputThread( void *arg ){			// converts TB_Key msgs from keypad ISR's 
 				KSt.firstDown = kINVALID;
 			} 
 			else if ( k == kTIMER ){  // pseudo up for longPress
-				if ( (KSt.firstDown == kINVALID) || (KSt.secondDown != kINVALID) ) 
+				if ( KSt.firstDown == kINVALID ) 
 						dbgLog("bad timer state\n");  
 				else {
 					sendEvent( toLongEvt(KSt.firstDown), ts-KSt.firstDownTS );			// add event to queue

@@ -492,7 +492,8 @@ void						copyNorLog( const char * fpath ){						// copy curr Nor log into file 
 	const char * badLogPatt = "M0:/LOG/badLog_%d.txt";
 	
 	FILE * f = tbOpenWrite( tmpNm ); //fopen( tmp, "w" );
-	if ( f==NULL ) norErr("cpyNor fopen err");
+	if ( f==NULL ) 
+        norErr("cpyNor fopen err");
 	
 	CheckNLog( f );			// check & correct any consistency issues in NLg or Page0
 	bool validLog = true;

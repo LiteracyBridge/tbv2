@@ -16,6 +16,7 @@
 
 #include <stdlib.h>
 
+extern bool BootVerboseLog;
 
 // GPIO utilities based on GPIO_ID enumeration & GPIO_Signal[] in main.h
 GPIO_Def_t  						gpio_def[ MAX_GPIO ];														// array of signal definitions, indexed by GPIO_ID 
@@ -500,7 +501,7 @@ bool 										showRTC( ){
         return false;    //  RTC is uninitialized
 	
 	uint8_t year, month, day, hour, minute, second, dayOfWeek;
-	uint32_t milliSec;
+//	uint32_t milliSec;
 	year =  ((Dt>>20) & 0xF)*10 + ((Dt>>16) & 0xF);
 	dayOfWeek = ((Dt>>13) & 0x7);
 	month = ((Dt>>12) & 0x1)*10 + ((Dt>>8) & 0xF);
@@ -514,14 +515,14 @@ bool 										showRTC( ){
 	if ((Tm>>22) & 0x1) hour += 12;
 
 	char * wkdy[] = { "", "Mon","Tue","Wed","Thu","Fri","Sat","Sun" };
-	logEvtFmt( "RTC", "Dt: 20%02d-%02d-%02d (%s), Tm: %02d_%02d_%02d.%03d", year, month, day, wkdy[dayOfWeek], hour, minute, second, milliSec  );
+	logEvtFmt( "RTC", "Dt: 20%02d-%02d-%02d (%s), Tm: %02d_%02d_%02d.%03d", year, month, day, wkdy[dayOfWeek], hour, minute, second, mSec  );
     uint32_t msRTC = (hour * 3600 + minute * 60 + second)*1000 + mSec;
     uint32_t tsNow = tbTimeStamp();
     if ( init_msRTC==0 ){
         init_msTS = tsNow;
         init_msRTC = msRTC;
     }
-    if ( BootKey=='L' ) logEvtFmt( "Clocks", "ts_ms: %d,  rtc_ms: %d", tsNow, init_msTS + msRTC - init_msRTC );
+    if ( BootVerboseLog ) logEvtFmt( "Clocks", "ts_ms: %d,  rtc_ms: %d", tsNow, init_msTS + msRTC - init_msRTC );
     
 	return true;    // RTC is initialized, and value has been logged
 }

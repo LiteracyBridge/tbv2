@@ -73,7 +73,7 @@ char *					loadLine( char * line, const char * fpath, fsTime *tm ){		// => 1st l
 	
 	if ( txt == NULL ) return line;
 	
-	char *pRet = strchr( txt, '\r' );
+	char *pRet = strchr( txt, '\n' );
 	if ( pRet!=NULL ) *pRet = 0;
 	
 	fsFileInfo fAttr;
@@ -198,11 +198,23 @@ void						logPowerUp( bool reboot ){											// re-init logger after reboot, U
         char bkey[2] = { BootKey, 0 };
   //      if (BootKey!=' ') sprintf( bkey, "Key= %c", BootKey );
 		logEvtNS(   "REBOOT --------", "BootKey", bkey );
-        gotRtc = showRTC();
+        gotRtc = showRTC();      // show current RTC time, or false if unset
+  if ( !gotRtc ){  
+    // RTC unset after hard power down (e.g. battery change) (or DFU). Reset from the last time we knew. Certainly
+    // the wrong time, possibly by a huge amount, but at least time increases monotonically.
+    bool haveTime = getFileTime(lastRtcFile, &rtcDt);
+    if (haveTime) {
+      dateStr( dt, rtcDt );
+      logEvtNS( "resetRTC", "DtTm", dt );
+      setupRTC( rtcDt );      
+    }
+  }
+
         char * oldFW = loadLine( line, firmwareIdFile, &bootDt );
         bool haveNewFW = strcmp(oldFW, TBV2_Version)!= 0;
-
-		logEvtNS( "TB_V2", (haveNewFW? "NEW_Firmware" : "Firmware"), TBV2_Version );
+		if ( haveNewFW ) 
+            logEvtNS( "TB_V2", "Old_Firmware", oldFW );
+		logEvtNS( "TB_V2", "Firmware", TBV2_Version );
         
         writeLine( (char *)TBV2_Version, firmwareIdFile);
 	//	logEvtFmt( "BUILT", "on: %s, at: %s", __DATE__, __TIME__);  // date & time LOGGER.C last compiled -- link date?
@@ -259,17 +271,6 @@ void						logPowerUp( bool reboot ){											// re-init logger after reboot, U
       }
     }
   }
-  
-  if ( !gotRtc ){  // show current RTC time, or false if unset
-    // RTC unset after hard power down (e.g. battery change). Reset from the last time we knew. Certainly
-    // the wrong time, possibly by a huge amount, but at least time increases monotonically.
-    bool haveTime = getFileTime(lastRtcFile, &rtcDt);
-    if (haveTime) {
-      dateStr( dt, rtcDt );
-      logEvtNS( "resetRTC", "DtTm", dt );
-      setupRTC( rtcDt );      
-    }
-  }
 	
 	//boot complete!  count it
 	bootcnt++;
@@ -281,7 +282,7 @@ void						logPowerDown( void ){															// save & shut down logger for USB
 	
 	fsTime rtcTm;
 	getRTC( &rtcTm );  // current RTC
-
+    showRTC();          // put current RTC into log
 	if ( !fexists( lastRtcFile )) writeLine( "---", lastRtcFile );  // make sure it's there
 	ftime_set( lastRtcFile, &rtcTm, &rtcTm, &rtcTm );  // set create,access,write times to RTC 
 	

@@ -306,6 +306,7 @@ bool            loadPackageData( void ){                        // load structur
 
     if (inFile != NULL) {
         tbCloseFile( inFile );
+    } else {
         if (errCount == 0) {
             errLog("null file but errCount is 0", errCount);
             errCount = 1;

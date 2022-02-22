@@ -564,7 +564,7 @@ void								audLoadBuffs(){																// called on mediaThread to preload a
       }
 }
 
-
+extern bool BootVerboseLog;
 void 								audPlaybackComplete( void ) {									// shut down after completed playback
   int pct;
   haltPlayback();     // updates tsPause & msPlayed
@@ -586,13 +586,13 @@ void 								audPlaybackComplete( void ) {									// shut down after completed 
        pct = 100; //pSt.msPlayed * 100 / pSt.msecLength;
       // complete, so msPlayed == msecLength
       dbgEvt( TB_audDone, pSt.msPlayed, pct, pSt.msPlayed, pSt.msecLength );
-      if ( BootKey=='L' ) logEvtNININI( "playDn", "ms", pSt.msPlayed, "pct", pct, "nS", pSt.nPlayed );
+      if ( BootVerboseLog ) logEvtNININI( "playDn", "ms", pSt.msPlayed, "pct", pct, "nS", pSt.nPlayed );
       if ( pSt.playbackTyp==ptMsg )
         LOG_AUDIO_PLAY_DONE(pSt.msecLength, pSt.msPlayed, 100*pSt.msPlayed/pSt.msecLength);
       logPlayMsg( );
       
       // playback completed, report difference between measured & expected elapsed time
-      if ( BootKey=='L' ) logEvtNI("Play_Tim", "dif_ms", pSt.msecLength - pSt.msPlayed );
+      if ( BootVerboseLog ) logEvtNI("Play_Tim", "dif_ms", pSt.msecLength - pSt.msPlayed );
   }
   sendEvent( AudioDone, pct );				// end of file playback-- generate CSM event
   pSt.stats->Finish++;

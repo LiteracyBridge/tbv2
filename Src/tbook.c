@@ -93,6 +93,8 @@ void copyFile( const char *src, const char * dst ){
 	tbCloseFile( fdst );	
 }
 
+extern bool BootToQCtest;
+extern bool BootDebugLoop; 
 //
 //  TBook main thread
 void talking_book( void  *tbAttr ) {		// talking book initialization & control manager thread 
@@ -140,11 +142,11 @@ void talking_book( void  *tbAttr ) {		// talking book initialization & control m
 			setDev( TBP[ i ], fsDevs[0] );
 		}
 		
-		if ( BootKey=='C' || !fexists( TBP[ pQC_PASS ] )){
+		if ( BootToQCtest || !fexists( TBP[ pQC_PASS ] )){
 			RunQCTest = true;
 		}
 		
-		if ( BootKey=='M' )	
+    if ( BootDebugLoop )	
 			debugLoop( true );	// if Minus boot -- go straight to USB mode
 	}
 

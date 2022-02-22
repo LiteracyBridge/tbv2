@@ -68,7 +68,8 @@ static void 							initPwrSignals( void );					// forward
 static int								currPwrTimerMS;
 
 bool 											RebootOnKeyInt = false;					// tell inputmanager.c to reboot on key interrupt
-
+extern bool BootVerbosePower;
+extern bool BootVerboseLog;
 
 void checkPowerTimer(void *arg);                          // forward for timer callback function
 
@@ -102,7 +103,7 @@ void                      initPowerMgr( void ){           // initialize PowerMgr
 }
 void                      setPowerCheckTimer( int timerMs ){ // set msec between powerChecks	osTimerStop( pwrCheckTimer );
     osTimerStop( pwrCheckTimer );       // OS fails to reset timer->load value if running!
-    if ( BootKey=='R' ) timerMs = 60000;  // once a minute
+    if ( BootVerbosePower ) timerMs = 60000;  // once a minute
 	osTimerStart( pwrCheckTimer, timerMs );
 }
 void 											initPwrSignals( void ){					// configure power GPIO pins, & EXTI on NOPWR 	
@@ -260,7 +261,6 @@ void                      enterStopMode( void ){                    // put STM32
 	NVIC_SystemReset();			// soft reboot
 }
 void                      powerDownTBook( void ){                   // TBook orderly shut down -- copy NLog to disk
-    if ( BootKey == 'L' ) showRTC();
 	logEvt( "PwrDown" );
 	logPowerDown();        // flush & close logs, copy NorLog to eMMC
 	ledBg( NULL );
@@ -482,7 +482,7 @@ bool                      powerChanged(){    // compare previous power status wi
 		dbgLog( "5 Primary %d \n", pS.PrimaryMV );
 		changed = true;
 	}
-    if (BootKey == 'R'){
+    if (BootVerbosePower){
 		logEvtNI("Batt", "Stat",  pS.Stat ); 
 		logEvtNI("PriBatt", "mV", pS.PrimaryMV ); 
 		logEvtNI("LithBatt", "mV", pS.LiMV ); 
@@ -529,7 +529,7 @@ void 											checkPower( ){				// check and report power status
 	
 	readAllADC();
 	
-    if ( BootKey == 'L' || BootKey == 'R' ) showRTC();
+    if ( BootVerboseLog || BootVerbosePower ) showRTC();
 	if ( powerChanged() ){	// update pS state & => true if significant change
 		char sUsb = PwrGood_N==0? 'U' : 'u';
 		char sLi = RngChar( 3000, 4000, pS.LiMV ); 				// range from charge='0' to charge='9' to '!' > 4000

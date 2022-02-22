@@ -23,7 +23,8 @@ TBook_t TBook;
 
 osTimerId_t  	timers[3]; 	// ShortIdle, LongIdle, Timer
 void									setCSMcurrState( short iSt );  // set TBook.iCurrSt & dependent fields
-	
+extern bool BootVerboseLog;	
+
 // ------------  CSM Action execution
 static void                     clearIdle( ){       // clear timers started by AudioDone to generate shortIdle & longIdle
     osTimerStop( timers[0] );
@@ -75,18 +76,18 @@ void 									playSubjAudio( char *arg ){				// play current Subject: arg must b
 	if ( strcasecmp( arg, "nm" )==0 ){
 		aud = subj->shortPrompt; 
         playtyp = ptNm;
-		if ( BootKey=='L' ) logEvtNSNS( "PlayNm", "Subj", subj->subjName, "nm", aud->filename ); 
-        if ( BootKey=='L' ) LOG_AUDIO_PLAY_SPROMPT(subj->subjName, aud->filename);
+		if ( BootVerboseLog ) logEvtNSNS( "PlayNm", "Subj", subj->subjName, "nm", aud->filename ); 
+        if ( BootVerboseLog ) LOG_AUDIO_PLAY_SPROMPT(subj->subjName, aud->filename);
 	} else if ( strcasecmp( arg, "pr" )==0 ){
 		aud = subj->invitation;
         playtyp = ptInv;
-		if ( BootKey=='L' ) logEvtNSNS( "PlayInv", "Subj", subj->subjName, "pr", aud->filename ); 
-        if ( BootKey=='L' ) LOG_AUDIO_PLAY_LPROMPT(subj->subjName, aud->filename);
+		if ( BootVerboseLog ) logEvtNSNS( "PlayInv", "Subj", subj->subjName, "pr", aud->filename ); 
+        if ( BootVerboseLog ) LOG_AUDIO_PLAY_LPROMPT(subj->subjName, aud->filename);
 	} else if ( strcasecmp( arg, "msg" )==0 ){
 		aud = gMsg( subj, TBook.iMsg );
         playtyp = ptMsg;
 		logEvtNSNI( "PlayMsg", "Subj", subj->subjName, "iM", TBook.iMsg ); 
-	    if ( BootKey=='L' ) LOG_AUDIO_PLAY_MESSAGE(TBook.iMsg, subj->subjName, aud->filename);
+	    if ( BootVerboseLog ) LOG_AUDIO_PLAY_MESSAGE(TBook.iMsg, subj->subjName, aud->filename);
   	stats = loadStats( subj->subjName, TBook.iSubj, TBook.iMsg );	// load stats for message
 	}
     getAudioPath( path, aud );
@@ -153,7 +154,7 @@ void 									playSysAudio( char *arg ){				// play system file 'arg'
             clearIdle();
 			playAudio( path, NULL, ptSys );        
 		//	logEvtNS( "PlaySys", "file", arg );
-            if ( BootKey == 'L' ) logEvtFmt("PlayAud", "system: '%s', file: '%s'", arg, path);
+            if ( BootVerboseLog ) logEvtFmt("PlayAud", "system: '%s', file: '%s'", arg, path);
             LOG_AUDIO_PLAY_SYSTEM(arg, path);
 			return;
 		}
@@ -291,7 +292,7 @@ void 									setCurrState( short iSt ){				// set iCurrSt & iPrevSt (& DBG stri
 
 static void 					doAction( Action act, char *arg, int iarg ){	// execute one csmAction
 	dbgEvt( TB_csmDoAct, act, arg[0],arg[1],iarg );
-	if (BootKey=='L') logEvtNSNS( "Action", "nm", actionNm(act), "arg", arg ); //DEBUG
+	if (BootVerboseLog) logEvtNSNS( "Action", "nm", actionNm(act), "arg", arg ); //DEBUG
 	if (isMassStorageEnabled()){		// if USB MassStorage running: ignore actions referencing files
 		switch ( act ){
 			case playSys:			
@@ -558,6 +559,7 @@ static void 					eventTest(  ){										// report Events until DFU (pot table)
 	}
 }
 
+extern bool BootToUSB;
 void 									initControlManager( void ){				// initialize control manager 	
 	EventRecorderEnable(  evrEA, 	  		TB_no, TBsai_no ); 	// TB, TBaud, TBsai  
 	EventRecorderDisable( evrAOD, 			EvtFsCore_No,   EvtFsMcSPI_No );  //FileSys library 
@@ -572,12 +574,13 @@ void 									initControlManager( void ){				// initialize control manager
     
 	if ( CSM != NULL ){     // have a CSM definition
 		ledBg( TB_Config->bgPulse );		// reset background pulse according to TB_Config
+		setVolume( TB_Config->default_volume );					// set initial volume
 
 		iPkg = 0;
 		if ( RunQCTest ){
 			Deployment = NULL; 
 		} else {			// don't load package for qcTest
-            if ( !loadPackageData() || onlyQcLoaded ){ 
+            if ( !loadPackageData() || onlyQcLoaded || BootToUSB ){  
                 USBmode( true );    // go to USB unless successfully loaded CSM & packages_data
             }
 		}
@@ -590,8 +593,6 @@ void 									initControlManager( void ){				// initialize control manager
         if ( !RunQCTest )
             PowerChecksEnabled = true;
         
-		setVolume( TB_Config->default_volume );					// set initial volume
-		
 		for ( int it=0; it<3; it++ ){
 			timers[it] = osTimerNew( tbTimer, osTimerOnce, (void *)it, NULL );
 			if ( timers[it] == NULL ) 

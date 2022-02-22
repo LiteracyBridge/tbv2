@@ -55,7 +55,7 @@ char BootKey;
 //  TABLE + TREE => hardware forced reboot
 //  TABLE + TREE + POT => hardware forced DFU mode
 
-// 'P'  										=> call talking_book() before starting OS, then debugLoop()
+// 'P'  										=> enter USBmode() before starting CSM
 // 'M'  										=> call debugLoop() in talking_book() thread
 // 'L'                                          => verbose log messages
 // no FileSys found 							=> call debugLoop( false ) in talking_book() thread
@@ -66,18 +66,25 @@ char BootKey;
 // calls to DbgPwrDown( cd ):
 //   if cd==BootMode, flash cd on LED & fastPowerDown()
 
+
+bool BootToUSB = false;
+bool BootDebugLoop = false;
+bool BootVerboseLog = false;
+bool BootToQCtest = false;
+bool BootVerbosePower = false;
+
 void setBootMode(){	// use key to to select value for BootMode
 	flashInit();			// enable keyboard to decode boot type
 	
 	BootMode = 0;  BootKey = ' ';
-	     if ( gGet( gSTAR ))		{ BootMode = 1;  BootKey = 'S'; }
-	else if ( gGet( gLHAND ))		{ BootMode = 2;  BootKey = 'L'; }
-	else if ( gGet( gMINUS ))		{ BootMode = 3;  BootKey = 'M'; }
-	else if ( gGet( gPLUS ))		{ BootMode = 4;  BootKey = 'P'; }
-	else if ( gGet( gRHAND ))		{ BootMode = 5;  BootKey = 'R'; }
-	else if ( gGet( gCIRCLE ))	    { BootMode = 6;  BootKey = 'C'; }
-	else if ( gGet( gHOME ))		{ BootMode = 7;  BootKey = 'H'; }
-    if ( BootMode != 0 )
+	     if ( gGet( gSTAR ))		{ BootMode = 1;  BootKey = 'S'; BootToQCtest = true; }
+	else if ( gGet( gLHAND ))		{ BootMode = 2;  BootKey = 'L'; BootVerboseLog = true; }
+	else if ( gGet( gMINUS ))		{ BootMode = 3;  BootKey = 'M'; BootDebugLoop = true; }
+	else if ( gGet( gPLUS ))		{ BootMode = 4;  BootKey = 'P'; BootToUSB = true; }
+	else if ( gGet( gRHAND ))		{ BootMode = 5;  BootKey = 'R'; BootVerbosePower = true; }
+	else if ( gGet( gCIRCLE ))	    { BootMode = 6;  BootKey = 'C'; }  // Circle restart
+	else if ( gGet( gHOME ))		{ BootMode = 7;  BootKey = 'H'; }  // Home restart
+    if ( BootMode != 6 && BootMode != 7 )        // no flash for Boot-Circle or Boot-Home -- normal resume keys
 		flashCode( BootMode );
 }
 
@@ -107,9 +114,9 @@ int  										main( void ){
 //	gConfigI2S( gMCO2 );  // TBookV2B 	{ gMCO2,					"PC9|0"		},  // DEBUG: MCO2 for external SystemClock/4 on PC9
 
   initPrintf(  TBV2_Version );
-    if ( BootKey=='P' ){    // PLUS => tbook with no OS -> debugLoop
-		talking_book( NULL );   // call without OS
-	}
+//    if ( BootKey=='P' ){    // PLUS => tbook with no OS -> debugLoop
+//		talking_book( NULL );   // call without OS
+//	}
 	
 	initIDs();
 

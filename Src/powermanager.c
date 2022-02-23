@@ -21,7 +21,7 @@ extern bool						firstBoot;						// true if 1st run after data loaded
 
 enum PwrStat { TEMPFAULT=0, xxx=1, CHARGING=2, LOWBATT=3, CHARGED=4, xxy=5, NOLITH=6, NOUSBPWR=7 };
 
-bool    PowerChecksEnabled = false;
+bool   PowerChecksEnabled = true;
 
 static osTimerId_t				pwrCheckTimer = NULL;
 static osEventFlagsId_t 	pwrEvents = NULL;

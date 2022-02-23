@@ -1,5 +1,5 @@
-// TB CSM 2022-01-28: V15 8 sec pause => stGoSleep, Circle__ => stChgPkg, starCircle => stNxtPkg, handle LowBattery,BattCharging,& BattCharged
-CSMcompile 8(2021-10-15) from C:\Users\geneb\Documents\CSMcompile\data\control_def.txt of 2022-02-21 17:12:49
+// TB CSM 2022-02-23: V16 starTree => play all subj messages in a loop
+CSMcompile 8(2021-10-15) from C:\Users\geneb\Documents\CSMcompile\data\control_def.txt of 2022-02-23 13:59:03
 6
 300000
 5000
@@ -192,6 +192,8 @@ msg
 stOnRepeatMsg
 45
 17,  1, 17,  8,  9, 16, 14, 15, 10, 17, 18,  2, 17, 17, 17, 17, 11, 12, 17, 17, 17, 17, 20, 17, 17, 17, 17, 17, 17, 17, 17, 45, 19, 19,  3,  4,  5,  6, 17, 17, 17, 17, 17, 17, 17, 
+2
+msgAdj
 1
 playSubj
 msg

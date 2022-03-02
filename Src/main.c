@@ -84,7 +84,7 @@ void setBootMode(){	// use key to to select value for BootMode
 	else if ( gGet( gRHAND ))		{ BootMode = 5;  BootKey = 'R'; BootVerbosePower = true; }
 	else if ( gGet( gCIRCLE ))	    { BootMode = 6;  BootKey = 'C'; }  // Circle restart
 	else if ( gGet( gHOME ))		{ BootMode = 7;  BootKey = 'H'; }  // Home restart
-    if ( BootMode != 6 && BootMode != 7 )        // no flash for Boot-Circle or Boot-Home -- normal resume keys
+    if ( BootMode != 0 && BootMode != 6 && BootMode != 7 )    // no flash for no keys, Boot-Circle or Boot-Home -- normal resume keys
 		flashCode( BootMode );
 }
 

@@ -42,20 +42,21 @@ const int ADC_TEMP_chan 				= 18;   		// TEMP = ADC1_18  if ADC_CCR.TSVREFE = 1
 const int gADC_THERM_chan				= 12;				// PC2 = ADC_THERM = ADC1_12
 
 typedef struct {
-	uint32_t							chkCnt;
-	enum PwrStat					Stat;								// stat1 stat2 pgn
-	uint32_t							VRefMV;							// should be 1200 
-	uint32_t							VBatMV;							// Backup CR2032 voltage: 2000..3300
-	uint32_t							LiMV;								// liIon voltage: 2000..3900
-	uint32_t							PrimaryMV;					// Primary (disposables) battery: 2000..2800
-	uint32_t							MpuTempMV;					// ADC_CHANNEL_TEMPSENSOR in ADC_IN18 
-	uint32_t							LiThermMV;					// LiIon thermister 
+	uint32_t                        chkCnt;
+	enum PwrStat					Stat;                       // stat1 stat2 pgn
+	uint32_t                        VRefMV;                     // should be 1200 
+	uint32_t                        VBatMV;                     // Backup CR2032 voltage: 2000..3300
+	uint32_t                        LiMV;                       // liIon voltage: 2000..3900
+	uint32_t                        PrimaryMV;					// Primary (replacable) battery: 2000..2800
+	uint32_t                        MpuTempMV;					// ADC_CHANNEL_TEMPSENSOR in ADC_IN18 
+	uint32_t                        LiThermMV;					// LiIon thermister 
 	
-	enum PwrStat					prvStat;						// previous saved by startPowerCheck()
-	bool									haveUSB; 						// USB pwrGood signal
-	bool									hadVBat;						// previous was > 2000: saved by startPowerCheck()
-	bool									hadLi;							// previous was > 2000: saved by startPowerCheck()
-	bool									hadPrimary;					// previous was > 2000: saved by startPowerCheck()
+	enum PwrStat					prvStat;                    // previous saved by startPowerCheck()
+	bool                            haveUSB;                    // USB pwrGood signal
+	bool                            hadVBat;                    // previous was > BkupPRESENT: saved by startPowerCheck()
+	bool                            hadLi;                      // previous was > LiPRESENT: saved by startPowerCheck()
+	bool                            hadPrimary;					// previous was > ReplPRESENT: saved by startPowerCheck()
+    bool                            hadUSB;                     // USB power at previous powerCheck
 } PwrState;
 static PwrState 					pS;				// state of powermanager
 extern int 				  mAudioVolume;             // current audio volume 
@@ -447,6 +448,20 @@ void											checkPowerTimer( void *arg ){		// timer to signal periodic power 
 		setPowerCheckTimer( currPwrTimerMS );
 	}
 }
+const int LiMIN = 3200;     // power down threshold
+const int LiLOW = 3400;     // mV at  ~5% capacity
+const int LiMED = 3600;		// mV at ~40%
+const int LiHI  = 3800;		// mV at ~75%
+const int LiMAX = 4000;     // start constant voltage charging
+const int LiPRESENT = 2800; // max if not connected
+
+const int ReplLOW = 2300;   // mV at ~15% capacity (for AA Alkaline)
+const int ReplMED = 2500;	// mV at ~45%  
+const int ReplHI  = 2700;	// mV at ~75% 
+const int ReplPRESENT = 1000;
+const int BkupPRESENT = 2000;
+const int HiMpuTemp = 800;
+const int HiLiTemp  = 800;
 char 											RngChar( int lo, int hi, int val ){   // => '-', '0', ... '9', '!' 
 	if (val < lo) return '-';
 	if (val > hi) return '!';
@@ -456,57 +471,56 @@ char 											RngChar( int lo, int hi, int val ){   // => '-', '0', ... '9', '
 
 void                      startPowerCheck( enum PwrStat pstat ){  // remember previous values-- only report if changed	// save previous values
 	pS.prvStat		= pS.Stat;
-	pS.hadLi 			= pS.LiMV > 2000;
-	pS.hadPrimary = pS.PrimaryMV > 2000;
-	pS.hadVBat		= pS.VBatMV > 2000;
+	pS.hadLi 		= pS.LiMV > LiPRESENT;
+	pS.hadPrimary   = pS.PrimaryMV > ReplPRESENT;
+	pS.hadVBat		= pS.VBatMV > BkupPRESENT;
+    pS.hadUSB       = (pS.prvStat & 1) == 0;
 
 	pS.chkCnt++;
 	pS.Stat = pstat;
 	pS.haveUSB = (pstat & 1) == 0;
 }
 bool                      powerChanged(){    // compare previous power status with current value-- need to report change?	bool changed = pS.chkCnt==1;
-  bool changed = pS.chkCnt==1;
+    bool changed = pS.chkCnt==1;
+    if ( pS.haveUSB != pS.hadUSB ){
+        logEvtNS("PwrChg", "USB", pS.haveUSB? "connected":"removed" );
+        changed = true;
+    }
 	if ( pS.prvStat != pS.Stat ){ 
 		dbgLog( "5 pwrStat %d => %d \n", pS.prvStat, pS.Stat );
 		changed = true;
 	}
-	if ( (pS.LiMV > 2000) 			!= pS.hadLi ){
+	if ( (pS.LiMV > LiPRESENT) != pS.hadLi ){
 		dbgLog( "5 LiIon %d \n", pS.LiMV );
+        logEvtNS("PwrChg", "LiIon", pS.LiMV > LiPRESENT? "connected":"removed" );
 		changed = true;
 	}
-	if ( (pS.VBatMV > 2000)			!= pS.hadVBat ){
-		dbgLog( "5 VBat %d \n", pS.VBatMV );
+	if ( (pS.VBatMV > BkupPRESENT) != pS.hadVBat ){
+		dbgLog( "5 BkupBat %d \n", pS.VBatMV );
+        logEvtNS("PwrChg", "Bkup", pS.VBatMV > BkupPRESENT? "connected":"removed" );
 		changed = true;
 	}
-	if ( (pS.PrimaryMV > 2000)	!= pS.hadPrimary ){
+	if ( (pS.PrimaryMV > ReplPRESENT) != pS.hadPrimary ){
 		dbgLog( "5 Primary %d \n", pS.PrimaryMV );
+        logEvtNS("PwrChg", "Primary", pS.PrimaryMV > ReplPRESENT? "connected":"removed" );
 		changed = true;
 	}
     if (BootVerbosePower){
-		logEvtNI("Batt", "Stat",  pS.Stat ); 
-		logEvtNI("PriBatt", "mV", pS.PrimaryMV ); 
-		logEvtNI("LithBatt", "mV", pS.LiMV ); 
-        logEvtNI("Volume", "lev", mAudioVolume );
-        return true;
+		char pwrDat[80];
+		sprintf(pwrDat, "Ref:%d, Stat:%d, Li:%d, Pri:%d, Bk:%d, MpuTp:%d, LiTh:%d, Vol:%d", 
+          pS.VRefMV, pS.Stat, pS.LiMV, pS.PrimaryMV, pS.VBatMV, pS.MpuTempMV, pS.LiThermMV, mAudioVolume ); 
+		logEvtNS( "PwrChk","Data",	pwrDat ); 
     }
 	return changed;
 }
 
-const int LiLOW = 3400;     // mV at  ~5% capacity
-const int LiMED = 3600;			// mV at ~40%
-const int LiHI  = 3800;			// mV at ~75%
-const int ReplLOW = 2300;   // mV at ~15% capacity (for AA Alkaline)
-const int ReplMED = 2500;		// mV at ~45%  
-const int ReplHI  = 2700;		// mV at ~75%  
-const int HiMpuTemp = 800;
-const int HiLiTemp  = 800;
 
 void                      cdc_PowerUp( void );   // extern from ti_aic3100 -- for early init on pwr thread
 
 void 											checkPower( ){				// check and report power status
 	//  check gPWR_FAIL_N & MCP73871: gBAT_PG_N, gBAT_STAT1, gBAT_STAT2
 	bool PwrFail 			= gGet( gPWR_FAIL_N );	// PE2 -- input power fail signal
-  if ( PwrFail==0 ) 
+    if ( PwrFail==0 ) 
 		powerDownTBook( );
 	
 	//  check MCP73871: gBAT_PG_N, gBAT_STAT1, gBAT_STAT2
@@ -530,9 +544,10 @@ void 											checkPower( ){				// check and report power status
 	readAllADC();
 	
     if ( BootVerboseLog || BootVerbosePower ) showRTC();
-	if ( powerChanged() ){	// update pS state & => true if significant change
+    bool pwrChg = powerChanged();
+	if ( pwrChg || BootVerboseLog ){	// update pS state & => true if significant change
 		char sUsb = PwrGood_N==0? 'U' : 'u';
-		char sLi = RngChar( 3000, 4000, pS.LiMV ); 				// range from charge='0' to charge='9' to '!' > 4000
+		char sLi = RngChar( 3000, 4000, pS.LiMV ); 			// range from charge='0' to charge='9' to '!' > 4000
 		char sPr = RngChar( 2000, 4000, pS.PrimaryMV ); 	// 2000..2200 = '0', 3800..4000 = '9'
 		char sBk = RngChar( 2000, 4000, pS.VBatMV ); 
 		char sMt = RngChar(  200, 1200, pS.MpuTempMV ); 	// 200..300 = '0'  1000..1200 = '9'
@@ -540,19 +555,19 @@ void 											checkPower( ){				// check and report power status
 		char sCh = ' ';
 		if (pstat!=CHARGING)  sLt = ' ';		// not meaningful unless charging
 		if (pstat==CHARGING)  sCh = 'c'; 
-		if (pstat==CHARGED) 	sCh = 'C';
+		if (pstat==CHARGED)   sCh = 'C';
 		if (pstat==TEMPFAULT) sCh = 'X';
 
 /*=========== Power Status -- Log message interpretation ================================
 PwrCheck, stat:  'u Lxct Pp Bb Tm Vv'
                   |  |||  |  |  |  |
                   |  |||  |  |  | Vv   v = current audio volume
-                  |  |||  |  | Tm      m = -/0/1/2/.../9/+ = MPU temp  (m+2)* 100mV, - if <200mV, + if >1200mV
-                  |  |||  | Bb         b = -/0/1/2/.../9/+ = Backup  batt voltage 2+b*.2V, - if <2.0V, + if >3.9V 
-                  |  ||| Pp            p = -/0/1/2/.../9/+ = Primary batt voltage 2+p*.2V, - if <2.0V, + if >3.9V 
-                  |  ||t               t = -/0/1/2/.../9/+ = Lithium thermistor  (t+2)* 100mV, - if <200mV, + if >1200mV
+                  |  |||  |  | Tm      m = -/0/1/2/.../9/! = MPU temp  (m+2)* 100mV, - if <200mV, + if >1200mV
+                  |  |||  | Bb         b = -/0/1/2/.../9/! = Backup  batt voltage 2+b*.2V, - if <2.0V, + if >3.9V 
+                  |  ||| Pp            p = -/0/1/2/.../9/! = Primary batt voltage 2+p*.2V, - if <2.0V, + if >3.9V 
+                  |  ||t               t = -/0/1/2/.../9/! = Lithium thermistor  (t+2)* 100mV, - if <200mV, + if >1200mV
                   |  |c                c =  /c/C/X  c=charging, C=charged, X=temp fault
-                  | Lx                 x = -/0/1/2/.../9/+ = Lithium voltage 3.xV, - if <3.0V, + if >3.9V 
+                  | Lx                 x = -/0/1/2/.../9/! = Lithium voltage 3.xV, - if <3.0V, + if >3.9V 
                   u                    u = U/u, U if Usb power is present
 ========================================================================================*/
 		char pwrStat[10];
@@ -565,11 +580,11 @@ PwrCheck, stat:  'u Lxct Pp Bb Tm Vv'
 			logEvtNI("MpuTemp", "mV", pS.MpuTempMV );
 			sendEvent( MpuHot, pS.MpuTempMV );
 		}
-	  if ( pS.haveUSB ){		// charger status is only meaningful if we haveUSB power
+	    if ( pS.haveUSB ){		// charger status is only meaningful if we haveUSB power
 			switch ( pstat ){
 				case CHARGED:						// CHARGING complete
 					logEvtNI("Charged", "mV", pS.LiMV ); 
-					sendEvent( BattCharged, pS.LiMV ); 			
+					if (pwrChg) sendEvent( BattCharged, pS.LiMV ); 		// only send CHARGED once	
 					break; 
 				case CHARGING: 					// started charging
 					logEvtNI("Charging", "mV", pS.LiMV ); 
@@ -578,6 +593,11 @@ PwrCheck, stat:  'u Lxct Pp Bb Tm Vv'
 						logEvtNI("LiTemp", "mV", pS.LiThermMV );
 						sendEvent( LithiumHot, pS.LiThermMV );
 					}
+                    if ( pS.LiMV > LiMAX ){ // charged to constant voltage regime
+                        logEvt("LiBattMax");
+                        showRTC();
+                 //       sendEvent( BattMax, ps.LiMV );
+                    }
 					break;
 				case TEMPFAULT:					// LiIon charging fault (temp?)
 					logEvtNI("ChrgeFlt", "LiTherm mV", pS.LiThermMV ); 
@@ -585,18 +605,24 @@ PwrCheck, stat:  'u Lxct Pp Bb Tm Vv'
 					break;
 				case LOWBATT:						// LiIon is low  (no USB)
 					logEvtNI("BattLow", "mV", pS.LiMV ); 
-					sendEvent( LowBattery,  pS.LiMV );		
+					if (pwrChg) sendEvent( LowBattery,  pS.LiMV );  // only send LOWBATT once		
 					break;
 				default: break;
 			}
 		} else {  // no USB,  report if batteries are present, but low
-			if ( pS.PrimaryMV > 1000 && pS.PrimaryMV < ReplLOW ){
+			if ( pS.PrimaryMV > ReplPRESENT && pS.PrimaryMV < ReplLOW ){
 				logEvtNI("ReplBattLow", "mV", pS.PrimaryMV ); 
 				sendEvent( LowBattery,  pS.PrimaryMV );		
 			}
-			if ( pS.LiMV > 1000 && pS.LiMV < LiLOW ){
+			if ( pS.LiMV > LiPRESENT && pS.LiMV < LiLOW ){
 				logEvtNI("LiBattLow", "mV", pS.LiMV ); 
 				sendEvent( LowBattery,  pS.LiMV );		
+			}
+			if ( pS.LiMV > LiPRESENT && pS.LiMV < LiMIN ){ // level to treat as power down
+                logEvt("LiBattOut");
+		//		sendEvent( BattOut,  pS.LiMV );		
+                showRTC();
+                enterStopMode();
 			}
 		}
 	}
@@ -626,7 +652,7 @@ void 											showBattCharge(){			// generate ledFG to signal power state
 	// G O O -- charging & LiMV < LiHI
 	// G O G -- charging & LiMV > LiHI
 	// G G G -- charged
-  if ( pS.LiMV > 2000 ){
+  if ( pS.LiMV > LiPRESENT ){
 		if ( pS.haveUSB ){ // report Li charge status
 			c1 = 'G';
 			c2 = 'O';
@@ -644,7 +670,7 @@ void 											showBattCharge(){			// generate ledFG to signal power state
 					break;
 			}
 		} else
-		// if no USB, but LiMV > 2000 : report LiIon level
+		// if no USB, but LiPRESENT : report LiIon level
 		// O O R -- LiMV < LiLOW
 		// O O O -- LiMV < LiMED
 		// O O G -- LiMV < LiHI
@@ -674,7 +700,9 @@ void 											showBattCharge(){			// generate ledFG to signal power state
 // ========================================================
 //    powerFail ISR
 void                     EXTI2_IRQHandler(void){          // PWR_FAIL_N interrupt-- PE2==0 => power failure, shut down
-    if ( gGet( gPWR_FAIL_N )==0 ){ 
+    if ( gGet( gPWR_FAIL_N )==0 ){
+        logEvt("PWRFAIL");
+        showRTC();
         enterStopMode();
     }
 }

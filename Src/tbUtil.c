@@ -503,6 +503,8 @@ bool 										showRTC( ){
 	uint8_t year, month, day, hour, minute, second, dayOfWeek;
 //	uint32_t milliSec;
 	year =  ((Dt>>20) & 0xF)*10 + ((Dt>>16) & 0xF);
+    if ( year < 2022 )                       // treat any date before 2022 like reset value-- date is invalid
+        return false;
 	dayOfWeek = ((Dt>>13) & 0x7);
 	month = ((Dt>>12) & 0x1)*10 + ((Dt>>8) & 0xF);
 	day =((Dt>> 4) & 0x3)*10 + (Dt & 0xF);

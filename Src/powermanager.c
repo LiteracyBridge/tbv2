@@ -543,9 +543,10 @@ void 											checkPower( ){				// check and report power status
 	
 	readAllADC();
 	
-    if ( BootVerboseLog || BootVerbosePower ) showRTC();
+    if ( BootVerboseLog || BootVerbosePower )
+        showRTC();
     bool pwrChg = powerChanged();
-	if ( pwrChg || BootVerboseLog ){	// update pS state & => true if significant change
+	if ( pwrChg || BootVerboseLog || BootVerbosePower ){	// update pS state & => true if significant change
 		char sUsb = PwrGood_N==0? 'U' : 'u';
 		char sLi = RngChar( 3000, 4000, pS.LiMV ); 			// range from charge='0' to charge='9' to '!' > 4000
 		char sPr = RngChar( 2000, 4000, pS.PrimaryMV ); 	// 2000..2200 = '0', 3800..4000 = '9'
@@ -596,7 +597,7 @@ PwrCheck, stat:  'u Lxct Pp Bb Tm Vv'
                     if ( pS.LiMV > LiMAX ){ // charged to constant voltage regime
                         logEvt("LiBattMax");
                         showRTC();
-                 //       sendEvent( BattMax, ps.LiMV );
+                        sendEvent( BattMax, pS.LiMV );
                     }
 					break;
 				case TEMPFAULT:					// LiIon charging fault (temp?)
@@ -620,9 +621,9 @@ PwrCheck, stat:  'u Lxct Pp Bb Tm Vv'
 			}
 			if ( pS.LiMV > LiPRESENT && pS.LiMV < LiMIN ){ // level to treat as power down
                 logEvt("LiBattOut");
-		//		sendEvent( BattOut,  pS.LiMV );		
+				sendEvent( BattMin,  pS.LiMV );		
                 showRTC();
-                enterStopMode();
+             //   enterStopMode();
 			}
 		}
 	}

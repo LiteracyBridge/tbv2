@@ -13,9 +13,9 @@ typedef enum { 	// Event -- TBook event types
 			Home__,   Circle__,   Plus__, 	Minus__,   Tree__, 	 Lhand__, 	Rhand__,   Pot__,   Star__,	  Table__,   //=20
 			starHome, starCircle, starPlus, starMinus, starTree, starLhand, starRhand, starPot, starStar, starTable, //=30
 			AudioStart,           AudioDone,	       ShortIdle,	        LongIdle,	        LowBattery,          //=35
-  	        BattCharging,         BattCharged,	       FirmwareUpdate,      Timer,              ChargeFault,         //=40
-            LithiumHot,           MpuHot,              FilesSuccess,        FilesFail,          anyKey,              //=45
-            eUNDEF //=46
+  	        BattCharging,         BattCharged,         BattMin,             BattMax,            FirmwareUpdate,      //=40
+            Timer,                ChargeFault,         LithiumHot,          MpuHot,             FilesSuccess,        //=45
+            FilesFail,            anyKey,              eUNDEF //=48
 }	Event;
 
 // MUST MATCH:  char * ANms[] names defined in packageData.c

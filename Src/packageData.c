@@ -31,9 +31,9 @@ char *  ENms[] = {
         "Home__",   "Circle__",   "Plus__",   "Minus__",   "Tree__",   "Lhand__",   "Rhand__",   "Pot__",   "Star__",   "Table__",   //=20
 		"starHome", "starCircle", "starPlus", "starMinus", "starTree", "starLhand", "starRhand", "starPot", "starStar", "starTable", //=30
 		"AudioStart",             "AudioDone",             "ShortIdle",             "LongIdle",             "LowBattery",            //=35 
-        "BattCharging",           "BattCharged",           "FirmwareUpdate",        "Timer",                "ChargeFault",           //=40
-        "LithiumHot",             "MpuHot",                "FilesSuccess",          "FilesFail",            "anyKey",                //=45
-        "eUNDEF", //=46
+        "BattCharging",           "BattCharged",           "BattMin",               "BattMax",              "FirmwareUpdate",        //=40
+        "Timer",                  "ChargeFault",           "LithiumHot",            "MpuHot",               "FilesSuccess",          //=45
+        "FilesFail",              "anyKey",                "eUNDEF", //=48
     NULL    // end of list marker
 };
 // MUST MATCH:  typedef Event in tknTable.h
@@ -41,8 +41,8 @@ char *  shENms[] = { "eN",
 	"Ho", "Ci", "Pl", "Mi", "Tr", "Lh", "Rh", "po", "St", "ta",
 	"H_", "C_", "P_", "M_", "T_", "L_", "R_", "p_", "S_", "t_",
 	"sH", "sC", "sP", "sM", "sT", "sL", "sR", "sp", "sS", "st",
-	"aS", "aD", "sI", "lI", "bL", "bc", "bC", "fU", "Ti", "cF", 
-	"LH", "MH", "fS", "fF", "aK", "eU",
+	"aS", "aD", "sI", "lI", "bL", "bc", "bC", "b0", "b1", "fU",
+    "Ti", "cF", "LH", "MH", "fS", "fF", "aK", "eU",
     NULL
 };
 char *	eventNm( Event e )	{ return ENms[ (int)e ];; }

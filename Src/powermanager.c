@@ -57,6 +57,8 @@ typedef struct {
 	bool                            hadLi;                      // previous was > LiPRESENT: saved by startPowerCheck()
 	bool                            hadPrimary;					// previous was > ReplPRESENT: saved by startPowerCheck()
     bool                            hadUSB;                     // USB power at previous powerCheck
+    bool                            LithNearlyCharged; 
+    bool                            LithFullyCharged;     
 } PwrState;
 static PwrState 					pS;				// state of powermanager
 extern int 				  mAudioVolume;             // current audio volume 
@@ -100,6 +102,10 @@ void                      initPowerMgr( void ){           // initialize PowerMgr
 		
 	currPwrTimerMS = PWR_TIME_OUT;
 	osTimerStart( pwrCheckTimer, currPwrTimerMS );
+    
+    pS.LithFullyCharged = false;      // reset message flags
+    pS.LithNearlyCharged = false;
+
 	dbgLog( "4 PowerMgr OK \n" );
 }
 void                      setPowerCheckTimer( int timerMs ){ // set msec between powerChecks	osTimerStop( pwrCheckTimer );
@@ -506,6 +512,7 @@ bool                      powerChanged(){    // compare previous power status wi
 		changed = true;
 	}
     if (BootVerbosePower){
+        showRTC();
 		char pwrDat[80];
 		sprintf(pwrDat, "Ref:%d, Stat:%d, Li:%d, Pri:%d, Bk:%d, MpuTp:%d, LiTh:%d, Vol:%d", 
           pS.VRefMV, pS.Stat, pS.LiMV, pS.PrimaryMV, pS.VBatMV, pS.MpuTempMV, pS.LiThermMV, mAudioVolume ); 
@@ -543,10 +550,8 @@ void 											checkPower( ){				// check and report power status
 	
 	readAllADC();
 	
-    if ( BootVerboseLog || BootVerbosePower )
+	if ( powerChanged() ){	// update pS state & => true if significant change
         showRTC();
-    bool pwrChg = powerChanged();
-	if ( pwrChg || BootVerboseLog || BootVerbosePower ){	// update pS state & => true if significant change
 		char sUsb = PwrGood_N==0? 'U' : 'u';
 		char sLi = RngChar( 3000, 4000, pS.LiMV ); 			// range from charge='0' to charge='9' to '!' > 4000
 		char sPr = RngChar( 2000, 4000, pS.PrimaryMV ); 	// 2000..2200 = '0', 3800..4000 = '9'
@@ -581,11 +586,14 @@ PwrCheck, stat:  'u Lxct Pp Bb Tm Vv'
 			logEvtNI("MpuTemp", "mV", pS.MpuTempMV );
 			sendEvent( MpuHot, pS.MpuTempMV );
 		}
+        
 	    if ( pS.haveUSB ){		// charger status is only meaningful if we haveUSB power
 			switch ( pstat ){
 				case CHARGED:						// CHARGING complete
-					logEvtNI("Charged", "mV", pS.LiMV ); 
-					if (pwrChg) sendEvent( BattCharged, pS.LiMV ); 		// only send CHARGED once	
+					logEvtNI("Charged", "mV", pS.LiMV );
+                    if ( !pS.LithFullyCharged )
+                        sendEvent( BattCharged, pS.LiMV ); 		// only send CHARGED once	
+                    pS.LithFullyCharged = true;
 					break; 
 				case CHARGING: 					// started charging
 					logEvtNI("Charging", "mV", pS.LiMV ); 
@@ -594,10 +602,9 @@ PwrCheck, stat:  'u Lxct Pp Bb Tm Vv'
 						logEvtNI("LiTemp", "mV", pS.LiThermMV );
 						sendEvent( LithiumHot, pS.LiThermMV );
 					}
-                    if ( pS.LiMV > LiMAX ){ // charged to constant voltage regime
-                        logEvt("LiBattMax");
-                        showRTC();
+                    if ( !pS.LithNearlyCharged && pS.LiMV > LiMAX ){ // charged to constant voltage regime
                         sendEvent( BattMax, pS.LiMV );
+                        pS.LithNearlyCharged = true;        // only send once
                     }
 					break;
 				case TEMPFAULT:					// LiIon charging fault (temp?)
@@ -605,8 +612,8 @@ PwrCheck, stat:  'u Lxct Pp Bb Tm Vv'
 					sendEvent( ChargeFault,  pS.LiMV );	
 					break;
 				case LOWBATT:						// LiIon is low  (no USB)
-					logEvtNI("BattLow", "mV", pS.LiMV ); 
-					if (pwrChg) sendEvent( LowBattery,  pS.LiMV );  // only send LOWBATT once		
+				//	logEvtNI("BattLow", "mV", pS.LiMV ); 
+				//	if (pwrChg) sendEvent( LowBattery,  pS.LiMV );  // only send LOWBATT once		
 					break;
 				default: break;
 			}
@@ -615,18 +622,20 @@ PwrCheck, stat:  'u Lxct Pp Bb Tm Vv'
 				logEvtNI("ReplBattLow", "mV", pS.PrimaryMV ); 
 				sendEvent( LowBattery,  pS.PrimaryMV );		
 			}
-			if ( pS.LiMV > LiPRESENT && pS.LiMV < LiLOW ){
-				logEvtNI("LiBattLow", "mV", pS.LiMV ); 
-				sendEvent( LowBattery,  pS.LiMV );		
-			}
-			if ( pS.LiMV > LiPRESENT && pS.LiMV < LiMIN ){ // level to treat as power down
-                logEvt("LiBattOut");
-				sendEvent( BattMin,  pS.LiMV );		
-                showRTC();
-             //   enterStopMode();
-			}
-		}
-	}
+			if ( pS.LiMV > LiPRESENT ){   // have Lith battery, but no USB power
+                pS.LithFullyCharged = false;
+                pS.LithNearlyCharged = false;
+                if ( pS.LiMV < LiLOW ){
+                    logEvtNI("LiBattLow", "mV", pS.LiMV ); 
+                    sendEvent( LowBattery,  pS.LiMV );		
+                }
+                if ( pS.LiMV < LiMIN ){ // level that forces power down
+                    logEvt("LiBattOut");
+                    sendEvent( BattMin,  pS.LiMV );		
+                }
+            }
+       }
+   }
 }
 bool											haveUSBpower(){				// true if USB plugged in (PwrGood_N = 0)
 	if ( pS.chkCnt==0 )		checkPower();
@@ -639,13 +648,13 @@ void 											showBattCharge(){			// generate ledFG to signal power state
 	
 	if ( pS.chkCnt==0 )		checkPower();
 
-	if ( pS.haveUSB )
-		logEvt("PwrOnUSB" );
+//	if ( pS.haveUSB )
+//		logEvt("PwrOnUSB" );
 	
-	logEvtNI("PwrLiIon", 		"mV", 	pS.LiMV );
-	logEvtNI("PwrPrimary", 	"mV", 	pS.PrimaryMV );
-	logEvtNI("PwrBackup", 	"mV", 	pS.VBatMV );
-	logEvtNI("Therm", 			"Mpu", 	pS.MpuTempMV );
+//	logEvtNI("PwrLiIon", 		"mV", 	pS.LiMV );
+//	logEvtNI("PwrPrimary", 	"mV", 	pS.PrimaryMV );
+//	logEvtNI("PwrBackup", 	"mV", 	pS.VBatMV );
+//	logEvtNI("Therm", 			"Mpu", 	pS.MpuTempMV );
 
   // if haveUSB power & not NOLITH:  report charging status
 	// R R R -- temp fault

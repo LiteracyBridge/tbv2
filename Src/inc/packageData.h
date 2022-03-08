@@ -111,7 +111,7 @@ typedef	struct CState {	// CState_t --  Control State definition
 
 typedef	struct CSList {	// CSList_t --  cnt & ptrs to each ControlState
 	int nCS;            // number of different ControlStates
-	CState_t * CS[35];  // ptr to ControlState def  
+	CState_t * CS[100  ];  // ptr to ControlState def  
 } CSList_t;
 
 typedef	struct CSM {

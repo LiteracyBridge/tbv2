@@ -269,6 +269,8 @@ void						logPowerUp( bool reboot ){											// re-init logger after reboot, U
       if (stat != fsOK) {
         errLog( "frename %s to %s => %d \n", rtcSetFile, rtcDontSetFile, stat );
       }
+	  if ( !fexists( lastRtcFile )) writeLine( "---", lastRtcFile );  // make sure it's there
+	  ftime_set( lastRtcFile, &rtcDt, &rtcDt, &rtcDt );  // set create,access,write times to RTC 
     }
   }
 	

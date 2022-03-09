@@ -159,6 +159,15 @@ void						closeLog(){
 	//checkLog(); //DEBUG
 }
 
+void                        saveLastTime( fsTime rtc ){
+    if ( rtc.year < 2022 ) {
+        dbgLog( "! save invalid date\n" );
+       return;  
+    }
+    if ( !fexists( lastRtcFile ))
+        writeLine( "---", lastRtcFile );  // make sure it's there
+    ftime_set( lastRtcFile, &rtc, &rtc, &rtc );  // set create,access,write times to RTC    
+}
 void 						dateStr( char *s, fsTime dttm ){
 	sprintf( s, "%d-%d-%d %02d:%02d", dttm.year, dttm.mon, dttm.day, dttm.hr, dttm.min );
 }
@@ -258,19 +267,19 @@ void						logPowerUp( bool reboot ){											// re-init logger after reboot, U
   // several seconds in the past, but should be "good enough".`
   if ( fexists( rtcSetFile )) { 
     bool haveTime = getFileTime(rtcSetFile, &rtcDt);
-    if (haveTime) {
+    if ( haveTime && rtcDt.year >= 2022 ){  // got a valid date/time
       dateStr( dt, rtcDt );
       logEvtNS( "setRTC", "DtTm", dt );
       setupRTC( rtcDt );   
       gotRtc = true;
-      // rename setRTC.txt to dontSetRTC.txt 
-      // TODO: why not simply remove it?
+      // rename setRTC.txt to dontSetRTC.txt -- leave it as a comment for how this works
       uint32_t stat = frename( rtcSetFile, rtcDontSetFile );    
       if (stat != fsOK) {
         errLog( "frename %s to %s => %d \n", rtcSetFile, rtcDontSetFile, stat );
       }
-	  if ( !fexists( lastRtcFile )) writeLine( "---", lastRtcFile );  // make sure it's there
-	  ftime_set( lastRtcFile, &rtcDt, &rtcDt, &rtcDt );  // set create,access,write times to RTC 
+      saveLastTime( rtcDt );
+	//  if ( !fexists( lastRtcFile )) writeLine( "---", lastRtcFile );  // make sure it's there
+	//  ftime_set( lastRtcFile, &rtcDt, &rtcDt, &rtcDt );  // set create,access,write times to RTC 
     }
   }
 	
@@ -279,14 +288,16 @@ void						logPowerUp( bool reboot ){											// re-init logger after reboot, U
 	sprintf( line, " %d", bootcnt );
 	writeLine( line,  TBP[ pBOOTCNT ] );
 }
+
 void						logPowerDown( void ){															// save & shut down logger for USB or sleeping
 	flushStats();
 	
 	fsTime rtcTm;
 	getRTC( &rtcTm );  // current RTC
     showRTC();          // put current RTC into log
-	if ( !fexists( lastRtcFile )) writeLine( "---", lastRtcFile );  // make sure it's there
-	ftime_set( lastRtcFile, &rtcTm, &rtcTm, &rtcTm );  // set create,access,write times to RTC 
+    saveLastTime( rtcTm );
+//	if ( !fexists( lastRtcFile )) writeLine( "---", lastRtcFile );  // make sure it's there
+//	ftime_set( lastRtcFile, &rtcTm, &rtcTm, &rtcTm );  // set create,access,write times to RTC 
 	
 	copyNorLog( "" );		// auto log name
 	

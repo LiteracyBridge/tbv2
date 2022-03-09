@@ -95,6 +95,7 @@ extern void             checkMem( void );
 extern void             showMem( void );
 extern bool 			fexists( const char *fname );		// return true if file path exists
 extern char *			findOnPathList( char * destpath, const char *search_path, const char * nm );	// store path to 1st 'nm' on 'search_path' in 'destpath'
+extern void             saveLastTime( fsTime rtc );         // update lastRTC.txt modified time
 
 #include "tb_evr.h"
 

@@ -1,3 +1,4 @@
+// v14: Star_LHand repeat playlist
 // TB CSM 2021-10-20: V13 Star_Tree
 // TB CSM 2021-10-05: V12 QC tune changes, longer recording (Bill)
 // TB CSM 2021-09-23: V11 QC test-- skip on Star after Home
@@ -42,6 +43,7 @@
     whenNav:       { Lhand:      stOnPrevSubj,
                      Rhand:      stOnNextSubj,
                      Tree:       stOnNextMsg,
+                     starLhand:  stOnRepeatPlaylist,
                      starTree:   stOnRepeatMsg,
                      Table:      stOnPrevMsg,
                      AudioDone:  stWait,
@@ -65,9 +67,9 @@
     whenTestDone:  {  Star: stQcUSB,  Table: stQcTest,  Home: stQcReboot, Pot: stQcSysTest  },
   },
   CStates: {
-    stWakeup:       { Actions: [ LED(_), bgLED(bgPulse), changePkg, playSys(welcome) ], CGroups:[ whenAwake, whenPlaying, whenNav ], AudioStart: stWelcoming },
+    stWakeup:       { Actions: [ LED(_), bgLED(bgPulse), changePkg, playSys(10) ], CGroups:[ whenAwake, whenPlaying, whenNav ], AudioStart: stWelcoming },
     stWelcoming:    {                                                           CGroups:[ whenAwake, whenPlaying, whenNav ], AudioDone: stPromptSubj },
-    stPromptSubj:   { Actions: [ playSys(rh_for_subj) ],                        CGroups:[ whenAwake, whenPlaying, whenNav ], AudioStart: stPromptingSub },
+    stPromptSubj:   { Actions: [ playSys(11) ],                                 CGroups:[ whenAwake, whenPlaying, whenNav ], AudioStart: stPromptingSub },
     stPromptingSub: {                                                           CGroups:[ whenAwake, whenPlaying, whenNav ], AudioDone: stWait },
 
     stWait:         {                                                           CGroups:[ whenAwake, whenNav, whenIdle ] },
@@ -87,15 +89,19 @@
     stOnNextSubj:   { Actions: [ subjAdj( 1),  playSubj(nm) ],                  CGroups:[ whenAwake, whenPlaying, whenNav ], AudioStart: stAnnouncing },
     stAnnouncing:   {                                                           CGroups:[ whenAwake, whenPlaying, whenNav ], AudioDone: stInvitation },
     stInvitation:   { Actions: [ playSubj(pr) ],                                CGroups:[ whenAwake, whenPlaying, whenNav ], AudioDone: stPromptNextSubj },
-    stPromptNextSubj:{ Actions: [ playSys(rh_for_nxt_subj) ],                   CGroups:[ whenAwake, whenPlaying, whenNav ] },
+    stPromptNextSubj:{ Actions: [ playSys(41) ],                                CGroups:[ whenAwake, whenPlaying, whenNav ] },
     stOnPrevMsg:    { Actions: [ msgAdj( -1),  playSubj(msg) ],                 CGroups:[ whenAwake, whenPlaying, whenNav ], AudioStart: stPlaying },
     stOnNextMsg:    { Actions: [ msgAdj(  1),  playSubj(msg) ],                 CGroups:[ whenAwake, whenPlaying, whenNav ], AudioStart: stPlaying },
     stPlaying:      {                                                           CGroups:[ whenAwake, whenPlaying, whenNav ] },
     stOnRepeatMsg:  { Actions: [ playSubj(msg) ],                               CGroups:[ whenAwake, whenPlaying, whenNav ], AudioStart: stRepeating },
     stRepeating:    {                                                           CGroups:[ whenAwake, whenPlaying, whenNav ], AudioDone: stOnRepeatMsg },
 
-    stOnFeedback:   { Actions: [ playSys(cir_record_ideas) ],                   CGroups:[ whenAwake, whenFeedback ] },
-    stFbOptions:    { Actions: [ playSys(rh_things_to_do) ],                    CGroups:[ whenAwake ] },
+    stOnRepeatPlaylist:{ Actions: [msgAdj(  1), playSubj(msg) ],                CGroups:[ whenAwake, whenPlaying, whenNav ], AudioStart: stPlaylistForever },
+    stPlaylistForever: {                                                        CGroups:[ whenAwake, whenPlaying, whenNav ], AudioDone: stOnRepeatPlaylist },
+
+
+    stOnFeedback:   { Actions: [ playSys(65) ],                                 CGroups:[ whenAwake, whenFeedback ] },
+    stFbOptions:    { Actions: [ playSys(26) ],                                 CGroups:[ whenAwake ] },
 
     stStartRec:     { Actions: [ startRec ],                                    CGroups:[ whenAwake, whenRecording ] },
     stPauseRec:     { Actions: [ saveSt( 2),  pauseRec ],                       CGroups:[ whenAwake, whenRecording ] },
@@ -105,8 +111,8 @@
     stCancelRec:    { Actions: [ saveRec(del) ],                                CGroups:[ whenAwake, whenNav ] },
 
     stOnLowBatt:    { Actions: [ bgLED(R_9) ],                                  CGroups:[ whenAwake ] },
-    stIdleLouder:   { Actions: [ volAdj( 1),  playSys(louder),  goPrevSt ],     CGroups:[ whenAwake, whenPlaying ] },
-    stIdleSofter:   { Actions: [ volAdj(-1),  playSys(softer),  goPrevSt ],     CGroups:[ whenAwake, whenPlaying ] },
+    stIdleLouder:   { Actions: [ volAdj( 1),  playSys(0),  goPrevSt ],          CGroups:[ whenAwake, whenPlaying ] },
+    stIdleSofter:   { Actions: [ volAdj(-1),  playSys(0),  goPrevSt ],          CGroups:[ whenAwake, whenPlaying ] },
     stOnUpdate:     { Actions: [ sysBoot ],                                     CGroups:[ whenAwake ] },
     stUSBmode:      { Actions: [ bgLED(O2_8), startUSB ],                       CGroups:[ whenUSB ] },
     stCloseUSB:     { Actions: [ endUSB,      bgLED(G_29), setTimer(1000) ],    Timer: stWakeup },

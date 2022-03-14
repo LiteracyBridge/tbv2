@@ -1,5 +1,6 @@
-// v14: Star_LHand repeat playlist
-// TB CSM 2021-10-20: V13 Star_Tree
+// TB CSM 2022-01-28: V15 8 sec pause => stGoSleep, Circle__ => stChgPkg, starCircle => stNxtPkg, handle LowBattery,BattCharging,& BattCharged
+// TB CSM 2022-01-28: V14 Home__ to stGoSleep
+// TB CSM 2021-10-20: V13 Star_Tree repeats msg for battery testing
 // TB CSM 2021-10-05: V12 QC tune changes, longer recording (Bill)
 // TB CSM 2021-09-23: V11 QC test-- skip on Star after Home
 // TB CSM 2021-05-19: V10 QC test-- each key beeps
@@ -30,9 +31,11 @@
     whenSleeping:  { Home:       stWakeup,
                      Circle:     stWakeup },
     whenAwake:     { Home:       stWakeup,
-                     Circle__:   stWakeup,
-                     Home__:     stSleepy,
-                     LongIdle:   stSleepy },
+                     Home__:     stGoSleep,
+                     LongIdle:   stSleepy,
+                     LowBattery: stLowBatt,
+                     BattCharging:stOnCharging,
+                     BattCharged:stOnCharged },
     whenUSB:       { starPlus:   stCloseUSB },
     whenPlaying:   { Plus:       stPlayLouder,
                      Minus:      stPlaySofter,
@@ -43,7 +46,6 @@
     whenNav:       { Lhand:      stOnPrevSubj,
                      Rhand:      stOnNextSubj,
                      Tree:       stOnNextMsg,
-                     starLhand:  stOnRepeatPlaylist,
                      starTree:   stOnRepeatMsg,
                      Table:      stOnPrevMsg,
                      AudioDone:  stWait,
@@ -56,20 +58,19 @@
                      Tree:       stPlayRec,
                      Table:      stCancelRec,
                      Star:       stSaveRec },
-    whenIdle:      { LowBattery: stLowBatt,
-                     starPlus:   stUSBmode,
+    whenIdle:      { starPlus:   stUSBmode,
                      Plus:       stIdleLouder,
                      Minus:      stIdleSofter,
-                     starTable:  stTest,
-                     starMinus:  stOnUpdate,
-                     starPot:    stNxtPkg,
-                     starRhand:  stChgPkg },
+//                     starTable:  stTest,
+//                     starMinus:  stOnUpdate,
+                     Circle__:   stChgPkg,
+                     starCircle: stNxtPkg },
     whenTestDone:  {  Star: stQcUSB,  Table: stQcTest,  Home: stQcReboot, Pot: stQcSysTest  },
   },
   CStates: {
-    stWakeup:       { Actions: [ LED(_), bgLED(bgPulse), changePkg, playSys(10) ], CGroups:[ whenAwake, whenPlaying, whenNav ], AudioStart: stWelcoming },
+    stWakeup:       { Actions: [ LED(_), bgLED(bgPulse), changePkg, playSys(welcome) ], CGroups:[ whenAwake, whenPlaying, whenNav ], AudioStart: stWelcoming },
     stWelcoming:    {                                                           CGroups:[ whenAwake, whenPlaying, whenNav ], AudioDone: stPromptSubj },
-    stPromptSubj:   { Actions: [ playSys(11) ],                                 CGroups:[ whenAwake, whenPlaying, whenNav ], AudioStart: stPromptingSub },
+    stPromptSubj:   { Actions: [ playSys(rh_for_subj) ],                        CGroups:[ whenAwake, whenPlaying, whenNav ], AudioStart: stPromptingSub },
     stPromptingSub: {                                                           CGroups:[ whenAwake, whenPlaying, whenNav ], AudioDone: stWait },
 
     stWait:         {                                                           CGroups:[ whenAwake, whenNav, whenIdle ] },
@@ -80,7 +81,7 @@
 
     stPlayLouder:   { Actions: [ volAdj( 1),  goPrevSt ],                       CGroups:[ whenAwake, whenPlaying ] },
     stPlaySofter:   { Actions: [ volAdj(-1),  goPrevSt ],                       CGroups:[ whenAwake, whenPlaying ] },
-    stPlayPause:    { Actions: [ saveSt( 2),  pausePlay ],                      CGroups:[ whenAwake, whenPlaying, whenNav, whenPlayPaused ] },
+    stPlayPause:    { Actions: [ saveSt( 2),  setTimer(8000), pausePlay ],      CGroups:[ whenAwake, whenPlaying, whenNav, whenPlayPaused ], Timer:stGoSleep },
     stPlayResume:   { Actions: [ resumePlay,  goSavedSt(2) ],                   CGroups:[ whenAwake, whenPlaying, whenNav ] },
     stPlayJumpBack: { Actions: [ posAdj(-7) ],                                  CGroups:[ whenAwake, whenPlaying, whenNav ] },
     stPlayJumpFwd:  { Actions: [ posAdj(60) ],                                  CGroups:[ whenAwake, whenPlaying, whenNav ] },
@@ -89,19 +90,15 @@
     stOnNextSubj:   { Actions: [ subjAdj( 1),  playSubj(nm) ],                  CGroups:[ whenAwake, whenPlaying, whenNav ], AudioStart: stAnnouncing },
     stAnnouncing:   {                                                           CGroups:[ whenAwake, whenPlaying, whenNav ], AudioDone: stInvitation },
     stInvitation:   { Actions: [ playSubj(pr) ],                                CGroups:[ whenAwake, whenPlaying, whenNav ], AudioDone: stPromptNextSubj },
-    stPromptNextSubj:{ Actions: [ playSys(41) ],                                CGroups:[ whenAwake, whenPlaying, whenNav ] },
+    stPromptNextSubj:{ Actions: [ playSys(rh_for_nxt_subj) ],                   CGroups:[ whenAwake, whenPlaying, whenNav ] },
     stOnPrevMsg:    { Actions: [ msgAdj( -1),  playSubj(msg) ],                 CGroups:[ whenAwake, whenPlaying, whenNav ], AudioStart: stPlaying },
     stOnNextMsg:    { Actions: [ msgAdj(  1),  playSubj(msg) ],                 CGroups:[ whenAwake, whenPlaying, whenNav ], AudioStart: stPlaying },
     stPlaying:      {                                                           CGroups:[ whenAwake, whenPlaying, whenNav ] },
     stOnRepeatMsg:  { Actions: [ playSubj(msg) ],                               CGroups:[ whenAwake, whenPlaying, whenNav ], AudioStart: stRepeating },
     stRepeating:    {                                                           CGroups:[ whenAwake, whenPlaying, whenNav ], AudioDone: stOnRepeatMsg },
 
-    stOnRepeatPlaylist:{ Actions: [msgAdj(  1), playSubj(msg) ],                CGroups:[ whenAwake, whenPlaying, whenNav ], AudioStart: stPlaylistForever },
-    stPlaylistForever: {                                                        CGroups:[ whenAwake, whenPlaying, whenNav ], AudioDone: stOnRepeatPlaylist },
-
-
-    stOnFeedback:   { Actions: [ playSys(65) ],                                 CGroups:[ whenAwake, whenFeedback ] },
-    stFbOptions:    { Actions: [ playSys(26) ],                                 CGroups:[ whenAwake ] },
+    stOnFeedback:   { Actions: [ playSys(cir_record_ideas) ],                   CGroups:[ whenAwake, whenFeedback ] },
+    stFbOptions:    { Actions: [ playSys(rh_things_to_do) ],                    CGroups:[ whenAwake ] },
 
     stStartRec:     { Actions: [ startRec ],                                    CGroups:[ whenAwake, whenRecording ] },
     stPauseRec:     { Actions: [ saveSt( 2),  pauseRec ],                       CGroups:[ whenAwake, whenRecording ] },
@@ -110,16 +107,18 @@
     stSaveRec:      { Actions: [ saveRec(sv) ],                                 CGroups:[ whenAwake, whenNav ] },
     stCancelRec:    { Actions: [ saveRec(del) ],                                CGroups:[ whenAwake, whenNav ] },
 
-    stOnLowBatt:    { Actions: [ bgLED(R_9) ],                                  CGroups:[ whenAwake ] },
-    stIdleLouder:   { Actions: [ volAdj( 1),  playSys(0),  goPrevSt ],          CGroups:[ whenAwake, whenPlaying ] },
-    stIdleSofter:   { Actions: [ volAdj(-1),  playSys(0),  goPrevSt ],          CGroups:[ whenAwake, whenPlaying ] },
+    stOnLowBatt:    { Actions: [ bgLED(R_3) ],                                  CGroups:[ whenAwake ] },
+    stIdleLouder:   { Actions: [ volAdj( 1),  playSys(louder),  goPrevSt ],     CGroups:[ whenAwake, whenPlaying ] },
+    stIdleSofter:   { Actions: [ volAdj(-1),  playSys(softer),  goPrevSt ],     CGroups:[ whenAwake, whenPlaying ] },
     stOnUpdate:     { Actions: [ sysBoot ],                                     CGroups:[ whenAwake ] },
     stUSBmode:      { Actions: [ bgLED(O2_8), startUSB ],                       CGroups:[ whenUSB ] },
     stCloseUSB:     { Actions: [ endUSB,      bgLED(G_29), setTimer(1000) ],    Timer: stWakeup },
-    stOnCharging:   { Actions: [ showCharge,  goPrevSt ],                       CGroups:[ whenAwake, whenIdle ] },
-    stLowBatt:      {                                                           CGroups:[ whenAwake, whenIdle ] },
-    stGoFWU:        {                                                           CGroups:[ whenAwake ] },
-    stTest:         { Actions: [ sysTest ],                                     CGroups:[ whenAwake ] },
+    stOnCharging:   { Actions: [ bgLED(R_19),  goPrevSt ],                      CGroups:[ whenAwake, whenIdle ] },
+//  stNearCharged:  { Actions: [ bgLED(R_9),  goPrevSt ],                       CGroups:[ whenAwake, whenIdle ] },
+    stOnCharged:    { Actions: [ bgLED(G),  goPrevSt ],                         CGroups:[ whenAwake, whenIdle ] },
+    stLowBatt:      { Actions: [ showCharge,  goPrevSt ],                       CGroups:[ whenAwake, whenIdle ] },
+//    stGoFWU:        {                                                           CGroups:[ whenAwake ] },
+//    stTest:         { Actions: [ sysTest ],                                     CGroups:[ whenAwake ] },
     stNxtPkg:       { Actions: [ playNxtPkg ],                                  CGroups:[ whenAwake, whenIdle ] },
     stChgPkg:       { Actions: [ changePkg ],                                   CGroups:[ whenAwake, whenIdle, whenNav ] },
 

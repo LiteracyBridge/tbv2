@@ -69,6 +69,7 @@ const int							N_SADDR = 64;		// number of startAddresses in page0
 
 int 						maxBusyWait = 0;
 bool 						norErrInProgress = false;
+fsTime                      lastRTCinLog;
 
 void						norErr(const char * fmt, ...){
 	char s[100];
@@ -262,6 +263,32 @@ void 						NLogWrite( uint32_t addr, const char *data, int len ){	// write len b
 int 						nxtBlk( int addr, int blksz ){							// => 1st multiple of 'blksz' after 'addr'
 	return (addr/blksz + 1) * blksz;
 }
+void                        scanLogForRTC( uint32_t norAddr ){
+    int32_t logaddr, year, month, date, hour, minute;
+    int cnt = 20;    // scan up to 20 pages
+    logaddr = norAddr;
+    lastRTCinLog.year = 0;
+    while ( logaddr > NLg.logBase && cnt > 0 ){
+        char * rtc = strstr( NLg.pg, "RTC," );
+        if ( rtc != NULL && rtc[39] == '.' ){  // found a "RTC, Dt: 2022-03-09 (Wed), Tm: 16_34_45.535"
+            int cnt = sscanf( rtc, "RTC, Dt: %d-%d-%d", &year, &month, &date );
+            int cnt2 = sscanf( rtc+27, "Tm: %d_%d", &hour, &minute );
+            if ( cnt==3 && cnt2==2 ){           // successfully parsed RTC date & time
+              lastRTCinLog.year = year;
+              lastRTCinLog.mon = month;
+              lastRTCinLog.day = date;
+              lastRTCinLog.hr = hour;
+              lastRTCinLog.min = minute + 1;   // later!
+              lastRTCinLog.sec = 0;
+              break;
+            }
+            cnt--;
+        }
+        logaddr -= NLg.PGSZ;     // check previous page
+        NLogReadPage( logaddr );
+    }
+    NLogReadPage( norAddr );      // go back to last page
+}
 void						findLogNext(){															// sets NLg.Nxt to first erased byte in current log
 	uint32_t norAddr = NLg.logBase;			// start reading pages of current log
 	uint32_t pgcnt = 0;
@@ -301,6 +328,7 @@ void						findLogNext(){															// sets NLg.Nxt to first erased byte in c
 		midpg = (minpg + maxpg)/2;
 		norAddr = midpg * NLg.PGSZ;
 	}
+    scanLogForRTC( norAddr );
 	
 	if ( pNx == NLg.PGSZ ){ // last page of log is full, move to next
 		norAddr += NLg.PGSZ;

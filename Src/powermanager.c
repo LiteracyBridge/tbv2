@@ -508,7 +508,7 @@ void                      reportPowerChanges(){    // compare previous power sta
 }
 void                      cdc_PowerUp( void );   // extern from ti_aic3100 -- for early init on pwr thread
 
-void                      checkPower( ){				// check and report power status
+void                      checkPower( bool verbose ){				// check and report power status
 	//  check gPWR_FAIL_N & MCP73871: gBAT_PG_N, gBAT_STAT1, gBAT_STAT2
 	bool PwrFail 			= gGet( gPWR_FAIL_N );	// PE2 -- input power fail signal
     if ( PwrFail==0 ) 
@@ -567,7 +567,7 @@ PwrCheck, stat:  'u Lxct Pp Bb Tm Vv'
     bool changed = strcmp(prvStat, pwrStat) !=0;   // log it, if status line changes
     strcpy( prvStat, pwrStat );
 
-    if (BootVerbosePower){
+    if ( verbose ){
         char pwrDat[80];
         sprintf(pwrDat, "Ref:%d, Stat:%d, Li:%d, Pri:%d, Bk:%d, MpuTp:%d, LiTh:%d, Vol:%d", 
           pS.VRefMV, pS.Stat, pS.LiMV, pS.PrimaryMV, pS.VBatMV, pS.MpuTempMV, pS.LiThermMV, mAudioVolume ); 
@@ -643,72 +643,32 @@ PwrCheck, stat:  'u Lxct Pp Bb Tm Vv'
     }
 }
 bool                      haveUSBpower(){				// true if USB plugged in (PwrGood_N = 0)
-	if ( pS.chkCnt==0 )		checkPower();
+	if ( pS.chkCnt==0 )		checkPower(true);
 	return pS.haveUSB;
 }
 void                      showBattCharge(){			// generate ledFG to signal power state
-	char fg[20] = {0};
-	const char *fmt = "_5%c5_5%c5_5%c5_15";		// 3 .5sec flashes
-	char c1, c2, c3;
+	char fg[30] = {0};
+	const char *fmt = "_5%c5_5%c5_5%c5_5%c5_15";	// 4 .5sec flashes
+	char c1, c2, c3, c4;
 	
-	if ( pS.chkCnt==0 )		checkPower();
-
-//	if ( pS.haveUSB )
-//		logEvt("PwrOnUSB" );
-	
-//	logEvtNI("PwrLiIon", 		"mV", 	pS.LiMV );
-//	logEvtNI("PwrPrimary", 	"mV", 	pS.PrimaryMV );
-//	logEvtNI("PwrBackup", 	"mV", 	pS.VBatMV );
-//	logEvtNI("Therm", 			"Mpu", 	pS.MpuTempMV );
-
-  // if haveUSB power & not NOLITH:  report charging status
-	// R R R -- temp fault
-	// G O R -- low liIon pre-charging or LiMED
-	// G O O -- charging & LiMV < LiHI
-	// G O G -- charging & LiMV > LiHI
-	// G G G -- charged
-  if ( pS.LiMV > LiPRESENT ){
-		if ( pS.haveUSB ){ // report Li charge status
-			c1 = 'G';
-			c2 = 'O';
-			logEvtNI("Charger", "Stat", pS.Stat );
-			switch ( pS.Stat ){
-				case TEMPFAULT:		c1='R'; c2='R', c3='R'; break;	// R R R   - temp fault
-				case LOWBATT:			c3='R';	break;									// G O R -- low, pre-charge
-				case CHARGING:		
-					logEvtNI("Charging", "LiThermMV", pS.LiThermMV );
-					c3 = pS.LiMV < LiMED? 'R' : (pS.LiMV < LiHI?'O' : 'G');		// GOR, GOO or GOG
-				  break;
-				case CHARGED:			c2='G'; c3='G';	break;  				// G G G  -- charged
-				
-				default: 			// incl NOLITH-- shouldn't get here
-					break;
-			}
-		} else
-		// if no USB, but LiPRESENT : report LiIon level
-		// O O R -- LiMV < LiLOW
-		// O O O -- LiMV < LiMED
-		// O O G -- LiMV < LiHI
-		// O G G -- LiMV > LiHI
-		{	
-			c1 = 'O'; 
-			c2 = pS.LiMV < LiHI? 'O' : 'G';
-			c3 = pS.LiMV < LiLOW? 'R' : (pS.LiMV < LiMED? 'O' : 'G');
-		}
-	} else 
-	// if no USB & no Lith:  report primary (replaceable) level
-	// R O R -- primary < ReplLOW
-	// R O O -- primary < ReplMED
-	// R O G -- primary < ReplHI
-	// R G G -- primary > ReplHI
-	{
-		c1 = 'R'; 
-		c2 = pS.PrimaryMV < ReplHI? 'O' : 'G';
-		c3 = pS.PrimaryMV < ReplLOW? 'R' : (pS.PrimaryMV < ReplMED? 'O' : 'G');
+	checkPower(true);
+    // charge GGGG > 90%, RGGG > 75%, RRGG > 50%, RRRG > 25%, RRRR < 10%
+    if ( pS.LiMV > LiPRESENT ){
+ 		// Lithium voltage thresholds:  3.9, 3.8, 3.7, 3.63, 3.58 
+        c1 = pS.LiMV > 3900? 'G':'R';
+        c2 = pS.LiMV > 3800? 'G':'R';
+        c3 = pS.LiMV > 3700? 'G':'R';
+        c4 = pS.LiMV > 3630? 'G':'R';
+	} else { 
+ 		// replacable voltage thresholds:  2.9, 2.6, 2.5, 2.4, 2.2 
+        c1 = pS.LiMV > 2900? 'G':'R';
+        c2 = pS.LiMV > 2600? 'G':'R';
+        c3 = pS.LiMV > 2500? 'G':'R';
+        c4 = pS.LiMV > 2200? 'G':'R';
 	}
-	sprintf( fg, fmt, c1,c2,c3 );
+	sprintf( fg, fmt, c1,c2,c3,c4 );
 	ledFg( fg );
-	logEvtS("battChg", fg );
+	logEvtS("battLev", fg );
 }
 
 
@@ -738,7 +698,7 @@ static void 							powerThreadProc( void *arg ){		// powerThread -- catches PM_N
 				break;
 
 			case PM_PWRCHK:
-				checkPower( );			// get current power status
+				checkPower( BootVerbosePower );			// get current power status
 				break;
 		}
 	} 

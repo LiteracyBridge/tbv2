@@ -32,6 +32,9 @@ char *					lastRtcFile = "M0:/system/lastRTC.txt";						// written at powerdown-
 const char *		logFilePatt = "M0:/LOG/tbLog_%d.txt";			// file name of previous log on first boot
 
 const int				MAX_EVT_LEN1 = 32, MAX_EVT_LEN2 = 64;
+
+extern fsTime               lastRTCinLog;
+
 /*  //DEBUG ONLY:  debugger accessible log history
 TBH_arr 				TBH;	
 
@@ -200,7 +203,7 @@ void						logPowerUp( bool reboot ){											// re-init logger after reboot, U
 		}
 	}
 	
-  bool gotRtc = false;
+    bool gotRtc = false;
 	if ( reboot ){
 		totLogCh = 0;			// tot chars appended
 		if (logF!=NULL) fprintf( logF, "\n" );
@@ -208,16 +211,23 @@ void						logPowerUp( bool reboot ){											// re-init logger after reboot, U
   //      if (BootKey!=' ') sprintf( bkey, "Key= %c", BootKey );
 		logEvtNS(   "REBOOT --------", "BootKey", bkey );
         gotRtc = showRTC();      // show current RTC time, or false if unset
-  if ( !gotRtc ){  
-    // RTC unset after hard power down (e.g. battery change) (or DFU). Reset from the last time we knew. Certainly
-    // the wrong time, possibly by a huge amount, but at least time increases monotonically.
-    bool haveTime = getFileTime(lastRtcFile, &rtcDt);
-    if (haveTime) {
-      dateStr( dt, rtcDt );
-      logEvtNS( "resetRTC", "DtTm", dt );
-      setupRTC( rtcDt );      
-    }
-  }
+        if ( !gotRtc ){  
+            // RTC unset after hard power down (e.g. battery change) (or DFU). Reset from the last time we knew. Certainly
+            // the wrong time, possibly by a huge amount, but at least time increases monotonically.
+            bool haveTime = getFileTime(lastRtcFile, &rtcDt);
+            // lastRTCinLog may have been set by initNorLog -- from last RTC log entry
+            // use latest
+            bool useFileTime = haveTime && (rtcDt.year >= lastRTCinLog.year) && (rtcDt.mon >= lastRTCinLog.mon) && (rtcDt.day >= lastRTCinLog.day) &&
+                (rtcDt.hr >= lastRTCinLog.hr) && (rtcDt.min >= lastRTCinLog.min) && (rtcDt.sec >= lastRTCinLog.sec); 
+            if ( useFileTime ){
+              dateStr( dt, rtcDt );
+              setupRTC( rtcDt );    
+            } else {
+              dateStr( dt, lastRTCinLog );
+              setupRTC( lastRTCinLog );    
+            }                
+            logEvtNS( "resetRTC", "DtTm", dt );
+        }
 
         char * oldFW = loadLine( line, firmwareIdFile, &bootDt );
         bool haveNewFW = strcmp(oldFW, TBV2_Version)!= 0;
@@ -421,7 +431,7 @@ void						logEvtS( const char *evtID, const char *args ){		// write log entry: '
 	char 		evtBuff[ MAX_EVT_LEN1 ];
 	int tsec = ts/100, sec = tsec/10, min = sec/60, hr = min/60;
 //	if ( hr > 0 )
-	sprintf( evtBuff,  "%d_%02d_%02d.%d: %8s", hr, min %60, sec % 60, tsec % 10, evtID );
+	sprintf( evtBuff,  "%02d_%02d_%02d.%d: %8s", hr, min %60, sec % 60, tsec % 10, evtID );
 //	else
 //		sprintf( evtBuff,  "%d_%02d.%d: %8s", min %60, sec % 60, tsec % 10, evtID );
 //	addHist( evtBuff, args );

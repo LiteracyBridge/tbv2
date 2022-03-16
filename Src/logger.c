@@ -427,14 +427,10 @@ void						norEvt( const char *s1, const char *s2 ){
 	appendNorLog( "\n" );
 }
 void						logEvtS( const char *evtID, const char *args ){		// write log entry: 'm.ss.s: EVENT, ARGS'
-	int 		ts = tbTimeStamp();
+	int     ts = tbTimeStamp();
 	char 		evtBuff[ MAX_EVT_LEN1 ];
-	int tsec = ts/100, sec = tsec/10, min = sec/60, hr = min/60;
-//	if ( hr > 0 )
-	sprintf( evtBuff,  "%02d_%02d_%02d.%d: %8s", hr, min %60, sec % 60, tsec % 10, evtID );
-//	else
-//		sprintf( evtBuff,  "%d_%02d.%d: %8s", min %60, sec % 60, tsec % 10, evtID );
-//	addHist( evtBuff, args );
+	int sec = ts/1000, min = sec/60, hr = min/60;
+	sprintf( evtBuff,  "%d_%02d_%02d.%03d: %8s", hr, min%60, sec%60, ts%1000, evtID );
 	dbgLog( " %s %s\n", evtBuff, args );
 	
 	if (( osKernelGetState()== osKernelRunning) && osMutexAcquire( logLock, osWaitForever )!=osOK ){
@@ -445,10 +441,12 @@ void						logEvtS( const char *evtID, const char *args ){		// write log entry: '
 	norEvt( evtBuff, args );	// WRITE to NOR Log
 	if ( logF!=NULL ){
 		int nch = fprintf( logF, "%s, %s\n", evtBuff, args );
-		if (nch < 0) 
-			dbgLog( "! LogErr: %d \n", nch );
-		else
-			totLogCh += nch;
+      if (nch < 0) {
+          // Error writing to log file. Mostly ignore the error and soldier on. NOR is what counts.
+          dbgLog( "! LogErr: %d \n", nch );
+      } else {
+          totLogCh += nch;
+      }
 		int err = fflush( logF );
 		
 		dbgEvt( TB_flshLog, nch, totLogCh, err,0);

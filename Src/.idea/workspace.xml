@@ -23,18 +23,23 @@
     </expand>
     <select />
   </component>
+  <component name="CMakeSettings">
+    <configurations>
+      <configuration PROFILE_NAME="Debug" ENABLED="true" CONFIG_NAME="Debug" />
+    </configurations>
+  </component>
   <component name="ChangeListManager">
     <list default="true" id="2be5cdee-f850-4dcd-86cd-c2bed8d89643" name="Default Changelist" comment="Small change to controlmanager.&#10;&#10;One substantive change:&#10;- changed goSavedSt to also update &quot;iCurrSt&quot;, which has the effect of ending&#10;  the state transition without executing the state entry actions. That seems&#10;  to be logically correct, and also lets play/pause work.&#10;  &#10;Some non-substantive changes:&#10;- The function &quot;stIdx&quot; appears to simply assert that the argument is a valid&#10;  state index (and returns it). I made that explicit in the name, &quot;assertValidState&quot;&#10;- Added some spacing for legibility.&#10;- Made a few variable names more meanigful, and added comments for comprehension.">
-      <change beforePath="$PROJECT_DIR$/../Listings/TBookRev2b.map" beforeDir="false" afterPath="$PROJECT_DIR$/../Listings/TBookRev2b.map" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../Objects/TBookRev2b.build_log.htm" beforeDir="false" afterPath="$PROJECT_DIR$/../Objects/TBookRev2b.build_log.htm" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../Objects/TBookRev2b.hex" beforeDir="false" afterPath="$PROJECT_DIR$/../Objects/TBookRev2b.hex" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../Objects/TBookRev2b.htm" beforeDir="false" afterPath="$PROJECT_DIR$/../Objects/TBookRev2b.htm" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../Objects/TBook_Rev2b_TBv2b.dep" beforeDir="false" afterPath="$PROJECT_DIR$/../Objects/TBook_Rev2b_TBv2b.dep" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/logger.c" beforeDir="false" afterPath="$PROJECT_DIR$/logger.c" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tbUtil.c" beforeDir="false" afterPath="$PROJECT_DIR$/tbUtil.c" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
     <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="ClangdSettings">
+    <option name="formatViaClangd" value="false" />
   </component>
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$/.." />
@@ -50,8 +55,11 @@
   <component name="PropertiesComponent">
     <property name="RunOnceActivity.OpenProjectViewOnStart" value="true" />
     <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
+    <property name="RunOnceActivity.cidr.known.project.marker" value="true" />
     <property name="WebServerToolWindowFactoryState" value="false" />
     <property name="aspect.path.notification.shown" value="true" />
+    <property name="cf.first.check.clang-format" value="false" />
+    <property name="cidr.known.project.marker" value="true" />
     <property name="last_opened_file_path" value="$PROJECT_DIR$" />
     <property name="node.js.detected.package.eslint" value="true" />
     <property name="node.js.detected.package.tslint" value="true" />

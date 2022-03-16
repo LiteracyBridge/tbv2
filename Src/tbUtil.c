@@ -517,7 +517,8 @@ bool 										showRTC( ){
 	if ((Tm>>22) & 0x1) hour += 12;
 
 	char * wkdy[] = { "", "Mon","Tue","Wed","Thu","Fri","Sat","Sun" };
-	logEvtFmt( "RTC", "Dt: 20%02d-%02d-%02d (%s), Tm: %02d_%02d_%02d.%03d", year, month, day, wkdy[dayOfWeek], hour, minute, second, mSec  );
+  // Date and time in ISO 8601 format. Day of week for convenience.
+	logEvtFmt( "RTC", "Dt: 20%02d-%02d-%02d %02d:%02d:%02d.%03d (%s)", year, month, day, hour, minute, second, mSec, wkdy[dayOfWeek]  );
     uint32_t msRTC = (hour * 3600 + minute * 60 + second)*1000 + mSec;
     uint32_t tsNow = tbTimeStamp();
     if ( init_msRTC==0 ){

@@ -197,6 +197,11 @@ void 										flashLED( const char *s ){											// 'GGRR__' in .1sec
 	}
 	gSet( gGREEN, 0 );	gSet( gRED, 0 );
 }
+/*
+ * Flash the LED 4 times, red for 1-bits and green for 0-bits in v.
+ * 9 (0x1001) => R G G R
+ * 3 (0x0011) => R R G G
+ */
 void 										flashCode( int v ){															// e.g. 9 => "RR__GG__GG__RR______"
   EnableLedMngr( false );
   flashLED("___");
@@ -205,14 +210,14 @@ void 										flashCode( int v ){															// e.g. 9 => "RR__GG__GG__RR___
 	flashLED("_____");
 	EnableLedMngr( true );
 }
-void										flashInit( ){																		// init keypad GPIOs for debugging	
-	LED_Init( gGREEN );	
-	LED_Init( gRED );		
+void										flashInit( ){																		// init keypad GPIOs for debugging
+	LED_Init( gGREEN );
+	LED_Init( gRED );
 	for ( GPIO_ID id = gHOME; id <= gTABLE;  id++ )
 		gConfigKey( id ); // low speed pulldown input
 }
 
-// 
+//
 // filesystem wrappers -- allow eMMC power shut off
 static bool FSysPowered = false;
 bool FSysPowerAlways = false;
@@ -230,7 +235,7 @@ FILE * 									tbOpenReadBinary( const char * nm ){						// repower if necessar
 FILE *									tbOpenWrite( const char * nm ){									// repower if necessary, & open file (delete if already exists)
 	FileSysPower( true );
 	dbgLog( "F tbOpenWr( %s )\n", nm );
-	if ( fexists( nm )) 
+	if ( fexists( nm ))
 		fdelete( nm, NULL );
 	return fopen( nm, "w" );
 }
@@ -244,16 +249,16 @@ void										tbCloseFile( FILE * f ){												// close file errLog if error
 	int st = fclose( f );
 	if ( st != fsOK ) errLog("fclose => %d", st );
 }
-void										tbRenameFile( const char *src, const char *dst ){  // rename path to path 
+void										tbRenameFile( const char *src, const char *dst ){  // rename path to path
 	// delete dst if it exists (why path is needed)
 	// fails if paths are in the same directory
 	if ( fexists( dst )){
 		fdelete( dst, NULL );
 	}
 	char *fpart = strrchr( dst, '/' )+1;  // ptr to file part of path
-	
+
 	uint32_t stat = frename( src, fpart );		// rename requires no path
-	if (stat != fsOK) 
+	if (stat != fsOK)
 		errLog( "frename %s to %s => %d \n", src, dst, stat );
 }
 
@@ -264,15 +269,15 @@ fsStatus 								fsMount( char *drv ){		// try to finit() & mount()  drv:   fini
 			dbgLog( "3 finit( %s ) got %d \n", drv, stat );
 			return stat;
 		}
-		EventRecorderDisable( evrAOD, 	 EvtFsCore_No, EvtFsMcSPI_No );  	//FS:  only Error 
+		EventRecorderDisable( evrAOD, 	 EvtFsCore_No, EvtFsMcSPI_No );  	//FS:  only Error
 		stat = fmount( drv );
 		if ( stat==fsOK ) return stat;
 
 		if ( stat == fsNoFileSystem ){
-			EventRecorderEnable( EventRecordAll, 	EvtFsCore_No, EvtFsMcSPI_No );  	//FileSys library 
+			EventRecorderEnable( EventRecordAll, 	EvtFsCore_No, EvtFsMcSPI_No );  	//FileSys library
 			stat = fformat( drv, "/FAT32" );
 			if ( stat == fsOK ) return stat;   // successfully formatted
-			
+
 			dbgLog( "formating %s got %d \n", drv, stat );
 			return stat;
 		}
@@ -283,25 +288,25 @@ void 										FileSysPower( bool enable ){										// power up/down eMMC & SD 
 		enable = true;
 	if ( enable ){
 		if ( FSysPowered ) return;
-		
+
 		dbgLog( "5 FSysPwr up \n" );
 		gConfigOut( g3V3_SW_EN );		// 1 to enable power to SDCard & eMMC
 		gConfigOut( gEMMC_RSTN );		// 0 to reset? eMMC
 		gSet( gEMMC_RSTN, 1 );			// enable at power up?
 		gSet( g3V3_SW_EN, 1 );			// enable at start up, for FileSys access
-		
+
 		tbDelay_ms( 100 );		// FileSys pwr up
 		fsStatus st = fsMount( "M0:" );  // finit() & fmount()
 		FSysPowered = true;
 
 	} else {
 		if ( !FSysPowered ) return;
-		
+
 		dbgLog( "5 FSysPwr dn \n" );
 		int st = funinit( "M0:" );	// resets PA8, PB4,PB5, PC10,PC12, PD2 to analog
-		if ( st != fsOK ) 
+		if ( st != fsOK )
 			errLog("funinit => %d", st );
-		
+
 		gUnconfig( gEMMC_RSTN );		// set PE10 to analog
 		gSet( g3V3_SW_EN, 0 );			// shut off 3V supply to SDIO  PD6
 		FSysPowered = false;
@@ -329,7 +334,7 @@ void 	  								dbgRdSect( uint32_t sect, const uint8_t *buf, uint32_t cnt, uint
 		shBuff( data, buf );
 	  dbgLog( "F %d + rdSect( %d, 0x%x[%s], cnt:%d ) => %d \n",	rdSectCnt, sect, data, data,  cnt, res );
 		rdSectCnt = 0;
-	} else 
+	} else
 		rdSectCnt += cnt;
 }
 void 	  								dbgWrSect( uint32_t sect, const uint8_t *buf, uint32_t cnt ){
@@ -339,16 +344,16 @@ void 	  								dbgWrSect( uint32_t sect, const uint8_t *buf, uint32_t cnt ){
 		shBuff( data, buf );
 		dbgLog( "F %d => WrSect( %d, 0x%x[%s], cnt:%d ) \n", wrSectCnt, sect, data, data,  cnt );
 		wrSectCnt = 0;
-	} else 
+	} else
 		wrSectCnt += cnt;
 }
 //*********** OS IDLE
 void 										osRtxIdleThread (void *argument) {
   (void)argument;
-  // The idle demon is a system thread, running when no other thread is ready to run. 
+  // The idle demon is a system thread, running when no other thread is ready to run.
   for (;;) {
     if ( SleepWhenIdle )
-			__WFE();                            // Enter sleep mode    
+			__WFE();                            // Enter sleep mode
   }
 }
 //
@@ -358,7 +363,7 @@ void 										loadTBookName(){
 	strcpy( TBookName, TB_ID );		// default to ID
 	FILE *f = tbOpenRead( "M0:/system/tbook_names.txt" ); //fopen( , "r" );
 	if ( f == NULL ) return;
-	
+
 	char fid[20], fnm[20];
 	while ( fscanf( f, "%20s %20s \n", fid, fnm )==2 ){
 		if ( strcmp(fid, TB_ID)==0 ){
@@ -371,7 +376,7 @@ void 										loadTBookName(){
 void 										initIDs(){																		// initialize CPU_ID & TB_ID strings
 	typedef struct {	// MCU device & revision
 		// Ref Man: 30.6.1 or 31.6.1: MCU device ID code
-		// stm32F412: 0xE0042000	== 0x30006441 => CPU441_c 
+		// stm32F412: 0xE0042000	== 0x30006441 => CPU441_c
 		// stm32F10x: 0xE0042000  rev: 0x1000  dev: 0xY430  (XL density) Y reserved == 6
 		// stm32F411xC/E: 0xE0042000  rev: 0x1000  dev: 0x431
 		uint16_t dev_id 	: 12;
@@ -387,8 +392,8 @@ void 										initIDs(){																		// initialize CPU_ID & TB_ID strings
 	}
 	sprintf( CPU_ID, "0x%x.%c", id->dev_id, rev );
 
-	struct {						// STM32 unique device ID 
-		// Ref Man: 30.2 Unique device ID register  
+	struct {						// STM32 unique device ID
+		// Ref Man: 30.2 Unique device ID register
 		// stm32F411xC/E: 0x1FFF7A10  32bit id, 8bit waf_num ascii, 56bit lot_num ascii
 		// stm32F412: 		0x1FFF7A10  32,32,32 -- no explanation
 		// stm32F103xx: 	0x1FFFF7E8  16, 16, 32, 32 -- no explanation
@@ -397,14 +402,14 @@ void 										initIDs(){																		// initialize CPU_ID & TB_ID strings
 		uint8_t wafer;
 		char lot[11];		// lot in 0..6
 	}  stmID;
-	
+
 //	uint32_t * uniqID = (uint32_t *) UID_BASE;	// as 32 bit int array
 //	dbgLog( "UID: %08x \n %08x %08x \n", uniqID[0], uniqID[1], uniqID[2] );
-	
+
 	memcpy( &stmID, (const void *)UID_BASE, 12 );
 	stmID.lot[7] = 0;  // null terminate the lot string
 	sprintf( TB_ID, "%04x.%04x.%x.%s", stmID.x, stmID.y, stmID.wafer, stmID.lot );
-	
+
 //	loadTBookName();
 }
 
@@ -444,8 +449,8 @@ struct {
 /// \param[out] fsTime      fsTime structure to be filled in.
 void 										getRTC( struct _fsTime *fsTime ) {
   uint32_t Dt=1, Tm=1, mSec=1;
-	fetchRtc( &Dt, &Tm, &mSec );  // get valid RTC register values 
-	
+	fetchRtc( &Dt, &Tm, &mSec );  // get valid RTC register values
+
  /*   int pDt=0,Dt=1, pTm=0,Tm=1, SubSec=1;
     while (pDt != Dt || pTm != Tm){
         pDt = Dt;
@@ -457,7 +462,7 @@ void 										getRTC( struct _fsTime *fsTime ) {
     const int PREDIV_S = 255;    // RTC prescaler default value
     uint32_t milliSec = (PREDIV_S - SubSec)*1000/(PREDIV_S + 1);   // in ~4mSec steps
 */
-	
+
     // This is going suck in the year 2100. But it would break in 2107 anyway.
     // The time format allows years 1980 to 2107. The RTC only allows years % 100.
     fsTime->year = ((Dt >> 20) & 0xF)*10 + ((Dt >> 16) & 0xF) + 2000;
@@ -471,7 +476,7 @@ void 										getRTC( struct _fsTime *fsTime ) {
 
 uint32_t 								tbRtcStamp(){   // returns millisecond timestamp based on RTC instead of OS Tic
   uint32_t Dt=1, Tm=1, mSec=1;
-	fetchRtc( &Dt, &Tm, &mSec );  // get valid RTC register values 
+	fetchRtc( &Dt, &Tm, &mSec );  // get valid RTC register values
 	uint8_t hour =  ((Tm>>20) & 0x3)*10 + ((Tm>>16) & 0xF);
 	uint8_t minute = ((Tm>>12) & 0x7)*10 + ((Tm>>8) & 0xF);
 	uint8_t second  = ((Tm>> 4) & 0x7)*10 + (Tm & 0xF);
@@ -482,8 +487,8 @@ uint32_t 								tbRtcStamp(){   // returns millisecond timestamp based on RTC i
 uint32_t init_msRTC= 0, init_msTS;
 bool 										showRTC( ){
   uint32_t Dt=1, Tm=1, mSec=1;
-	fetchRtc( &Dt, &Tm, &mSec );  // get valid RTC register values 
-	
+	fetchRtc( &Dt, &Tm, &mSec );  // get valid RTC register values
+
  /*	int pDt=0,Dt=1, pTm=0,Tm=1, SubSec=1;
 	while (pDt != Dt || pTm != Tm){
 		pDt = Dt;
@@ -494,12 +499,12 @@ bool 										showRTC( ){
 	}
     const int PREDIV_S = 255;    // RTC prescaler default value
 	*/
-	
-    const int ACT_DATE_RESET = 0x0c101;    // reset value of RTC Date Register = Saturday, 1-Jan-2000 
+
+    const int ACT_DATE_RESET = 0x0c101;    // reset value of RTC Date Register = Saturday, 1-Jan-2000
     const int DOC_DATE_RESET = 0x02101;    // reset value of RTC Date Register = Monday, 1-Jan-00  (according to RM0402)
-	if ( Dt == DOC_DATE_RESET || Dt == ACT_DATE_RESET ) 
+	if ( Dt == DOC_DATE_RESET || Dt == ACT_DATE_RESET )
         return false;    //  RTC is uninitialized
-	
+
 	uint8_t year, month, day, hour, minute, second, dayOfWeek;
 //	uint32_t milliSec;
 	year =  ((Dt>>20) & 0xF)*10 + ((Dt>>16) & 0xF);
@@ -508,7 +513,7 @@ bool 										showRTC( ){
 	dayOfWeek = ((Dt>>13) & 0x7);
 	month = ((Dt>>12) & 0x1)*10 + ((Dt>>8) & 0xF);
 	day =((Dt>> 4) & 0x3)*10 + (Dt & 0xF);
-	
+
 	hour =  ((Tm>>20) & 0x3)*10 + ((Tm>>16) & 0xF);
 	minute = ((Tm>>12) & 0x7)*10 + ((Tm>>8) & 0xF);
 	second  = ((Tm>> 4) & 0x7)*10 + (Tm & 0xF);

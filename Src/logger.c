@@ -191,15 +191,19 @@ void						logPowerUp( bool reboot ){											// re-init logger after reboot, U
 
     if ( !LogSizeOk() )     // advance boot idx automatically if Log has grown too large
         FirstSysBoot = true;
-    
-	if ( FirstSysBoot ){  // FirstBoot after install
+
+	if ( FirstSysBoot ){  // FirstBoot after install TODO: How does this follow from "!LogSizeOk()"?
 		bool eraseNor = fexists( norEraseFile );
-		if ( eraseNor )  // if M0:/system/EraseNorLog.txt exists-- erase 
+		if ( eraseNor )  // if M0:/system/EraseNorLog.txt exists-- erase
 			eraseNorFlash( false );			// CLEAR nor & create a new log
 		else {     // First Boot starts a new log (unless already done by erase)
 			sprintf(line, logFilePatt, NLogIdx() );
-			copyNorLog( line );				// save final previous log
-			initNorLog( true );				// restart with a new log 
+      // Boot with PLUS+MINUS. Escape valve to suppress this -- causes initNorLog() to hang/fail in some cases. Unknown reason.
+      // TODO: Fix the bricking!
+			if (BootKey!='0') copyNorLog( line );				// save final previous log
+      // Flash RRGGGGRR TODO: Remove this when we remove the "if" around copyNorLog();
+      flashCode(3); flashCode(12);
+			initNorLog( true );				// restart with a new log
 		}
 	}
 	

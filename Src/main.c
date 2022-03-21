@@ -77,15 +77,25 @@ void setBootMode(){	// use key to to select value for BootMode
 	flashInit();			// enable keyboard to decode boot type
 	
 	BootMode = 0;  BootKey = ' ';
-	     if ( gGet( gSTAR ))		{ BootMode = 1;  BootKey = 'S'; BootToQCtest = true; }
+  if ( gGet( gSTAR ))		      { BootMode = 1;  BootKey = 'S'; BootToQCtest = true; }
 	else if ( gGet( gLHAND ))		{ BootMode = 2;  BootKey = 'L'; BootVerboseLog = true; }
-	else if ( gGet( gMINUS ))		{ BootMode = 3;  BootKey = 'M'; BootDebugLoop = true; }
-	else if ( gGet( gPLUS ))		{ BootMode = 4;  BootKey = 'P'; BootToUSB = true; }
 	else if ( gGet( gRHAND ))		{ BootMode = 5;  BootKey = 'R'; BootVerbosePower = true; }
-	else if ( gGet( gCIRCLE ))	    { BootMode = 6;  BootKey = 'C'; }  // Circle restart
+	else if ( gGet( gCIRCLE ))	{ BootMode = 6;  BootKey = 'C'; }  // Circle restart
 	else if ( gGet( gHOME ))		{ BootMode = 7;  BootKey = 'H'; }  // Home restart
-    if ( BootMode != 0 && BootMode != 6 && BootMode != 7 )    // no flash for no keys, Boot-Circle or Boot-Home -- normal resume keys
-		flashCode( BootMode );
+  else if ( gGet( gMINUS ))		{
+      // TODO: this is a bit ad-hoc. We should have an enum or #defines for all of these modes.
+      if ( gGet( gPLUS )) {
+          BootMode = 9;
+          BootKey = '0';    // "plus" and "minus" cancel each other out?
+      } else {
+          BootMode = 3;
+          BootKey = 'M';
+      }
+      BootDebugLoop = true;
+  } else if ( gGet( gPLUS ))		{ BootMode = 4;  BootKey = 'P'; BootToUSB = true; }
+
+  if ( BootMode != 0 && BootMode != 6 && BootMode != 7 )    // no flash for no keys, Boot-Circle or Boot-Home -- normal resume keys
+      flashCode( BootMode );
 }
 
 

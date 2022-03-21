@@ -404,7 +404,8 @@ CState_t *      loadCState( FILE *inF, int idx ){               // load & return
 
 //
 // public routines to load & access the CSM from /system/control_def.txt
-bool            loadControlDef( void ){                         // load structured Control State Machine 
+// TODO: Document the format here.
+bool            loadControlDef( void ){                         // load structured Control State Machine
     errType = "CSM";
     errCount = 0;
     lineNum = 0;
@@ -437,6 +438,7 @@ bool            loadControlDef( void ){                         // load structur
     if ( errCount > 0 ){ errLog( "csm_data: %d parse errors", errCount ); return false; }
     return true;
 }
+
 int             nSysAud( void ){                                // return # of SysAudio names used by CSM
     if ( CSM==NULL || CSM->SysAudio==NULL ){
         errLog( "bad SysAudio" );

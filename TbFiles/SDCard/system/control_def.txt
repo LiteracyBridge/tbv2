@@ -25,7 +25,7 @@
       default_speed: 5,
       shortIdleMS: 5000,
       longIdleMS: 20000,
-      powerCheckMS: 300000,
+      powerCheckMS: 60000,
       systemAudio: system/audio/,
       qcTestState: stQcTest
       initState: stWakeup

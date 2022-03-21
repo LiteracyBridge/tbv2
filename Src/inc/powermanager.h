@@ -1,5 +1,5 @@
-#ifndef POWER_MGR_H
-#define POWER_MGR_H
+#ifndef POWER_MANAGER_H
+#define POWER_MANAGER_H
 
 #include 	"tbook.h"
 
@@ -18,5 +18,5 @@ extern void		setupRTC( fsTime time );					// init RTC to time
 extern void		showBattCharge( void );						// generate ledFG to signal power state
 extern bool		haveUSBpower( void );							// true if USB plugged in (PwrGood_N = 0)
 
-#endif	/* POWER_MGR_H */
+#endif	/* POWER_MANAGER_H */
 

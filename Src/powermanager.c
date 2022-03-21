@@ -2,7 +2,7 @@
 //   Apr 2018
 
 #include "tbook.h"
-#include "powerMgr.h"
+#include "powermanager.h"
 
 //#include "stm32f4xx_hal_dma.h"
 //#include "stm32f4xx_hal_adc.h"
@@ -17,13 +17,14 @@ extern bool						firstBoot;						// true if 1st run after data loaded
 #define 									PM_NOPWR  1											// id for osEvent signaling NOPWR interrupt
 #define 									PM_PWRCHK 2											// id for osTimerEvent signaling periodic power check
 #define 									PM_ADCDONE  4										// id for osEvent signaling period power check interrupt
-#define 									PWR_TIME_OUT 15000							// do initial power check after 15sec
+#define 									INITIAL_POWER_CHECK_DELAY 15000	// do initial power check after 15sec
 
 enum PwrStat { TEMPFAULT=0, xxx=1, CHARGING=2, LOWBATT=3, CHARGED=4, xxy=5, NOLITH=6, NOUSBPWR=7 };
 
+// TODO: Why would this ever be false?
 bool   PowerChecksEnabled = true;
 
-static osTimerId_t				pwrCheckTimer = NULL;
+static osTimerId_t				powerCheckTimer = NULL;
 static osEventFlagsId_t 	pwrEvents = NULL;
 static osThreadAttr_t 		pm_thread_attr;
 
@@ -68,13 +69,25 @@ extern void               EXTI2_IRQHandler( void );       // override default (w
 static void 							powerThreadProc( void *arg );		// forward
 static void 							initPwrSignals( void );					// forward
 
-static int								currPwrTimerMS;
+static int								currentPowerCheckIntervalMS;
 
 bool 											RebootOnKeyInt = false;					// tell inputmanager.c to reboot on key interrupt
 extern bool BootVerbosePower;
 extern bool BootVerboseLog;
 
-void checkPowerTimer(void *arg);                          // forward for timer callback function
+
+/*
+ * Forward declaration for a function. Related functions and data:
+ * - powerCheckTimerCallback    Function that signals the power check thread to check power. Reschedules itself
+ *                              by calling setPowerCheckTimer. Note: may only need to be *re*-scheduled once.
+ * - setPowerCheckTimer         Sets the OS timer timeout for powerCheckTimer. Only called from powerCheckTimerCallback.
+ * - powerCheckTimer            os timer structure for the power check timer. Created and initialized in initPowerMgr.
+ * - currentPowerCheckIntervalMS The steady-state power check interval. From config file or over-ridden by RIGHT-boot.
+ * - INITIAL_POWER_CHECK_DELAY  Delay before the first power check. Lets the system settle a bit.
+ * - TB_Config->powerCheckMS    Power check interval from the config file. Can be overridden to 60sec with RIGHT-boot.
+ *                              Note that the power manager is initialized long before the config file is read.
+ */
+void powerCheckTimerCallback(void *arg);                          // forward for timer callback function
 
 // ========================================================
 //   POWER initialization  -- create osTimer to call powerCheck, start powerThreadProc()
@@ -88,9 +101,9 @@ void                      initPowerMgr( void ){           // initialize PowerMgr
 	timer_attr.attr_bits = 0;
 	timer_attr.cb_mem = 0;
 	timer_attr.cb_size = 0;
-	pwrCheckTimer = osTimerNew(	checkPowerTimer, osTimerPeriodic, 0, &timer_attr);
-	if ( pwrCheckTimer == NULL ) 
-		tbErr( "pwrCheckTimer not alloc'd" );
+	powerCheckTimer = osTimerNew(	powerCheckTimerCallback, osTimerPeriodic, 0, &timer_attr);
+	if ( powerCheckTimer == NULL ) 
+		tbErr( "powerCheckTimer not alloc'd" );
 	
 	initPwrSignals();		// setup power pins & NO_PWR interrupt
 
@@ -100,19 +113,15 @@ void                      initPowerMgr( void ){           // initialize PowerMgr
 	if ( Dbg.thread[1] == NULL ) 
 		tbErr( "powerThreadProc not created" );
 		
-	currPwrTimerMS = PWR_TIME_OUT;
-	osTimerStart( pwrCheckTimer, currPwrTimerMS );
+	currentPowerCheckIntervalMS = INITIAL_POWER_CHECK_DELAY;
+	osTimerStart( powerCheckTimer, currentPowerCheckIntervalMS );
     
     pS.LithFullyCharged = false;      // reset message flags
     pS.LithNearlyCharged = false;
 
 	dbgLog( "4 PowerMgr OK \n" );
 }
-void                      setPowerCheckTimer( int timerMs ){ // set msec between powerChecks	osTimerStop( pwrCheckTimer );
-    osTimerStop( pwrCheckTimer );       // OS fails to reset timer->load value if running!
-    if ( BootVerbosePower ) timerMs = 60000;  // once a minute
-	osTimerStart( pwrCheckTimer, timerMs );
-}
+
 void 											initPwrSignals( void ){					// configure power GPIO pins, & EXTI on NOPWR 	
 	// power supply signals
 	gConfigOut( gADC_ENABLE );	// 1 to enable battery voltage levels
@@ -445,16 +454,24 @@ void                      setupRTC( fsTime time ){				// init RTC & set based on
 }
 
 // ========================================================
-//    periodic power checks --  osTimer calls checkPowerTimer(), which signals powerThread() to call powerCheck()
-void                      checkPowerTimer( void *arg ){		// timer to signal periodic power status check
+//    periodic power checks --  osTimer calls powerCheckTimerCallback(), which signals powerThread() to call powerCheck()
+void                      setPowerCheckTimer( int timerMs ){ // set msec between powerChecks	osTimerStop( powerCheckTimer );
+    osTimerStop( powerCheckTimer );       // OS fails to reset timer->load value if running!
+    if ( BootVerbosePower ) timerMs = 60000;  // once a minute
+    osTimerStart( powerCheckTimer, timerMs );
+}
+
+void                      powerCheckTimerCallback( void *arg ){		// timer to signal periodic power status check
     if ( PowerChecksEnabled )
         osEventFlagsSet( pwrEvents, PM_PWRCHK );						// wakeup powerThread for power status check
-	if ( currPwrTimerMS != TB_Config->powerCheckMS ){		// update delay (after initial check)
-		currPwrTimerMS = TB_Config->powerCheckMS;
-		setPowerCheckTimer( currPwrTimerMS );
-	}
+	  if ( currentPowerCheckIntervalMS != TB_Config->powerCheckMS ){		// update delay (after initial check)
+		    currentPowerCheckIntervalMS = TB_Config->powerCheckMS;
+		    setPowerCheckTimer( currentPowerCheckIntervalMS );
+	  }
 }
-const int LiMIN = 3200;     // power down threshold
+
+//TODO: At least the min value should be configurable without rebuilding.
+const int LiMIN = 3250;     // power down threshold
 const int LiLOW = 3400;     // mV at  ~5% capacity
 const int LiMED = 3600;		// mV at ~40%
 const int LiHI  = 3800;		// mV at ~75%
@@ -562,7 +579,7 @@ PwrCheck, stat:  'u Lxct Pp Bb Tm Vv'
 ========================================================================================*/
     static char prvStat[30];
     char pwrStat[30];
-    sprintf(pwrStat, "%c L%c%c%c P%c B%c T%c V%d", sUsb, sLi,sCh,sLt, sPr, sBk, sMt, mAudioVolume ); 
+    sprintf(pwrStat, "%c L%c%c%c P%c B%c T%c V%d Li%d", sUsb, sLi,sCh,sLt, sPr, sBk, sMt, mAudioVolume, pS.LiMV );
 
     bool changed = strcmp(prvStat, pwrStat) !=0;   // log it, if status line changes
     strcpy( prvStat, pwrStat );

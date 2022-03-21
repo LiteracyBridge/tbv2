@@ -31,7 +31,7 @@
 #include "tb_enum.h"			// GrpID, Event, Action
 #include "log.h"				// logEvt...
 #include "ledMgr.h"				// ledFg, ledBg
-#include "powerMgr.h"			// registerPowerEventHandler
+#include "powermanager.h"      // registerPowerEventHandler
 #include "inputMgr.h"			// sendEvent
 
 

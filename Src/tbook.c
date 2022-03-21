@@ -19,7 +19,7 @@ const int 		INPUT_STACK_SIZE 		= 1024;
 const int 		MEDIA_STACK_SIZE 		= 4096;		// opens in/out files
 const int 		FILEOP_STACK_SIZE 	    = 6144;		// opens in/out files, mp3 decode
 const int 		LED_STACK_SIZE 			= 512;
-// RTX_Config.h  sets OS_TIMER_THREAD_STACK_SIZE = 512;  // used by timer callbacks:  checkPowerTimer, checkKeyTimer, tbTimer
+// RTX_Config.h  sets OS_TIMER_THREAD_STACK_SIZE = 512;  // used by timer callbacks:  powerCheckTimerCallback, checkKeyTimer, tbTimer
 
 const int	pBOOTCNT 			= 0; 
 const int	pCSM_DEF 			= 1;

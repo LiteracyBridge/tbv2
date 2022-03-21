@@ -6,7 +6,7 @@
 //Ver:   // TB CSM 2022-03-07: V18 fix-- state name mismatch for BattMin
 static TBConfig_t  preTB_Config = { 
   6,  // default_volume 
-  300000,  // powerCheckMS 
+  60000,  // powerCheckMS
   5000,  // shortIdleMS 
   20000,  // longIdleMS 
   50,  // minShortPressMS 

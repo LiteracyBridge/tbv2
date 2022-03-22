@@ -427,11 +427,18 @@ void						norEvt( const char *s1, const char *s2 ){
 	appendNorLog( "\n" );
 }
 void						logEvtS( const char *evtID, const char *args ){		// write log entry: 'm.ss.s: EVENT, ARGS'
-	int 		ts = tbTimeStamp();
+    uint32_t Dt=1, Tm=1, mSec=1;
+	fetchRtc( &Dt, &Tm, &mSec );  // get valid RTC register values 
+	uint8_t hour =  ((Tm>>20) & 0x3)*10 + ((Tm>>16) & 0xF);
+	if ((Tm>>22) & 0x1) hour += 12;
+	uint8_t minute = ((Tm>>12) & 0x7)*10 + ((Tm>>8) & 0xF);
+	uint8_t second  = ((Tm>> 4) & 0x7)*10 + (Tm & 0xF);
+//	int 		ts = tbTimeStamp();
 	char 		evtBuff[ MAX_EVT_LEN1 ];
-	int tsec = ts/100, sec = tsec/10, min = sec/60, hr = min/60;
+//	int tsec = ts/100, sec = tsec/10, min = sec/60, hr = min/60;
 //	if ( hr > 0 )
-	sprintf( evtBuff,  "%02d_%02d_%02d.%d: %8s", hr, min %60, sec % 60, tsec % 10, evtID );
+//	sprintf( evtBuff,  "%02d_%02d_%02d.%d: %8s", hr, min %60, sec % 60, tsec % 10, evtID );
+	sprintf( evtBuff,  "%02d_%02d_%02d.%03d: %8s", hour, minute, second, mSec, evtID );
 //	else
 //		sprintf( evtBuff,  "%d_%02d.%d: %8s", min %60, sec % 60, tsec % 10, evtID );
 //	addHist( evtBuff, args );

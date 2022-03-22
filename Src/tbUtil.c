@@ -469,17 +469,19 @@ void 										getRTC( struct _fsTime *fsTime ) {
     fsTime->sec = ((Tm >>  4) & 0x7)*10 + (Tm & 0xF);
 }
 
+uint32_t init_msRTC=0, init_day=0, init_msTS;
 uint32_t 								tbRtcStamp(){   // returns millisecond timestamp based on RTC instead of OS Tic
   uint32_t Dt=1, Tm=1, mSec=1;
 	fetchRtc( &Dt, &Tm, &mSec );  // get valid RTC register values 
 	uint8_t hour =  ((Tm>>20) & 0x3)*10 + ((Tm>>16) & 0xF);
 	uint8_t minute = ((Tm>>12) & 0x7)*10 + ((Tm>>8) & 0xF);
 	uint8_t second  = ((Tm>> 4) & 0x7)*10 + (Tm & 0xF);
-  uint32_t msRTC = (hour * 3600 + minute * 60 + second)*1000 + mSec;
+	uint8_t day =((Dt>> 4) & 0x3)*10 + (Dt & 0xF);
+    uint32_t msRTC = (hour * 3600 + minute * 60 + second)*1000 + mSec;
+    if ( day != init_day ) // crossed midnight during this boot
+        msRTC += 24*3600*1000;
 	return msRTC;   // wraps at midnight
 }
-
-uint32_t init_msRTC= 0, init_msTS;
 bool 										showRTC( ){
   uint32_t Dt=1, Tm=1, mSec=1;
 	fetchRtc( &Dt, &Tm, &mSec );  // get valid RTC register values 
@@ -523,6 +525,7 @@ bool 										showRTC( ){
     if ( init_msRTC==0 ){
         init_msTS = tsNow;
         init_msRTC = msRTC;
+        init_day = day;
     }
     if ( BootVerboseLog ) logEvtFmt( "Clocks", "ts_ms: %d,  rtc_ms: %d", tsNow, init_msTS + msRTC - init_msRTC );
     

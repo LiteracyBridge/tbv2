@@ -957,7 +957,7 @@ extern bool 				playWave( const char *fname ){ 					// play WAV file, true if st
     pSt.samplesPerSec = audioFreq;
     pSt.bytesPerSample = pSt.fmtData.numChannels * pSt.fmtData.bitsPerSample/8;  // = 4 bytes per stereo sample -- same as ->BlockAlign
     pSt.nSamples = dataChunkSize / pSt.bytesPerSample;
-    pSt.msecLength = pSt.nSamples*1000 / pSt.samplesPerSec;
+    pSt.msecLength = pSt.nSamples / (pSt.samplesPerSec / 1000);   // nSamples*1000 can overflow for large messages
     pSt.dataStartPos = ftell( pSt.audF );    // remember start of wav data, for setWavPos()
     pSt.state = pbGotHdr;
     if ( pSt.playbackTyp==ptMsg )   // details only for content messages

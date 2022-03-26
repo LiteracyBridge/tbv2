@@ -442,7 +442,6 @@ void						logEvtS( const char *evtID, const char *args ){		// write log entry: '
 	uint8_t minute = ((Tm>>12) & 0x7)*10 + ((Tm>>8) & 0xF);
 	uint8_t second  = ((Tm>> 4) & 0x7)*10 + (Tm & 0xF);
 //	int 		ts = tbTimeStamp();
-	char 		evtBuff[ MAX_EVT_LEN1 ];
 //	int tsec = ts/100, sec = tsec/10, min = sec/60, hr = min/60;
 //	if ( hr > 0 )
 //	sprintf( evtBuff,  "%02d_%02d_%02d.%d: %8s", hr, min %60, sec % 60, tsec % 10, evtID );

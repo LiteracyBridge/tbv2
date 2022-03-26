@@ -270,9 +270,9 @@ void                        scanLogForRTC( uint32_t norAddr ){
     lastRTCinLog.year = 0;
     while ( logaddr > NLg.logBase && cnt > 0 ){
         char * rtc = strstr( NLg.pg, "RTC," );
-        if ( rtc != NULL && rtc[39] == '.' ){  // found a "RTC, Dt: 2022-03-09 (Wed), Tm: 16_34_45.535"
+        if ( rtc != NULL && rtc[28] == '.' ){  // found a "RTC, Dt: 2022-03-09 16:34:45.535"
             int cnt = sscanf( rtc, "RTC, Dt: %d-%d-%d", &year, &month, &date );
-            int cnt2 = sscanf( rtc+27, "Tm: %d_%d", &hour, &minute );
+            int cnt2 = sscanf( rtc+20, "%d:%d", &hour, &minute );
             if ( cnt==3 && cnt2==2 ){           // successfully parsed RTC date & time
               lastRTCinLog.year = year;
               lastRTCinLog.mon = month;
@@ -439,6 +439,7 @@ void						initNorLog( bool startNewLog ){							// init driver for W25Q64JV NOR 
 	if ( NLg.PGSZ > BUFFSZ ) norErr("NLog: buff too small");
 	NLg.E_VAL	 		= NLg.pI->erased_value;
 	NLg.MAX_ADDR 	= ( NLg.pI->sector_count * NLg.pI->sector_size )-1;
+    NLg.Nxt             = -1;  // mark as NOT fully initialized -- prevent power timer logging during initialization
 	
 	stat = NLg.pNor->Initialize( NULL );
 	if ( stat != ARM_DRIVER_OK ) norErr(" pNor->Init => %d", stat );
@@ -461,7 +462,8 @@ void						initNorLog( bool startNewLog ){							// init driver for W25Q64JV NOR 
 }
 void						appendNorLog( const char * s ){							// append text to Nor flash
   if ( norErrInProgress ) return;
-  if ( NLg.pNor == NULL ) return;				// Nor not initialized
+  if ( NLg.pNor == NULL || NLg.Nxt < 0 ) 
+      return;				// Nor not initialized
 
 	int len = strlen( s );
 	

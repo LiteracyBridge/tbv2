@@ -527,6 +527,9 @@ void						copyNorLog( const char * fpath ){						// copy curr Nor log into file 
 	
 	CheckNLog( f );			// check & correct any consistency issues in NLg or Page0
 	bool validLog = true;
+    int maxLogSz = (NLg.MAX_ADDR - NLg.PGSZ)/ N_SADDR;  // 1/64th of capacity
+    int maxLogCnt = 0;
+    dbgLog("! copyNorLog: %d bytes\n", NLg.Nxt-NLg.logBase );
 	for ( int p = NLg.logBase; p < NLg.Nxt; p+= NLg.PGSZ ){		// log always starts at page boundary, is full from logBase..Nxt-1
 		stat = NLg.pNor->ReadData( p, NLg.pg, NLg.PGSZ );
 		if ( stat != NLg.PGSZ ) fprintf( f, "\n cpyNor read 0x%08x => %d \n", p, stat );
@@ -544,6 +547,10 @@ void						copyNorLog( const char * fpath ){						// copy curr Nor log into file 
 		if ( stat != cnt ) 
 			fprintf(f, "\n cpyNor fwrite => %d  totcnt=%d \n", stat, totcnt );
 		totcnt += cnt;
+        if ( totcnt/maxLogSz > maxLogCnt ){
+            maxLogCnt++;
+            dbgLog("! copying: %d maxLogs\n", maxLogCnt );
+        }
 	}
 	tbCloseFile( f );		//fclose( f );  // tbTmpLog
 	

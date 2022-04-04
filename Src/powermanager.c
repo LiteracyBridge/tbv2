@@ -491,10 +491,8 @@ void                      powerCheckTimerCallback( void *arg ){		// timer to sig
 }
 
 //TODO: At least the min value should be configurable without rebuilding.
-const int LiMIN = 3250;     // power down threshold
-const int LiLOW = 3400;     // mV at  ~5% capacity
-const int LiMED = 3600;		// mV at ~40%
-const int LiHI  = 3800;		// mV at ~75%
+const int LiMIN = 3400;     // power down threshold
+const int LiLOW = 3500;     // mV at  ~5% capacity  BattLow event
 const int LiMAX = 4000;     // start constant voltage charging
 const int LiPRESENT = 2800; // max if not connected
 
@@ -691,7 +689,7 @@ void                      showBattCharge(){			// generate ledFG to signal power 
 	checkPower(true);
     // charge GGGG > 90%, RGGG > 75%, RRGG > 50%, RRRG > 25%, RRRR < 10%
     if ( pS.LiMV > LiPRESENT ){
- 		// Lithium voltage thresholds:  3.9, 3.8, 3.7, 3.63, 3.58 
+ 		// Lithium voltage thresholds:  3.9, 3.8, 3.7, 3.63, 3.58   // ~90% 75% 60%  10% 5%
         c1 = pS.LiMV > 3900? 'G':'R';
         c2 = pS.LiMV > 3800? 'G':'R';
         c3 = pS.LiMV > 3700? 'G':'R';
@@ -705,6 +703,7 @@ void                      showBattCharge(){			// generate ledFG to signal power 
 	}
 	sprintf( fg, fmt, c1,c2,c3,c4 );
 	ledFg( fg );
+    sprintf( fg, "_%c_%c_%c_%c_", c1,c2,c3,c4 );
 	logEvtS("battLev", fg );
 }
 

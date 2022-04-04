@@ -412,6 +412,7 @@ void                      setupRTC( fsTime time ){				// init RTC & set based on
 	RCC->BDCR |= RCC_BDCR_LSEON;												// enable 32KHz LSE clock
 	cnt = 0;
 	while ( (RCC->BDCR & RCC_BDCR_LSERDY)==0 && (cnt < 1000) ) cnt++; 	// & wait till ready
+    if (cnt==1000) tbErr("RTC: LSE not ready");
 
 	// configure RTC  (per RM0402 22.3.5)
 	RCC->BDCR |= RCC_BDCR_RTCSEL_0;										// select LSE as RTC source
@@ -422,13 +423,18 @@ void                      setupRTC( fsTime time ){				// init RTC & set based on
 	RTC->ISR |= RTC_ISR_INIT;													// set init mode
 	cnt = 0;
 	while ( (RTC->ISR & RTC_ISR_INITF)==0 && (cnt < 1000)) cnt++;		// & wait till ready
+    if (cnt==1000) tbErr("RTC: Initmode not ready");
 	
 	RTC->PRER  = (256 << RTC_PRER_PREDIV_S_Pos);				// Synchronous prescaler = 256  MUST BE FIRST
 	RTC->PRER |= (127 << RTC_PRER_PREDIV_A_Pos);				// THEN asynchronous = 127 for 32768Hz => 1Hz
 	
-	// try AM/PM to see if days will switch
-	int32_t ampm = 0, hr = time.hr;
-	if ( hr > 12 ){ ampm = 1; hr -= 12; }
+	// using AM/PM, since 24hr updated improperly (day didn't switch)
+	int32_t ampm = 0, hr = time.hr;   
+    // 0 -> 12a, 1..11 -> 1a..11a 12->12p 13..23 -> 1..11p
+	if ( hr == 12 ) 
+        { ampm = 1; }           // 12 -> 12pm 
+    else if ( hr > 12 )
+        { ampm = 1; hr -= 12;  }  // 13..23 -> 1..11pm 
 	uint32_t TR = (ampm << 22) | ( Bcd2( hr ) << 16 ) | ( Bcd2( time.min ) << 8 ) | Bcd2( time.sec );
 	
 	// calc weekday from date
@@ -451,6 +457,20 @@ void                      setupRTC( fsTime time ){				// init RTC & set based on
 	RTC->ISR 	&= ~RTC_ISR_INIT;												// leave RTC init mode
 	
 	PWR->CR 	&= ~PWR_CR_DBP;													// disable access to Backup Domain 
+    
+    // read clock until change has taken effect
+    fsTime newtime;
+    uint32_t msec;
+    cnt = 0;
+    while ( true ){
+        getRTC( &newtime, &msec );
+        if (newtime.day == time.day && newtime.mon == time.mon && newtime.year == time.year ){    // date has updated
+            if (newtime.hr == time.hr && newtime.min >= time.min) return;    // time also updated 
+        }
+        cnt++;
+        if ( cnt > 1000 ) tbErr("RTC didn't set: %d-%d-%d %02d:%02d  \n", newtime.year, newtime.mon, newtime.day, newtime.hr, newtime.min );
+    }
+    dbgLog("! setupRTC: took %d reads\n", cnt );
 }
 
 // ========================================================

@@ -298,6 +298,7 @@ int32_t 						audPlayPct( void ){														// => current playback pct of fil
 void 								audAdjPlayPos( int32_t adj ){									// shift current playback position +/- by 'adj' seconds
   if ( pSt.state==pbPlaying )
     audPauseResumeAudio();
+  if ( pSt.state != pbPaused ) return;      // weren't playing or paused
 
   if ( pSt.audType==audWave ){
     int newMS = pSt.msPlayed + adj*1000;

@@ -238,14 +238,16 @@ void									svQCresult( char * arg ){  					// save 'arg' to system/QC_PASS.txt
 
 void 									USBmode( bool start ){						// start (or stop) USB storage mode
 	fsTime rtcTm;
+    uint32_t msec;
     clearIdle();
 	if ( start ){
 		playSqrTune( "G/+G/+" );
-        getRTC( &rtcTm );  // current RTC
+        getRTC( &rtcTm, &msec );  // current RTC
         showRTC();          // put current RTC into log
         saveLastTime( rtcTm );
         
 		logEvt( "enterUSB" );
+        copyNorLog("");
 		logPowerDown();				// flush & shut down logs
 		setDbgFlag('F', false);
 		enableMassStorage( "M0:", NULL, NULL, NULL );

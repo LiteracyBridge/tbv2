@@ -28,12 +28,14 @@ const char *    firmwareIdFile = "/system/firmware_ID.txt";
 const char *		norEraseFile = "M0:/system/EraseNorLog.txt";			// flag file to force full erase of NOR flash
 char *					rtcSetFile = "M0:/system/SetRTC.txt";							// flag file to force setting RTC to last modification time of SetRTC.txt
 char *					rtcDontSetFile = "dontSetRTC.txt";  							// renamed version of SetRTC.txt
+char *					rtcDontSetPath = "M0:/system/dontSetRTC.txt";  					// full path for fexists 
 char *					lastRtcFile = "M0:/system/lastRTC.txt";						// written at powerdown-- modification date used to reset clock
 const char *		logFilePatt = "M0:/LOG/tbLog_%d.txt";			// file name of previous log on first boot
 
 const int				MAX_EVT_LEN1 = 32, MAX_EVT_LEN2 = 64;
 
 extern fsTime               lastRTCinLog;
+
 
 /*  //DEBUG ONLY:  debugger accessible log history
 TBH_arr 				TBH;	
@@ -174,6 +176,11 @@ void                        saveLastTime( fsTime rtc ){
 void 						dateStr( char *s, fsTime dttm ){
 	sprintf( s, "%d-%d-%d %02d:%02d", dttm.year, dttm.mon, dttm.day, dttm.hr, dttm.min );
 }
+void                        startNextLog(){         // save current log, switch to next index
+    if (BootKey != '0')   // escape to skip saving a huge log
+        copyNorLog( "" );     // save with default name
+    initNorLog( true );
+}
 void						logPowerUp( bool reboot ){											// re-init logger after reboot, USB or sleeping
 	char line[200];
 	char dt[30];
@@ -198,12 +205,15 @@ void						logPowerUp( bool reboot ){											// re-init logger after reboot, U
 			eraseNorFlash( false );			// CLEAR nor & create a new log
 		else {     // First Boot starts a new log (unless already done by erase)
 			sprintf(line, logFilePatt, NLogIdx() );
+            startNextLog();
+/*            
       // Boot with PLUS+MINUS. Escape valve to suppress this -- causes initNorLog() to hang/fail in some cases. Unknown reason.
       // TODO: Fix the bricking!
 			if (BootKey!='0') copyNorLog( line );				// save final previous log
       // Flash RRGGGGRR TODO: Remove this when we remove the "if" around copyNorLog();
       flashCode(3); flashCode(12);
 			initNorLog( true );				// restart with a new log
+            */
 		}
 	}
 	
@@ -231,6 +241,7 @@ void						logPowerUp( bool reboot ){											// re-init logger after reboot, U
               setupRTC( lastRTCinLog );    
             }                
             logEvtNS( "resetRTC", "DtTm", dt );
+            showRTC();
         }
 
         char * oldFW = loadLine( line, firmwareIdFile, &bootDt );
@@ -284,9 +295,12 @@ void						logPowerUp( bool reboot ){											// re-init logger after reboot, U
     if ( haveTime && rtcDt.year >= 2022 ){  // got a valid date/time
       dateStr( dt, rtcDt );
       logEvtNS( "setRTC", "DtTm", dt );
-      setupRTC( rtcDt );   
+      setupRTC( rtcDt );  
+      showRTC();
       gotRtc = true;
       // rename setRTC.txt to dontSetRTC.txt -- leave it as a comment for how this works
+      if ( fexists(rtcDontSetPath) ) 
+          fdelete( rtcDontSetPath, NULL ); 
       uint32_t stat = frename( rtcSetFile, rtcDontSetFile );    
       if (stat != fsOK) {
         errLog( "frename %s to %s => %d \n", rtcSetFile, rtcDontSetFile, stat );
@@ -307,16 +321,17 @@ void						logPowerDown( void ){															// save & shut down logger for USB
 	flushStats();
 	
 	fsTime rtcTm;
-	getRTC( &rtcTm );  // current RTC
+    uint32_t msec;
     showRTC();          // put current RTC into log
+	getRTC( &rtcTm, &msec );  // current RTC
     saveLastTime( rtcTm );
 //	if ( !fexists( lastRtcFile )) writeLine( "---", lastRtcFile );  // make sure it's there
 //	ftime_set( lastRtcFile, &rtcTm, &rtcTm, &rtcTm );  // set create,access,write times to RTC 
 	
-	copyNorLog( "" );		// auto log name
+//	copyNorLog( "" );		// auto log name
 	
 	if ( logF==NULL ) return;
-	logEvtNI( "WrLog", "nCh", totLogCh );
+//	logEvtNI( "WrLog", "nCh", totLogCh );
 	closeLog();
 }
 
@@ -432,19 +447,23 @@ void						norEvt( const char *s1, const char *s2 ){
 }
 void						logEvtS( const char *evtID, const char *args ){		// write log entry: 'm.ss.s: EVENT, ARGS'
 	char 		evtBuff[ MAX_EVT_LEN1 ];
-    uint32_t Dt=1, Tm=1, mSec=1;
-	fetchRtc( &Dt, &Tm, &mSec );  // get valid RTC register values 
-	uint8_t hour =  ((Tm>>20) & 0x3)*10 + ((Tm>>16) & 0xF);
+    fsTime tmdt;
+    uint32_t msec;
+    getRTC( &tmdt, &msec );
+ /*   uint32_t Dt=1, Tm=1, mSec=1;
+//	fetchRtc( &Dt, &Tm, &mSec );  // get valid RTC register values 
+	uint8_t hour =  ((Tm>>20) & 0x3)*10 + ((Tm>>16) & 0xF) - 1;    // HR as 0..11 (AM or PM)
 	if ((Tm>>22) & 0x1) hour += 12;
 	uint8_t minute = ((Tm>>12) & 0x7)*10 + ((Tm>>8) & 0xF);
 	uint8_t second  = ((Tm>> 4) & 0x7)*10 + (Tm & 0xF);
-	sprintf( evtBuff,  "%02d_%02d_%02d.%03d: %8s", hour, minute, second, mSec, evtID );
+    */
+	sprintf( evtBuff,  "%02d_%02d_%02d.%03d: %8s", tmdt.hr, tmdt.min, tmdt.sec, msec, evtID );
 //	int 		ts = tbTimeStamp();
 //	int tsec = ts/100, sec = tsec/10, min = sec/60, hr = min/60;
 //	sprintf( evtBuff,  "%02d_%02d_%02d.%d: %8s", hr, min %60, sec % 60, tsec % 10, evtID );
 //	addHist( evtBuff, args );
 	dbgLog( " %s %s\n", evtBuff, args );
-	
+
 	if (( osKernelGetState()== osKernelRunning) && osMutexAcquire( logLock, osWaitForever )!=osOK ){
 		dbgLog( "! logLock lost %s \n", evtID );
 		return;

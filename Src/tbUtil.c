@@ -418,18 +418,22 @@ void 										initIDs(){																		// initialize CPU_ID & TB_ID strings
 // timestamps & RTC, allocation, fexists
 
 void fetchRtc( uint32_t *pDt, uint32_t *pTm, uint32_t *pMSec ){   // read RTC values into *pDt, *pTm, *pMSec
-   const int PREDIV_S = 255;    // RTC prescaler default value
-   uint32_t prvDt=0,Dt=1, prvTm=0,Tm=1, SubSec=1;
+  //const int PREDIV_S = 255;    // RTC prescaler default value
+   uint32_t prvDt=0,Dt=1, prvTm=0,Tm=1, SubSec=1, PreScale;
    while (prvDt != Dt || prvTm != Tm){
         prvDt = Dt;
         prvTm = Tm;
         Dt = RTC->DR;
         Tm = RTC->TR;
-				SubSec = RTC->SSR;
+		SubSec = RTC->SSR;
+        PreScale = RTC->PRER;
     }
-	  *pDt = Dt;
-		*pTm = Tm;
-		*pMSec = (PREDIV_S - SubSec)*1000/(PREDIV_S + 1);   // in ~4mSec steps
+	*pDt = Dt;
+	*pTm = Tm;
+    uint32_t prediv_S = (PreScale & 0x7FFF); 
+	int32_t msec = (prediv_S - SubSec)*1000/(prediv_S + 1);   // in ~4mSec steps
+    if (msec<0 || msec>999) msec = 0;   // check for SS > PREDIV_S (note on RM0402 22.6.11) and set msec to 0 
+    *pMSec = msec;
 }
 
 struct {
@@ -447,21 +451,11 @@ struct {
 
 /// \brief Gets the current time from RTC into a fsTime structure.
 /// \param[out] fsTime      fsTime structure to be filled in.
-void 										getRTC( struct _fsTime *fsTime ) {
-  uint32_t Dt=1, Tm=1, mSec=1;
-	fetchRtc( &Dt, &Tm, &mSec );  // get valid RTC register values
-
- /*   int pDt=0,Dt=1, pTm=0,Tm=1, SubSec=1;
-    while (pDt != Dt || pTm != Tm){
-        pDt = Dt;
-        pTm = Tm;
-        Dt = RTC->DR;
-        Tm = RTC->TR;
-				SubSec = RTC->SSR;
-    }
-    const int PREDIV_S = 255;    // RTC prescaler default value
-    uint32_t milliSec = (PREDIV_S - SubSec)*1000/(PREDIV_S + 1);   // in ~4mSec steps
-*/
+fsTime prevTm;
+uint32_t prevMsec;
+void 										getRTC( struct _fsTime *fsTime, uint32_t *pMSec ) {
+    uint32_t Dt=1, Tm=1;
+	fetchRtc( &Dt, &Tm, pMSec );  // get valid RTC register values
 
     // This is going suck in the year 2100. But it would break in 2107 anyway.
     // The time format allows years 1980 to 2107. The RTC only allows years % 100.
@@ -469,29 +463,59 @@ void 										getRTC( struct _fsTime *fsTime ) {
     fsTime->mon = ((Dt >> 12) & 0x1)*10 + ((Dt >> 8) & 0xF);
     fsTime->day =((Dt >>  4) & 0x3)*10 + (Dt & 0xF);
 
-    fsTime->hr = ((Tm >> 22) & 0x1)*12 + ((Tm >> 20) & 0x3)*10 + ((Tm >> 16) & 0xF);
+    // convert HR from 12a 1a .. 11a 12p 1p .. 11p => 0..23
+    fsTime->hr =  ((Tm >> 20) & 0x3)*10 + ((Tm >> 16) & 0xF);   // HR as 12,1..11 AM/PM
+    bool pm = ((Tm >> 22) & 0x1);
+    if (fsTime->hr == 12) 
+        { if (!pm) fsTime->hr = 0; }       // 12am => 0  12pm => 12
+    else
+        if ( pm ) fsTime->hr += 12;        // 1pm..11pm => 13..23
     fsTime->min = ((Tm >> 12) & 0x7)*10 + ((Tm >> 8) & 0xF);
     fsTime->sec = ((Tm >>  4) & 0x7)*10 + (Tm & 0xF);
+    // HACK to try to ensure clock grows monotonically, in spite of occassionally seeing sec fail to increment (especially when power is low)
+    if ( prevTm.min == fsTime->min && prevTm.sec == fsTime->sec && prevMsec > *pMSec ){  // earlier than previous time (sec didn't incr)
+       fsTime->sec++;
+       if (fsTime->sec == 60) { fsTime->sec = 0; fsTime->min++; }
+       if (fsTime->min == 60) { fsTime->min = 0; fsTime->hr++; }      // doesn't work across midnight
+    }
+    prevTm.min = fsTime->min;
+    prevTm.sec = fsTime->sec;
+    prevMsec = *pMSec;
 }
 
-uint32_t init_msRTC=0, init_day=0, init_msTS;
-uint32_t 								tbRtcStamp(){   // returns millisecond timestamp based on RTC instead of OS Tic
-  uint32_t Dt=1, Tm=1, mSec=1;
-	fetchRtc( &Dt, &Tm, &mSec );  // get valid RTC register values
-	uint8_t hour =  ((Tm>>20) & 0x3)*10 + ((Tm>>16) & 0xF);
-	uint8_t minute = ((Tm>>12) & 0x7)*10 + ((Tm>>8) & 0xF);
-	uint8_t second  = ((Tm>> 4) & 0x7)*10 + (Tm & 0xF);
-	uint8_t day =((Dt>> 4) & 0x3)*10 + (Dt & 0xF);
-    uint32_t msRTC = (hour * 3600 + minute * 60 + second)*1000 + mSec;
-    if ( day != init_day ) // crossed midnight during this boot
-        msRTC += 24*3600*1000;
+uint32_t init_msRTC=0, init_day=0, day_msec = 0, init_msTS;
+uint32_t 								tbRtcStamp(){       // returns millisecond timestamp based on RTC instead of OS Tic
+    fsTime timedate;
+    uint32_t mSec;
+    
+    getRTC( &timedate, &mSec );
+    
+//    uint32_t Dt=1, Tm=1, mSec=1;
+//	fetchRtc( &Dt, &Tm, &mSec );  // get valid RTC register values
+//	uint8_t hour =  ((Tm>>20) & 0x3)*10 + ((Tm>>16) & 0xF) - 1;       // HR as 0..11 AM/PM
+//    if ((Tm >> 22) & 0x1) hour += 12;           // HR as 0..23
+//	uint8_t minute = ((Tm>>12) & 0x7)*10 + ((Tm>>8) & 0xF);
+//	uint8_t second  = ((Tm>> 4) & 0x7)*10 + (Tm & 0xF);
+//	uint8_t day =((Dt>> 4) & 0x3)*10 + (Dt & 0xF);
+//    uint32_t msRTC = (hour * 3600 + minute * 60 + second)*1000 + mSec;       // milliseconds since previous midnight
+    if ( timedate.day != init_day ){         // crossed midnight since last call
+        day_msec += 24*3600*1000;
+        init_day = timedate.day;             // to detect next midnight crossing
+    }
+    uint32_t msRTC = timedate.hr *3600 + timedate.min * 60 + timedate.sec * 1000 + mSec;
+    msRTC += day_msec;      // add in any full day adjustments
 	return msRTC;   // wraps at midnight
 }
 bool 										showRTC( ){
-  uint32_t Dt=1, Tm=1, mSec=1;
+    fsTime timedate;
+    uint32_t mSec;
+    
+    getRTC( &timedate, &mSec );
+ /*
+    uint32_t Dt=1, Tm=1, mSec=1;
 	fetchRtc( &Dt, &Tm, &mSec );  // get valid RTC register values
 
- /*	int pDt=0,Dt=1, pTm=0,Tm=1, SubSec=1;
+	int pDt=0,Dt=1, pTm=0,Tm=1, SubSec=1;
 	while (pDt != Dt || pTm != Tm){
 		pDt = Dt;
 		pTm = Tm;
@@ -500,7 +524,6 @@ bool 										showRTC( ){
         SubSec = RTC->SSR;
 	}
     const int PREDIV_S = 255;    // RTC prescaler default value
-	*/
 
     const int ACT_DATE_RESET = 0x0c101;    // reset value of RTC Date Register = Saturday, 1-Jan-2000
     const int DOC_DATE_RESET = 0x02101;    // reset value of RTC Date Register = Monday, 1-Jan-00  (according to RM0402)
@@ -510,8 +533,10 @@ bool 										showRTC( ){
 	uint8_t year, month, day, hour, minute, second, dayOfWeek;
 //	uint32_t milliSec;
 	year =  ((Dt>>20) & 0xF)*10 + ((Dt>>16) & 0xF);
-    if ( year < 22 )                       // treat any date before 2022 like reset value-- date is invalid
+*/
+    if ( timedate.year < 2022 )                       // treat any date before 2022 like reset value-- date is invalid
         return false;
+/*
 	dayOfWeek = ((Dt>>13) & 0x7);
 	month = ((Dt>>12) & 0x1)*10 + ((Dt>>8) & 0xF);
 	day =((Dt>> 4) & 0x3)*10 + (Dt & 0xF);
@@ -524,17 +549,20 @@ bool 										showRTC( ){
 	if ((Tm>>22) & 0x1) hour += 12;
 
 	char * wkdy[] = { "", "Mon","Tue","Wed","Thu","Fri","Sat","Sun" };
+*/
   // Date and time in ISO 8601 format. Day of week for convenience.
-	logEvtFmt( "RTC", "Dt: 20%02d-%02d-%02d %02d:%02d:%02d.%03d (%s)", year, month, day, hour, minute, second, mSec, wkdy[dayOfWeek]  );
-    uint32_t msRTC = (hour * 3600 + minute * 60 + second)*1000 + mSec;
-    uint32_t tsNow = tbTimeStamp();
-    if ( init_msRTC==0 ){
-        init_msTS = tsNow;
-        init_msRTC = msRTC;
-        init_day = day;
+	logEvtFmt( "RTC", "Dt: %02d-%02d-%02d %02d:%02d:%02d.%03d", timedate.year, timedate.mon, timedate.day, timedate.hr, timedate.min, timedate.sec, mSec  );
+
+    init_day = timedate.day;
+    if ( BootVerboseLog ){
+        uint32_t msRTC = tbRtcStamp();
+        uint32_t tsNow = tbTimeStamp();
+        if ( init_msRTC==0 ){
+            init_msTS = tsNow;
+            init_msRTC = msRTC;
+            logEvtFmt( "Clocks", "ts_ms: %d,  rtc_ms: %d", tsNow, init_msTS + msRTC - init_msRTC );
+        }
     }
-    if ( BootVerboseLog ) logEvtFmt( "Clocks", "ts_ms: %d,  rtc_ms: %d", tsNow, init_msTS + msRTC - init_msRTC );
-    
 	return true;    // RTC is initialized, and value has been logged
 }
 

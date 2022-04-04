@@ -83,7 +83,7 @@ extern fsStatus 	fsMount( char *drv );														// try to finit() & mount() 
 extern osMutexId_t		logLock;																		// mutex for access to NorFlash
 
 extern void 			talking_book( void *tbAttr );			// talking book initialization & control manager thread 
-extern void 			getRTC( struct _fsTime *fsTime );							// load current RTC into fsTime
+extern void 			getRTC( struct _fsTime *fsTime, uint32_t *pMSec );					// load current RTC into fsTime & *pMSec
 extern bool 			showRTC( void );
 extern uint32_t 	tbTimeStamp( void );  // returns millisecond timestamp based on OS Tic
 extern uint32_t 	tbRtcStamp( void );   // returns millisecond timestamp based on RTC instead of OS Tic

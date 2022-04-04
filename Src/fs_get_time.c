@@ -8,6 +8,7 @@
 ///               - fsOK               = Operation successful.
 ///               - fsError            = Failed to get the current time.
 fsStatus fs_get_time (fsTime *time) {
-  getRTC(time);
+  uint32_t msec;
+  getRTC( time, &msec );
   return fsOK;
 }

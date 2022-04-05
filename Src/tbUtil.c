@@ -483,7 +483,8 @@ void 										getRTC( struct _fsTime *fsTime, uint32_t *pMSec ) {
     prevMsec = *pMSec;
 }
 
-uint32_t init_msRTC=0, init_day=0, day_msec = 0, init_msTS;
+uint32_t init_msRTC=0, init_day=0, day_msec = 0, init_msTS, prevRTC=0;
+fsTime prevTmDt;
 uint32_t 								tbRtcStamp(){       // returns millisecond timestamp based on RTC instead of OS Tic
     fsTime timedate;
     uint32_t mSec;
@@ -502,8 +503,16 @@ uint32_t 								tbRtcStamp(){       // returns millisecond timestamp based on R
         day_msec += 24*3600*1000;
         init_day = timedate.day;             // to detect next midnight crossing
     }
-    uint32_t msRTC = timedate.hr *3600 + timedate.min * 60 + timedate.sec * 1000 + mSec;
+    uint32_t msRTC = (timedate.hr *3600 + timedate.min * 60 + timedate.sec) * 1000 + mSec;    // milliseconds since previous midnight
     msRTC += day_msec;      // add in any full day adjustments
+    if ( msRTC < prevRTC ){
+        dbgLog("! nonMon RTC: prev:%d:%d:%d=%d rtc: %d:%d:%d=%d \n", prevTmDt.hr,prevTmDt.min,prevTmDt.sec, prevRTC, 
+                            timedate.hr,timedate.min,timedate.sec, msRTC );
+        __breakpoint(1);
+    }
+    prevRTC = msRTC;
+    prevTmDt.year = timedate.year; prevTmDt.mon = timedate.mon; prevTmDt.day = timedate.day;
+    prevTmDt.hr = timedate.hr; prevTmDt.min = timedate.min; prevTmDt.sec = timedate.sec;
 	return msRTC;   // wraps at midnight
 }
 bool 										showRTC( ){

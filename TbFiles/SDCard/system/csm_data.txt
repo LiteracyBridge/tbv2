@@ -1,5 +1,5 @@
-//TB CSM 2022-03-08: V18 TBv1 compatible file names.
-org.amplio.CSMcompile 8(2021-10-15) from C:\Users\bill\workspace\tbv2\TbFiles\SDCard\system\control_def.txt of 2022-03-17 16:23:45
+// TB CSM 2022-04-04: V19 handle battery events in USB mode
+org.amplio.CSMcompile 8(2021-10-15) from C:\Users\geneb\Documents\CSMcompile\data\control_def.txt of 2022-04-04 12:47:54
 6
 60000
 5000
@@ -95,7 +95,7 @@ stOnCharged
  6,  1,  6, 31, 32,  6,  6,  6,  6,  6,  6,  2, 34,  6,  6,  6,  6,  6,  6,  6,  6,  6, 35, 30, 33,  6,  6,  6,  6,  6,  6,  6,  6,  6,  3,  4,  5,  6,  7,  8,  6,  6,  6,  6,  6,  6,  6, 
 2
 bgLED
-G
+G_9
 goPrevSt
 _
 7
@@ -286,10 +286,10 @@ sv
 30
 stUSBmode
 47
-30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30,  9, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 
+30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30,  9, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30,  4,  5,  6,  7,  8, 30, 30, 30, 30, 30, 30, 30, 
 2
 bgLED
-O2_8
+R2_8G2_8
 startUSB
 _
 31

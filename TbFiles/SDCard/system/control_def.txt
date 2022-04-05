@@ -1,4 +1,5 @@
-//TB CSM 2022-03-08: V18 TBv1 compatible file names.
+// TB CSM 2022-04-04: V19 handle battery events in USB mode
+// TB CSM 2022-03-08: V18 TBv1 compatible file names.
 // TB CSM 2022-03-02: V17 handle BattMin & BattMax events
 // TB CSM 2022-02-23: V16 starTree => play all subj messages in a loop
 // TB CSM 2022-02-21: V15 8 sec pause => stGoSleep, Circle__ => stChgPkg, starCircle => stNxtPkg, handle LowBattery,BattCharging,& BattCharged
@@ -40,8 +41,15 @@
                      BattCharging:stOnCharging,
                      BattCharged:stOnCharged,
                      BattMin:    stOnBattMin,
-                     BattMax:    stNearCharged },
-    whenUSB:       { starPlus:   stCloseUSB },
+                     BattMax:    stNearCharged
+                   },
+    whenUSB:       { starPlus:   stCloseUSB,
+                     LowBattery: stOnLowBatt,
+                     BattCharging:stOnCharging,
+                     BattCharged:stOnCharged,
+                     BattMin:    stOnBattMin,
+                     BattMax:    stNearCharged
+                   },
     whenPlaying:   { Plus:       stPlayLouder,
                      Minus:      stPlaySofter,
                      Pot:        stPlayPause,
@@ -116,11 +124,11 @@
     stOnLowBatt:    { Actions: [ bgLED(R3_2), goPrevSt ],                       CGroups:[ whenAwake, whenNav, whenIdle ] },
     stIdleLouder:   { Actions: [ volAdj( 1),  playSys(0),  goPrevSt ],          CGroups:[ whenAwake, whenPlaying ] },
     stIdleSofter:   { Actions: [ volAdj(-1),  playSys(0),  goPrevSt ],          CGroups:[ whenAwake, whenPlaying ] },
-    stUSBmode:      { Actions: [ bgLED(O2_8), startUSB ],                       CGroups:[ whenUSB ] },
+    stUSBmode:      { Actions: [ bgLED(R2_8G2_8), startUSB ],                       CGroups:[ whenUSB ] },
     stCloseUSB:     { Actions: [ endUSB,      bgLED(G_29), setTimer(1000) ],    Timer: stWakeup },
     stOnCharging:   { Actions: [ bgLED(R_19),  goPrevSt ],                      CGroups:[ whenAwake, whenIdle ] },
     stNearCharged:  { Actions: [ bgLED(R_9),  goPrevSt ],                       CGroups:[ whenAwake, whenIdle ] },
-    stOnCharged:    { Actions: [ bgLED(G),  goPrevSt ],                         CGroups:[ whenAwake, whenIdle ] },
+    stOnCharged:    { Actions: [ bgLED(G_9),  goPrevSt ],                         CGroups:[ whenAwake, whenIdle ] },
     stShowBatt:     { Actions: [ showCharge,  goPrevSt ],                       CGroups:[ whenAwake, whenIdle ] },
     stBattMin:      { Actions: [ bgLED(R5_5),  setTimer(5000) ],                CGroups:[ whenSleeping ], Timer: stFallAsleep },
 #    stTest:         { Actions: [ sysTest ],                                     CGroups:[ whenAwake ] },

@@ -282,10 +282,10 @@ void                        scanLogForRTC( uint32_t norAddr ){
               lastRTCinLog.sec = 0;
               break;
             }
-            cnt--;
         }
         logaddr -= NLg.PGSZ;     // check previous page
         NLogReadPage( logaddr );
+        cnt--;
     }
     NLogReadPage( norAddr );      // go back to last page
 }

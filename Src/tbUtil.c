@@ -358,21 +358,7 @@ void 										osRtxIdleThread (void *argument) {
 }
 //
 // MPU Identifiers
-char CPU_ID[20], TB_ID[20], TBookName[20];
-void 										loadTBookName(){
-	strcpy( TBookName, TB_ID );		// default to ID
-	FILE *f = tbOpenRead( "M0:/system/tbook_names.txt" ); //fopen( , "r" );
-	if ( f == NULL ) return;
-
-	char fid[20], fnm[20];
-	while ( fscanf( f, "%20s %20s \n", fid, fnm )==2 ){
-		if ( strcmp(fid, TB_ID)==0 ){
-			strcpy( TBookName, fnm );
-			break;
-		}
-	}
-	tbCloseFile( f );		// fclose( f );
-}
+char CPU_ID[20], TB_ID[20];
 void 										initIDs(){																		// initialize CPU_ID & TB_ID strings
 	typedef struct {	// MCU device & revision
 		// Ref Man: 30.6.1 or 31.6.1: MCU device ID code
@@ -409,168 +395,139 @@ void 										initIDs(){																		// initialize CPU_ID & TB_ID strings
 	memcpy( &stmID, (const void *)UID_BASE, 12 );
 	stmID.lot[7] = 0;  // null terminate the lot string
 	sprintf( TB_ID, "%04x.%04x.%x.%s", stmID.x, stmID.y, stmID.wafer, stmID.lot );
-
-//	loadTBookName();
 }
 
 
 //
 // timestamps & RTC, allocation, fexists
 
-void fetchRtc( uint32_t *pDt, uint32_t *pTm, uint32_t *pMSec ){   // read RTC values into *pDt, *pTm, *pMSec
-  //const int PREDIV_S = 255;    // RTC prescaler default value
-   uint32_t prvDt=0,Dt=1, prvTm=0,Tm=1, SubSec=1, PreScale;
-   while (prvDt != Dt || prvTm != Tm){
+/// \brief Reads the registers from the Real Time Clock
+/// \param[out] pDt         Pointer to a uint32_t to receive the contents of the Date Register.
+/// \param[out] pTm         Pointer to a uint32_t to receive the contents of the Time Register.
+/// \param[out] pMSec       Pointer to a uint32_t to receive milliseconds. Note that this a value
+///                         in milliseconds, but not millisecond resolution; about 4ms resolution.
+/// \return                 nothing
+void fetchRtc(uint32_t *pDt, uint32_t *pTm, uint32_t *pMSec) {   // read RTC values into *pDt, *pTm, *pMSec
+    uint32_t prvDt = 0, Dt = 1, prvTm = 0, Tm = 1, SubSec = 1, PreScale;
+    while (prvDt != Dt || prvTm != Tm) {
         prvDt = Dt;
         prvTm = Tm;
         Dt = RTC->DR;
         Tm = RTC->TR;
-		SubSec = RTC->SSR;
+        SubSec = RTC->SSR;
         PreScale = RTC->PRER;
     }
-	*pDt = Dt;
-	*pTm = Tm;
-    uint32_t prediv_S = (PreScale & 0x7FFF); 
-	int32_t msec = (prediv_S - SubSec)*1000/(prediv_S + 1);   // in ~4mSec steps
-    if (msec<0 || msec>999) msec = 0;   // check for SS > PREDIV_S (note on RM0402 22.6.11) and set msec to 0 
+    *pDt = Dt;
+    *pTm = Tm;
+    uint32_t prediv_S = (PreScale & 0x7FFF);
+    int32_t msec = (prediv_S - SubSec) * 1000 / (prediv_S + 1);   // in ~4mSec steps
+    if (msec < 0 || msec > 999) {
+        // check for SS > PREDIV_S (note on RM0402 22.6.11) and set msec to 0
+        msec = 0;
+    }
     *pMSec = msec;
 }
 
-struct {
-	uint8_t		yr;
-	uint8_t		mon;
-	uint8_t		date;
-	uint8_t		day;
-	uint8_t		hr;
-	uint8_t		min;
-	uint8_t		sec;
-	uint8_t		tenths;
-	uint8_t		pm;
-} lastRTC, firstRTC;
+// To catch time going backwards.
+fsTime prevGetRtcTime;
+uint32_t prevGetRtcMs = 0;
 
-
-/// \brief Gets the current time from RTC into a fsTime structure.
-/// \param[out] fsTime      fsTime structure to be filled in.
-fsTime prevTm;
-uint32_t prevMsec;
-void 										getRTC( struct _fsTime *fsTime, uint32_t *pMSec ) {
-    uint32_t Dt=1, Tm=1;
-	fetchRtc( &Dt, &Tm, pMSec );  // get valid RTC register values
+/// \brief Retrieves the current date and time from the Real Time Clock.
+/// \param[out] fsTime      Pointer to a fsTime structure to be filled in.
+/// \param[out] pMSec       Pointer to a uint32_t to receive milliseconds.
+/// \return                 true if the RTC seems to have been set (date >= 2022)
+bool getRTC(struct _fsTime *fsTime, uint32_t *pMSec) {
+    uint32_t Dt = 1, Tm = 1, msec;
+    fetchRtc(&Dt, &Tm, &msec);  // get valid RTC register values
 
     // This is going suck in the year 2100. But it would break in 2107 anyway.
     // The time format allows years 1980 to 2107. The RTC only allows years % 100.
-    fsTime->year = ((Dt >> 20) & 0xF)*10 + ((Dt >> 16) & 0xF) + 2000;
-    fsTime->mon = ((Dt >> 12) & 0x1)*10 + ((Dt >> 8) & 0xF);
-    fsTime->day =((Dt >>  4) & 0x3)*10 + (Dt & 0xF);
+    uint16_t year = ((Dt >> 20) & 0xF) * 10 + ((Dt >> 16) & 0xF) + 2000;
+    if (year < 2022) {
+        return false;
+    }
+    fsTime->year = year;
+    fsTime->mon = ((Dt >> 12) & 0x1) * 10 + ((Dt >> 8) & 0xF);
+    fsTime->day = ((Dt >> 4) & 0x3) * 10 + (Dt & 0xF);
 
     // convert HR from 12a 1a .. 11a 12p 1p .. 11p => 0..23
     fsTime->hr =  ((Tm >> 20) & 0x3)*10 + ((Tm >> 16) & 0xF);   // HR as 12,1..11 AM/PM
     bool pm = ((Tm >> 22) & 0x1);
-    if (fsTime->hr == 12) 
+    if (fsTime->hr == 12)
         { if (!pm) fsTime->hr = 0; }       // 12am => 0  12pm => 12
     else
         if ( pm ) fsTime->hr += 12;        // 1pm..11pm => 13..23
     fsTime->min = ((Tm >> 12) & 0x7)*10 + ((Tm >> 8) & 0xF);
     fsTime->sec = ((Tm >>  4) & 0x7)*10 + (Tm & 0xF);
+    if (pMSec != NULL) {
+        *pMSec = msec;
+    }
+    ///////////////////////////////////////////////////////////////////////////
     // HACK to try to ensure clock grows monotonically, in spite of occassionally seeing sec fail to increment (especially when power is low)
-    if ( prevTm.min == fsTime->min && prevTm.sec == fsTime->sec && prevMsec > *pMSec ){  // earlier than previous time (sec didn't incr)
+    if ( prevGetRtcTime.min == fsTime->min && prevGetRtcTime.sec == fsTime->sec && prevGetRtcMs > msec ){  // earlier than previous time (sec didn't incr)
        fsTime->sec++;
        if (fsTime->sec == 60) { fsTime->sec = 0; fsTime->min++; }
        if (fsTime->min == 60) { fsTime->min = 0; fsTime->hr++; }      // doesn't work across midnight
     }
-    prevTm.min = fsTime->min;
-    prevTm.sec = fsTime->sec;
-    prevMsec = *pMSec;
+    prevGetRtcTime = *fsTime;
+    prevGetRtcMs = msec;
+    //
+    ///////////////////////////////////////////////////////////////////////////
+    return true;
 }
 
-uint32_t init_msRTC=0, init_day=0, day_msec = 0, init_msTS, prevRTC=0;
-fsTime prevTmDt;
-uint32_t 								tbRtcStamp(){       // returns millisecond timestamp based on RTC instead of OS Tic
+// Used to track when the clock crosses midnight, and the adjustment to the timestamp from those crossings.
+uint32_t previousTimestampDay = 0;
+uint32_t previousDaysMilliseconds = 0;
+
+/// \brief Gets a timestamp of milliseconds since midnight on the day that the device was
+/// booted. (Sub-second, about 4ms, resolution, monotonically increasing.)
+/// \return             Milliseconds since midnight on the day the device booted.
+uint32_t tbRtcStamp() {
     fsTime timedate;
     uint32_t mSec;
-    
-    getRTC( &timedate, &mSec );
-    
-//    uint32_t Dt=1, Tm=1, mSec=1;
-//	fetchRtc( &Dt, &Tm, &mSec );  // get valid RTC register values
-//	uint8_t hour =  ((Tm>>20) & 0x3)*10 + ((Tm>>16) & 0xF) - 1;       // HR as 0..11 AM/PM
-//    if ((Tm >> 22) & 0x1) hour += 12;           // HR as 0..23
-//	uint8_t minute = ((Tm>>12) & 0x7)*10 + ((Tm>>8) & 0xF);
-//	uint8_t second  = ((Tm>> 4) & 0x7)*10 + (Tm & 0xF);
-//	uint8_t day =((Dt>> 4) & 0x3)*10 + (Dt & 0xF);
-//    uint32_t msRTC = (hour * 3600 + minute * 60 + second)*1000 + mSec;       // milliseconds since previous midnight
-    if ( timedate.day != init_day ){         // crossed midnight since last call
-        day_msec += 24*3600*1000;
-        init_day = timedate.day;             // to detect next midnight crossing
+
+    getRTC(&timedate, &mSec);
+
+    if (previousTimestampDay == 0) {
+        previousTimestampDay = timedate.day;
+    } else if (timedate.day != previousTimestampDay) {
+        // crossed midnight since last call
+        previousDaysMilliseconds += 24 * 3600 * 1000;
+        previousTimestampDay = timedate.day;
     }
-    uint32_t msRTC = (timedate.hr *3600 + timedate.min * 60 + timedate.sec) * 1000 + mSec;    // milliseconds since previous midnight
-    msRTC += day_msec;      // add in any full day adjustments
-    if ( msRTC < prevRTC ){
-        dbgLog("! nonMon RTC: prev:%d:%d:%d=%d rtc: %d:%d:%d=%d \n", prevTmDt.hr,prevTmDt.min,prevTmDt.sec, prevRTC, 
-                            timedate.hr,timedate.min,timedate.sec, msRTC );
-        __breakpoint(1);
-    }
-    prevRTC = msRTC;
-    prevTmDt.year = timedate.year; prevTmDt.mon = timedate.mon; prevTmDt.day = timedate.day;
-    prevTmDt.hr = timedate.hr; prevTmDt.min = timedate.min; prevTmDt.sec = timedate.sec;
-	return msRTC;   // wraps at midnight
+    uint32_t msRTC = (timedate.hr * 3600 + timedate.min * 60 + timedate.sec) * 1000 + mSec;
+    msRTC += previousDaysMilliseconds;
+    return msRTC;
 }
-bool 										showRTC( ){
+
+// To track how the CPU millisecond timer drifts from the RTC.
+uint32_t init_msRTC = 0, init_msTS;
+
+/// \brief Logs the current RTC time, if the RTC appears to have been set.
+/// \return             true if RTC seems to have been set.
+bool showRTC() {
     fsTime timedate;
     uint32_t mSec;
-    
-    getRTC( &timedate, &mSec );
- /*
-    uint32_t Dt=1, Tm=1, mSec=1;
-	fetchRtc( &Dt, &Tm, &mSec );  // get valid RTC register values
 
-	int pDt=0,Dt=1, pTm=0,Tm=1, SubSec=1;
-	while (pDt != Dt || pTm != Tm){
-		pDt = Dt;
-		pTm = Tm;
-		Dt = RTC->DR;
-		Tm = RTC->TR;
-        SubSec = RTC->SSR;
-	}
-    const int PREDIV_S = 255;    // RTC prescaler default value
-
-    const int ACT_DATE_RESET = 0x0c101;    // reset value of RTC Date Register = Saturday, 1-Jan-2000
-    const int DOC_DATE_RESET = 0x02101;    // reset value of RTC Date Register = Monday, 1-Jan-00  (according to RM0402)
-	if ( Dt == DOC_DATE_RESET || Dt == ACT_DATE_RESET )
-        return false;    //  RTC is uninitialized
-
-	uint8_t year, month, day, hour, minute, second, dayOfWeek;
-//	uint32_t milliSec;
-	year =  ((Dt>>20) & 0xF)*10 + ((Dt>>16) & 0xF);
-*/
-    if ( timedate.year < 2022 )                       // treat any date before 2022 like reset value-- date is invalid
+    if (!getRTC(&timedate, &mSec)) {
         return false;
-/*
-	dayOfWeek = ((Dt>>13) & 0x7);
-	month = ((Dt>>12) & 0x1)*10 + ((Dt>>8) & 0xF);
-	day =((Dt>> 4) & 0x3)*10 + (Dt & 0xF);
+    }
+    // Date and time in ISO 8601 format. Day of week for convenience.
+    logEvtFmt("RTC", "Dt: %02d-%02d-%02d %02d:%02d:%02d.%03d", timedate.year, timedate.mon, timedate.day, timedate.hr,
+              timedate.min, timedate.sec, mSec);
 
-	hour =  ((Tm>>20) & 0x3)*10 + ((Tm>>16) & 0xF);
-	minute = ((Tm>>12) & 0x7)*10 + ((Tm>>8) & 0xF);
-	second  = ((Tm>> 4) & 0x7)*10 + (Tm & 0xF);
-//    milliSec = (PREDIV_S - SubSec)*1000/(PREDIV_S + 1);   // in ~4mSec steps
-
-	if ((Tm>>22) & 0x1) hour += 12;
-
-	char * wkdy[] = { "", "Mon","Tue","Wed","Thu","Fri","Sat","Sun" };
-*/
-  // Date and time in ISO 8601 format. Day of week for convenience.
-	logEvtFmt( "RTC", "Dt: %02d-%02d-%02d %02d:%02d:%02d.%03d", timedate.year, timedate.mon, timedate.day, timedate.hr, timedate.min, timedate.sec, mSec  );
-
-    init_day = timedate.day;
-    if ( BootVerboseLog ){
+    if (BootVerboseLog) {
         uint32_t msRTC = tbRtcStamp();
-        uint32_t tsNow = tbTimeStamp();
-        if ( init_msRTC==0 ){
-            init_msTS = tsNow;
+        uint32_t msNow = tbTimeStamp();
+        if (init_msRTC == 0) {
+            // Initialize the "initial values of millisecond timers"
+            init_msTS = msNow;
             init_msRTC = msRTC;
-            logEvtFmt( "Clocks", "ts_ms: %d,  rtc_ms: %d", tsNow, init_msTS + msRTC - init_msRTC );
         }
+        // How has the difference changed? 
+        int32_t drift = (init_msRTC - init_msTS) - (msRTC - msNow);
+        logEvtFmt("Clocks", "ts_ms: %d,  rtc_ms: %d, drift: %d", msNow, msRTC, drift);
     }
 	return true;    // RTC is initialized, and value has been logged
 }

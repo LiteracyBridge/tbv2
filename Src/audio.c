@@ -405,24 +405,30 @@ void 								audStopAudio( void ){													// abort any leftover operation
   }
 
   if (st == Playing ){
-    playback_type_t playtyp = pSt.playbackTyp;   // remember across reset
-      
-    if (pSt.state==pbPlaying ){
-      haltPlayback();			// stop device & update timestamps
-      audPlayDone();
-    }
-    freeBuffs();
-    pSt.stats->Left++;		// update stats for interrupted operation
-    
-    int pct = 100 * pSt.msPlayed / pSt.msecLength;     // already stopped, so calc final pct
-    dbgLog( "D audStop play %d \n", pct );
-    pSt.stats->LeftSumPct += pct;
-    if ( pct < pSt.stats->LeftMinPct ) pSt.stats->LeftMinPct = pct;
-    if ( pct > pSt.stats->LeftMaxPct ) pSt.stats->LeftMaxPct = pct;
-    logEvtNININI("CutPlay", "ms", pSt.msPlayed, "pct", pct, "nSamp", pSt.nPlayed );
-    if ( playtyp==ptMsg )
-        LOG_AUDIO_PLAY_STOP( pSt.msecLength, pSt.msPlayed, pct, pSt.playSubj, pSt.playMsg );
-    logPlayMsg();
+      playback_type_t playtyp = pSt.playbackTyp;   // remember across reset
+
+      if (pSt.state == pbPlaying) {
+          haltPlayback();            // stop device & update timestamps
+          audPlayDone();
+      }
+      freeBuffs();
+      pSt.stats->Left++;        // update stats for interrupted operation
+
+      /////////////////////////////////////////////////////////////////////////////////
+      /////////////////////////////////////////////////////////////////////////////////
+      // TODO: Fix the problem of 0-length files, don't just work around it!
+      // msecLength is somehow sometimes getting a value of zero. Don't divide by zero.
+      int pct = 100 * pSt.msPlayed / (pSt.msecLength ? pSt.msecLength : 1);     // already stopped, so calc final pct
+      /////////////////////////////////////////////////////////////////////////////////
+      /////////////////////////////////////////////////////////////////////////////////
+      dbgLog("D audStop play %d \n", pct);
+      pSt.stats->LeftSumPct += pct;
+      if (pct < pSt.stats->LeftMinPct) pSt.stats->LeftMinPct = pct;
+      if (pct > pSt.stats->LeftMaxPct) pSt.stats->LeftMaxPct = pct;
+      logEvtNININI("CutPlay", "ms", pSt.msPlayed, "pct", pct, "nSamp", pSt.nPlayed);
+      if (playtyp == ptMsg)
+          LOG_AUDIO_PLAY_STOP(pSt.msecLength, pSt.msPlayed, pct, pSt.playSubj, pSt.playMsg);
+      logPlayMsg();
   }
 }
 

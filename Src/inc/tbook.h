@@ -40,15 +40,14 @@
 extern void				EnableLedMngr( bool enable );  // DEBUG allow disabling LED manager for debugging
 #define count(x) sizeof(x)/sizeof(x[0])
 
-extern char 			CPU_ID[20], TB_ID[20], TBookName[20];
+extern char 			CPU_ID[20], TB_ID[20];
 extern bool 			NO_OS_DEBUG;					// set in main.c, used in tbook.c
 extern bool 			FirstSysBoot;					// defined in logger
 extern bool 			RunQCTest;						// defined in tbook.c -- if no /system/QC_PASS.txt  or Circle boot
 extern char             BootKey;                        // set in main.c, used in tbook.c
-extern bool				PowerChecksEnabled;				// set true for normal operation 
+extern bool				PowerChecksEnabled;				// set true for normal operation
 
 extern void 			initIDs( void );
-extern void				loadTBookName( void );													// load TBookName with string matching ID from /system/tbook_names.txt
 extern void 			GPIO_DefineSignals( const GPIO_Signal def[] );
 extern void 			gSet( GPIO_ID gpio, uint8_t on );								// set the state of a GPIO output pin
 extern bool			 	gOutVal( GPIO_ID gpio );												// => LOGICAL state of a GPIO OUTput, e.g. True if 'PA0_'.ODR==0 or 'PB3'.ODR==1
@@ -76,18 +75,17 @@ extern FILE * 		tbOpenReadBinary( const char * nm );						// repower if necessar
 extern FILE * 		tbOpenWrite( const char * nm );									// repower if necessary, & open file
 extern FILE * 		tbOpenWriteBinary( const char * nm );						// repower if necessary, & open file
 extern void				tbCloseFile( FILE * f );												// close file, errLog if error
-extern void				tbRenameFile( const char *src, const char *dst ); // rename path to path 
+extern void				tbRenameFile( const char *src, const char *dst ); // rename path to path
 
 extern void 			FileSysPower( bool enable );										// power up/down eMMC & SD 3V supply
 extern fsStatus 	fsMount( char *drv );														// try to finit() & mount()  drv:   finit() code, fmount() code
 extern osMutexId_t		logLock;																		// mutex for access to NorFlash
 
-extern void 			talking_book( void *tbAttr );			// talking book initialization & control manager thread 
-extern void 			getRTC( struct _fsTime *fsTime, uint32_t *pMSec );					// load current RTC into fsTime & *pMSec
+extern void 			talking_book( void *tbAttr );			// talking book initialization & control manager thread
+extern bool 			getRTC( struct _fsTime *fsTime, uint32_t *pMSec );					// load current RTC into fsTime & *pMSec
 extern bool 			showRTC( void );
 extern uint32_t 	tbTimeStamp( void );  // returns millisecond timestamp based on OS Tic
 extern uint32_t 	tbRtcStamp( void );   // returns millisecond timestamp based on RTC instead of OS Tic
-extern void 			fetchRtc( uint32_t *pDt, uint32_t *pTm, uint32_t *pMSec );   // read RTC values into *pDt, *pTm, *pMSec
 
 extern void 			tbDelay_ms( int ms ); 					//  Delay execution for a specified number of milliseconds
 extern void *			tbAlloc( int nbytes, const char *msg );

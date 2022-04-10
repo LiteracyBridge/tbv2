@@ -426,45 +426,44 @@ void                      setupRTC( fsTime time ){				// init RTC & set based on
     if (cnt==1000) tbErr("RTC: Initmode not ready");
 	
 	RTC->PRER  = (256 << RTC_PRER_PREDIV_S_Pos);				// Synchronous prescaler = 256  MUST BE FIRST
-	RTC->PRER |= (127 << RTC_PRER_PREDIV_A_Pos);				// THEN asynchronous = 127 for 32768Hz => 1Hz
-	
-	// using AM/PM, since 24hr updated improperly (day didn't switch)
-	int32_t ampm = 0, hr = time.hr;   
-    // 0 -> 12a, 1..11 -> 1a..11a 12->12p 13..23 -> 1..11p
-	if ( hr == 12 ) 
-        { ampm = 1; }           // 12 -> 12pm 
-    else if ( hr > 12 )
-        { ampm = 1; hr -= 12;  }  // 13..23 -> 1..11pm 
-	uint32_t TR = (ampm << 22) | ( Bcd2( hr ) << 16 ) | ( Bcd2( time.min ) << 8 ) | Bcd2( time.sec );
-	
-	// calc weekday from date
-	int yr = time.year, yy = yr % 100, cen = yr / 100, mon = time.mon, day = time.day;
-	bool leap = (yr%400==0) || (yr%4==0 && yr%100!=0);
-	uint16_t cenCd[] = { 6, 4, 2 };	// for 20, 21, 22
-	uint16_t monCd[] = { 0, 3, 3, 6, 1, 4, 6, 2, 5, 0, 3, 5 };
-	uint16_t cCd = cenCd[cen-20];
-	uint16_t yCd = (yy/4 + yy) % 7;
-	uint16_t mCd = monCd[ mon-1 ];
-	uint8_t wkday = (yCd+mCd+day+cCd - (leap && mon<3? 1 : 0)) % 7;
-	if (wkday==0) wkday = 7;
-	
-	uint32_t DR = ( Bcd2( yy ) << 16 ) | (wkday << 13 ) | ( Bcd2( mon ) << 8 ) | Bcd2( day );
+    RTC->PRER |= (127 << RTC_PRER_PREDIV_A_Pos);                // THEN asynchronous = 127 for 32768Hz => 1Hz
 
-	RTC->CR 	|= RTC_CR_FMT;			// use AM/PM hour format
-	RTC->TR = TR;		// set time of day
-	RTC->DR = DR;		// set y
-	// RTC->CR.FMT == 0 (24 hour format)
-	RTC->ISR 	&= ~RTC_ISR_INIT;												// leave RTC init mode
-	
-	PWR->CR 	&= ~PWR_CR_DBP;													// disable access to Backup Domain 
-    
+    // using AM/PM, since 24hr updated improperly (day didn't switch)
+    int32_t ampm = 0, hr = time.hr;
+    // 0 -> 12a, 1..11 -> 1a..11a 12->12p 13..23 -> 1..11p
+    if (hr == 12) { ampm = 1; }           // 12 -> 12pm
+    else if (hr > 12) { ampm = 1; hr -= 12; }  // 13..23 -> 1..11pm
+    uint32_t TR = (ampm << 22) | (Bcd2(hr) << 16) | (Bcd2(time.min) << 8) | Bcd2(time.sec);
+
+    // calc weekday from date. Adapted from https://artofmemory.com/blog/how-to-calculate-the-day-of-the-week
+    // The RTC needs day of week, though we don't care about it.
+    int yr = time.year, yy = yr % 100, cen = yr / 100, mon = time.mon, day = time.day;
+    bool leap = (yr % 400 == 0) || (yr % 4 == 0 && yr % 100 != 0);
+    uint16_t cenCd[] = {6, 4, 2};  // for centuries 20xx, 21xx, 22xx
+    uint16_t monCd[] = {0, 3, 3, 6, 1, 4, 6, 2, 5, 0, 3, 5};
+    uint16_t cCd = cenCd[cen - 20];
+    uint16_t yCd = (yy / 4 + yy) % 7;
+    uint16_t mCd = monCd[mon - 1];
+    uint8_t wkday = (yCd + mCd + day + cCd - (leap && mon < 3 ? 1 : 0)) % 7;
+    if (wkday == 0) wkday = 7;
+
+    uint32_t DR = (Bcd2(yy) << 16) | (wkday << 13) | (Bcd2(mon) << 8) | Bcd2(day);
+
+    RTC->CR |= RTC_CR_FMT;      // use AM/PM hour format
+    RTC->CR |= RTC_CR_BYPSHAD;  // Bypass shadow registers; read calendar directly. Costs 1 extra "APB cycle" per read.
+    RTC->TR = TR;    // set time of day
+    RTC->DR = DR;    // set date
+    RTC->ISR &= ~RTC_ISR_INIT;                        // leave RTC init mode
+
+    PWR->CR &= ~PWR_CR_DBP;                                                    // disable access to Backup Domain
+
     // read clock until change has taken effect
     fsTime newtime;
     uint32_t msec;
     cnt = 0;
-    while ( true ){
-        getRTC( &newtime, &msec );
-        if (newtime.day == time.day && newtime.mon == time.mon && newtime.year == time.year ){    // date has updated
+    while (true) {
+        getRTC(&newtime, &msec);
+        if (newtime.day == time.day && newtime.mon == time.mon && newtime.year == time.year) {    // date has updated
             if (newtime.hr == time.hr && newtime.min >= time.min) return;    // time also updated 
         }
         cnt++;

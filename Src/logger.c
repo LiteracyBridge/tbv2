@@ -112,14 +112,20 @@ bool getFileTime(char *path, fsTime *time) {
   return false;
 }
 
-void 						writeLine( char * line, const char * fpath ){
-	FILE *stF = tbOpenWriteBinary( fpath ); //fopen( fpath, "wb" );
-	if ( stF!=NULL ){
-		int nch = fprintf( stF, "%s\n", line );
-		tbCloseFile( stF );		//int err = fclose( stF );
-	  dbgEvt( TB_wrLnFile, nch, 0, 0, 0 );
-	}
+/// \brief Create or truncate a file and write data to it. The data is presumed to be a nul ('\0')
+/// terminated string. A '\n' character is appended to the end.
+/// \param[in] line     Nul terminated string.
+/// \param[in] fpath    Name of the file to be created / truncated.
+/// \return             nothing
+void writeLine(char *line, const char *fpath) {
+    FILE *stF = tbOpenWriteBinary(fpath); //fopen( fpath, "wb" );
+    if (stF != NULL) {
+        int nch = fprintf(stF, "%s\n", line);
+        tbCloseFile(stF);        //int err = fclose( stF );
+        dbgEvt(TB_wrLnFile, nch, 0, 0, 0);
+    }
 }
+
 bool						openLog( bool forRead ){
 	fsFileInfo fAttr;
 	fAttr.fileID = 0;
@@ -206,14 +212,6 @@ void						logPowerUp( bool reboot ){											// re-init logger after reboot, U
 		else {     // First Boot starts a new log (unless already done by erase)
 			sprintf(line, logFilePatt, NLogIdx() );
             startNextLog();
-/*            
-      // Boot with PLUS+MINUS. Escape valve to suppress this -- causes initNorLog() to hang/fail in some cases. Unknown reason.
-      // TODO: Fix the bricking!
-			if (BootKey!='0') copyNorLog( line );				// save final previous log
-      // Flash RRGGGGRR TODO: Remove this when we remove the "if" around copyNorLog();
-      flashCode(3); flashCode(12);
-			initNorLog( true );				// restart with a new log
-            */
 		}
 	}
 	
@@ -256,8 +254,6 @@ void						logPowerUp( bool reboot ){											// re-init logger after reboot, U
 		logEvtNS(  "TB_ID", "Id", TB_ID );
         if ( !fexists( deviceIdFile ))
             writeLine( TB_ID, deviceIdFile );
-		loadTBookName();
-		logEvtNS(  "TB_NM", "Nm", TBookName );
 		logEvtNI( "CPU_CLK", "MHz", SystemCoreClock/1000000 );
 		logEvtNINI("BUS_CLK", "APB2", APB2_clock, "APB1", APB1_clock );
 	} else
@@ -267,26 +263,6 @@ void						logPowerUp( bool reboot ){											// re-init logger after reboot, U
 	dbgEvt( TB_bootCnt, bootcnt, 0,0,0);
 	NLogShowStatus();
 	
-/*
-	fsFileInfo fAttr;
-	fAttr.fileID = 0;
-
-	if ( nCSMstates == 0 ){  // will need to parse control.def to define CSM
-		fsStatus fStat = ffind( TBP[ pCSM_DEF ], &fAttr );
-		if ( fStat != fsOK ){
-			logEvtNS( "TB_CSM", "missing", TBP[ pCSM_DEF ] );
-			return;
-		} else {	// Read 1st line (latest version comment) from "M0:/system/control.def" & log it
-			char * status = loadLine( line, TBP[ pCSM_DEF ], &verDt );			// control.def file exists-- when created
-			int slen = strlen( status );
-			if ( slen >= MAX_VERSION_LEN ) 
-				status[MAX_VERSION_LEN-1] = 0;   // truncate if too long
-			strcpy( CSM_Version, status );
-		}
-	}
-	logEvtNS( "TB_CSM", "ver", CSM_Version );		// log CSM version comment
-*/
-
 
   // IF a file SetRTC.txt exists, use it's timestamp to set the RTC. The timestamp will likely be at least
   // several seconds in the past, but should be "good enough".`
@@ -306,8 +282,6 @@ void						logPowerUp( bool reboot ){											// re-init logger after reboot, U
         errLog( "frename %s to %s => %d \n", rtcSetFile, rtcDontSetFile, stat );
       }
       saveLastTime( rtcDt );
-	//  if ( !fexists( lastRtcFile )) writeLine( "---", lastRtcFile );  // make sure it's there
-	//  ftime_set( lastRtcFile, &rtcDt, &rtcDt, &rtcDt );  // set create,access,write times to RTC 
     }
   }
 	
@@ -427,12 +401,13 @@ MsgStats *			loadStats( const char *subjNm, short iSubj, short iMsg ){		// load 
 	} 
 	else { // success--
 		dbgEvt( TB_LdStatFile, iSubj,iMsg, 0,0);
-		tbCloseFile( stF );		//fclose( stF );		
+		tbCloseFile( stF );		//fclose( stF );
 	}
 	lastRef[ newStatIdx ] = nRefs;
 	touched[ newStatIdx ] = 1;
 	return st;
 }
+
 // logEvt formats
 void						logEvt( const char *evtID ){											// write log entry: 'EVENT, at:    d.ddd'
 	logEvtS( evtID, "" );
@@ -450,24 +425,12 @@ void						logEvtS( const char *evtID, const char *args ){		// write log entry: '
     fsTime tmdt;
     uint32_t msec;
     getRTC( &tmdt, &msec );
- /*   uint32_t Dt=1, Tm=1, mSec=1;
-//	fetchRtc( &Dt, &Tm, &mSec );  // get valid RTC register values 
-	uint8_t hour =  ((Tm>>20) & 0x3)*10 + ((Tm>>16) & 0xF) - 1;    // HR as 0..11 (AM or PM)
-	if ((Tm>>22) & 0x1) hour += 12;
-	uint8_t minute = ((Tm>>12) & 0x7)*10 + ((Tm>>8) & 0xF);
-	uint8_t second  = ((Tm>> 4) & 0x7)*10 + (Tm & 0xF);
-    */
 	sprintf( evtBuff,  "%02d_%02d_%02d.%03d: %8s", tmdt.hr, tmdt.min, tmdt.sec, msec, evtID );
-//	int 		ts = tbTimeStamp();
-//	int tsec = ts/100, sec = tsec/10, min = sec/60, hr = min/60;
-//	sprintf( evtBuff,  "%02d_%02d_%02d.%d: %8s", hr, min %60, sec % 60, tsec % 10, evtID );
-//	addHist( evtBuff, args );
 	dbgLog( " %s %s\n", evtBuff, args );
 
 	if (( osKernelGetState()== osKernelRunning) && osMutexAcquire( logLock, osWaitForever )!=osOK ){
 		dbgLog( "! logLock lost %s \n", evtID );
 		return;
-		//tbErr("logLock");
 	}
 	norEvt( evtBuff, args );	// WRITE to NOR Log
 	if ( logF!=NULL ){
@@ -479,9 +442,9 @@ void						logEvtS( const char *evtID, const char *args ){		// write log entry: '
           totLogCh += nch;
       }
 		int err = fflush( logF );
-		
+
 		dbgEvt( TB_flshLog, nch, totLogCh, err,0);
-		if ( err<0 ) 
+		if ( err<0 )
 			dbgLog( "! Log flush err %d \n", err );
 	}
 	if (( osKernelGetState()== osKernelRunning) &&  osMutexRelease( logLock )!=osOK )	tbErr("logLock!");

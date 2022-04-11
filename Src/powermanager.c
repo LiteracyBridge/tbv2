@@ -583,8 +583,8 @@ void                      checkPower( bool verbose ){				// check and report pow
     if (pstat==TEMPFAULT) sCh = 'X';
 
 /*=========== Power Status -- Log message interpretation ================================
-PwrCheck, stat:  'u Lxct Pp Bb Tm Vv'
-                  |  |||  |  |  |  |
+PwrCheck, stat:  'u Lxct Pp Bb Tm Vv Liuuuu'
+                  |  |||  |  |  |  |   uuuu = current Li-ion battery reading, mV
                   |  |||  |  |  | Vv   v = current audio volume
                   |  |||  |  | Tm      m = -/0/1/2/.../9/! = MPU temp  (m+2)* 100mV, - if <200mV, + if >1200mV
                   |  |||  | Bb         b = -/0/1/2/.../9/! = Backup  batt voltage 2+b*.2V, - if <2.0V, + if >3.9V 

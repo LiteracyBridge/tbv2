@@ -172,7 +172,7 @@ extern const int	pBOOTCNT;
 extern const int	pCSM_DEF;
 extern const int	pLOG_TXT;
 extern const int	pSTATS_PATH;
-extern const int	pMSGS_PATH;
+extern const int	pRECORDINGS_PATH;
 extern const int	pLIST_OF_SUBJS;
 extern const int	pPACKAGE_DIR;
 extern const int	pPKG_VERS;

@@ -343,10 +343,10 @@ int							fileMatchNext( const char *fnPatt ){			// return next unused value for
 }
 char *					logMsgName( char *path, const char * sNm, short iSubj, short iMsg, const char *ext, int *pcnt ){			// build & => file path for next msg for Msg<iPkg>_<sNm>_S<iS>_M<iM>.<ext>
 	char fnPatt[ MAX_PATH ]; 
-	sprintf( fnPatt, "%sMsgP%d_%s_S%d_M%d_*%s", TBP[ pMSGS_PATH ], iPkg, sNm, iSubj, iMsg, ext );	// e.g. "M0:/messages/Msg_Health_S2_M3_*.txt"
+	sprintf( fnPatt, "%sMsgP%d_%s_S%d_M%d_*%s", TBP[ pRECORDINGS_PATH ], iPkg, sNm, iSubj, iMsg, ext );	// e.g. "M0:/recordings/Msg_Health_S2_M3_*.txt"
 	
 	int cnt = fileMatchNext( fnPatt );
-	sprintf( path, "%sMsgP%d_%s_S%d_M%d_%d%s", TBP[ pMSGS_PATH ], iPkg, sNm, iSubj, iMsg, cnt, ext );
+	sprintf( path, "%sMsgP%d_%s_S%d_M%d_%d%s", TBP[ pRECORDINGS_PATH ], iPkg, sNm, iSubj, iMsg, cnt, ext );
 	*pcnt = cnt;
 	return path;
 }

@@ -3,7 +3,7 @@ org.amplio.CSMcompile 8(2021-10-15) from C:\Users\geneb\Documents\CSMcompile\dat
 6
 180000
 5000
-20000
+180000
 50
 1000
 0

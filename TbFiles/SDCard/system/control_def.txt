@@ -22,7 +22,7 @@
   config: {
       minShortPressMS: 50,
       minLongPressMS: 1000,
-      default_volume: 6,
+      default_volume: 4,
       default_speed: 5,
       shortIdleMS: 5000,
       longIdleMS: 180000,

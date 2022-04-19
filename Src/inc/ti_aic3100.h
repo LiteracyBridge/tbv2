@@ -35,9 +35,11 @@
 #define AUDIO_MUTE_ON                 1
 #define AUDIO_MUTE_OFF                0
 
-#define MAX_VOLUME   10
-#define MIN_VOLUME   0
-//#define DEFAULT_VOLUME   80
+// These are only the steps of the volume control. Actual values sent to the codec can be found in the implementation.
+#define MAX_VOLUME_SETTING   8
+// 0 is used to mean "uninitialized"
+#define MIN_VOLUME_SETTING   1
+#define DEFAULT_VOLUME_SETTING   4
 
 /***************** 	// AIC_init_sequence -- from eval board
 struct {		// AIC_init_sequence -- from eval board

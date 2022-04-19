@@ -145,7 +145,9 @@ extern    void 		initPrintf( const char *hdr );
 //extern    char 		Screen[ ][ dbgScreenChars ];				
 	
 #define Error_Handler() _Error_Handler( __FILE__, __LINE__ )
+// TODO: stdlib?
 #define min(a,b) (((a)<(b))?(a):(b))
+#define max(a,b) (((a)>(b))?(a):(b))
 
 #define MAX_DBG_LEN 	300
 

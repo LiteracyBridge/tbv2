@@ -19,7 +19,8 @@ static ARM_DRIVER_I2C *		I2Cdrv = 				&Driver_I2C1;
 #define VERIFY_WRITTENDATA 
 #endif /* VERIFY_WRITTENDATA */
 
-static int8_t 	cdcFmtVolume;
+// TODO: Why was this static? It is used only as a temporary, in only one function, in only this file.
+//static int8_t 	cdcFmtVolume;
 static bool			cdcSpeakerOn 		= false;
 static bool			cdcMuted			 	= false;
 
@@ -940,11 +941,11 @@ void						cdc_RecordEnable( bool enable ){
 		//# Set AGC enable and Target Level = -10dB
 		//# Target level can be set lower if clipping occurs during speech
 		//# Target level is adjusted considering Max Gain also
-		aicSetReg( P0_R86_AGC_Control1, 			RP.targ ); //0xA0 );	// P0_R86: D7=1: AGC enabled, D6_4=010 AGC target level = –10 dB
+		aicSetReg( P0_R86_AGC_Control1, 			RP.targ ); //0xA0 );	// P0_R86: D7=1: AGC enabled, D6_4=010 AGC target level = ï¿½10 dB
 
 		//# AGC hysteresis=DISABLE, noise threshold = -90dB
 		//# Noise threshold should be set at higher level if noisy background is present in application
-		aicSetReg( P0_R87_AGC_Control2, 			0xFE );	// P0_R87: D7_6=11: AGC hysteresis disabled, D5_1=11 111 = AGC noise threshold = –90 dB
+		aicSetReg( P0_R87_AGC_Control2, 			0xFE );	// P0_R87: D7_6=11: AGC hysteresis disabled, D5_1=11 111 = AGC noise threshold = ï¿½90 dB
  
 		//# AGC maximum gain= 40 dB
     //# Higher Max gain is a trade off between gaining up a low sensitivity MIC, and the background acoustic noise
@@ -952,10 +953,10 @@ void						cdc_RecordEnable( bool enable ){
 		aicSetReg( P0_R88_AGC_MAX_Gain, 			RP.maxg ); //0x50 );	// P0_R88: D6_0=101 0000: ACG maximum gain = 40dB
 
 		//# Attack time=864/Fs
-		aicSetReg( P0_R89_AGC_Attack_Time, 		0x68 );	// P0_R89: D7_3=0110 1: AGC attack time = 13 × (32 / fS) ( 13*32=416 not 864? )
+		aicSetReg( P0_R89_AGC_Attack_Time, 		0x68 );	// P0_R89: D7_3=0110 1: AGC attack time = 13 ï¿½ (32 / fS) ( 13*32=416 not 864? )
 		//																					             D2_0=000: Multiply factor for the programmed AGC attack time = 1
 		//# Decay time=22016/Fs
-		aicSetReg( P0_R90_AGC_Decay_Time,     0xA8 );	// P0_R90: D7_3=1010 1: AGC decay time = 21 × (512 / fS), ( 21*512=10752 not 22016? )
+		aicSetReg( P0_R90_AGC_Decay_Time,     0xA8 );	// P0_R90: D7_3=1010 1: AGC decay time = 21 ï¿½ (512 / fS), ( 21*512=10752 not 22016? )
 		//																							         D2_0=000: Multiply factor for the programmed AGC decay time = 1
 
 		//# Noise debounce 0 ms
@@ -1247,7 +1248,7 @@ void 						cdc_Init( ){ 																								// Init codec & I2C (i2s_stm32f4
 
 	if ( LastVolume == 0 ){ // first time-- set to default_volume
 		LastVolume = TB_Config->default_volume;
-		if (LastVolume==0) LastVolume = 5;
+		if (LastVolume==0) LastVolume = DEFAULT_VOLUME_SETTING;
 	}
 	cdc_SetVolume( LastVolume );						// set to LastVolume used
 
@@ -1357,49 +1358,69 @@ void 						cdc_PowerDown( void ){																				// power down entire codec 
 }
 //
 //
-static uint8_t testVol = 0x19;			// DEBUG
-void		 				cdc_SetVolume( uint8_t Volume ){														// sets volume 0..10  ( mediaplayer )
-	uint8_t v = Volume>10? 10 : Volume; 
+/// \brief Sets the codec volume per config file or in response to volume up/down
+/// \param[in] Volume    A value between MIN_VOLUME_SETTING and MAX_VOLUME_SETTING.
+///                      The volume will be set to a value that is the linear interpolation
+///                      between an empirically determined minimum and maximum usable volume.
+/// \return             nothing
+void cdc_SetVolume( uint8_t Volume  ) {
+	uint8_t v = min(MAX_VOLUME_SETTING, max(MIN_VOLUME_SETTING, Volume));
 
 	LastVolume = v;
 	if ( !codecIsReady ) return;			// just remember for next cdc_Init()
 
-	#if defined( AIC3100 )
-		const int8_t cdcMUTEVOL = -127, cdcMAXVOL = 48;
-		const uint8_t cdcVOLRNG = cdcMAXVOL - cdcMUTEVOL;		// 175 = aic3100 digital volume range to use
-		cdcFmtVolume = cdcMUTEVOL + (v * cdcVOLRNG)/10;   // v=0 => -127 -- v=5 => -40 -- v=10 => 48
-	#endif
-	#if defined( AK4637 )
-		const uint8_t cdcMUTEVOL = 0xCC, cdcMAXVOL = 0x18, cdcVOLRNG = cdcMUTEVOL-cdcMAXVOL;		// ak4637 digital volume range to use
-		// Conversion of volume from user scale [0:10] to audio codec scale [cdcMUTEVOL..cdcMAXVOL]  (AK cc..18) (TI 81..c0)
-		//   values >= 0xCC force mute on AK4637
-		//   limit max volume to 0x18 == 0dB (to avoid increasing digital level-- causing resets?)
-		cdcFmtVolume = cdcMUTEVOL - ( v * cdcVOLRNG )/10; 
-	#endif
-	
-	if (Volume==99)	//DEBUG
-		{ cdcFmtVolume = testVol; 	testVol--; }	//DEBUG: test if vol>akMAXVOL causes problems
-	
-//	logEvtNI( "setVol", "vol", v );
-	dbgEvt( TB_cdcSetVol, Volume, cdcFmtVolume,0,0);
-	dbgLog( "2 cdcSetVol v=%d cdcV=0x%x \n", v, cdcFmtVolume );
-	#if defined( AIC3100 )
-		// AIC3100 -- left channel volume:  -127..48 => -63.5dB .. 24dB
-//HACK to avoid Volume GLITCH
-//		bool paused = false;	//HACK
-//		if ( audGetState()==Playing )	{	audPauseResumeAudio(); paused=true; }	//HACK
-		aicSetReg( P0_R65_DAC_Left_Volume_Control, cdcFmtVolume	 ); 		 // P0_R65: -127..48 (0x81..0x30)
-		dbgLog( "2 AIC Lvol %d \n", cdcFmtVolume );
-//		if ( paused ) audPauseResumeAudio();	//HACK
-	#endif
-	#if defined( AK4343 )
-		Codec_WrReg( AK_Lch_Digital_Volume_Control, akFmtVolume );  // Left Channel Digital Volume control
-		Codec_WrReg( AK_Rch_Digital_Volume_Control, akFmtVolume );  // Right Channel Digital Volume control
-	#endif
-	#if defined( AK4637 )
-		akR.R.DigVolCtr.DVOL7_0 = akFmtVolume;			
-		akUpd();
-	#endif
+#if defined( AIC3100 )
+    // The original code was this:
+    // const int8_t cdcMUTEVOL = -127, cdcMAXVOL = 48;
+    // const uint8_t cdcVOLRNG = cdcMAXVOL - cdcMUTEVOL;		// 175 = aic3100 digital volume range to use
+    // cdcFmtVolume = cdcMUTEVOL + (v * cdcVOLRNG)/10;   // v=0 => -127 -- v=5 => -40 -- v=10 => 48
+    // In words:
+    // (with maximum volume = 10)
+    // desired fraction of volume range = (desired volume) / (maximum volume)
+    // new volume = (codec minimum volume) + (codec volume range) * (desired fraction of range)
+    // This yielded these values: -127, -110, -92, -75, -57, -40, -22, -5, 13, 31, 48
+    // The default initial value was 6 (via config file.
+    // Empirically, we determined that 6 (-22) was a good initial value, that 10 (48) was far too loud, 9 (31) was too
+    // loud, and somewhere between 8 and 9 (~22) would be a good max volume. And that 4 (-57) is the quietest useful
+    // volume. The desire is four steps from the initial volume (-22) to the maximum (22), and three steps to the
+    // minimum (-57). The steps are slightly different for the lower range (11-2/3) vs upper (11), but close
+    // enough. If that proves otherwise, use a lookup table:
+    //static int8_t AIC3100_VOLUME[] = {-57, -45, -34, -22, -11, 0, 11, 22};
+    //int8_t cdcFmtVolume = AIC3100_VOLUME[v];
+    const int8_t minUseful = -57;
+    const int8_t maxUseful = 22;
+    const uint8_t usefulRange = maxUseful - minUseful;
+    int8_t cdcFmtVolume = minUseful + (usefulRange * (v-MIN_VOLUME_SETTING)) / MAX_VOLUME_SETTING;
+
+    // Uncomment and adjust for volume level testing.
+    //static uint8_t testVol = 0x19;			// DEBUG
+    //if (Volume==99)	//DEBUG
+    //    { cdcFmtVolume = testVol; 	testVol--; }	//DEBUG: test if vol>akMAXVOL causes problems
+
+    dbgEvt( TB_cdcSetVol, Volume, cdcFmtVolume,0,0);
+    dbgLog( "2 cdcSetVol v=%d cdcV=0x%x \n", v, cdcFmtVolume );
+
+    // AIC3100 -- left channel volume:  -127..48 => -63.5dB .. 24dB
+    aicSetReg( P0_R65_DAC_Left_Volume_Control, cdcFmtVolume	 ); 		 // P0_R65: -127..48 (0x81..0x30)
+    dbgLog( "2 AIC Lvol %d \n", cdcFmtVolume );
+#endif
+
+#if defined( AK4343 )
+    #error "This AK4343 code is unmaintained and is certainly incorrect. Retained for history/documentation."
+    Codec_WrReg( AK_Lch_Digital_Volume_Control, akFmtVolume );  // Left Channel Digital Volume control
+    Codec_WrReg( AK_Rch_Digital_Volume_Control, akFmtVolume );  // Right Channel Digital Volume control
+#endif
+
+#if defined( AK4637 )
+    #error "This AK46573 code is unmaintained and is certainly incorrect. Retained for history/documentation."
+   const uint8_t cdcMUTEVOL = 0xCC, cdcMAXVOL = 0x18, cdcVOLRNG = cdcMUTEVOL-cdcMAXVOL;		// ak4637 digital volume range to use
+    // Conversion of volume from user scale [0:10] to audio codec scale [cdcMUTEVOL..cdcMAXVOL]  (AK cc..18) (TI 81..c0)
+    //   values >= 0xCC force mute on AK4637
+    //   limit max volume to 0x18 == 0dB (to avoid increasing digital level-- causing resets?)
+    cdcFmtVolume = cdcMUTEVOL - ( v * cdcVOLRNG )/10;
+    akR.R.DigVolCtr.DVOL7_0 = akFmtVolume;
+    akUpd();
+#endif
 }
 
 void		 				cdc_SetMute( bool muted ){																	// true => enable mute on codec  (audio)

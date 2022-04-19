@@ -25,7 +25,9 @@ static 	osThreadAttr_t 				thread_attr;
 osEventFlagsId_t							mMediaEventId;			// for signals to mediaThread
 
 // communication variables shared with mediaThread
-volatile int 				        	mAudioVolume		= 7;			// current volume, overwritten from CSM config (setVolume)    (external for powermanager)
+
+// current volume, overwritten from CSM config (setVolume)    (external for powermanager)
+volatile int 				        	mAudioVolume		= DEFAULT_VOLUME_SETTING;
 static volatile int 					mAudioSpeed			= 5;			// current speed, NYI
 
 const int MAX_NOTE_CNT = 80;
@@ -148,8 +150,8 @@ void 					adjSpeed( int adj ){								// adjust playback speed by 'adj'
 }
 void 					adjVolume( int adj ){								// adjust playback volume by 'adj'
 	mAudioVolume += adj;
-	if ( mAudioVolume > MAX_VOLUME ) mAudioVolume = MAX_VOLUME;
-	if ( mAudioVolume < MIN_VOLUME ) mAudioVolume = MIN_VOLUME;
+	if ( mAudioVolume > MAX_VOLUME_SETTING ) mAudioVolume = MAX_VOLUME_SETTING;
+	if ( mAudioVolume < MIN_VOLUME_SETTING ) mAudioVolume = MIN_VOLUME_SETTING;
 	dbgEvt( TB_audAdjVol, adj, mAudioVolume, 0,0);
 	osEventFlagsSet( mMediaEventId, MEDIA_SET_VOL );
 }

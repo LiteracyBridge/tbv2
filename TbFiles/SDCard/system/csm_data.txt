@@ -1,6 +1,6 @@
-// TB CSM 2022-04-04: V19 handle battery events in USB mode
+// TB CSM 2022-04-04: V19 handle battery events in USB mode + 2022-04-18 volume adjustment
 org.amplio.CSMcompile 8(2021-10-15) from C:\Users\geneb\Documents\CSMcompile\data\control_def.txt of 2022-04-04 12:47:54
-6
+4
 180000
 5000
 180000

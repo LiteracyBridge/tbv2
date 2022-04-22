@@ -187,6 +187,41 @@ void                        startNextLog(){         // save current log, switch 
         copyNorLog( "" );     // save with default name
     initNorLog( true );
 }
+bool                        validDateTime( fsTime dtTm ){
+    if ( dtTm.year < 2022 ) return false;
+    if ( dtTm.mon < 1 || dtTm.mon > 12 ) return false;
+    if ( dtTm.day < 1 || dtTm.day > 31 ) return false;
+
+    if ( dtTm.hr > 23 ) return false;
+    if ( dtTm.min > 59 ) return false;
+    if ( dtTm.sec > 59 ) return false;
+    return true;
+}
+fsTime                      laterDateTime( fsTime tm1, fsTime tm2 ){    // returns latest valid time (or 2022-1-1 00:00:00 if both invalid)
+    int major, minor;
+    fsTime fw;  
+    // set fw to date from TBV2_Version  (e.g. V3.1 of 2022-22-04 13:43:36)
+    if ( sscanf(TBV2_Version, "V%u.%u of %hu-%hhu-%hhu %hhu:%hhu:%hhu", &major,&minor, &fw.year,&fw.mon,&fw.day, &fw.hr,&fw.min,&fw.sec)!=8){ 
+        //couldn't parse version, use 2022-01-01 00:00:00
+        fw.year = 2022; fw.mon = 1; fw.day = 1; 
+        fw.hr = 0; fw.min = 0; fw.sec = 0;
+    }
+        
+    bool tm1valid = validDateTime( tm1 );
+    bool tm2valid = validDateTime( tm2 );
+    if ( tm1valid && !tm2valid ) return tm1;
+    if ( tm2valid && !tm1valid ) return tm2;
+    if ( !tm1valid && !tm2valid ) return fw;  // use firmware date 
+
+    // both valid -- use more recent
+    if ( tm1.year != tm2.year ) return tm1.year > tm2.year? tm1 : tm2;
+    if ( tm1.mon != tm2.mon )   return tm1.mon  > tm2.mon? tm1 : tm2;
+    if ( tm1.day != tm2.day )   return tm1.day  > tm2.day? tm1 : tm2;
+    if ( tm1.hr  != tm2.hr )    return tm1.hr   > tm2.hr?  tm1 : tm2;
+    if ( tm1.min != tm2.min )   return tm1.min  > tm2.min? tm1 : tm2;
+    if ( tm1.sec != tm2.sec )   return tm1.sec  > tm2.sec? tm1 : tm2;
+    return tm1;  // valid & the same
+}
 void						logPowerUp( bool reboot ){											// re-init logger after reboot, USB or sleeping
 	char line[200];
 	char dt[30];
@@ -228,9 +263,13 @@ void						logPowerUp( bool reboot ){											// re-init logger after reboot, U
             // the wrong time, possibly by a huge amount, but at least time increases monotonically.
             bool haveTime = getFileTime(lastRtcFile, &rtcDt);
             // lastRTCinLog may have been set by initNorLog -- from last RTC log entry
-            // use latest
+            // use latest valid time
+            
+            fsTime latest = laterDateTime( rtcDt, lastRTCinLog );
+            /*
             bool useFileTime = haveTime && (rtcDt.year >= lastRTCinLog.year) && (rtcDt.mon >= lastRTCinLog.mon) && (rtcDt.day >= lastRTCinLog.day) &&
                 (rtcDt.hr >= lastRTCinLog.hr) && (rtcDt.min >= lastRTCinLog.min) && (rtcDt.sec >= lastRTCinLog.sec); 
+            
             if ( useFileTime ){
               dateStr( dt, rtcDt );
               setupRTC( rtcDt );    
@@ -238,6 +277,10 @@ void						logPowerUp( bool reboot ){											// re-init logger after reboot, U
               dateStr( dt, lastRTCinLog );
               setupRTC( lastRTCinLog );    
             }                
+            */
+            dateStr( dt, latest );
+            setupRTC( latest ); 
+            
             logEvtNS( "resetRTC", "DtTm", dt );
             showRTC();
         }

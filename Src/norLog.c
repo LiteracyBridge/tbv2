@@ -6,11 +6,11 @@
 //  3V 64M-BIT  SERIAL FLASH MEMORY WITH DUAL, QUAD SPI
 //
 //	The W25Q64JV device is directly handled by W25Q64JV.c 
-//  The driver sends commands to the chip over SPI, this file only access a few driver functions:
-//     pNor->Initialize,  pNor->PowerControl, & pNor->GetInfo  -- from initNorLog()
+// ï¿½The driver sends commands to the chip over SPI, this file only access a few driver functions:
+//   ï¿½ pNor->Initialize,ï¿½ pNor->PowerControl, & pNor->GetInfo  -- from initNorLog()
 //     pNor->ReadData						  -- from NLogReadPage() and copyNorLog()
-//     pNor->ProgramData				  -- from NLogWrite()
-//     pNor->EraseSector()  			-- from eraseNorFlash()
+//   ï¿½ pNor->ProgramData				  -- from NLogWrite()
+//   ï¿½ pNor->EraseSector()  			-- from eraseNorFlash()
 //
 //  
 //  the NOR-FLASH is organized as a collection of sequential text log files, each starting on a NOR page boundary
@@ -63,7 +63,7 @@ const char *  				fgNOR_Erasing		= "R5G5!";		// alternate 1/2 sec red & green
 //
 // NOR-flash LOG
 const char *					norTmpFile = "M0:/system/svLog.txt";
-const char *					norLogPath = "M0:/LOG";
+const char *					norLogPath = "M0:/log";
 const int 						BUFFSZ = 260;   // 256 plus space for null to terminate string
 const int							N_SADDR = 64;		// number of startAddresses in page0
 
@@ -516,10 +516,10 @@ void						copyNorLog( const char * fpath ){						// copy curr Nor log into file 
 	
 	strcpy( fnm, fpath );
 	if ( strlen( fnm )==0 ) // generate tmp log name
-		sprintf( fnm, "M0:/LOG/tbLog_%d.txt", NLg.currLogIdx );  // e.g. LOG/tbLog_x.txt 
+		sprintf( fnm, "M0:/log/tbLog_%d.txt", NLg.currLogIdx );  // e.g. LOG/tbLog_x.txt
 
-	const char * tmpNm = "M0:/LOG/tbTmpLog.txt";
-	const char * badLogPatt = "M0:/LOG/badLog_%d.txt";
+	const char * tmpNm = "M0:/log/tbTmpLog.txt";
+	const char * badLogPatt = "M0:/log/badLog_%d.txt";
 	
 	FILE * f = tbOpenWrite( tmpNm ); //fopen( tmp, "w" );
 	if ( f==NULL ) 

@@ -30,7 +30,7 @@ char *					rtcSetFile = "M0:/system/SetRTC.txt";							// flag file to force set
 char *					rtcDontSetFile = "dontSetRTC.txt";  							// renamed version of SetRTC.txt
 char *					rtcDontSetPath = "M0:/system/dontSetRTC.txt";  					// full path for fexists 
 char *					lastRtcFile = "M0:/system/lastRTC.txt";						// written at powerdown-- modification date used to reset clock
-const char *		logFilePatt = "M0:/LOG/tbLog_%d.txt";			// file name of previous log on first boot
+const char *		logFilePatt = "M0:/log/tbLog_%d.txt";			// file name of previous log on first boot
 
 const int				MAX_EVT_LEN1 = 32, MAX_EVT_LEN2 = 64;
 

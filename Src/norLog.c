@@ -523,7 +523,8 @@ void						copyNorLog( const char * fpath ){						// copy curr Nor log into file 
 	
 	FILE * f = tbOpenWrite( tmpNm ); //fopen( tmp, "w" );
 	if ( f==NULL ) 
-        norErr("cpyNor fopen err");
+        return; // try to make it into USBmode anyway 
+        //norErr("cpyNor fopen err");
 	
 	CheckNLog( f );			// check & correct any consistency issues in NLg or Page0
 	bool validLog = true;

@@ -398,7 +398,7 @@ void                      setupRTC( fsTime time ){				// init RTC & set based on
 	int cnt = 0;
 	RCC->APB1ENR |= ( RCC_APB1ENR_PWREN | RCC_APB1ENR_RTCAPBEN );				// start clocking power control & RTC_APB
 	PWR->CSR 	|= PWR_CSR_BRE;											// enable backup power regulator
-	while ( (PWR->CSR & PWR_CSR_BRR)==0 && (cnt < 1000)) cnt++;  //  & wait till ready
+	while ( (PWR->CSR & PWR_CSR_BRR)==0 && (cnt < 10000)) cnt++;  //  & wait till ready
 
 	RCC->BDCR |= RCC_BDCR_BDRST;   				// backup domain reset
 	RCC->BDCR &= ~RCC_BDCR_BDRST;   			// & release
@@ -411,8 +411,8 @@ void                      setupRTC( fsTime time ){				// init RTC & set based on
 	RCC->BDCR |= RCC_BDCR_RTCEN;
 	RCC->BDCR |= RCC_BDCR_LSEON;												// enable 32KHz LSE clock
 	cnt = 0;
-	while ( (RCC->BDCR & RCC_BDCR_LSERDY)==0 && (cnt < 1000) ) cnt++; 	// & wait till ready
-    if (cnt==1000) tbErr("RTC: LSE not ready");
+	while ( (RCC->BDCR & RCC_BDCR_LSERDY)==0 && (cnt < 10000) ) cnt++; 	// & wait till ready
+    if (cnt==10000) tbErr("RTC: LSE not ready");
 
 	// configure RTC  (per RM0402 22.3.5)
 	RCC->BDCR |= RCC_BDCR_RTCSEL_0;										// select LSE as RTC source
@@ -437,7 +437,7 @@ void                      setupRTC( fsTime time ){				// init RTC & set based on
         { ampm = 1; hr -= 12;  }  // 13..23 -> 1..11pm 
 	uint32_t TR = (ampm << 22) | ( Bcd2( hr ) << 16 ) | ( Bcd2( time.min ) << 8 ) | Bcd2( time.sec );
 	
-	// calc weekday from date
+	// calc weekday from date  e.g. https://artofmemory.com/blog/how-to-calculate-the-day-of-the-week/
 	int yr = time.year, yy = yr % 100, cen = yr / 100, mon = time.mon, day = time.day;
 	bool leap = (yr%400==0) || (yr%4==0 && yr%100!=0);
 	uint16_t cenCd[] = { 6, 4, 2 };	// for 20, 21, 22

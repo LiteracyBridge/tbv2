@@ -122,7 +122,7 @@
     #
     # One-touch implementation of recording
     #
-    stBeginRecording:   { Actions: [ saveSt(2), bgLED(R!), playSys(1) ],         CGroups:[ whenAwake, whenRecording], AudioDone: stRecording },
+    stBeginRecording:   { Actions: [ saveSt(2), playSys(1) ],                   CGroups:[ whenAwake, whenRecording], AudioDone: stRecording },
     stRecordAnother:    { Actions: [ playSys(1) ],                              CGroups:[ whenAwake, whenRecording], AudioDone: stRecording },
     stRecording:        { Actions: [ startRec ],                                CGroups:[ whenAwake, whenRecording] },
     stRecordingPaused:  { Actions: [ saveSt(3), pauseRec ],                     CGroups:[ whenAwake, whenRecordingPaused] },

@@ -1,3 +1,4 @@
+// TB CSM 2022-04-27: V20 One touch recording
 // TB CSM 2022-04-04: V19 handle battery events in USB mode
 // TB CSM 2022-03-08: V18 TBv1 compatible file names.
 // TB CSM 2022-03-02: V17 handle BattMin & BattMax events
@@ -41,7 +42,8 @@
                      BattCharging:stOnCharging,
                      BattCharged:stOnCharged,
                      BattMin:    stOnBattMin,
-                     BattMax:    stNearCharged
+                     BattMax:    stNearCharged,
+                     starPlus:   stUSBmode,
                    },
     whenUSB:       { starPlus:   stCloseUSB,
                      LowBattery: stOnLowBatt,
@@ -59,22 +61,28 @@
     whenNav:       { Lhand:      stOnPrevSubj,
                      Rhand:      stOnNextSubj,
                      Tree:       stOnNextMsg,
-                     starTree:   stOnRepeatMsg,
+                     Tree__:     stOnRepeatMsg,
                      Table:      stOnPrevMsg,
                      AudioDone:  stWait,
                      ShortIdle:  stWait,
-                     starCircle: stOnFeedback },
-    whenFeedback:  { Star:       stFbOptions,
-                     Circle:     stStartRec },
-    whenRecording: { Pot:        stPauseRec,
-                     Circle:     stFinishRec,
-                     Tree:       stPlayRec,
-                     Table:      stCancelRec,
-                     Star:       stSaveRec },
+                     Star:       stBeginRecording },
+
+    whenRecording:       { Pot:     stRecordingPaused
+                           Star:    stRecordingDone },
+    whenRecordingPaused: { Pot:     stRecordingResumed },
+    reviewNav:           { Star:    stRecordAnother,
+                           Tree:    stEndRecording,
+                           Table:   stEndRecording,
+                           Lhand:   stEndRecording,
+                           Rhand:   stEndRecording,
+                           Circle:  stEndRecording },
+    whenReviewing:       { Pot:     stReviewPaused },
+    whenReviewPaused:    { Pot:     stReviewResumed },
+
     whenIdle:      { starPlus:   stUSBmode,
                      Plus:       stIdleLouder,
                      Minus:      stIdleSofter,
-#                     starTable:  stTest,
+#                    starTable:  stTest,
                      starMinus:  stShowBatt,
                      Circle__:   stChgPkg,
                      starCircle: stNxtPkg },
@@ -111,15 +119,26 @@
     stOnRepeatMsg:  { Actions: [ msgAdj(  1),  playSubj(msg) ],                 CGroups:[ whenAwake, whenPlaying, whenNav ], AudioStart: stRepeating },
     stRepeating:    {                                                           CGroups:[ whenAwake, whenPlaying, whenNav ], AudioDone: stOnRepeatMsg },
 
-    stOnFeedback:   { Actions: [ playSys(65) ],                                 CGroups:[ whenAwake, whenFeedback ] },
-    stFbOptions:    { Actions: [ playSys(26) ],                                 CGroups:[ whenAwake ] },
+    #
+    # One-touch implementation of recording
+    #
+    stBeginRecording:   { Actions: [ saveSt(2), bgLED(R!), playSys(1) ],         CGroups:[ whenAwake, whenRecording], AudioDone: stRecording },
+    stRecordAnother:    { Actions: [ playSys(1) ],                              CGroups:[ whenAwake, whenRecording], AudioDone: stRecording },
+    stRecording:        { Actions: [ startRec ],                                CGroups:[ whenAwake, whenRecording] },
+    stRecordingPaused:  { Actions: [ saveSt(3), pauseRec ],                     CGroups:[ whenAwake, whenRecordingPaused] },
+    stRecordingResumed: { Actions: [ resumeRec, goSavedSt(3) ],                 CGroups:[ whenAwake, whenRecording] },
 
-    stStartRec:     { Actions: [ startRec ],                                    CGroups:[ whenAwake, whenRecording ] },
-    stPauseRec:     { Actions: [ saveSt( 2),  pauseRec ],                       CGroups:[ whenAwake, whenRecording ] },
-    stFinishRec:    { Actions: [ finishRec ],                                   CGroups:[ whenAwake, whenRecording ] },
-    stPlayRec:      { Actions: [ playRec ],                                     CGroups:[ whenAwake, whenRecording ] },
-    stSaveRec:      { Actions: [ saveRec(sv) ],                                 CGroups:[ whenAwake, whenNav ] },
-    stCancelRec:    { Actions: [ saveRec(del) ],                                CGroups:[ whenAwake, whenNav ] },
+    stRecordingDone:    { Actions: [ finishRec, playSys(3) ],                   CGroups:[ whenAwake], AudioDone: stReviewing },
+    stReviewing:        { Actions: [ playRec ],                                 CGroups:[ whenAwake, reviewNav, whenReviewing ], AudioDone: stEndRecording },
+    stReviewLouder:     { Actions: [ volAdj(1), goPrevSt ],                     CGroups:[ whenAwake, reviewNav, whenReviewing ] },
+    stReviewSofter:     { Actions: [ volAdj(-1), goPrevSt ],                    CGroups:[ whenAwake, reviewNav, whenReviewing ] },
+    stReviewPaused:     { Actions: [ saveSt(3), pausePlay ],                    CGroups:[ whenAwake, reviewNav, whenReviewPaused ] },
+    stReviewResumed:    { Actions: [ resumePlay goSavedSt(3) ],                 CGroups:[ whenAwake, reviewNav, whenReviewing ] },
+
+    stEndRecording:     { Actions: [ saveRec, LED(_), goSavedSt(2) ] },
+    # TODO: How do we take an action, then GOTO a state? "Actions: [saveRec, go(stWakeup)]"
+    stEndRecordingHome: { Actions: [ saveRec, LED(_), bgLED(bgPulse), changePkg, playSys(10) ], CGroups:[ whenAwake, whenPlaying, whenNav ], AudioStart: stWelcoming },
+
 
     stOnLowBatt:    { Actions: [ bgLED(R3_2), goPrevSt ],                       CGroups:[ whenAwake, whenNav, whenIdle ] },
     stIdleLouder:   { Actions: [ volAdj( 1),  playSys(0),  goPrevSt ],          CGroups:[ whenAwake, whenPlaying ] },
@@ -130,7 +149,7 @@
     stNearCharged:  { Actions: [ bgLED(R_9),  goPrevSt ],                       CGroups:[ whenAwake, whenIdle ] },
     stOnCharged:    { Actions: [ bgLED(G_9),  goPrevSt ],                         CGroups:[ whenAwake, whenIdle ] },
     stShowBatt:     { Actions: [ showCharge,  goPrevSt ],                       CGroups:[ whenAwake, whenIdle ] },
-    stBattMin:      { Actions: [ bgLED(R5_5),  setTimer(5000) ],                CGroups:[ whenSleeping ], Timer: stFallAsleep },
+    stOnBattMin:    { Actions: [ bgLED(R5_5),  setTimer(5000) ],                CGroups:[ whenSleeping ], Timer: stFallAsleep },
 #    stTest:         { Actions: [ sysTest ],                                     CGroups:[ whenAwake ] },
     stNxtPkg:       { Actions: [ playNxtPkg ],                                  CGroups:[ whenAwake, whenIdle ] },
     stChgPkg:       { Actions: [ changePkg ],                                   CGroups:[ whenAwake, whenIdle, whenNav ] },

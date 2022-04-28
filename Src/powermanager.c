@@ -46,7 +46,7 @@ typedef struct {
 	uint32_t                        chkCnt;
 	enum PwrStat					Stat;                       // stat1 stat2 pgn
 	uint32_t                        VRefMV;                     // should be 1200 
-	uint32_t                        VBatMV;                     // Backup CR2032 voltage: 2000..3300
+	uint32_t                        VBatMV;                     // RTC Backup CR2032 voltage: 2000..3300
 	uint32_t                        LiMV;                       // liIon voltage: 2000..3900
 	uint32_t                        PrimaryMV;					// Primary (replacable) battery: 2000..2800
 	uint32_t                        MpuTempMV;					// ADC_CHANNEL_TEMPSENSOR in ADC_IN18 
@@ -356,6 +356,7 @@ void 											readAllADC( void ){
 	int MpuTempCnt = readADC( ADC_TEMP_chan, ADC_CCR_TSVREFE ); // ADC_CHANNEL_TEMPSENSOR in ADC_IN18 
   pS.MpuTempMV = MpuTempCnt * VREF/MAXCNT;			
 
+    // RTC backup CR2032
 	int VBatCnt = readADC( ADC_VBAT_chan, ADC_CCR_VBATE ); 		// enable VBAT on channel 18
   pS.VBatMV = VBatCnt * 4 * VREF/MAXCNT;		
 
@@ -365,6 +366,7 @@ void 											readAllADC( void ){
 	int LiCnt = readADC( ADC_LI_ION_chan, 0 );	
   pS.LiMV = LiCnt * 2 * VREF/MAXCNT;			
 
+    // Replaceable battery
 	int PrimaryCnt = readADC( ADC_PRIMARY_chan, 0 );
   pS.PrimaryMV = PrimaryCnt * 2 * VREF/MAXCNT;	
 	
@@ -502,6 +504,7 @@ const int ReplPRESENT = 1000;
 const int BkupPRESENT = 2000;
 const int HiMpuTemp = 800;
 const int HiLiTemp  = 800;
+
 char                      RngChar( int lo, int hi, int val ){   // => '-', '0', ... '9', '!' 
 	if (val < lo) return '-';
 	if (val > hi) return '!';
@@ -512,8 +515,8 @@ char                      RngChar( int lo, int hi, int val ){   // => '-', '0', 
 void                      startPowerCheck( enum PwrStat pstat ){  // remember previous values-- only report if changed	// save previous values
 	pS.prvStat		= pS.Stat;
 	pS.hadLi 		= pS.LiMV > LiPRESENT;
-	pS.hadPrimary   = pS.PrimaryMV > ReplPRESENT;
-	pS.hadVBat		= pS.VBatMV > BkupPRESENT;
+	pS.hadPrimary   = pS.PrimaryMV > ReplPRESENT; // Replaceable battery
+	pS.hadVBat		= pS.VBatMV > BkupPRESENT; // RTC backup CR2032
     pS.hadUSB       = (pS.prvStat & 1) == 0;
 
 	pS.chkCnt++;
@@ -531,10 +534,12 @@ void                      reportPowerChanges(){    // compare previous power sta
 		dbgLog( "5 LiIon %d \n", pS.LiMV );
         logEvtNS("PwrChg", "LiIon", pS.LiMV > LiPRESENT? "connected":"removed" );
 	}
+    // RTC backup CR2032
 	if ( (pS.VBatMV > BkupPRESENT) != pS.hadVBat ){
 		dbgLog( "5 BkupBat %d \n", pS.VBatMV );
         logEvtNS("PwrChg", "Bkup", pS.VBatMV > BkupPRESENT? "connected":"removed" );
 	}
+    // Replaceable battery
 	if ( (pS.PrimaryMV > ReplPRESENT) != pS.hadPrimary ){
 		dbgLog( "5 Primary %d \n", pS.PrimaryMV );
         logEvtNS("PwrChg", "Primary", pS.PrimaryMV > ReplPRESENT? "connected":"removed" );
@@ -572,8 +577,8 @@ void                      checkPower( bool verbose ){				// check and report pow
  	
     char sUsb = PwrGood_N==0? 'U' : 'u';
     char sLi = RngChar( 3000, 4000, pS.LiMV ); 			// range from charge='0' to charge='9' to '!' > 4000
-    char sPr = RngChar( 2000, 4000, pS.PrimaryMV ); 	// 2000..2200 = '0', 3800..4000 = '9'
-    char sBk = RngChar( 2000, 4000, pS.VBatMV ); 
+    char sPr = RngChar( 2000, 4000, pS.PrimaryMV ); 	// Replaceable battery, 2000..2200 = '0', 3800..4000 = '9'
+    char sBk = RngChar( 2000, 4000, pS.VBatMV );        // RTC backup CR2032
     char sMt = RngChar(  200, 1200, pS.MpuTempMV ); 	// 200..300 = '0'  1000..1200 = '9'
     char sLt = RngChar(  200, 1200, pS.LiThermMV ); 
     char sCh = ' ';
@@ -587,8 +592,8 @@ PwrCheck, stat:  'u Lxct Pp Bb Tm Vv Liuuuu'
                   |  |||  |  |  |  |   uuuu = current Li-ion battery reading, mV
                   |  |||  |  |  | Vv   v = current audio volume
                   |  |||  |  | Tm      m = -/0/1/2/.../9/! = MPU temp  (m+2)* 100mV, - if <200mV, + if >1200mV
-                  |  |||  | Bb         b = -/0/1/2/.../9/! = Backup  batt voltage 2+b*.2V, - if <2.0V, + if >3.9V 
-                  |  ||| Pp            p = -/0/1/2/.../9/! = Primary batt voltage 2+p*.2V, - if <2.0V, + if >3.9V 
+                  |  |||  | Bb         b = -/0/1/2/.../9/! = RTC Backup batt voltage 2+b*.2V, - if <2.0V, + if >3.9V
+                  |  ||| Pp            p = -/0/1/2/.../9/! = Replaceable batt voltage 2+p*.2V, - if <2.0V, + if >3.9V
                   |  ||t               t = -/0/1/2/.../9/! = Lithium thermistor  (t+2)* 100mV, - if <200mV, + if >1200mV
                   |  |c                c =  /c/C/X  c=charging, C=charged, X=temp fault
                   | Lx                 x = -/0/1/2/.../9/! = Lithium voltage 3.xV, - if <3.0V, + if >3.9V 

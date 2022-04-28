@@ -1,5 +1,5 @@
 // TB CSM 2022-04-27: V20 One touch recording
-org.amplio.CSMcompile 8(2021-10-15) from C:\Users\bill\workspace\CSMcompile\..\tbv2\TbFiles\SDCard\system\control_def.txt of 2022-04-27 11:36:04
+org.amplio.CSMcompile 8(2021-10-15) from C:\Users\bill\workspace\CSMcompile\..\tbv2\TbFiles\SDCard\system\control_def.txt of 2022-04-27 19:52:09
 4
 180000
 5000
@@ -445,8 +445,10 @@ stRepeating
 49
 stRecording
 47
-49,  1, 49, 49, 49, 49, 49, 49, 24, 25, 49,  2, 49, 49, 49, 49, 49, 49, 49, 49, 49, 49, 49,  9, 49, 49, 49, 49, 49, 49, 49, 49, 49, 49,  3,  4,  5,  6,  7,  8, 49, 49, 49, 49, 49, 49, 49, 
-1
+49,  1, 49, 49, 49, 49, 49, 49, 24, 25, 49,  2, 49, 49, 49, 49, 49, 49, 49, 49, 49, 49, 49,  9, 49, 49, 49, 49, 49, 49, 49, 49, 49, 49,  3,  4,  5,  6,  7,  8, 49, 25, 49, 49, 49, 49, 49, 
+2
+setTimer
+1800000
 startRec
 _
 50

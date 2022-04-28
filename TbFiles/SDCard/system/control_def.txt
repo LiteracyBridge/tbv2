@@ -124,7 +124,8 @@
     #
     stBeginRecording:   { Actions: [ saveSt(2), playSys(1) ],                   CGroups:[ whenAwake, whenRecording], AudioDone: stRecording },
     stRecordAnother:    { Actions: [ playSys(1) ],                              CGroups:[ whenAwake, whenRecording], AudioDone: stRecording },
-    stRecording:        { Actions: [ startRec ],                                CGroups:[ whenAwake, whenRecording] },
+    # Start recording and time out after 30 minutes. 30*60*1000 = 1800000 ms
+    stRecording:        { Actions: [ setTimer(1800000), startRec ],             CGroups:[ whenAwake, whenRecording], Timer: stRecordingDone },
     stRecordingPaused:  { Actions: [ saveSt(3), pauseRec ],                     CGroups:[ whenAwake, whenRecordingPaused] },
     stRecordingResumed: { Actions: [ resumeRec, goSavedSt(3) ],                 CGroups:[ whenAwake, whenRecording] },
 

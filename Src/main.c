@@ -77,6 +77,10 @@ void setBootMode(){	// use key to to select value for BootMode
 	flashInit();			// enable keyboard to decode boot type
 	
 	BootMode = 0;  BootKey = ' ';
+//===============================================================
+// This is just a hack to quickly get a more user-friendly boot.
+// Reliably boots to TB mode and to USB mode.
+#if 0
   if ( gGet( gSTAR ))		      { BootMode = 1;  BootKey = 'S'; BootToQCtest = true; }
 	else if ( gGet( gLHAND ))		{ BootMode = 2;  BootKey = 'L'; BootVerboseLog = true; }
 	else if ( gGet( gRHAND ))		{ BootMode = 5;  BootKey = 'R'; BootVerbosePower = true; }
@@ -92,10 +96,14 @@ void setBootMode(){	// use key to to select value for BootMode
           BootKey = 'M';
       }
       BootDebugLoop = true;
-  } else if ( gGet( gPLUS ))		{ BootMode = 4;  BootKey = 'P'; BootToUSB = true; }
-
+  } else
+#endif
+//    if ( gGet( gPLUS ))		{ BootMode = 4;  BootKey = 'P'; BootToUSB = true; }
+    if ( gGet( gPLUS ))		{ BootMode = 3;  BootKey = 'P'; BootDebugLoop = true; }
+#if 0
   if ( BootMode != 0 && BootMode != 6 && BootMode != 7 )    // no flash for no keys, Boot-Circle or Boot-Home -- normal resume keys
       flashCode( BootMode );
+#endif
 }
 
 

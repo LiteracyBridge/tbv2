@@ -97,14 +97,16 @@ typedef struct csmAction {  // csmAction_t -- enum Action & string arg
 	Action	act;
 	char *	arg;
 } csmAction_t;
+
 typedef	struct ActionList {	// ActionList_t--  holds cnt & ptrs to csmActions
 	int nActs;              // # actions
 	csmAction_t * Act[10];  // Action & arg  
-} ActionList_t;    
+} ActionList_t;
+
 typedef	struct CState {	// CState_t --  Control State definition
     short idx;              // idx of this state
     char * nm;              // name of this state
-	short nNxtStates;       // # possible events
+	  short nNxtStates;       // # possible events
     short * evtNxtState;    // index of next state for each possible event
     ActionList_t * Actions; // cnt & array of csmAction_t
 } CState_t;    

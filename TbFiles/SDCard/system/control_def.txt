@@ -38,11 +38,13 @@
     whenAwake:     { Home:       stWakeup,
                      Home__:     stGoSleep,
                      LongIdle:   stSleepy,
-                     LowBattery: stOnLowBatt,
-                     BattCharging:stOnCharging,
-                     BattCharged:stOnCharged,
-                     BattMin:    stOnBattMin,
+                     BattCharging: stOnCharging,
+                     BattCharging75: stOnCharging75,
                      BattMax:    stNearCharged,
+                     BattCharged: stOnCharged,
+                     LowBattery: stOnLowBatt,
+                     BattNotCharging: stNotCharging,
+                     BattMin:    stOnBattMin,
                      starPlus:   stUSBmode,
                    },
     whenUSB:       { starPlus:   stCloseUSB,
@@ -70,13 +72,16 @@
     whenRecording:       { Pot:     stRecordingPaused
                            Star:    stRecordingDone },
     whenRecordingPaused: { Pot:     stRecordingResumed },
-    reviewNav:           { Star:    stRecordAnother,
+    reviewNav:           { Home:    stEndRecordingHome,
+                           Star:    stRecordAnother,
                            Tree:    stEndRecording,
                            Table:   stEndRecording,
                            Lhand:   stEndRecording,
                            Rhand:   stEndRecording,
                            Circle:  stEndRecording },
-    whenReviewing:       { Pot:     stReviewPaused },
+    whenReviewing:       { Pot:     stReviewPaused,
+                           Plus:    stReviewLouder,
+                           Minus:   stReviewSofter },
     whenReviewPaused:    { Pot:     stReviewResumed },
 
     whenIdle:      { starPlus:   stUSBmode,
@@ -95,9 +100,9 @@
     stPromptingSub: {                                                           CGroups:[ whenAwake, whenPlaying, whenNav ], AudioDone: stWait },
 
     stWait:         {                                                           CGroups:[ whenAwake, whenNav, whenIdle ] },
-    stSleepy:       { Actions: [ bgLED(O_9),  saveSt(1),  setTimer(5000) ],     CGroups:[ whenAwake ], anyKey: stUnSleepy, Timer: stGoSleep },
+    stSleepy:       { Actions: [ bgLED(O_9), saveSt(1), setTimer(5000) ],       CGroups:[ whenAwake ], anyKey: stUnSleepy, Timer: stGoSleep },
     stUnSleepy:     { Actions: [ bgLED(bgPulse), goSavedSt(1) ],                CGroups:[ whenAwake ] },
-    stGoSleep:      { Actions: [ bgLED(R_3),  setTimer(1000) ],                 CGroups:[ whenSleeping ], Timer: stFallAsleep },
+    stGoSleep:      { Actions: [ playTune(H/+), bgLED(R),  setTimer(1000) ],    CGroups:[ whenSleeping ], Timer: stFallAsleep },
     stFallAsleep:   { Actions: [ powerDown ],                                   CGroups:[ whenSleeping ] },
 
     stPlayLouder:   { Actions: [ volAdj( 1),  goPrevSt ],                       CGroups:[ whenAwake, whenPlaying ] },
@@ -117,7 +122,7 @@
     stPlaying:      {                                                           CGroups:[ whenAwake, whenPlaying, whenNav ] },
     
     stOnRepeatMsg:  { Actions: [ msgAdj(  1),  playSubj(msg) ],                 CGroups:[ whenAwake, whenPlaying, whenNav ], AudioStart: stRepeating },
-    stRepeating:    {                                                           CGroups:[ whenAwake, whenPlaying, whenNav ], AudioDone: stOnRepeatMsg },
+    stRepeating:    { Actions: [ showCharge ],                                  CGroups:[ whenAwake, whenPlaying, whenNav ], AudioDone: stOnRepeatMsg },
 
     #
     # One-touch implementation of recording
@@ -134,24 +139,34 @@
     stReviewLouder:     { Actions: [ volAdj(1), goPrevSt ],                     CGroups:[ whenAwake, reviewNav, whenReviewing ] },
     stReviewSofter:     { Actions: [ volAdj(-1), goPrevSt ],                    CGroups:[ whenAwake, reviewNav, whenReviewing ] },
     stReviewPaused:     { Actions: [ saveSt(3), pausePlay ],                    CGroups:[ whenAwake, reviewNav, whenReviewPaused ] },
-    stReviewResumed:    { Actions: [ resumePlay goSavedSt(3) ],                 CGroups:[ whenAwake, reviewNav, whenReviewing ] },
+    stReviewResumed:    { Actions: [ resumePlay, goSavedSt(3) ],                CGroups:[ whenAwake, reviewNav, whenReviewing ] },
 
     stEndRecording:     { Actions: [ saveRec, LED(_), goSavedSt(2) ] },
-    # TODO: How do we take an action, then GOTO a state? "Actions: [saveRec, go(stWakeup)]"
-    stEndRecordingHome: { Actions: [ saveRec, LED(_), bgLED(bgPulse), changePkg, playSys(10) ], CGroups:[ whenAwake, whenPlaying, whenNav ], AudioStart: stWelcoming },
+    stEndRecordingHome: { Actions: [ saveRec, setTimer(100) ],                  Timer: stWakeup },
 
 
-    stOnLowBatt:    { Actions: [ bgLED(R3_2), goPrevSt ],                       CGroups:[ whenAwake, whenNav, whenIdle ] },
-    stIdleLouder:   { Actions: [ volAdj( 1),  playSys(0),  goPrevSt ],          CGroups:[ whenAwake, whenPlaying ] },
-    stIdleSofter:   { Actions: [ volAdj(-1),  playSys(0),  goPrevSt ],          CGroups:[ whenAwake, whenPlaying ] },
-    stUSBmode:      { Actions: [ bgLED(R2_8G2_8), startUSB ],                       CGroups:[ whenUSB ] },
-    stCloseUSB:     { Actions: [ endUSB,      bgLED(G_29), setTimer(1000) ],    Timer: stWakeup },
-    stOnCharging:   { Actions: [ bgLED(R_19),  goPrevSt ],                      CGroups:[ whenAwake, whenIdle ] },
-    stNearCharged:  { Actions: [ bgLED(R_9),  goPrevSt ],                       CGroups:[ whenAwake, whenIdle ] },
-    stOnCharged:    { Actions: [ bgLED(G_9),  goPrevSt ],                         CGroups:[ whenAwake, whenIdle ] },
+    stIdleLouder:   { Actions: [ volAdj( 1), playSys(0),  goPrevSt ],           CGroups:[ whenAwake, whenPlaying ] },
+    stIdleSofter:   { Actions: [ volAdj(-1), playSys(0),  goPrevSt ],           CGroups:[ whenAwake, whenPlaying ] },
+    stUSBmode:      { Actions: [ bgLED(R2_8G2_8), startUSB ],                   CGroups:[ whenUSB ] },
+    stCloseUSB:     { Actions: [ endUSB, bgLED(G_29), setTimer(1000) ],         Timer: stWakeup },
+
     stShowBatt:     { Actions: [ showCharge,  goPrevSt ],                       CGroups:[ whenAwake, whenIdle ] },
-    stOnBattMin:    { Actions: [ bgLED(R5_5),  setTimer(5000) ],                CGroups:[ whenSleeping ], Timer: stFallAsleep },
-#    stTest:         { Actions: [ sysTest ],                                     CGroups:[ whenAwake ] },
+
+    # Charging, charge < 75% (ideally), blink red every 5 seconds
+    # Charging, 75% < charge < 90% (ideally), blink green every 5 seconds
+    # Charging, 90% < charge < 100% (ideally), double blink green every 5 seconds.
+    # Charged. Lights off
+    # Battery > 20%, not charging: Lights off
+    # Battery low: charge < 20%, blink red every 2 seconds
+    # Battery at minimum: not enough juice to run. Two seconds of red, then back to sleep.
+    stOnCharging:   { Actions: [ bgLED(R_49),  goPrevSt ],                      CGroups:[ whenAwake, whenIdle ] },
+    stOnCharging75: { Actions: [ bgLED(G_49),  goPrevSt ],                      CGroups:[ whenAwake, whenIdle ] },
+    stNearCharged:  { Actions: [ bgLED(G_G_47), goPrevSt ],                     CGroups:[ whenAwake, whenIdle ] },
+    stOnCharged:    { Actions: [ bgLED(_),  goPrevSt ],                         CGroups:[ whenAwake, whenIdle ] },
+    stOnLowBatt:    { Actions: [ bgLED(R_19), goPrevSt ],                       CGroups:[ whenAwake, whenNav, whenIdle ] },
+    stNotCharging:  { Actions: [ bgLED(_), goPrevSt ],                          CGroups:[ whenAwake, whenNav, whenIdle ] },
+    stOnBattMin:    { Actions: [ bgLED(R20_30),  setTimer(5000) ],              CGroups:[ whenSleeping ], Timer: stFallAsleep },
+
     stNxtPkg:       { Actions: [ playNxtPkg ],                                  CGroups:[ whenAwake, whenIdle ] },
     stChgPkg:       { Actions: [ changePkg ],                                   CGroups:[ whenAwake, whenIdle, whenNav ] },
 

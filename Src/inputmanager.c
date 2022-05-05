@@ -167,8 +167,10 @@ void 					handleInterrupt( bool fromThread ){					// called for external interru
 	KEY k;
 	disableInputs();
 	if (RebootOnKeyInt){
-		EXTI->PR = EXTI->PR;		// clear all Int Pending bits (by setting them to 1)
-		NVIC_SystemReset();			// soft reboot
+      // clear all Int Pending bits. Pending interrupts are cleared by writing 1 to their bit, and pending interrupts
+      // are marked with a 1 in their bit, so this clears exactly the pending interrupts.
+      EXTI->PR = EXTI->PR;
+      NVIC_SystemReset();			// soft reboot
 	}
 	
 	KSt.eventTS = tbTimeStamp();								// record TStamp of this interrupt
@@ -234,6 +236,10 @@ void 					EXTI4_IRQHandler(void){  		// call handleInterrupt( )
   handleInterrupt( false );
 }
 #endif
+
+/*
+ * Configure interrupts on the STM32 line for a given membrane switch key.
+ */
 void					configInputKey( KEY k ){		// set up GPIO & external interrupt
 		GPIO_PortClock   ( 		keydef[ k ].port, true);
 		gConfigKey( keydef[ k ].id ); // low speed pulldown input
@@ -271,9 +277,14 @@ void					configInputKey( KEY k ){		// set up GPIO & external interrupt
 		EXTI->IMR  |= pinBit; 			// Configure the interrupt mask 
 		KeypadIMR  |= pinBit;
 }
+
+/*
+ * Builds the data structures used to manage interrupts
+ */
 void 					initializeInterrupts(){			// configure each keypad GPIO pin to input, pull, EXTI on rising & falling, freq_low 
 	KEY k;
 	// using CMSIS GPIO
+  // iterate over the membrane switch (keypad) keys
 	for ( k = kHOME; k < kINVALID; k++ ){
 		GPIO_ID id = keydef[ k ].id;			// gpio_def idx for this key
 		keydef[ k ].port = gpio_def[ id ].port;

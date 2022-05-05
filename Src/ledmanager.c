@@ -90,6 +90,11 @@ void								convertSeq( ledSeq *seq, const char *def ){		// fill 'seq' based on 
 	//  "R G8" => shade R for 0.1sec, G for 0.8sec, repeat=false
 	//  "R20 G O _10" => R 2.0sec, G 0.1, O 0.1, off 1.0, repeat=false
 	//  "R!" =>  R 0.1, repeat=true			// stays till changed
+    //  R : brighter red
+    //  r : dimmer red
+    //  G : brighter green
+    //  g : dimmer green
+    //  O : both (probably brightest, the apparent color varies by device)
 	while( def[i] != 0 ){
 		ledShade shd = asShade( def[i] );
 		short tsec = 0;

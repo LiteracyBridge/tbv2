@@ -608,6 +608,7 @@ void 									initControlManager( void ){				// initialize control manager
 		} else {			// don't load package for qcTest
             if ( !loadPackageData() || onlyQcLoaded || BootToUSB ){  
                 USBmode( true );    // go to USB unless successfully loaded CSM & packages_data
+                return;         // don't do anything else after starting USBmode
             }
 		}
 		
@@ -616,8 +617,8 @@ void 									initControlManager( void ){				// initialize control manager
 		
 		// don't init power timer-- it is set to do 1st check at 15sec, then resets from TB_Config
 		//setPowerCheckTimer( TB_Config->powerCheckMS );	
-        if ( !RunQCTest )
-            PowerChecksEnabled = true;
+        if ( RunQCTest )
+            PowerChecksEnabled = false;     // disable powerChecks during QC
         
         if ( DecodeMP3 ){
             decodeAudio();    // start fileOps thread checking for .mp3 files that haven't been decoded

@@ -271,6 +271,7 @@ void                      enterStopMode( void ){                    // put STM32
 	int sleep = osKernelSuspend();		// turn off sysTic 
 	RebootOnKeyInt = true;
 	EXTI->IMR |= KeypadIMR;					// enable keypad EXTI interrupts
+    EXTI->FTSR = 0;    // disable key up transitions -- so only key down will wakeup device
 	
 	__WFI();	// sleep till interrupt -- 10 keyboard EXTI's enabled
 	
@@ -395,6 +396,7 @@ uint8_t                   Bcd2( int v ){									// return v as 8 bits-- bcdTens
 	return (vt << 4) | vu;
 }
 void                      setupRTC( fsTime time ){				// init RTC & set based on fsTime
+    const int MAX_DLY = 1000000;
 	int cnt = 0;
 	RCC->APB1ENR |= ( RCC_APB1ENR_PWREN | RCC_APB1ENR_RTCAPBEN );				// start clocking power control & RTC_APB
 	PWR->CSR 	|= PWR_CSR_BRE;											// enable backup power regulator
@@ -411,8 +413,8 @@ void                      setupRTC( fsTime time ){				// init RTC & set based on
 	RCC->BDCR |= RCC_BDCR_RTCEN;
 	RCC->BDCR |= RCC_BDCR_LSEON;												// enable 32KHz LSE clock
 	cnt = 0;
-	while ( (RCC->BDCR & RCC_BDCR_LSERDY)==0 && (cnt < 10000) ) cnt++; 	// & wait till ready
-    if (cnt==1000) tbErr("RTC: LSE not ready");
+	while ( (RCC->BDCR & RCC_BDCR_LSERDY)==0 && (cnt < MAX_DLY) ) cnt++; 	// & wait till ready
+    if (cnt==MAX_DLY) tbErr("RTC: LSE not ready");
 
 	// configure RTC  (per RM0402 22.3.5)
 	RCC->BDCR |= RCC_BDCR_RTCSEL_0;										// select LSE as RTC source
@@ -422,8 +424,8 @@ void                      setupRTC( fsTime time ){				// init RTC & set based on
 
 	RTC->ISR |= RTC_ISR_INIT;													// set init mode
 	cnt = 0;
-	while ( (RTC->ISR & RTC_ISR_INITF)==0 && (cnt < 1000)) cnt++;		// & wait till ready
-    if (cnt==1000) tbErr("RTC: Initmode not ready");
+	while ( (RTC->ISR & RTC_ISR_INITF)==0 && (cnt < MAX_DLY)) cnt++;		// & wait till ready
+    if (cnt==MAX_DLY) tbErr("RTC: Initmode not ready");
 	
 	RTC->PRER  = (256 << RTC_PRER_PREDIV_S_Pos);				// Synchronous prescaler = 256  MUST BE FIRST
     RTC->PRER |= (127 << RTC_PRER_PREDIV_A_Pos);                // THEN asynchronous = 127 for 32768Hz => 1Hz
@@ -467,7 +469,7 @@ void                      setupRTC( fsTime time ){				// init RTC & set based on
             if (newtime.hr == time.hr && newtime.min >= time.min) return;    // time also updated 
         }
         cnt++;
-        if ( cnt > 1000 ) tbErr("RTC didn't set: %d-%d-%d %02d:%02d  \n", newtime.year, newtime.mon, newtime.day, newtime.hr, newtime.min );
+        if ( cnt > MAX_DLY ){ tbErr("RTC didn't set: %d-%d-%d %02d:%02d  \n", newtime.year, newtime.mon, newtime.day, newtime.hr, newtime.min ); break; }
     }
     dbgLog("! setupRTC: took %d reads\n", cnt );
 }

@@ -195,7 +195,7 @@ int							NLogReadSA(){					// read StartAddress array in page 0 & verify consis
 		} else if ( SA == E_VAL32 ){  // found first empty slot
 			fE = i;
 		} else {	// next log start-- must be higher & multiple of PGSZ
-			if ( (SA % NLg.PGSZ) != 0 || SA <= prvSA ){ 
+			if ( (SA % NLg.PGSZ) != 0 || SA <= prvSA || SA >= NLg.MAX_ADDR ){ 
 				dbgLog( "! NLogRdSA-- SA[%d]=0x%08x but SA[%d]=0x%08x \n", i-1, NLg.startAddr[i-1], i, NLg.startAddr[i] );
 				FILE * f = tbOpenWrite( "system/badNorPg0.txt" ); 
 				if ( f==NULL ) 
@@ -404,23 +404,28 @@ void 						eraseNorFlash( bool svCurrLog ){						// erase entire chip & re-init 
 	uint32_t cnt = 0;
 
 	ledFg( fgNOR_Erasing );
-	bool needToInit = true;
+//	bool needToInit = true;
+    int eraseErrCnt = 0;
 	for ( uint32_t addr = 0; addr < NLg.MAX_ADDR; addr += NLg.SECTORSZ ){
 		int stat = NLg.pNor->EraseSector( addr );	
-		if ( stat != ARM_DRIVER_OK ) norErr(" pNor erase => %d", stat );
-		waitWhileBusy();	// non-blocking-- wait till done
+		if ( stat != ARM_DRIVER_OK ){
+            eraseErrCnt++;
+            addr -= NLg.SECTORSZ;       // retry this sector
+            //norErr(" pNor erase => %d", stat );
+            
+        }
+        waitWhileBusy();	// non-blocking-- wait till done
 		
-		if ( needToInit ){		// re-init current log as soon as 1 sector erased
-			findCurrNLog( true );				// creates a new empty currentLog
-			needToInit = false;
-			osMutexRelease( logLock );	// allow other threads to continue
-		}
-		
+        showProgress( "RGR__", 200 );    // eraseNor
 		cnt++;
-		if ( cnt % 512 == 0) dbgLog( "Erasing sector %d... \n", cnt );
 	}
+    if ( eraseErrCnt > 0 ) dbgLog("! eraseNorFlash %d errors \n", eraseErrCnt );
 	dbgLog("! NLog erased %d sectors in %d msec\n", cnt, tbTimeStamp()-stMS );
+    endProgress();
 	ledFg( NULL );
+    
+	findCurrNLog( true );				// creates a new empty currentLog
+	osMutexRelease( logLock );	    // allow other threads to continue
 	
 	//int stat = NLg.pNor->EraseChip( );	//DOESN'T WORK!
 	//if ( stat != ARM_DRIVER_OK ) norErr(" pNor erase => %d", stat );
@@ -530,6 +535,7 @@ void						copyNorLog( const char * fpath ){						// copy curr Nor log into file 
 	bool validLog = true;
     int maxLogSz = (NLg.MAX_ADDR - NLg.PGSZ)/ N_SADDR;  // 1/64th of capacity
     int maxLogCnt = 0;
+    int invalidpgcnt = 0;   // count invalid pages found
     dbgLog("! copyNorLog: %d bytes\n", NLg.Nxt-NLg.logBase );
 	for ( int p = NLg.logBase; p < NLg.Nxt; p+= NLg.PGSZ ){		// log always starts at page boundary, is full from logBase..Nxt-1
 		stat = NLg.pNor->ReadData( p, NLg.pg, NLg.PGSZ );
@@ -539,14 +545,20 @@ void						copyNorLog( const char * fpath ){						// copy curr Nor log into file 
 		if ( cnt > NLg.PGSZ ) cnt = NLg.PGSZ;	
 		for (int i=0; i<cnt; i++){   // verify validity of data
 			if ( !isValidChar( NLg.pg[i] )){
+                invalidpgcnt++;
 				if ( validLog ) // first bad char found
 					fprintf(f, "\n bad Log%d 0x%08x: [%d] = 0x%02x logBase=0x%08x Nxt=0x%08x \n", NLg.currLogIdx, p, i, NLg.pg[i], NLg.logBase, NLg.Nxt );
 				validLog = false;
 			}
 		}
-		stat = fwrite( NLg.pg, 1, cnt, f );
+		stat = fwrite( NLg.pg, 1, cnt, f );  
+        showProgress( "RG___", 200 );   // copyNorLog
 		if ( stat != cnt ) 
 			fprintf(f, "\n cpyNor fwrite => %d  totcnt=%d \n", stat, totcnt );
+        if ( invalidpgcnt > 20 ){
+			fprintf(f, "\n >20 invalid pages-- stop copying after %d bytes \n", totcnt );
+            break;
+        }
 		totcnt += cnt;
         if ( totcnt/maxLogSz > maxLogCnt ){
             maxLogCnt++;
@@ -554,7 +566,8 @@ void						copyNorLog( const char * fpath ){						// copy curr Nor log into file 
         }
 	}
 	tbCloseFile( f );		//fclose( f );  // tbTmpLog
-	
+    endProgress();
+    
 	if ( !validLog ){  // bad log-- save to different filename
 		sprintf( fnm, badLogPatt, NLg.currLogIdx );  // save invalid log-- no path
 		dbgLog( "! inconsistent NorLog-- saving to %s \n", fnm );

@@ -89,13 +89,13 @@ void setBootMode(){	// use key to to select value for BootMode
                 sprintf( prog, "_%c_%c_%c__", BootToQCtest? 'G':'_', BootVerboseLog? 'G':'_', BootVerbosePower? 'G':'_' );
             showProgress( prog, 200 );    // select boot keys
     
-            if ( gGet( gPLUS ))  BootToUSB = true;        // boot directly to USB
+            if ( gGet( gPLUS  )) BootToUSB = true;        // boot directly to USB
             if ( gGet( gMINUS )) BootResetLog = true;     // reset Log (skip copy of last log)
-            if ( gGet( gTREE ))  BootFormatFileSys = true;  // reformat EMMC filesystem
+            if ( gGet( gLHAND )) BootFormatFileSys = true;  // reformat EMMC filesystem
         
             // debug switches
             if ( gGet( gCIRCLE )) BootToQCtest = true;
-            if ( gGet( gLHAND  )) BootVerboseLog = true;
+            if ( gGet( gPOT    )) BootVerboseLog = true;
             if ( gGet( gRHAND  )) BootVerbosePower = true;
             
             if ( gGet( gTABLE ))  break;

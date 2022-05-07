@@ -128,7 +128,7 @@ static const ARM_FLASH_CAPABILITIES 	DriverCapabilities = {										// Driver C
 static ARM_FLASH_STATUS 							FlashStatus;															// Flash Status
 static uint8_t 												Flags;
 //
-static uint32_t												getReg( uint8_t cmd, uint8_t * sreg );							// forward for GetStatus
+static int32_t												getReg( uint8_t cmd, uint8_t * sreg );							// forward for GetStatus
 static bool 													isSpiErr( int32_t err, bool reset, int32_t FnStp );	// forward for GetStatus
 static ARM_DRIVER_VERSION 						GetVersion (void) {												// return driver version
   return DriverVersion;
@@ -154,6 +154,7 @@ static ARM_FLASH_STATUS 							GetStatus (void) {												// return flash sta
 // INTERNAL 
 static uint8_t 	currCmd;
 static uint32_t maxBusyCnt = 0;
+const  uint32_t MAX_WAIT = 50000;
 
 static bool 		isSpiErr( int32_t err, bool reset, int32_t FnStp ){							// if error report & opt. reset SPI
   if ( err == ARM_DRIVER_OK ) return false;
@@ -164,8 +165,9 @@ static bool 		isSpiErr( int32_t err, bool reset, int32_t FnStp ){							// if er
 		ptrSPI->Control( ARM_SPI_CONTROL_SS, ARM_SPI_SS_INACTIVE );
   return true;
 }
-static uint32_t	getReg( uint8_t cmd, uint8_t * sreg ){																								// read Status 1
-	uint32_t result, waitcnt = 0;
+static int32_t	getReg( uint8_t cmd, uint8_t * sreg ){																								// read Status 1
+  uint32_t result;
+  int waitcnt = 0;
   char buf[] = { cmd };  				// Read register Command 
   const int FN = 10;
   
@@ -174,17 +176,17 @@ static uint32_t	getReg( uint8_t cmd, uint8_t * sreg ){																								//
 
   result = ptrSPI->Send( buf, 1 );  // Send Command byte
   if ( isSpiErr( result, true, FN+2 ) ) return result;
-  while ( ptrSPI->GetDataCount() != 1 ) waitcnt++;
+  while ( ptrSPI->GetDataCount() != 1 ) { waitcnt++;  if (waitcnt > MAX_WAIT) return ARM_DRIVER_ERROR; }
 
   result = ptrSPI->Receive( buf, 1 );	// Read result byte
   if ( isSpiErr( result, true, FN+3 ) ) return result;
-  while ( ptrSPI->GetDataCount() != 1 ) waitcnt++;
+  while ( ptrSPI->GetDataCount() != 1 ) { waitcnt++;  if (waitcnt > MAX_WAIT) return ARM_DRIVER_ERROR; }
 	
   result = ptrSPI->Control( ARM_SPI_CONTROL_SS, ARM_SPI_SS_INACTIVE );  	// Deselect Slave
   if ( isSpiErr( result, false, FN+4 ) ) return result;
 	
   *sreg = buf[0];
-	return ARM_DRIVER_OK;
+  return ARM_DRIVER_OK;
 }
 static bool			WaitWhileBusy(){																								// read Status 1 until Status1.BUSY goes false
   const int MAX_LONG_OP = 10000000, MAX_SHORT_OP = 5; 
@@ -198,12 +200,12 @@ static bool			WaitWhileBusy(){																								// read Status 1 until Sta
 
   result = ptrSPI->Send( buf, 1 );  // Send Read Status1 Command 
   if ( isSpiErr( result, true, FN+2 ) ) return false;
-  while ( ptrSPI->GetDataCount() != 1 ) waitcnt++;
+  while ( ptrSPI->GetDataCount() != 1 ) { waitcnt++;  if (waitcnt > MAX_WAIT) return false; }
 
   while ( busycnt < MAX_LONG_OP ) {  		// Read Status Register 1 repeatedly, until Busy(bit0)==0 
     result = ptrSPI->Receive( buf, 1 );	
 		if ( isSpiErr( result, true, FN+3 ) ) return false;
-    while ( ptrSPI->GetDataCount() != 1 ) waitcnt++;
+    while ( ptrSPI->GetDataCount() != 1 ) { waitcnt++;  if (waitcnt > MAX_WAIT) return false; }
 	
 		uint8_t stat1 = buf[0];
 		if ( (stat1 & STAT1_BUSY) == 0 ) break;
@@ -225,6 +227,7 @@ static bool			SendWriteCommand( uint8_t cmd ){																// send write enab
   const int FN = 30;
   char buf[] = { CMD_WR_ENABLE, cmd };
   uint32_t cnt = cmd==0? 1 : 2;
+  uint32_t sentCnt;
 	currCmd = cmd;
 	
   result = ptrSPI->Control( ARM_SPI_CONTROL_SS, ARM_SPI_SS_ACTIVE );  // Select Slave
@@ -232,8 +235,12 @@ static bool			SendWriteCommand( uint8_t cmd ){																// send write enab
 
   result = ptrSPI->Send( buf, cnt ); 		 // Send WriteEnable, then cmd
   if ( isSpiErr( result, true, FN+2 )) 	return false; 
-  
-  while ( ptrSPI->GetDataCount() != cnt ) waitcnt++;
+ 
+  while ( (sentCnt = ptrSPI->GetDataCount()) != cnt ) { 
+    waitcnt++;  
+    if (waitcnt > MAX_WAIT) 
+        return false; 
+  }
   if ( cnt==1 ){
 		result = ptrSPI->Control( ARM_SPI_CONTROL_SS, ARM_SPI_SS_INACTIVE );  	// Deselect Slave
 		if ( isSpiErr( result, false, FN+4 ) ) return false;
@@ -267,6 +274,7 @@ static bool 		SendCommand (uint8_t cmd, uint32_t addr, const uint8_t *data, uint
 	(uint8_t)((addr >>  0)& 0xFF) 
   };
   int32_t  result, waitcnt = 0;
+  uint32_t sentCnt;
 	currCmd = cmd;
 
   result = ptrSPI->Control( ARM_SPI_CONTROL_SS, ARM_SPI_SS_ACTIVE ); 		 // Select Slave 
@@ -275,12 +283,20 @@ static bool 		SendCommand (uint8_t cmd, uint32_t addr, const uint8_t *data, uint
   result = ptrSPI->Send( buf, 4 );  				// Send Command with address 
   if ( isSpiErr( result, true, FN+2 ) ) return false;
 
-  while ( ptrSPI->GetDataCount() != 4) waitcnt++;
+  while ( (sentCnt = ptrSPI->GetDataCount()) != 4) { 
+    waitcnt++;  
+    if (waitcnt > MAX_WAIT) 
+        return false; 
+  }
 
   if ( (data != NULL) && (size != 0) ) {  // Send Data?
     result = ptrSPI->Send(data, size);
-		if ( isSpiErr( result, true, FN+3 )) return false;
-    while ( ptrSPI->GetDataCount() != size ) waitcnt++;
+	if ( isSpiErr( result, true, FN+3 )) return false;
+    while ( (sentCnt = ptrSPI->GetDataCount()) != size ) { 
+        waitcnt++;  
+        if (waitcnt > MAX_WAIT) 
+            return false; 
+    }
   }
   
   result = ptrSPI->Control( ARM_SPI_CONTROL_SS, ARM_SPI_SS_INACTIVE ); 	 // Deselect Slave 
@@ -360,11 +376,11 @@ static int32_t 	ReadData (uint32_t addr, void *data, uint32_t cnt) {						// rea
 
   result = ptrSPI->Send( buf, 4 ); 		 // Send Command with Address
   if ( isSpiErr( result, true, FN+2 )) return ARM_DRIVER_ERROR; 
-  while ( ptrSPI->GetDataCount() != 4 ) waitcnt++;
+  while ( ptrSPI->GetDataCount() != 4 ) { waitcnt++;  if (waitcnt > MAX_WAIT) return 0; }
 
   result = ptrSPI->Receive( data, cnt ); 		 // Receive Data 
   if ( isSpiErr( result, true, FN+3 )) return ARM_DRIVER_ERROR; 
-  while ( ptrSPI->GetDataCount() != cnt ) waitcnt++;
+  while ( ptrSPI->GetDataCount() != cnt ) { waitcnt++;  if (waitcnt > MAX_WAIT) return 0; }
 
   result = ptrSPI->Control(ARM_SPI_CONTROL_SS, ARM_SPI_SS_INACTIVE);  // Deselect Slave 
   if ( isSpiErr( result, false, FN+4 )) return ARM_DRIVER_ERROR; 

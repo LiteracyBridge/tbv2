@@ -166,10 +166,10 @@ void 					handleInterrupt( bool fromThread ){					// called for external interru
 */
 	KEY k;
 	disableInputs();
-	if (RebootOnKeyInt){
+	if ( RebootOnKeyInt ){    // waiting for a key-down to wakeup device
 		EXTI->PR = EXTI->PR;		// clear all Int Pending bits (by setting them to 1)
-		NVIC_SystemReset();			// soft reboot
-	}
+        NVIC_SystemReset();			// soft reboot
+    }
 	
 	KSt.eventTS = tbTimeStamp();								// record TStamp of this interrupt
 	KSt.msecSince = KSt.eventTS - KSt.lastTS;		// msec between prev & this

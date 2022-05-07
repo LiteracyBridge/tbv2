@@ -86,6 +86,8 @@ extern bool 			getRTC( struct _fsTime *fsTime, uint32_t *pMSec );					// load cu
 extern bool 			showRTC( void );
 extern uint32_t 	tbTimeStamp( void );  // returns millisecond timestamp based on OS Tic
 extern uint32_t 	tbRtcStamp( void );   // returns millisecond timestamp based on RTC instead of OS Tic
+extern void             showProgress( const char *s, uint32_t stepMs );      // step through LED string, min stepMs msec each
+extern void             endProgress( void );                                 // finish showing progress
 
 extern void 			tbDelay_ms( int ms ); 					//  Delay execution for a specified number of milliseconds
 extern void *			tbAlloc( int nbytes, const char *msg );

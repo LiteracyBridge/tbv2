@@ -35,6 +35,14 @@ const char *		logFilePatt = "M0:/log/tbLog_%d.txt";			// file name of previous l
 const int				MAX_EVT_LEN1 = 32, MAX_EVT_LEN2 = 64;
 
 extern fsTime               lastRTCinLog;
+extern bool BootToUSB;
+extern bool BootDebugLoop;
+extern bool BootVerboseLog;
+extern bool BootToQCtest;
+extern bool BootVerbosePower;
+extern bool BootResetLog;
+extern bool BootFormatFileSys;
+
 
 
 /*  //DEBUG ONLY:  debugger accessible log history
@@ -183,44 +191,32 @@ void 						dateStr( char *s, fsTime dttm ){
 	sprintf( s, "%d-%d-%d %02d:%02d", dttm.year, dttm.mon, dttm.day, dttm.hr, dttm.min );
 }
 void                        startNextLog(){         // save current log, switch to next index
-    if (BootKey != '0')   // escape to skip saving a huge log
+    if ( !BootResetLog )   // if Reset-- skip saving a log with problems
         copyNorLog( "" );     // save with default name
     initNorLog( true );
 }
-bool                        validDateTime( fsTime dtTm ){
-    if ( dtTm.year < 2022 ) return false;
-    if ( dtTm.mon < 1 || dtTm.mon > 12 ) return false;
-    if ( dtTm.day < 1 || dtTm.day > 31 ) return false;
+bool                        validDateTime( fsTime *dtTm ){
+    if ( dtTm->year < 2022 ) return false;
+    if ( dtTm->mon < 1 || dtTm->mon > 12 ) return false;
+    if ( dtTm->day < 1 || dtTm->day > 31 ) return false;
 
-    if ( dtTm.hr > 23 ) return false;
-    if ( dtTm.min > 59 ) return false;
-    if ( dtTm.sec > 59 ) return false;
+    if ( dtTm->hr > 23 ) return false;
+    if ( dtTm->min > 59 ) return false;
+    if ( dtTm->sec > 59 ) return false;
     return true;
 }
-fsTime                      laterDateTime( fsTime tm1, fsTime tm2 ){    // returns latest valid time (or 2022-1-1 00:00:00 if both invalid)
-    int major, minor;
-    fsTime fw;  
-    // set fw to date from TBV2_Version  (e.g. V3.1 of 2022-22-04 13:43:36)
-    if ( sscanf(TBV2_Version, "V%u.%u of %hu-%hhu-%hhu %hhu:%hhu:%hhu", &major,&minor, &fw.year,&fw.mon,&fw.day, &fw.hr,&fw.min,&fw.sec)!=8){ 
-        //couldn't parse version, use 2022-01-01 00:00:00
-        fw.year = 2022; fw.mon = 1; fw.day = 1; 
-        fw.hr = 0; fw.min = 0; fw.sec = 0;
-    }
-        
-    bool tm1valid = validDateTime( tm1 );
-    bool tm2valid = validDateTime( tm2 );
-    if ( tm1valid && !tm2valid ) return tm1;
-    if ( tm2valid && !tm1valid ) return tm2;
-    if ( !tm1valid && !tm2valid ) return fw;  // use firmware date 
+fsTime *                    laterDtTm( fsTime *tm1, fsTime *tm2 ){    // returns later datetime of tm2 & tm2
+    if ( !validDateTime( tm1 )) return tm2;
+    if ( !validDateTime( tm2 )) return tm1;
 
     // both valid -- use more recent
-    if ( tm1.year != tm2.year ) return tm1.year > tm2.year? tm1 : tm2;
-    if ( tm1.mon != tm2.mon )   return tm1.mon  > tm2.mon? tm1 : tm2;
-    if ( tm1.day != tm2.day )   return tm1.day  > tm2.day? tm1 : tm2;
-    if ( tm1.hr  != tm2.hr )    return tm1.hr   > tm2.hr?  tm1 : tm2;
-    if ( tm1.min != tm2.min )   return tm1.min  > tm2.min? tm1 : tm2;
-    if ( tm1.sec != tm2.sec )   return tm1.sec  > tm2.sec? tm1 : tm2;
-    return tm1;  // valid & the same
+    if ( tm1->year != tm2->year ) return tm1->year > tm2->year? tm1 : tm2;
+    if ( tm1->mon != tm2->mon )   return tm1->mon  > tm2->mon? tm1 : tm2;
+    if ( tm1->day != tm2->day )   return tm1->day  > tm2->day? tm1 : tm2;
+    if ( tm1->hr  != tm2->hr )    return tm1->hr   > tm2->hr?  tm1 : tm2;
+    if ( tm1->min != tm2->min )   return tm1->min  > tm2->min? tm1 : tm2;
+    if ( tm1->sec != tm2->sec )   return tm1->sec  > tm2->sec? tm1 : tm2;
+    return tm1;  // identical
 }
 void						logPowerUp( bool reboot ){											// re-init logger after reboot, USB or sleeping
 	char line[200];
@@ -236,16 +232,24 @@ void						logPowerUp( bool reboot ){											// re-init logger after reboot, U
 	int bootcnt = 1;		// if file not there-- first boot
 	if ( boot!=NULL ) sscanf( boot, " %d", &bootcnt );
 	FirstSysBoot = (bootcnt==1);
+    
+    bool StartNewLog = false;
+    
+    if ( FirstSysBoot )     // advance log idx if FirstBoot
+        StartNewLog = true;
 
-    if ( !LogSizeOk() )     // advance boot idx automatically if Log has grown too large
-        FirstSysBoot = true;
+    if ( !LogSizeOk() )     // advance log idx automatically if Log has grown too large
+        StartNewLog = true;
+    
+    if ( BootResetLog )     // also start new log if ResetLog Boot  
+        StartNewLog = true;
 
-	if ( FirstSysBoot ){  // FirstBoot after install TODO: How does this follow from "!LogSizeOk()"?
+	if ( StartNewLog ){    // switch to new log index
 		bool eraseNor = fexists( norEraseFile );
 		if ( eraseNor )  // if M0:/system/EraseNorLog.txt exists-- erase
 			eraseNorFlash( false );			// CLEAR nor & create a new log
 		else {     // First Boot starts a new log (unless already done by erase)
-			sprintf(line, logFilePatt, NLogIdx() );
+		//	sprintf(line, logFilePatt, NLogIdx() );    //TODO: not needed
             startNextLog();
 		}
 	}
@@ -254,18 +258,36 @@ void						logPowerUp( bool reboot ){											// re-init logger after reboot, U
 	if ( reboot ){
 		totLogCh = 0;			// tot chars appended
 		if (logF!=NULL) fprintf( logF, "\n" );
-        char bkey[2] = { BootKey, 0 };
-  //      if (BootKey!=' ') sprintf( bkey, "Key= %c", BootKey );
-		logEvtNS(   "REBOOT --------", "BootKey", bkey );
+        sprintf(line, " %s %s %s %s %s %s ",    BootToUSB? "USB":"", BootResetLog? "ResetLog":"", BootFormatFileSys? "FormatFilesys":"", BootToQCtest? "QCTest":"",
+                    BootVerboseLog? "VerboseLog":"", BootVerbosePower? "VerbosePwr":"" );
+		logEvtNS(   "REBOOT --------", "BootKeys", line );
         gotRtc = showRTC();      // show current RTC time, or false if unset
         if ( !gotRtc ){  
             // RTC unset after hard power down (e.g. battery change) (or DFU). Reset from the last time we knew. Certainly
             // the wrong time, possibly by a huge amount, but at least time increases monotonically.
-            bool haveTime = getFileTime(lastRtcFile, &rtcDt);
-            // lastRTCinLog may have been set by initNorLog -- from last RTC log entry
-            // use latest valid time
             
-            fsTime latest = laterDateTime( rtcDt, lastRTCinLog );
+            fsTime jan22 = { 0, 0, 0, 1, 1, 2022 };  // hr min sec, day, mon, year = 2022-01-01 00:00:00 
+            
+            if ( !getFileTime(lastRtcFile, &rtcDt))   // timestamp of lastRTC.txt (from last proper shutdown)                                
+                rtcDt.year = 0; //if invalid  
+            
+            int major, minor;
+            fsTime fware;  
+            // set fw to date from TBV2_Version  (e.g. V3.1 of 2022-22-04 13:43:36)
+            if ( sscanf(TBV2_Version, "V%u.%u of %hu-%hhu-%hhu %hhu:%hhu:%hhu", &major,&minor, &fware.year,&fware.mon,&fware.day, &fware.hr,&fware.min,&fware.sec)!=8)
+                fware.year = 0;  // firmware date invalid
+
+            dateStr( dt, rtcDt ); logEvtNS( "foundRTC", "lastRtc", dt );
+            dateStr( dt, fware ); logEvtNS( "foundRTC", "firmwareRtc", dt );
+            dateStr( dt, lastRTCinLog ); logEvtNS( "foundRTC", "lastRtcInLog", dt );
+            
+            fsTime *latest = &jan22;                    // default if all others invalid
+            latest = laterDtTm( latest, &rtcDt );           // use lastRTC timestamp if valid
+            latest = laterDtTm( latest, &fware );           // use firmware date if later than lastRTC
+            latest = laterDtTm( latest, &lastRTCinLog );    // lastRTCinLog may have been set by initNorLog -- from last RTC log entry
+            
+            // latest -> most recent valid time of jan22, rtcDt, fware, lastRTCinLog
+
             /*
             bool useFileTime = haveTime && (rtcDt.year >= lastRTCinLog.year) && (rtcDt.mon >= lastRTCinLog.mon) && (rtcDt.day >= lastRTCinLog.day) &&
                 (rtcDt.hr >= lastRTCinLog.hr) && (rtcDt.min >= lastRTCinLog.min) && (rtcDt.sec >= lastRTCinLog.sec); 
@@ -278,8 +300,8 @@ void						logPowerUp( bool reboot ){											// re-init logger after reboot, U
               setupRTC( lastRTCinLog );    
             }                
             */
-            dateStr( dt, latest );
-            setupRTC( latest ); 
+            dateStr( dt, *latest );
+            setupRTC( *latest ); 
             
             logEvtNS( "resetRTC", "DtTm", dt );
             showRTC();

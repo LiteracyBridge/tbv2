@@ -90,7 +90,7 @@ int							NLogIdx(){  																// => index of log section currently in us
 }
 bool                        LogSizeOk(){                                     // TRUE if log below 1/64 of NLog
 	int logSz = NLg.Nxt-NLg.logBase;
-	int maxLogSz = (NLg.MAX_ADDR - NLg.PGSZ)/ N_SADDR;  // 1/64th of capacity
+	int maxLogSz = (NLg.MAX_ADDR - NLg.PGSZ)/ N_SADDR;  // ~8Mb/64 = ~128Kb 
     return ( logSz < maxLogSz );
 }
 bool						isValidChar( uint8_t ch ){									// TRUE for text & newline
@@ -439,11 +439,11 @@ void						initNorLog( bool startNewLog ){							// init driver for W25Q64JV NOR 
 	// init constants in NLg struct
 	NLg.pNor 			= &Driver_Flash0;
 	NLg.pI 				= NLg.pNor->GetInfo();   // get key NORFLASH parameters (defined in W25Q64JV.h)
-	NLg.PGSZ 			= NLg.pI->page_size;
-	NLg.SECTORSZ 	= NLg.pI->sector_size;
+	NLg.PGSZ 			= NLg.pI->page_size;     
+	NLg.SECTORSZ 	= NLg.pI->sector_size;       // (4Kb) 
 	if ( NLg.PGSZ > BUFFSZ ) norErr("NLog: buff too small");
 	NLg.E_VAL	 		= NLg.pI->erased_value;
-	NLg.MAX_ADDR 	= ( NLg.pI->sector_count * NLg.pI->sector_size )-1;
+	NLg.MAX_ADDR 	= ( NLg.pI->sector_count * NLg.pI->sector_size )-1;      // 2048 * 4Kb = 8Mb
     NLg.Nxt             = -1;  // mark as NOT fully initialized -- prevent power timer logging during initialization
 	
 	stat = NLg.pNor->Initialize( NULL );

@@ -262,6 +262,7 @@ void										tbRenameFile( const char *src, const char *dst ){  // rename path 
 		errLog( "frename %s to %s => %d \n", src, dst, stat );
 }
 
+extern bool BootFormatFileSys;
 fsStatus 								fsMount( char *drv ){		// try to finit() & mount()  drv:   finit() code, fmount() code
 		// gSDIO_DAT0 PB4, gSDIO_DAT1 PA8, gSDIO_DAT2 PC10, gSDIO_DAT3 PB5, gSDIO_CLK PC12, gSDIO_CMD PD2
 		fsStatus stat = finit( drv );  		// init file system driver for device-- configures PA8, PB4,PB5, PC10,PC12, PD2 to (PP+PU)
@@ -273,7 +274,7 @@ fsStatus 								fsMount( char *drv ){		// try to finit() & mount()  drv:   fini
 		stat = fmount( drv );
 		if ( stat==fsOK ) return stat;
 
-		if ( stat == fsNoFileSystem ){
+		if ( stat == fsNoFileSystem || BootFormatFileSys ){
 			EventRecorderEnable( EventRecordAll, 	EvtFsCore_No, EvtFsMcSPI_No );  	//FileSys library
 			stat = fformat( drv, "/FAT32" );
 			if ( stat == fsOK ) return stat;   // successfully formatted
@@ -533,6 +534,26 @@ bool showRTC() {
 }
 
 
+uint32_t    lastProgress = 0, nextProgressStep = 0;
+void                                        showProgress( const char *s, uint32_t stepMs ){      // step through LED string, min stepMs msec each
+    uint32_t tm = tbRtcStamp();
+    if ( tm < lastProgress + stepMs ) return;  // avoid flashing too fast
+    lastProgress = tm;
+    EnableLedMngr( false );
+    
+    if ( nextProgressStep >= strlen(s) ) nextProgressStep = 0;
+    char clr = s[ nextProgressStep ];
+    nextProgressStep++;
+      
+	switch ( clr ){
+		case 'G': gSet( gGREEN, 1 ); gSet( gRED, 0 ); break;
+		case 'R': gSet( gGREEN, 0 ); gSet( gRED, 1 ); break;
+		default:  gSet( gGREEN, 0 ); gSet( gRED, 0 ); break;
+	}
+}
+void                                        endProgress(){                                      // finish showing progress
+    EnableLedMngr( true );
+}
 void 										measureSystick(){
 	const int NTS = 6;
 	int msTS[ NTS ], minTS = 1000000, maxTS=0, sumTS=0;

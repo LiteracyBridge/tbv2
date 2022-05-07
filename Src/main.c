@@ -72,10 +72,37 @@ bool BootDebugLoop = false;
 bool BootVerboseLog = false;
 bool BootToQCtest = false;
 bool BootVerbosePower = false;
+bool BootResetLog = false;
+bool BootFormatFileSys = false;
 
 void setBootMode(){	// use key to to select value for BootMode
 	flashInit();			// enable keyboard to decode boot type
-	
+	bool HardwareBoot = gGet( gTABLE ) || gGet( gTREE );
+    char prog[20] = "R_G_";
+    
+    if ( HardwareBoot && gGet( gSTAR )){  // Star Hardware Boot--  BootMode selection loop
+     
+        while (true){
+            if ( BootToUSB || BootResetLog || BootFormatFileSys )
+                sprintf( prog, "_%c_%c_%c__", BootToUSB? 'R':'_', BootResetLog? 'R':'_', BootFormatFileSys? 'R':'_' );
+            else if ( BootToQCtest || BootVerboseLog || BootVerbosePower )
+                sprintf( prog, "_%c_%c_%c__", BootToQCtest? 'G':'_', BootVerboseLog? 'G':'_', BootVerbosePower? 'G':'_' );
+            showProgress( prog, 200 );    // select boot keys
+    
+            if ( gGet( gPLUS ))  BootToUSB = true;        // boot directly to USB
+            if ( gGet( gMINUS )) BootResetLog = true;     // reset Log (skip copy of last log)
+            if ( gGet( gTREE ))  BootFormatFileSys = true;  // reformat EMMC filesystem
+        
+            // debug switches
+            if ( gGet( gCIRCLE )) BootToQCtest = true;
+            if ( gGet( gLHAND  )) BootVerboseLog = true;
+            if ( gGet( gRHAND  )) BootVerbosePower = true;
+            
+            if ( gGet( gTABLE ))  break;
+        }
+        endProgress();
+    }
+/*        
 	BootMode = 0;  BootKey = ' ';
   if ( gGet( gSTAR ))		      { BootMode = 1;  BootKey = 'S'; BootToQCtest = true; }
 	else if ( gGet( gLHAND ))		{ BootMode = 2;  BootKey = 'L'; BootVerboseLog = true; }
@@ -96,6 +123,7 @@ void setBootMode(){	// use key to to select value for BootMode
 
   if ( BootMode != 0 && BootMode != 6 && BootMode != 7 )    // no flash for no keys, Boot-Circle or Boot-Home -- normal resume keys
       flashCode( BootMode );
+      */
 }
 
 

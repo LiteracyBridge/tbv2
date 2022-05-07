@@ -494,9 +494,13 @@ void 								audPauseResumeAudio( void ){									// signal playback to request 
       #ifdef _SQUARE_WAVE_SIMULATOR
       if ( pSt.SqrWAVE )  break;    // ignore pause while playTone
       #endif
-       if ( pSt.playbackTyp!=ptMsg ) break;     // ignore pause in prompts
+      // TODO: The comment says "ignore pause in prompts", it also ignored pause in everything else
+      // except content. Consensus is that we do want to pause in prompts (as does TBv1). Do we want
+      // to pause *everything*? Probably. But if there are playback types that we don't want to pause,
+      // handle them here.
+      // if ( pSt.playbackTyp!=ptMsg ) break;     // ignore pause in prompts
     
-      // pausing '
+      // pausing
       haltPlayback();		// shut down device & update timestamps
       pSt.state = pbPaused;
       ledFg( TB_Config->fgPlayPaused );	// blink green: while paused

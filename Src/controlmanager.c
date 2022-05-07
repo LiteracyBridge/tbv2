@@ -470,11 +470,23 @@ static void						changeCSMstate( short nSt, short lastEvtTyp ){
 }
 
 static void						tbTimer( void * eNum ){
-	switch ((int)eNum){
-		case 0:		sendEvent( ShortIdle,  0 );  	break;
-		case 1:		sendEvent( LongIdle,  0 );  	break;
-		case 2:		sendEvent( Timer,  0 );  		break;
-	}
+    switch ((int)eNum){
+        case 0:	sendEvent( ShortIdle,  0 ); break;
+        case 1:
+            // TODO: This feels a little wrong, embedding decisions here based on charging. But both the idle
+            // timers and the event processing are managed here, so that's 2 out of 3.
+            // We may want to build some sort of "Keep Awake" facility that other sub-systems could use to
+            // prevent sleeping. If done well, that would also let us timeout after playing audio, and also
+            // sleep immediately when charging is complete.
+            // Long idle is for going to sleep. Don't sleep while charging, so we can continue to report status.
+            if (isCharging()) {
+                osTimerStart(timers[1], TB_Config->longIdleMS);
+            } else {
+                sendEvent(LongIdle, 0);
+            }
+            break;
+        case 2:	sendEvent( Timer,  0 );     break;
+    }
 }
 
 
@@ -519,8 +531,14 @@ void 									executeCSM( void ){								// execute TBook control state machine
 			case LowBattery:
 			case BattCharging:
 			case BattCharged:
+      case BattMin: // ?? this one
+      case BattMax:
+      case ChargeFault: // ?? this one
+      case LithiumHot: // ?? this one
 			case FilesSuccess:
 			case FilesFail:
+      case BattCharging75:
+      case BattNotCharging:
 				break;
 			case AudioStart:
                 audioIdle = false;

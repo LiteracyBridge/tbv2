@@ -21,32 +21,32 @@ char *  ANms[] = { "aNull",
         "filesTest",
     NULL
 };
-char *	actionNm( Action a ){ return ANms[ (int)a ]; }
+char * actionNm( Action a ){ return ANms[ (int)a ]; }
 
 // MUST MATCH:  typedef Event in tknTable.h  
 // MUST MATCH:  CsmToken.java -- enum TknEvent 
 char *  ENms[] = { 
-		"eNull", 
+    "eNull",
         "Home",     "Circle",     "Plus",     "Minus",     "Tree",     "Lhand",     "Rhand",     "Pot",     "Star",     "Table",     //=10
         "Home__",   "Circle__",   "Plus__",   "Minus__",   "Tree__",   "Lhand__",   "Rhand__",   "Pot__",   "Star__",   "Table__",   //=20
-		"starHome", "starCircle", "starPlus", "starMinus", "starTree", "starLhand", "starRhand", "starPot", "starStar", "starTable", //=30
-		"AudioStart",             "AudioDone",             "ShortIdle",             "LongIdle",             "LowBattery",            //=35 
+        "starHome", "starCircle", "starPlus", "starMinus", "starTree", "starLhand", "starRhand", "starPot", "starStar", "starTable", //=30
+        "AudioStart",             "AudioDone",             "ShortIdle",             "LongIdle",             "LowBattery",            //=35
         "BattCharging",           "BattCharged",           "BattMin",               "BattMax",              "FirmwareUpdate",        //=40
         "Timer",                  "ChargeFault",           "LithiumHot",            "MpuHot",               "FilesSuccess",          //=45
-        "FilesFail",              "anyKey",                "eUNDEF", //=48
+        "FilesFail",              "anyKey",                "BattCharging75",        "BattNotCharging",      "eUNDEF", //=50
     NULL    // end of list marker
 };
 // MUST MATCH:  typedef Event in tknTable.h
-char *  shENms[] = { "eN",
-	"Ho", "Ci", "Pl", "Mi", "Tr", "Lh", "Rh", "po", "St", "ta",
-	"H_", "C_", "P_", "M_", "T_", "L_", "R_", "p_", "S_", "t_",
-	"sH", "sC", "sP", "sM", "sT", "sL", "sR", "sp", "sS", "st",
-	"aS", "aD", "sI", "lI", "bL", "bc", "bC", "b0", "b1", "fU",
-    "Ti", "cF", "LH", "MH", "fS", "fF", "aK", "eU",
-    NULL
-};
-char *	eventNm( Event e )	{ return ENms[ (int)e ];; }
-char *	shEvntNm( Event e )	{ return shENms[ (int)e ];; }
+//char *  shENms[] = { "eN",
+//    "Ho", "Ci", "Pl", "Mi", "Tr", "Lh", "Rh", "po", "St", "ta",
+//    "H_", "C_", "P_", "M_", "T_", "L_", "R_", "p_", "S_", "t_",
+//    "sH", "sC", "sP", "sM", "sT", "sL", "sR", "sp", "sS", "st",
+//    "aS", "aD", "sI", "lI", "bL", "bc", "bC", "b0", "b1", "fU",
+//    "Ti", "cF", "LH", "MH", "fS", "fF", "aK", "eU",
+//    NULL
+//};
+char * eventNm( Event e )	{ return ENms[ (int)e ];; }
+//char *	shEvntNm( Event e )	{ return shENms[ (int)e ];; }
 //
 //
 /***************************   read package_data.txt to get structure & audio files for loaded content  ***********************/

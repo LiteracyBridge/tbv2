@@ -14,6 +14,7 @@ static 	osThreadAttr_t 			thread_attr;
 static  osEventFlagsId_t		mFileOpEventId;								// for signals to fileOpThread
 
 static volatile char				mFileArgPath[ MAX_PATH ];			// communication variable shared with fileOpThread
+
 uint32_t Mp3FilesToConvert = 1;     // start at 1 & decrement at end of counting pass (so >0 until all are converted)
 
 

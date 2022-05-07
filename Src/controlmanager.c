@@ -23,7 +23,9 @@ TBook_t TBook;
 
 osTimerId_t  	timers[3]; 	// ShortIdle, LongIdle, Timer
 void									setCSMcurrState( short iSt );  // set TBook.iCurrSt & dependent fields
-extern bool BootVerboseLog;	
+extern bool     BootVerboseLog;	
+bool            DecodeMP3 = false;  // if set, decode MP3's to Wav before entering CSM
+
 
 // ------------  CSM Action execution
 static void                     clearIdle( ){       // clear timers started by AudioDone to generate shortIdle & longIdle
@@ -258,8 +260,6 @@ void 									USBmode( bool start ){						// start (or stop) USB storage mode
 		logEvt( "exitUSB" );
 //	    NVIC_SystemReset();			// soft reboot?
 		logPowerUp( false );
-		if ( FirstSysBoot )  // should run in background
-			decodeAudio();
 	} 
 }
 
@@ -567,6 +567,7 @@ static void 					eventTest(  ){										// report Events until DFU (pot table)
 }
 
 extern bool BootToUSB;
+extern uint32_t Mp3FilesToConvert;
 void 									initControlManager( void ){				// initialize control manager 	
 	EventRecorderEnable(  evrEA, 	  		TB_no, TBsai_no ); 	// TB, TBaud, TBsai  
 	EventRecorderDisable( evrAOD, 			EvtFsCore_No,   EvtFsMcSPI_No );  //FileSys library 
@@ -599,6 +600,14 @@ void 									initControlManager( void ){				// initialize control manager
 		//setPowerCheckTimer( TB_Config->powerCheckMS );	
         if ( !RunQCTest )
             PowerChecksEnabled = true;
+        
+        if ( DecodeMP3 ){
+            decodeAudio();    // start fileOps thread checking for .mp3 files that haven't been decoded
+            while (true ){
+                if ( Mp3FilesToConvert==0 ) break;
+                tbDelay_ms(100);
+            }
+        }
         
 		for ( int it=0; it<3; it++ ){
 			timers[it] = osTimerNew( tbTimer, osTimerOnce, (void *)it, NULL );

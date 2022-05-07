@@ -14,6 +14,7 @@ static 	osThreadAttr_t 			thread_attr;
 static  osEventFlagsId_t		mFileOpEventId;								// for signals to fileOpThread
 
 static volatile char				mFileArgPath[ MAX_PATH ];			// communication variable shared with fileOpThread
+uint32_t Mp3FilesToConvert = 1;     // start at 1 & decrement at end of counting pass (so >0 until all are converted)
 
 
 static void 	fileOpThread( void *arg );						// forward 
@@ -32,6 +33,7 @@ extern void					initFileOps( void ){								// init fileOps & spawn thread to ha
 		tbErr( "fileOpThread spawn failed" );	
 }
 extern void 				decodeAudio(){									// decode all .mp3 files in /system/audio/ & /package/*/  to .wav 
+    Mp3FilesToConvert = 1;
 	osEventFlagsSet( mFileOpEventId, FILE_DECODE_REQ );		// transfer request to fileOpThread
 }
 
@@ -84,7 +86,7 @@ static void 				encryptCopy( ){
 	FileSysPower( false );  // powerdown SDIO after encrypting recording
 }
 
-static void 				decodeMp3( char *fpath ){			// decode fname (.mp3) & copy to .wav
+/*static void 				decodeMp3( char *fpath ){			// decode fname (.mp3) & copy to .wav
 	int flen = strlen( fpath );
 	fpath[ flen-4 ] = 0;
 	strcat( fpath, ".wav" );
@@ -92,6 +94,7 @@ static void 				decodeMp3( char *fpath ){			// decode fname (.mp3) & copy to .wa
 		fpath[ flen-4 ] = 0;
 		strcat( fpath, ".mp3" );
 		mp3ToWav( fpath );
+        showProgress( "GRG__", 400 );      // decode MP3's
 	} else 
 	  dbgLog( "7 %s already decoded\n", fpath );
 }
@@ -100,50 +103,57 @@ static bool					endsWith( char *nm, char *sfx ){
 	if ( nmlen < slen ) return false;
 	return strcasecmp( nm+nmlen-slen, sfx )==0;
 }
-static void 				scanTree( char *dstpath ){			// scan & decode mp3s in 'path'
+*/
+
+static void 				scanDirForMp3s( char *dir, bool count ){	// scan dir for .mp3 without .wav & decode 
 	fsFileInfo fInfo;
 	fInfo.fileID = 0;
+    char patt[100], path[100];
+    
+    strcpy( patt, dir );
+	strcat( patt, "*.mp3" );    // pattern to search for .mp3 files
 	
-	int dlen = strlen( dstpath );
-	if ( dstpath[dlen-1]!='/' ) 
-		strcat( dstpath, "/" ); 
-	strcat( dstpath, "*" );
-	dlen = strlen( dstpath );
-	
-	while ( ffind( dstpath, &fInfo )==fsOK ){		// scan everything in dir 
-		
-		dstpath[ dlen-1 ] = 0;		// overwrite "*"
-		strcat( dstpath, fInfo.name );
-		
-		if ( fInfo.attrib == 0x10 &&  fInfo.name[0]!='.' ){  // dir other than . or ..
-			scanTree( dstpath );
-		} else if ( endsWith( fInfo.name, ".MP3" ))
-			decodeMp3( dstpath );
-		
-		dstpath[ dlen-1 ] = 0;		// revert to "path/*"
-		strcat( dstpath, "*" );
-	}
+	while ( ffind( patt, &fInfo ) == fsOK ){		// scan mp3s in dir 
+        strcpy( path, dir );
+        strcat( path, fInfo.name );      // "dir/file.mp3"
+        
+        int dlen = strlen( path );
+        path[ dlen-4 ] = 0;                 // "dir/file"
+        strcat( path, ".wav" );         // "dir/file.wav"
+        if ( !fexists( path )){
+            if ( count ){  // 1st pass -- count unconverted files
+                Mp3FilesToConvert++;
+            } else {     // 2nd pass -- do the conversions
+              path[ dlen-4 ] = 0;  
+              strcat( path, ".mp3" );
+              mp3ToWav( path );
+              showProgress( "GRG_", 400 );   // decode MP3's
+            }    
+        }            
+ 	}
 }
-static void 				scanDecodeAudio( ){			// scan audio paths for .mp3 & copy to .wav
-	char path[ MAX_PATH ];
-	strcpy( path, "M0:/" );
-	scanTree( path );
+static void 				scanDecodeAudio( bool count ){			// scan Deployment->AudioPaths->AudPath[0..nPaths] for .mp3 & copy to .wav
+    int nP = Deployment->AudioPaths->nPaths;
+    for ( int i=0; i<nP; i++ )
+       scanDirForMp3s( Deployment->AudioPaths->audPath[i], count );
+    endProgress();
+//	char path[ MAX_PATH ];
+//	strcpy( path, "M0:/" );
+//	scanTree( path );
 }
 
-static void 				fileOpThread( void *arg ){				
-
-	if ( FirstSysBoot )	// on first boot, scan for audio to decode
-		scanDecodeAudio();
-	
+static void 				fileOpThread( void *arg ){					
 	while (true){		
 		uint32_t flags = osEventFlagsWait( mFileOpEventId, FILEOP_EVENTS,  osFlagsWaitAny, osWaitForever );
 		
 		if ( (flags & FILE_ENCRYPT_REQ) != 0 ){
-		//	encryptCopy();
+			encryptCopy();     // only requested if PrivateFeedback == True
 		}
 		
 		if ( (flags & FILE_DECODE_REQ) != 0 ){
-			scanDecodeAudio();
+			scanDecodeAudio( true );  // pass to count .mp3's without .wavs
+            Mp3FilesToConvert--;   // counting pass complete
+            scanDecodeAudio( false );   // this time do the conversions
 		}
 	}
 }

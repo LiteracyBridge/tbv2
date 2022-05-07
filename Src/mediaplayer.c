@@ -29,6 +29,7 @@ osEventFlagsId_t							mMediaEventId;			// for signals to mediaThread
 // current volume, overwritten from CSM config (setVolume)    (external for powermanager)
 volatile int 				        	mAudioVolume		= DEFAULT_VOLUME_SETTING;
 static volatile int 					mAudioSpeed			= 5;			// current speed, NYI
+bool PrivateFeedback                                        = false;
 
 const int MAX_NOTE_CNT = 80;
 static volatile int						mNoteCnt = 0;
@@ -260,7 +261,8 @@ static void 	mediaThread( void *arg ){						// communicates with audio codec for
 		}
 		
 		if ( (flags & MEDIA_SAVE_RECORD) != 0 ){	// R5) request to save recording
-			copyEncrypted( (char *) mRecordFilePath );
+            if ( PrivateFeedback )
+                copyEncrypted( (char *) mRecordFilePath );
 			mRecordFilePath[0] = 0;
 		}
 		

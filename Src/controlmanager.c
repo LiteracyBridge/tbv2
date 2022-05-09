@@ -15,6 +15,8 @@
 
 // TBook Control State Machine
 //extern int 	 								nCSMstates;			// defined in tbook_csm.c
+bool controlManagerReady = false;
+
 
 int				    iPkg = 0;			// current package index 
 Package_t *         currPkg = NULL;	// TBook content package in use
@@ -493,6 +495,7 @@ static void						tbTimer( void * eNum ){
 void 									executeCSM( void ){								// execute TBook control state machine
 	TB_Event *evt;
 	osStatus_t status;
+  controlManagerReady = true;
 	
 	TBook.volume = TB_Config->default_volume;
 	TBook.iSubj = -1; // makes "next subject" go to the first subject.

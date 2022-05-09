@@ -272,8 +272,10 @@ void                      enterStopMode( void ){                    // put STM32
   // disable power Fail interrupt
   int pin = gpio_def[ gPWR_FAIL_N ].pin;
   EXTI->IMR  &= ~( 1 << pin );             // disable the interrupt	
-	
-	ResetGPIO();
+
+    disableKeyInterrupts(KM_HOME);
+
+    ResetGPIO();
 
 	extern uint16_t					KeypadIMR;				// inputmanager.c -- keyboard IMR flags
 

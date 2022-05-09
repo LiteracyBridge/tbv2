@@ -56,7 +56,7 @@ exti10_15 PA15  gTREE     8000
 EXTI_IMR                  87BB
 */
 
-KeyPadKey_arr 			keydef = {  // keypad GPIO in order: kHOME, kCIRCLE, kPLUS, kMINUS, kTREE, kLHAND, kPOT, kRHAND, kSTAR, kTABLE
+KeyPadKey_t keydef[10] = {  // keypad GPIO in order: kHOME, kCIRCLE, kPLUS, kMINUS, kTREE, kLHAND, kPOT, kRHAND, kSTAR, kTABLE
 // static placeholders, filled in by initializeInterrupts
 //	GPIO_ID    key,    port,  	pin,         intq				extiBit		signal		pressed	 down   tstamp dntime
 	{  gHOME,		kHOME,	  NULL, 		0,  				WWDG_IRQn,  	0,			"",					0,	 false,	0,	0  	},
@@ -100,6 +100,31 @@ void 					enableInputs( bool fromThread ){							// check for any unprocessed In
 	}
 	EXTI->IMR |= KeypadIMR;		// re-enable keypad EXTI interrupts
 }						   					
+
+/*
+ * Disables interrupts for keys, prior to sleeping, to limit the keys that can
+ * cause an interrupt. Expected usage is to disable all but House. Before sleeping
+ * it is a very good idea to disable the Bowl, because that will silently boot
+ * to DFU mode, likely causing confusion.
+ *
+ * enum KEYS_MASK keysToRemainEnabled: A mask of KEYS_MASKs for the keys NOT to be
+ *     disabled.
+ */
+void disableKeyInterrupts(enum KEYS_MASK keysToRemainEnabled) {
+    // iterate over the membrane switch (keypad) keys
+    for (KEY k = kHOME; k < kINVALID; k++) {
+        if (((1<<k)&keysToRemainEnabled) == 0) {
+            int pin = keydef[k].pin;
+            int pinBit = 1 << pin;      // bit mask for EXTI->IMR, RTSR, FTSR
+            EXTI->RTSR &= ~pinBit;      // Enable a rising trigger
+            EXTI->FTSR &= ~pinBit;      // Enable a falling trigger
+            EXTI->IMR &= ~pinBit;      // Configure the interrupt mask
+            KeypadIMR &= ~pinBit;
+        }
+    }
+    EXTI->IMR &= ~KeypadIMR;		// disable keypad EXTI interrupts for the specified keys
+}
+
 
 /*bool 					updateKeyState( KEY k ){		// read keypad pin, update keydef[k] if changed, & generate osEvt if UP transition
 	bool keydown = gGet( keydef[k].id ); 
@@ -378,10 +403,10 @@ void 					inputThread( void *arg ){			// converts TB_Key msgs from keypad ISR's 
 		KEY k = transition->k;
 		uint32_t ts = transition->tstamp;
 		bool keydown = transition->down;
-		osMemoryPoolFree( KeyTransition_pool, transition );		
+		osMemoryPoolFree( KeyTransition_pool, transition );
 
-		dbgLog( "A keyTr: %c%c %d %dDn 1:%c 2:%c %c%c \n", 
-                keyNm[k], keydown? 'v':'^', ts, KSt.downCnt, keyNm[KSt.firstDown], keyNm[KSt.secondDown], KSt.multipleDown? '_':'M', KSt.starUsed? '_':'S'	);
+      dbgLog( "A keyTr: %c%c %d %dDn 1:%c 2:%c %c%c \n",
+              keyNm[k], keydown? 'v':'^', ts, KSt.downCnt, keyNm[KSt.firstDown], keyNm[KSt.secondDown], KSt.multipleDown? '_':'M', KSt.starUsed? '_':'S'	);
 		if ( (KSt.keyState[kPOT]!='_') && (KSt.keyState[kHOME]!='_')){
 			KeypadTestActive = !KeypadTestActive;
 			dbgLog("A KeypadTestMode %s \n", KeypadTestActive? "on":"off" );
@@ -583,6 +608,10 @@ void 					sendEvent( Event key, int32_t arg ){	// log & send TB_Event to CSM
 	if ( key==eNull || key==anyKey || key==eUNDEF || (int)key<0 || (int)key>(int)eUNDEF )
 		tbErr( "bad event" );
 	if (TBEvent_pool==NULL) return; //DEBUG
+  if (!controlManagerReady) {
+      dbgLog("enqueue event, csm not ready");
+      return;
+  }
 	dbgEvt( TB_keyEvt, key, arg, 0, 0 );
 	dbgLog( "A Evt: %s %d \n", eventNm(key), arg );
 	
@@ -591,8 +620,12 @@ void 					sendEvent( Event key, int32_t arg ){	// log & send TB_Event to CSM
 	TB_Event *evt = (TB_Event *)osMemoryPoolAlloc( TBEvent_pool, osWaitForever );
 	evt->typ = key;
 	evt->arg = arg;
-	if ( osMessageQueuePut( osMsg_TBEvents, &evt, 0, 0 ) != osOK )	// Priority 0, no wait
-		tbErr( "failed to enQ tbEvent" );
+  osStatus_t result;
+    // send with Priority 0, no wait
+	if ( (result=osMessageQueuePut( osMsg_TBEvents, &evt, 0, 0 )) != osOK ) {
+      printf("failed to enQ tbEvent: %d \n", result);
+      tbErr("failed to enQ tbEvent");
+  }
 }
 void 					keyPadPowerUp( void ){					// re-initialize keypad GPIOs
 	initializeInterrupts();

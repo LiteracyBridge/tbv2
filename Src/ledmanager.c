@@ -75,6 +75,13 @@ void								seqAddShade( ledSeq *seq, ledShade shade, int ms ){				// add ms of 
 	seq->msec[ step ] = ms;
 	seq->nSteps = step+1;
 }
+
+/*
+ * Compile an LED string into a "ledSeq".
+ *
+ * seq:     Pointer to an "ledSeq" object to be filled.
+ * def:     The string to convert. If the string is null or an empty string, simply clears *seq.
+ */
 void								convertSeq( ledSeq *seq, const char *def ){		// fill 'seq' based on def e.g. "R20G100_10"
 	seq->nextStep = 0;
 	seq->shadeStep = 0;
@@ -201,6 +208,12 @@ void								ledThread( void *arg ){
 	}
 }
 //PUBLIC
+
+/*
+ * Sets the "foreground" LED sequence. Displays until cleared.
+ *
+ * def: A string describing the LEDs to show. See convertSeq.
+ */
 void 								ledFg( const char *def ){						// install 'def' as foreground pattern
 	if ( def==NULL || def[0]==0 ){  	// "" => switch to background pattern
 		currSeq = bgSeq;
@@ -215,6 +228,12 @@ void 								ledFg( const char *def ){						// install 'def' as foreground patte
 		osEventFlagsSet( osFlag_LedThr, LED_EVT );		// wakeup for ledThread
 	}
 }
+
+/*
+ * Sets the "background" LED sequence. Until cleared, displays when there is no foreground sequence.
+ *
+ * def: A string describing the LEDs to show. See convertSeq.
+ */
 void								ledBg( const char *def ){						// install 'def' as background pattern
 	dbgLog( "9 ledBg: %s \n", def );
 	if (def==NULL)	// NULL = turn off
@@ -231,9 +250,16 @@ void								ledBg( const char *def ){						// install 'def' as background patter
 		osEventFlagsSet( osFlag_LedThr, LED_EVT );		// wakeup ledThread
 	}
 }
+
+/*
+ * Enable or disable the LedManager.
+ *
+ * bool enable: If true, enable the LED manager.
+ */
 void								EnableLedMngr( bool enable ){
 	enableLedManager = enable;
 }
+
 void 								initLedManager(){				// initialize & spawn LED thread
 	handlePowerEvent( POWER_UP );
 //	registerPowerEventHandler( handlePowerEvent );

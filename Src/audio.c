@@ -576,6 +576,7 @@ void								audLoadBuffs(){																// called on mediaThread to preload a
 }
 
 extern bool BootVerboseLog;
+
 void 								audPlaybackComplete( void ) {									// shut down after completed playback
   int pct;
   haltPlayback();     // updates tsPause & msPlayed
@@ -585,15 +586,15 @@ void 								audPlaybackComplete( void ) {									// shut down after completed 
       pSt.tunePlayed += pSt.nSamples;
   #endif
 
-  ledFg( NULL );				// Turn off foreground LED: no longer playing
   #ifdef _SQUARE_WAVE_SIMULATOR
   if ( pSt.SqrWAVE ){
-	int msTunePlayed = pSt.tsPause - pSt.tsTuneStart;
-	pct = msTunePlayed * 100 / pSt.tuneMsec;
-	logEvtNININI( "tuneDn", "ms", pSt.msPlayed, "pct", pct, "nS", pSt.tunePlayed );
+        int msTunePlayed = pSt.tsPause - pSt.tsTuneStart;
+        pct = msTunePlayed * 100 / pSt.tuneMsec;
+        logEvtNININI( "tuneDn", "ms", pSt.msPlayed, "pct", pct, "nS", pSt.tunePlayed );
   } else
   #endif
   {
+      ledFg( NULL );				// Turn off foreground LED: no longer playing
        pct = 100; //pSt.msPlayed * 100 / pSt.msecLength;
       // complete, so msPlayed == msecLength
       dbgEvt( TB_audDone, pSt.msPlayed, pct, pSt.msPlayed, pSt.msecLength );
@@ -604,9 +605,9 @@ void 								audPlaybackComplete( void ) {									// shut down after completed 
       
       // playback completed, report difference between measured & expected elapsed time
       if ( BootVerboseLog ) logEvtNI("Play_Tim", "dif_ms", pSt.msecLength - pSt.msPlayed );
+      sendEvent( AudioDone, pct );				// end of file playback-- generate CSM event
+      pSt.stats->Finish++;
   }
-  sendEvent( AudioDone, pct );				// end of file playback-- generate CSM event
-  pSt.stats->Finish++;
 }
 
 
@@ -834,7 +835,6 @@ static void 				haltRecord( void ){														// ISR callable: stop audio inp
   pSt.msRecorded += (pSt.tsPause - pSt.tsResume);  		// (tsResume == tsRecord, if never paused)
   dbgEvt( TB_audRecDn, pSt.msRecorded, 0, 0,0 );
 
-  ledFg( NULL );		// cancel fgRecording
   ledFg( TB_Config->fgSavingRec );				// Switch foreground LED to saving
 }
 

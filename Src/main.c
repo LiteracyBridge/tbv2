@@ -66,7 +66,10 @@ char BootKey;
 // calls to DbgPwrDown( cd ):
 //   if cd==BootMode, flash cd on LED & fastPowerDown()
 
-
+// TODO: Put all these global state flags, counters, switches and so forth into a single struct.
+// Segregate all the debugging stuff, and put it inside an "#if DEBUG".
+// uvision doesn't support debug vs release builds (it's a pretty crappy tool), so we'll need to set it manually.
+// Still, it will put us in a better position if we ever do get a real build system.
 bool BootToUSB = false;
 bool BootDebugLoop = false;
 bool BootVerboseLog = false;
@@ -74,12 +77,32 @@ bool BootToQCtest = false;
 bool BootVerbosePower = false;
 bool BootResetLog = false;
 bool BootFormatFileSys = false;
+uint16_t keysDetectedAtBoot = 0;          // Which keys were detected at boot time.
 
 void setBootMode(){	// use key to to select value for BootMode
-	flashInit();			// enable keyboard to decode boot type
-	bool HardwareBoot = gGet( gTABLE ) || gGet( gTREE );
+    GPIO_ID key_gpios[] = {gHOME, gCIRCLE, gPLUS, gMINUS, gTREE, gLHAND, gRHAND, gPOT, gSTAR, gTABLE};
+    flashInit();			// enable keyboard to decode boot type
+    for (int i=0; i<=kTABLE; i++) {
+        if (gGet(key_gpios[i])) keysDetectedAtBoot |= 1<<i;
+    }
+    // Nothing other than Tree or Table.
+    bool hwCleanBoot = (keysDetectedAtBoot & ~(1<<kTREE|1<<kTABLE)) == 0;
+    bool hwPlusBoot = (keysDetectedAtBoot & ~(1<<kTREE|1<<kTABLE)) == 1<<kPLUS;
+    bool hwStarBoot = (keysDetectedAtBoot & ~(1<<kTREE|1<<kTABLE)) == 1<<kSTAR;
+    bool HardwareBoot = gGet( gTABLE ) || gGet( gTREE );
     char prog[20] = "R_G_";
-    
+
+    bool home_key = gGet( gHOME );
+    bool bowl_key = gGet( gPOT );
+    bool table_key = gGet( gTABLE );
+    bool plus_key = gGet( gPLUS );
+    bool minus_key = gGet( gMINUS );
+    bool lhand_key = gGet( gLHAND );
+    bool star_key = gGet( gSTAR );
+    bool circle_key = gGet( gCIRCLE );
+    bool rhand_key = gGet( gRHAND );
+    bool tree_key = gGet( gTREE );
+
     if ( HardwareBoot && gGet( gSTAR )){  // Star Hardware Boot--  BootMode selection loop
      
         while (true){
@@ -87,7 +110,7 @@ void setBootMode(){	// use key to to select value for BootMode
                 sprintf( prog, "_%c_%c_%c__", BootToUSB? 'R':'_', BootResetLog? 'R':'_', BootFormatFileSys? 'R':'_' );
             else if ( BootToQCtest || BootVerboseLog || BootVerbosePower )
                 sprintf( prog, "_%c_%c_%c__", BootToQCtest? 'G':'_', BootVerboseLog? 'G':'_', BootVerbosePower? 'G':'_' );
-            showProgress( prog, 200 );    // select boot keys
+            showProgress( prog, 100 );    // select boot keys
     
             if ( gGet( gPLUS  )) BootToUSB = true;        // boot directly to USB
             if ( gGet( gMINUS )) BootResetLog = true;     // reset Log (skip copy of last log)
@@ -101,6 +124,8 @@ void setBootMode(){	// use key to to select value for BootMode
             if ( gGet( gTABLE ))  break;
         }
         endProgress();
+    } else if (hwPlusBoot) {
+      BootToUSB = true;
     }
 /*        
 	BootMode = 0;  BootKey = ' ';

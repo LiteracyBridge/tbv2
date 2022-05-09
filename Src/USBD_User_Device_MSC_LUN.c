@@ -255,7 +255,6 @@ void	 	USBD_MSC0_Initialize( void ){										// callback from USBD_Initialize t
   for ( int i=0; i<nLUNs; i++ )
 		initLUN( i );
 	usbProvidingMassStorage = true;
-	ledFg( NULL );		// stop USBconnect
 	ledFg( TB_Config->fgUSB_MSC );			// connected
 }
 void 		USBD_MSC0_Uninitialize( void ){									// callback from USBD_Uninitialize to de-init all Logical Units of the USB MSC class instance.

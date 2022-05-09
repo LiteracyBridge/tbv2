@@ -34,6 +34,17 @@
 #include "powermanager.h"      // registerPowerEventHandler
 #include "inputMgr.h"			// sendEvent
 
+// global state
+extern bool BootToUSB;
+extern bool BootDebugLoop;
+extern bool BootVerboseLog;
+extern bool BootToQCtest;
+extern bool BootVerbosePower;
+extern bool BootResetLog;
+extern bool BootFormatFileSys;
+
+extern bool controlManagerReady;
+
 
 // global utilities
 // tbutil.c
@@ -257,7 +268,6 @@ typedef  struct {
 	KEY 					LongPressKey;			// key reported as long press -- shared ISR & thread
 */
 } KeyPadState_t;
-typedef KeyPadKey_t 	 KeyPadKey_arr[ NUM_KEYPADS ];		// so Dbg knows array size
 
 typedef struct {
 	bool 				Active;

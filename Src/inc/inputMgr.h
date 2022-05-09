@@ -6,7 +6,19 @@
 // TalkingBook keypad has 10 keys, each connected to a line of the keypad cable
 //  plus kINVALID for no key value, & kTIMER for long press timer elapsed
 typedef enum {	kHOME=0, kCIRCLE, kPLUS, kMINUS, kTREE, kLHAND, kRHAND, kPOT, kSTAR, kTABLE, kINVALID, kTIMER } KEY;
-
+// Mask bits for keys, so they can be or'd together.
+typedef enum KEYS_MASK {
+    KM_HOME = 1 << kHOME,
+    KM_CIRCLE = 1 << kCIRCLE,
+    KM_PLUS = 1 << kPLUS,
+    KM_MINUS = 1 << kMINUS,
+    KM_TREE = 1 << kTREE,
+    KM_LHAND = 1 << kLHAND,
+    KM_RHAND = 1 << kRHAND,
+    KM_POT = 1 << kPOT,
+    KM_STAR = 1 << kSTAR,
+    KM_TABLE = 1 << kTABLE
+} KEYS_MASK_T;
 typedef struct	{	// KeyPadKey -- assignments to GPIO pins, in inputManager.cpp
 	GPIO_ID				id;			// idx in gpio_def
 	KEY						key;		// KEYPAD key connected to this line
@@ -23,6 +35,8 @@ typedef struct	{	// KeyPadKey -- assignments to GPIO pins, in inputManager.cpp
 	uint32_t			dntime;		// num tbTicks it was down
 
 } KeyPadKey_t;
+typedef KeyPadKey_t 	 KeyPadKey_arr[ 10 ];		// so Dbg knows array size
+extern KeyPadKey_t keydef[10];
 
 /*typedef struct { 	// KeyState --	to keep track of the state of a keypad GPIO line-- SET/RESET and time of last change
 	KEY					key;
@@ -64,6 +78,7 @@ inline Event 	toLongEvt(  KEY k ){	return (Event)( (int)k + Home__ );  }
 inline Event 	toStarEvt(  KEY k ){	return (Event)( (int)k + starHome );  }
 
 extern void 	initInputManager( void );
+extern void   disableKeyInterrupts( enum KEYS_MASK keysToRemainEnabled );
 extern void 	keyPadPowerDown( void );						// shut down keypad GPIOs
 extern void 	keyPadPowerUp( void );							// re-initialize keypad GPIOs
 extern void 	sendEvent( Event, int32_t );

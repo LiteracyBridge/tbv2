@@ -844,9 +844,10 @@ void            cdc_RecordEnable( bool enable ){
      // 1.48, 1.49, 1.50,  1.46,  1.47, 0.20, 0.61, 0.83, 0.88, 0.83
      // in_p, in_m,  in_cm,bias,  pga,  aosr, prb,  targ, maxg, vol     DbgRec
   // pga 1.47:  (0x08=4dB), 0x00=0dB, 0x10=8dB, 0x20=16dB 0x40=32dB 0x50=40dB 0x60=48dB 0x70=56dB 0x77=59.5dB
-  //                              pga                     maxg
-      { 0x40, 0x10,  0x00, 0x0A,  0x77, 0x40, 0x04, 0x80, 0x58, 0x00 }, // 0  pga=59.5dB, AGCtarg=-5.5dB maxGain=44dB vol=0dB
-
+  //                              pga                     maxg  vol
+      { 0x40, 0x10,  0x00, 0x0A,  0x70, 0x40, 0x04, 0x80, 0x58, 0x00 }, // 18 pga=56dB, maxG=44dB, vul=0dB
+  //  { 0x40, 0x10,  0x00, 0x0A,  0x77, 0x40, 0x04, 0x80, 0x58, 0x00 }, // 0  pga=59.5dB, AGCtarg=-5.5dB maxGain=44dB vol=0dB
+  /*
       { 0x40, 0x10,  0x00, 0x0A,  0x70, 0x40, 0x04, 0x80, 0x50, 0x10 }, // 1  pga=56dB, AGCtarg=-5.5dB maxGain=40dB vol=8dB
       { 0x40, 0x10,  0x00, 0x0A,  0x68, 0x40, 0x04, 0x80, 0x50, 0x10 }, // 2  pga=52dB, AGCtarg=-5.5dB maxGain=40dB vol=8dB
       { 0x40, 0x10,  0x00, 0x0A,  0x60, 0x40, 0x04, 0x80, 0x50, 0x10 }, // 3  pga=48dB, AGCtarg=-5.5dB maxGain=40dB vol=8dB
@@ -859,9 +860,21 @@ void            cdc_RecordEnable( bool enable ){
       { 0x40, 0x10,  0x00, 0x0A,  0x77, 0x40, 0x04, 0x80, 0x5C, 0x00 }, // 8  pga=59.5dB, AGCtarg=-5.5dB maxGain=48dB
   // vol  0.83: 0x68=-12dB, 0x78=-6dB, 0x00=0dB, 0x10=8dB, 0x20=16dB  0x28=20dB
   //                                                            vol
-      { 0x40, 0x10,  0x00, 0x0A,  0x77, 0x40, 0x04, 0x80, 0x58, 0x10 }, // 8  pga=59.5dB, AGCtarg=-5.5dB maxGain=44dB vol=8dB
-      { 0x40, 0x10,  0x00, 0x0A,  0x77, 0x40, 0x04, 0x80, 0x58, 0x20 }, // 9  pga=59.5dB, AGCtarg=-5.5dB maxGain=44dB vol=16dB
-      { 0x40, 0x10,  0x00, 0x0A,  0x77, 0x40, 0x04, 0x80, 0x58, 0x28 }, //10  pga=59.5dB, AGCtarg=-5.5dB maxGain=44dB vol=20dB
+      { 0x40, 0x10,  0x00, 0x0A,  0x77, 0x40, 0x04, 0x80, 0x58, 0x10 }, // 9  pga=59.5dB, AGCtarg=-5.5dB maxGain=44dB vol=8dB
+      { 0x40, 0x10,  0x00, 0x0A,  0x77, 0x40, 0x04, 0x80, 0x58, 0x20 }, // 10  pga=59.5dB, AGCtarg=-5.5dB maxGain=44dB vol=16dB
+      { 0x40, 0x10,  0x00, 0x0A,  0x77, 0x40, 0x04, 0x80, 0x58, 0x28 }, // 11  pga=59.5dB, AGCtarg=-5.5dB maxGain=44dB vol=20dB
+  //                              pga                     maxg
+      { 0x40, 0x10,  0x00, 0x0A,  0x68, 0x40, 0x04, 0x80, 0x50, 0x00 }, // 12 pga=52dB, maxG=40dB
+      { 0x40, 0x10,  0x00, 0x0A,  0x68, 0x40, 0x04, 0x80, 0x58, 0x00 }, // 13 pga=52dB, maxG=44dB
+      { 0x40, 0x10,  0x00, 0x0A,  0x68, 0x40, 0x04, 0x80, 0x60, 0x00 }, // 14 pga=52dB, maxG=48dB
+      { 0x40, 0x10,  0x00, 0x0A,  0x68, 0x40, 0x04, 0x80, 0x68, 0x00 }, // 15 pga=52dB, maxG=52dB
+  //                              pga                           vol
+      { 0x40, 0x10,  0x00, 0x0A,  0x60, 0x40, 0x04, 0x80, 0x58, 0x00 }, // 16 pga=48dB, maxG=44dB, vul=0dB
+      { 0x40, 0x10,  0x00, 0x0A,  0x68, 0x40, 0x04, 0x80, 0x58, 0x00 }, // 17 pga=52dB, maxG=44dB, vul=0dB
+      { 0x40, 0x10,  0x00, 0x0A,  0x70, 0x40, 0x04, 0x80, 0x58, 0x00 }, // 18 pga=56dB, maxG=44dB, vul=0dB
+      { 0x40, 0x10,  0x00, 0x0A,  0x60, 0x40, 0x04, 0x80, 0x58, 0x10 }, // 19 pga=48dB, maxG=44dB, vul=8dB
+      { 0x40, 0x10,  0x00, 0x0A,  0x68, 0x40, 0x04, 0x80, 0x58, 0x10 }, // 20 pga=52dB, maxG=44dB, vul=8dB
+      { 0x40, 0x10,  0x00, 0x0A,  0x70, 0x40, 0x04, 0x80, 0x58, 0x10 }, // 21 pga=56dB, maxG=44dB, vul=8dB
 
   /*
   // targ 0.86: 0x00=AGCoff, 0x80=targ -5.5dB, 0xA0=-10dB, 0xC0=-14dB, 0xD0=-17dB, 0xE0=-20dB, 0xF0=-24dB
@@ -915,9 +928,8 @@ void            cdc_RecordEnable( bool enable ){
   */
     };
     const int MAX_OPTS = sizeof(opts) / sizeof(recP);
-
-    if ( RecDBG < 0 ) RecDBG = 0;
-    if ( RecDBG >= MAX_OPTS ) RecDBG = MAX_OPTS-1;
+    if ( RecDBG < 0 ) RecDBG = MAX_OPTS-1;
+    if ( RecDBG >= MAX_OPTS ) RecDBG = 0;
     recP RP = opts[ RecDBG ];
 
     aicSetReg( P0_R53_DOUT_Pin_Control, 0x02 );     // because Marc specified it-- enable bus-keeper?
@@ -952,11 +964,15 @@ void            cdc_RecordEnable( bool enable ){
     //# Microphone bias voltage (MICBIAS) level can be used to change the Microphone Sensitivity
     aicSetReg( P0_R88_AGC_MAX_Gain,       RP.maxg ); //0x50 );  // P0_R88: D6_0=101 0000: ACG maximum gain = 40dB
 
-    //# Attack time=864/Fs
-    aicSetReg( P0_R89_AGC_Attack_Time,    0x68 ); // P0_R89: D7_3=0110 1: AGC attack time = 13 � (32 / fS) ( 13*32=416 not 864? )
+    // Guidance on the AGC attack and decay time would be very helpful. The original values caused recording to ramp
+    // up over a couple of seconds, so the start of the recordings were generally cut off. Zero worked better in that
+    // regard, and seemed to sound OK, but a really short AGC easily leads to rapid AGC changes. These values were
+    // arrived by trial and error; they seem OK, but they're really just plucked out of thin air.
+    //# Attack time=864/Fs   NOTE: the original recommendation was 0x68
+    aicSetReg( P0_R89_AGC_Attack_Time,    0x04 ); // P0_R89: D7_3=0110 1: AGC attack time = 13 � (32 / fS) ( 13*32=416 not 864? )
     //                                                       D2_0=000: Multiply factor for the programmed AGC attack time = 1
     //# Decay time=22016/Fs  NOTE: the original recommendation was 0x80, 21 x ...
-    aicSetReg( P0_R90_AGC_Decay_Time,     0x00 ); // P0_R90: D7_3=0000 0: AGC decay time = 1 x (512 / fS)
+    aicSetReg( P0_R90_AGC_Decay_Time,     0x04 ); // P0_R90: D7_3=0000 0: AGC decay time = N+1 x (512 / fS)
     //                                                       D2_0=000: Multiply factor for the programmed AGC decay time = 1
 
     //# Noise debounce 0 ms
@@ -979,6 +995,7 @@ void            cdc_RecordEnable( bool enable ){
     showCdcRegs( false, false );
 
   } else {
+      // Disable
     const int MAX_ADC_PWR_WAIT = 10000;
     // power down the ADC and the MIC
     aicSetReg( P0_R81_ADC_Digital_Mic,    0x00 ); // P0_R81: Rst  D7= 0: ADC channel is powered down.

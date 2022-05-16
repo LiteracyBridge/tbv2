@@ -18,7 +18,7 @@ const int nSvBuffs 					= N_AUDIO_BUFFS;	// max buffers used in pSt.SvBuff[] whi
 
 const int MIN_AUDIO_PAD			= 37;							// minimum 0-padding samples at end of file, to clear codec pipeline before powering down
 
-const int RECORD_SAMPLE_RATE = 8000;					// AIC3100  7.3.8.2:  ADC, Mono, 8 kHz, DVDD = 1.8 V, AVDD = 3.3 V  AOSR=128,  PRB_R4 (example)
+const int RECORD_SAMPLE_RATE = 16000;					// AIC3100  7.3.8.2:  ADC, Mono, 8 kHz, DVDD = 1.8 V, AVDD = 3.3 V  AOSR=128,  PRB_R4 (example)
 const int RECORD_SEC 				= 30;
 const int WAV_DATA_SIZE			= RECORD_SAMPLE_RATE * 2 * RECORD_SEC; 		// 30sec at 8K 16bit samples
 

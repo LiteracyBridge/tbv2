@@ -116,12 +116,13 @@
     stWait:         {                                                           CGroups:[ whenAwake, whenNav, whenIdle ] },
     stSleepy:       { Actions: [ bgLED(O_9), saveSt(1), setTimer(5000) ],       CGroups:[ whenAwake ], anyKey: stUnSleepy, Timer: stGoSleep },
     stUnSleepy:     { Actions: [ bgLED(bgPulse), goSavedSt(1) ],                CGroups:[ whenAwake ] },
-    stGoSleep:      { Actions: [ playTune(H/+), bgLED(R),  setTimer(1000) ],    CGroups:[ whenSleeping ], Timer: stFallAsleep },
+    stGoSleep:      { Actions: [ playTune(H/+), bgLED(_), LED(R), setTimer(1000) ], CGroups:[ whenSleeping ], Timer: stFallAsleep },
     stFallAsleep:   { Actions: [ powerDown ],                                   CGroups:[ whenSleeping ] },
 
     stPlayLouder:   { Actions: [ volAdj( 1),  goPrevSt ],                       CGroups:[ whenAwake, whenPlaying ] },
     stPlaySofter:   { Actions: [ volAdj(-1),  goPrevSt ],                       CGroups:[ whenAwake, whenPlaying ] },
-    stPlayPause:    { Actions: [ saveSt( 2),  setTimer(8000), pausePlay ],      CGroups:[ whenAwake, whenPlaying, whenNav, whenPlayPaused ], Timer:stGoSleep },
+    # It would be nice to reference "long idle" here.
+    stPlayPause:    { Actions: [ saveSt( 2),  setTimer(180000), pausePlay ],    CGroups:[ whenAwake, whenPlaying, whenNav, whenPlayPaused ], Timer:stSleepy },
     stPlayResume:   { Actions: [ resumePlay,  goSavedSt(2) ],                   CGroups:[ whenAwake, whenPlaying, whenNav ] },
     stPlayJumpBack: { Actions: [ posAdj(-7), goPrevSt ],                        CGroups:[ whenAwake, whenPlaying, whenNav ] },
     stPlayJumpFwd:  { Actions: [ posAdj(60), goPrevSt ],                        CGroups:[ whenAwake, whenPlaying, whenNav ] },
@@ -156,8 +157,8 @@
     stReviewPaused:     { Actions: [ saveSt(3), pausePlay ],                    CGroups:[ whenAwake, reviewNav, whenReviewPaused ] },
     stReviewResumed:    { Actions: [ resumePlay, goSavedSt(3) ],                CGroups:[ whenAwake, reviewNav, whenReviewing ] },
 
-    stEndRecording:     { Actions: [ saveRec, LED(_), goSavedSt(2) ] },
-    stEndRecordingHome: { Actions: [ saveRec, setTimer(100) ],                  Timer: stWakeup },
+    stEndRecording:     { Actions: [ saveRec(sv), LED(_), goSavedSt(2) ] },
+    stEndRecordingHome: { Actions: [ saveRec(sv), setTimer(100) ],              Timer: stWakeup },
 
 
     stIdleLouder:   { Actions: [ volAdj( 1), playSys(0),  goPrevSt ],           CGroups:[ whenAwake, whenPlaying ] },

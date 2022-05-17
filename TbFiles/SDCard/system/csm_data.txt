@@ -1,5 +1,5 @@
-// TB CSM 2022-04-27: V20 One touch recording
-org.amplio.CSMcompile 8(2021-10-15) from C:\Users\bill\workspace\CSMcompile\..\tbv2\TbFiles\SDCard\system\control_def.txt of 2022-05-16 15:41:48
+// TB CSM 2022-05-17: V22 add explicit definition of LED strings used in firmware, no Orange in fgSavingRec & fgUSB_MSC
+org.amplio.CSMcompile 9(2022-5-16) from C:\Users\geneb\Documents\CSMcompile\..\tbv2_test\TbFiles\SDCard\system\control_def.txt of 2022-05-17 11:17:21
 4
 180000
 5000
@@ -9,19 +9,19 @@ org.amplio.CSMcompile 8(2021-10-15) from C:\Users\bill\workspace\CSMcompile\..\t
 0
 1
 system/audio
-_49G
-G!
-G2_3!
-R!
-R2_3!
-O!
-G3_3G3
-R3_3R3
-O5o5!
-R8_2R8_2R8_20!
-_3R3_3R3_3R3_5!
-G5g5!
-G_3G_3G_9G_3G_9G_3
+"_49G"
+"G!"
+"G2_3!"
+"R!"
+"R2_3!"
+"R_g_!"
+"G3_3G3"
+"R3_3R3"
+"R5_5G5_5!"
+"R8_2R8_2R8_20!"
+"_3R3_3R3_3R3_5!"
+"G5g5!"
+"G_3G_3G_9G_3G_9G_3"
 9
 10
 11

@@ -173,13 +173,12 @@ void									startRecAudio( char *arg ){         	// record user message into te
 		return;
 	} 
 	char path[MAX_PATH];
-    Subject_t * subj = gSubj( TBook.iSubj );
-	int mCnt = 0;
-	char * fNm = logMsgName( path, subj->subjName, TBook.iSubj, TBook.iMsg, ".wav", &mCnt ); //".ogg" );		// build file path for next audio msg for S<iS>M<iM>
-	logEvtNSNINI( "Record", "Subj", subj->subjName, "iM", TBook.iMsg, "cnt", mCnt );
+  Subject_t * subj = gSubj( TBook.iSubj );
+  int mCnt = makeAuxFileName(path, AUX_FILE_RECORDING);
+	logEvtFmt( "Record", "Subj: %s, ipkg: %d, ipl: %d, im: %d, uniq: %d", subj->subjName, iPkg, TBook.iSubj, TBook.iMsg, mCnt );
 	MsgStats *stats = loadStats( subj->subjName, TBook.iSubj, TBook.iMsg );	// load stats for message
     clearIdle();
-	recordAudio( fNm, stats );
+	recordAudio( path, stats );
 }
 
 
@@ -197,16 +196,23 @@ void									saveRecAudio( char *arg ){              // encrypt user message .wa
 	} 
 }
 
+/**
+ * Write the given text to a .txt file in the recordings directory. Filename based on current
+ * playlist and message.
+ * @param txt The text to be written.
+ */
 void									saveWriteMsg( char *txt ){				// save 'txt' in Msg file
-    Subject_t * subj = gSubj( TBook.iSubj );
+  char *subjName = TBook.iSubj>=0 ? gSubj(TBook.iSubj)->subjName : "-no-subject-";
 	char path[MAX_PATH];
-	int mCnt = 0;
-	char * fNm = logMsgName( path, subj->subjName, TBook.iSubj, TBook.iMsg, ".txt", &mCnt );		// build file path for next text msg for S<iS>M<iM>
-	FILE* outFP = tbOpenWrite( fNm ); //fopen( fNm, "w" );
+	int mCnt = makeAuxFileName(path, AUX_FILE_MESSAGE);
+	FILE* outFP = tbOpenWrite( path ); //fopen( fNm, "w" );
 	int nch = fprintf( outFP, "%s\n", txt );
-	tbCloseFile( outFP );  //int err = fclose( outFP ); 
-	dbgEvt( TB_wrMsgFile, nch, 0, 0, 0 );
-	logEvtNSNININS( "writeMsg", "Subj", subj->subjName, "iM", TBook.iMsg, "cnt", mCnt, "msg", txt );
+	tbCloseFile( outFP );  //int err = fclose( outFP );
+    saveAuxProperties( path );
+
+    dbgEvt( TB_wrMsgFile, nch, 0, 0, 0 );
+   logEvtFmt( "writeMsg", "Subj: %s, ipkg: %d, ipl: %d, im: %d, uniq: %d, msg: %s",
+              subjName, iPkg, TBook.iSubj, TBook.iMsg, mCnt, txt );
 }
 
 void 									QCfilesTest( char * arg ){					// write & re-read system/qc_test.txt -- gen Event FilesSuccess if identical, or FilesFail if not

@@ -66,6 +66,9 @@ char BootKey;
 // calls to DbgPwrDown( cd ):
 //   if cd==BootMode, flash cd on LED & fastPowerDown()
 
+// un-define this, or define as 0 for a release build. Note that uvision has no concept of debug vs release builds.
+#define DEBUG 1
+
 // TODO: Put all these global state flags, counters, switches and so forth into a single struct.
 // Segregate all the debugging stuff, and put it inside an "#if DEBUG".
 // uvision doesn't support debug vs release builds (it's a pretty crappy tool), so we'll need to set it manually.
@@ -85,25 +88,18 @@ void setBootMode(){	// use key to to select value for BootMode
     for (int i=0; i<=kTABLE; i++) {
         if (gGet(key_gpios[i])) keysDetectedAtBoot |= 1<<i;
     }
-    // Nothing other than Tree or Table.
+    // Nothing other than Tree and/or Table. Whether either or both of Tree or Table are still
+    // pressed after a Tree+Table boot is not deterministic.
     bool hwCleanBoot = (keysDetectedAtBoot & ~(1<<kTREE|1<<kTABLE)) == 0;
+    // Tree and/or Table + nothing else but Plus, etc.
     bool hwPlusBoot = (keysDetectedAtBoot & ~(1<<kTREE|1<<kTABLE)) == 1<<kPLUS;
     bool hwStarBoot = (keysDetectedAtBoot & ~(1<<kTREE|1<<kTABLE)) == 1<<kSTAR;
-    bool HardwareBoot = gGet( gTABLE ) || gGet( gTREE );
+#if DEBUG
+    bool hwMinusBoot = (keysDetectedAtBoot & ~(1<<kTREE|1<<kTABLE)) == 1<<kMINUS;
+#endif
     char prog[20] = "R_G_";
 
-    bool home_key = gGet( gHOME );
-    bool bowl_key = gGet( gPOT );
-    bool table_key = gGet( gTABLE );
-    bool plus_key = gGet( gPLUS );
-    bool minus_key = gGet( gMINUS );
-    bool lhand_key = gGet( gLHAND );
-    bool star_key = gGet( gSTAR );
-    bool circle_key = gGet( gCIRCLE );
-    bool rhand_key = gGet( gRHAND );
-    bool tree_key = gGet( gTREE );
-
-    if ( HardwareBoot && gGet( gSTAR )){  // Star Hardware Boot--  BootMode selection loop
+    if ( hwStarBoot ) {
      
         while (true){
             if ( BootToUSB || BootResetLog || BootFormatFileSys )
@@ -127,28 +123,11 @@ void setBootMode(){	// use key to to select value for BootMode
     } else if (hwPlusBoot) {
       BootToUSB = true;
     }
-/*        
-	BootMode = 0;  BootKey = ' ';
-  if ( gGet( gSTAR ))		      { BootMode = 1;  BootKey = 'S'; BootToQCtest = true; }
-	else if ( gGet( gLHAND ))		{ BootMode = 2;  BootKey = 'L'; BootVerboseLog = true; }
-	else if ( gGet( gRHAND ))		{ BootMode = 5;  BootKey = 'R'; BootVerbosePower = true; }
-	else if ( gGet( gCIRCLE ))	{ BootMode = 6;  BootKey = 'C'; }  // Circle restart
-	else if ( gGet( gHOME ))		{ BootMode = 7;  BootKey = 'H'; }  // Home restart
-  else if ( gGet( gMINUS ))		{
-      // TODO: this is a bit ad-hoc. We should have an enum or #defines for all of these modes.
-      if ( gGet( gPLUS )) {
-          BootMode = 9;
-          BootKey = '0';    // "plus" and "minus" cancel each other out?
-      } else {
-          BootMode = 3;
-          BootKey = 'M';
-      }
-      BootDebugLoop = true;
-  } else if ( gGet( gPLUS ))		{ BootMode = 4;  BootKey = 'P'; BootToUSB = true; }
-
-  if ( BootMode != 0 && BootMode != 6 && BootMode != 7 )    // no flash for no keys, Boot-Circle or Boot-Home -- normal resume keys
-      flashCode( BootMode );
-      */
+#if DEBUG
+    else if (hwMinusBoot) {
+        BootDebugLoop = true;
+    }
+#endif
 }
 
 
@@ -177,10 +156,6 @@ int  										main( void ){
 //	gConfigI2S( gMCO2 );  // TBookV2B 	{ gMCO2,					"PC9|0"		},  // DEBUG: MCO2 for external SystemClock/4 on PC9
 
   initPrintf(  TBV2_Version );
-//    if ( BootKey=='P' ){    // PLUS => tbook with no OS -> debugLoop
-//		talking_book( NULL );   // call without OS
-//	}
-	
 	initIDs();
 
 	osKernelInitialize();                 // Initialize CMSIS-RTOS

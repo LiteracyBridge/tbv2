@@ -32,6 +32,7 @@ GPIO_ID keyDown( ){
 }
 extern int 		RecDBG;			                    // defined in ti_aic3100.c
 extern void 	debugLoop( bool autoUSB );			// called if boot-MINUS, no file system,  autoUSB => usbMode
+extern void   preloadCSM( void );             // So we can get TB_Config even when no CSM.
 extern char * fsDevs[];
 extern int    fsNDevs;
 
@@ -63,7 +64,7 @@ int dbgIdx = 0;				// file index for current value of RecDBG
 void CheckRecording(){   // check for dbgLoop ongoing recording
 	if ( audGetState()==Recording ){ 
 		int msec = tbTimeStamp()-ts_recStart;
-		if (msec > 8000){
+		if (msec > 5000){
 			audRequestRecStop();
 			dbgLog(" RecStop\n");
 			while ( audGetState() != Ready )
@@ -122,7 +123,7 @@ void setCodecFreq( int idx ){
 	int speeds[] = {  0, 8000, 11025, 12000,  16000,  22050,  24000,  32000,  44100,  48000 };
 	int freq = speeds[ (idx % 10) ]; 
 	cdc_SetMasterFreq( freq ); 
-	cdc_SetVolume(5); 
+	cdc_SetVolume(DEFAULT_VOLUME_SETTING);
 	cdc_SpeakerEnable( true );
 	cdc_SetMute( false );
 	dbgLog( " Cir: setFreq %d \n", freq );	
@@ -176,6 +177,11 @@ extern int RecDBG;
 void debugLoop( bool autoUSB ){			// called if boot-MINUS, no file system,  autoUSB => usbMode
 	if ( fsNDevs==0 ) dbgLog( " no storage avail \n" );
 	else dbgLog( " no TBook on %s \n", fsDevs[0]  );
+  // Depending how we got here, the CSM data may not have been loaded.
+  // We don't need the CSM, but we do need some of the configuration items.
+    if (TB_Config == NULL) {
+        preloadCSM();
+    }
 
 	int ledCntr = 0; //, LEDpauseCnt = 0;
 //	bool inTestSequence = false;
@@ -209,13 +215,14 @@ void debugLoop( bool autoUSB ){			// called if boot-MINUS, no file system,  auto
 				break;
 			
 			case gPLUS:
+          // If out of range, cdc_RecordEnable will wrap it.
 				RecDBG++;
 				dbgLog( " + DBG: %d \n", RecDBG );
 				dbgIdx = 0;
 				break;
 			
 			case gMINUS:
-				if (RecDBG>0) RecDBG--;	
+				RecDBG--;
 				dbgLog( " - DBG: %d \n", RecDBG ); 
 				dbgIdx = 0; 
 			break;

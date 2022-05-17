@@ -145,9 +145,11 @@ void talking_book( void  *tbAttr ) {		// talking book initialization & control m
 		if ( BootToQCtest || !fexists( TBP[ pQC_PASS ] )){
 			RunQCTest = true;
 		}
-		
-    if ( BootDebugLoop )	
-			debugLoop( true );	// if Minus boot -- go straight to USB mode
+
+      if (BootDebugLoop) {
+          // true: straight to USB mode; false: not straight to USB
+          debugLoop(false);
+      }
 	}
 
 

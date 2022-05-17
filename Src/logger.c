@@ -34,6 +34,11 @@ const char *		logFilePatt = "M0:/log/tbLog_%d.txt";			// file name of previous l
 
 const int				MAX_EVT_LEN1 = 32, MAX_EVT_LEN2 = 64;
 
+// Constants for auxillary file names
+const char *   auxFilePrefixes[] = {"uf", "msg"};
+const char *   auxFileExtensions[] = {".wav", ".txt"};
+
+
 extern fsTime               lastRTCinLog;
 extern bool BootToUSB;
 extern bool BootDebugLoop;
@@ -391,29 +396,74 @@ static char *		statFNm( const char * nm, short iS, short iM ){		// INTERNAL: fil
 	sprintf( statFileNm, "%sP%d_%s_S%d_M%d.stat", TBP[ pSTATS_PATH ], iPkg, nm, iS, iM );
 	return statFileNm;
 }
-int							fileMatchNext( const char *fnPatt ){			// return next unused value for file pattern of form "xxxx_*.xxx"
-	fsFileInfo fAttr;
-	int cnt = 0;
-	fAttr.fileID = 0;
-	while ( ffind( fnPatt, &fAttr ) == fsOK ){			// scan all files matching pattern
-		char * pCnt = strrchr( fAttr.name, '_' )+1;   // ptr to digits after rightmost _
-		short v = 0;
-		while ( isdigit( *pCnt )){ 
-			v = v*10 + (*pCnt-'0'); 
-			pCnt++;
-		}
-		if ( v >= cnt ) cnt = v+1;  // result is 1 more than highest value found
-	}
-	return cnt;
+
+/**
+ * Given a pattern of the form "xxxx_*.xxxx", return the next unused value.
+ * Gaps are ignored, and the next value greater than the highest value found is
+ * returned. If no matching files are found, returns 0.
+ * @param fnPatt Search pattern of filenames for which to search.
+ * @return the next suffix greater than the largest suffix found, 0 if none found.
+ */
+int							fileMatchNext( const char *fnPatt ) {
+    fsFileInfo fInfo;
+    fInfo.fileID = 0;
+    int nextSuffix = 0;
+
+    FileSysPower( true );
+    while ( ffind(fnPatt, &fInfo) == fsOK) {
+        // uniqueness counter is digits after rightmost _
+        char *pSep = strrchr(fInfo.name, '_');
+        if (pSep) {
+            int v = atoi(pSep + 1);
+            if (v >= nextSuffix) nextSuffix = v + 1;
+        }
+    }
+    return nextSuffix;
 }
-char *					logMsgName( char *path, const char * sNm, short iSubj, short iMsg, const char *ext, int *pcnt ){			// build & => file path for next msg for Msg<iPkg>_<sNm>_S<iS>_M<iM>.<ext>
-	char fnPatt[ MAX_PATH ]; 
-	sprintf( fnPatt, "%sMsgP%d_%s_S%d_M%d_*%s", TBP[ pRECORDINGS_PATH ], iPkg, sNm, iSubj, iMsg, ext );	// e.g. "M0:/recordings/Msg_Health_S2_M3_*.txt"
-	
-	int cnt = fileMatchNext( fnPatt );
-	sprintf( path, "%sMsgP%d_%s_S%d_M%d_%d%s", TBP[ pRECORDINGS_PATH ], iPkg, sNm, iSubj, iMsg, cnt, ext );
-	*pcnt = cnt;
-	return path;
+
+/**
+ * Create a filename for an "auxillary" file, associated with the current content message.
+ * The filename will be appended with a uniquifier to avoid collisions.
+ * @param buf Buffer into which to build the filename. Should be [MAX_PATH]
+ * @param auxFileType enum AUX_FILE_TYPE describing what flavor of auxillary file.
+ * @return the uniquifier.
+ */
+int makeAuxFileName( char *buf, enum AUX_FILE_TYPE auxFileType) {
+    char pattern[MAX_PATH];
+    sprintf(pattern, "%s%s_pkg%d_pl%d_msg%d_*%s", TBP[ pRECORDINGS_PATH ], auxFilePrefixes[auxFileType],
+            iPkg, TBook.iSubj, TBook.iMsg, auxFileExtensions[auxFileType]);
+    int uniquifier = fileMatchNext(pattern);
+    sprintf(buf, "%s%s_pkg%d_pl%d_msg%d_%d%s", TBP[ pRECORDINGS_PATH ], auxFilePrefixes[auxFileType],
+            iPkg, TBook.iSubj, TBook.iMsg, uniquifier, auxFileExtensions[auxFileType]);
+    return uniquifier;
+}
+
+/**
+ * Saves properties about the recording to an auxillary file. This file will be filled
+ * in further, farther down the processing pipeline.
+ */
+void saveAuxProperties(char *baseFilename) {
+    char fnBuf[MAX_PATH];
+    strcpy(fnBuf, baseFilename);
+    char *pSep = strrchr(fnBuf, '.');
+    if (pSep) {
+        strncpy(pSep, ".properties", sizeof(fnBuf)-(pSep-fnBuf)-1);
+        FILE *outFP = tbOpenWrite(fnBuf);
+        fprintf(outFP, "PACKAGE_NAME:%s\n", currPkg->packageName);
+        fprintf(outFP, "PACKAGE_NUM:%d\n", currPkg->pkgIdx);
+        if (TBook.iSubj >= 0) {
+            fprintf(outFP, "PLAYLIST_NAME:%s\n", currPkg->subjects->subj[TBook.iSubj]->subjName);
+            fprintf(outFP, "PLAYLIST_NUM:%d\n", TBook.iSubj);
+            if (TBook.iMsg >= 0) {
+                // TODO: simplify !!
+                fprintf(outFP, "MESSAGE_NAME:%s\n",
+                        currPkg->subjects->subj[TBook.iSubj]->messages->msg[TBook.iMsg]->filename);
+                fprintf(outFP, "MESSAGE_NUM:%d\n", TBook.iMsg);
+            }
+        }
+        fprintf(outFP, "DEVICE_ID:%s\n", TB_ID);
+        tbCloseFile(outFP);
+    }
 }
 void 						saveStats( MsgStats *st ){ 												// save statistics block to file
 	char * fnm = statFNm( st->SubjNm, st->iSubj, st->iMsg );

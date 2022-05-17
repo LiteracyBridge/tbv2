@@ -33,6 +33,9 @@ typedef struct {	// MsgStats -- stats for iSubj/iMsg
 } MsgStats;
 
 
+enum AUX_FILE_TYPE {AUX_FILE_RECORDING=0,     // Audio recording associated with a content message.
+    AUX_FILE_MESSAGE=1                        // Saved text message associated with a content message.
+};
 //
 // external functions
 extern void			initLogger( void );												// init tbLog file on bootup
@@ -41,7 +44,8 @@ extern char *		loadLine( char * line, const char * fpath, fsTime *tm );		// => 1
 extern void			logPowerDown( void );											// save & shut down logger for USB or sleeping
 extern void         writeLine( char * line, const char * fpath );                   // write one line to file
 extern void			saveStats( MsgStats *st ); 										// save statistics block to file
-extern char *		logMsgName( char *path, const char * sNm, short iSubj, short iMsg, const char *ext, int *pcnt );	// build & => file path for next msg for Msg_<sNm>_S<iS>_M<iM>.<ext>
+extern int      makeAuxFileName( char *buf, enum AUX_FILE_TYPE auxFileType); // fn for recording or msg
+extern void     saveAuxProperties( char *baseFilename ); // auxillary "sidecar" file with info about selected content.
 extern void			flushStats( void );												// save all cached stats files
 extern MsgStats *	loadStats( const char *subjNm, short iSubj, short iMsg );	// load statistics snapshot for Subj/Msg
 extern void			logEvt( const char *evtID );									// write log entry: 'EVENT, at:    d.ddd'

@@ -3,6 +3,8 @@
 
 #include "mediaPlyr.h"
 #include "fileOps.h"
+#include "packageData.h"    // for current content selection
+#include "controlmanager.h" // for TBook
 
 const int 									CODEC_DATA_TX_DN   =	0x01; 			// signal sent by SAI callback when an buffer completes
 const int 									CODEC_PLAYBACK_DN	 =  0x02;				// signal from SAI on playback done
@@ -127,10 +129,17 @@ void					playRecording( ){	// play back just recorded audio
 	if ( mRecordFilePath[0] == 0 ) return;
 	osEventFlagsSet( mMediaEventId, MEDIA_PLAY_RECORD );	
 }
+
+/**
+ * Save the recording. If configured for "private feedback" encrypt first.
+ * Save the "sidecar" file with info about the track to which the recording applies.
+ */
 void					saveRecording( ){	// encrypt recorded audio & delete original
 	if ( mRecordFilePath[0] == 0 ) return;
-	ledFg( TB_Config->fgSaveRec );	
-	osEventFlagsSet( mMediaEventId, MEDIA_SAVE_RECORD );	
+	ledFg( TB_Config->fgSaveRec );
+  // Write the recording props file here. Heavy lifting of encryption will be done on another thread.
+    saveAuxProperties((char*)mRecordFilePath);
+  osEventFlagsSet( mMediaEventId, MEDIA_SAVE_RECORD );
 }
 void					cancelRecording(){ // delete recorded message
 	if ( mRecordFilePath[0] == 0 ) return;

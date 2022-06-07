@@ -16,7 +16,7 @@
         <TargetCommonOption>
           <Device>STM32F412VETx</Device>
           <Vendor>STMicroelectronics</Vendor>
-          <PackID>Keil.STM32F4xx_DFP.2.15.0</PackID>
+          <PackID>Keil.STM32F4xx_DFP.2.16.0</PackID>
           <PackURL>http://www.keil.com/pack/</PackURL>
           <Cpu>IRAM(0x20000000,0x00040000) IROM(0x08000000,0x00080000) CPUTYPE("Cortex-M4") FPU2 CLOCK(12000000) ELITTLE</Cpu>
           <FlashUtilSpec></FlashUtilSpec>
@@ -176,7 +176,7 @@
             <GenPPlst>0</GenPPlst>
             <AdsCpuType>"Cortex-M4"</AdsCpuType>
             <RvctDeviceName></RvctDeviceName>
-            <mOS>0</mOS>
+            <mOS>1</mOS>
             <uocRom>0</uocRom>
             <uocRam>0</uocRam>
             <hadIROM>1</hadIROM>
@@ -339,7 +339,7 @@
               <MiscControls></MiscControls>
               <Define>TBOOKREV2B,STM32F412Vx, HSE_VALUE=8000000 _RTE_, FPM_DEFAULT</Define>
               <Undefine></Undefine>
-              <IncludePath>.\Src\config;.\Src\inc;.\Keil\inc;.\Src\Rev2b\inc;.\Keil\mbedtls</IncludePath>
+              <IncludePath>C:\Keil_v5\ARM\PACK\ARM\CMSIS\5.9.0\CMSIS\RTOS2\Include;C:\Keil_v5\ARM\PACK\ARM\CMSIS\5.9.0\CMSIS\RTOS2\RTX\Include;C:\Keil_v5\ARM\PACK\ARM\CMSIS\5.9.0\CMSIS\Core\Include;C:\Keil_v5\ARM\PACK\ARM\CMSIS\5.9.0\CMSIS\Driver\Include;C:\Keil_v5\ARM\PACK\ARM\mbedCrypto\3.0.1\include;C:\Keil_v5\ARM\PACK\Keil\STM32F4xx_DFP\2.16.0\CMSIS\Driver;C:\Keil_v5\ARM\PACK\Keil\STM32F4xx_DFP\2.16.0\Drivers\CMSIS\Device\ST\STM32F4xx\Include;C:\Keil_v5\ARM\PACK\Keil\STM32F4xx_DFP\2.16.0\Drivers\STM32F4xx_HAL_Driver\Inc;.\Src\inc;.\Src\libmad\inc</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -383,6 +383,118 @@
         <Group>
           <GroupName>TBook</GroupName>
           <Files>
+            <File>
+              <FileName>codecI2C.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\Src\codecI2C.c</FilePath>
+              <FileOption>
+                <CommonProperty>
+                  <UseCPPCompiler>2</UseCPPCompiler>
+                  <RVCTCodeConst>0</RVCTCodeConst>
+                  <RVCTZI>0</RVCTZI>
+                  <RVCTOtherData>0</RVCTOtherData>
+                  <ModuleSelection>0</ModuleSelection>
+                  <IncludeInBuild>1</IncludeInBuild>
+                  <AlwaysBuild>2</AlwaysBuild>
+                  <GenerateAssemblyFile>2</GenerateAssemblyFile>
+                  <AssembleAssemblyFile>2</AssembleAssemblyFile>
+                  <PublicsOnly>2</PublicsOnly>
+                  <StopOnExitCode>11</StopOnExitCode>
+                  <CustomArgument></CustomArgument>
+                  <IncludeLibraryModules></IncludeLibraryModules>
+                  <ComprImg>1</ComprImg>
+                </CommonProperty>
+                <FileArmAds>
+                  <Cads>
+                    <interw>2</interw>
+                    <Optim>0</Optim>
+                    <oTime>2</oTime>
+                    <SplitLS>2</SplitLS>
+                    <OneElfS>2</OneElfS>
+                    <Strict>2</Strict>
+                    <EnumInt>2</EnumInt>
+                    <PlainCh>2</PlainCh>
+                    <Ropi>2</Ropi>
+                    <Rwpi>2</Rwpi>
+                    <wLevel>0</wLevel>
+                    <uThumb>2</uThumb>
+                    <uSurpInc>2</uSurpInc>
+                    <uC99>2</uC99>
+                    <uGnu>2</uGnu>
+                    <useXO>2</useXO>
+                    <v6Lang>0</v6Lang>
+                    <v6LangP>0</v6LangP>
+                    <vShortEn>2</vShortEn>
+                    <vShortWch>2</vShortWch>
+                    <v6Lto>2</v6Lto>
+                    <v6WtE>2</v6WtE>
+                    <v6Rtti>2</v6Rtti>
+                    <VariousControls>
+                      <MiscControls></MiscControls>
+                      <Define></Define>
+                      <Undefine></Undefine>
+                      <IncludePath></IncludePath>
+                    </VariousControls>
+                  </Cads>
+                </FileArmAds>
+              </FileOption>
+            </File>
+            <File>
+              <FileName>ti_aic3100.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\Src\ti_aic3100.c</FilePath>
+              <FileOption>
+                <CommonProperty>
+                  <UseCPPCompiler>2</UseCPPCompiler>
+                  <RVCTCodeConst>0</RVCTCodeConst>
+                  <RVCTZI>0</RVCTZI>
+                  <RVCTOtherData>0</RVCTOtherData>
+                  <ModuleSelection>0</ModuleSelection>
+                  <IncludeInBuild>1</IncludeInBuild>
+                  <AlwaysBuild>2</AlwaysBuild>
+                  <GenerateAssemblyFile>2</GenerateAssemblyFile>
+                  <AssembleAssemblyFile>2</AssembleAssemblyFile>
+                  <PublicsOnly>2</PublicsOnly>
+                  <StopOnExitCode>11</StopOnExitCode>
+                  <CustomArgument></CustomArgument>
+                  <IncludeLibraryModules></IncludeLibraryModules>
+                  <ComprImg>1</ComprImg>
+                </CommonProperty>
+                <FileArmAds>
+                  <Cads>
+                    <interw>2</interw>
+                    <Optim>0</Optim>
+                    <oTime>2</oTime>
+                    <SplitLS>2</SplitLS>
+                    <OneElfS>2</OneElfS>
+                    <Strict>2</Strict>
+                    <EnumInt>2</EnumInt>
+                    <PlainCh>2</PlainCh>
+                    <Ropi>2</Ropi>
+                    <Rwpi>2</Rwpi>
+                    <wLevel>0</wLevel>
+                    <uThumb>2</uThumb>
+                    <uSurpInc>2</uSurpInc>
+                    <uC99>2</uC99>
+                    <uGnu>2</uGnu>
+                    <useXO>2</useXO>
+                    <v6Lang>0</v6Lang>
+                    <v6LangP>0</v6LangP>
+                    <vShortEn>2</vShortEn>
+                    <vShortWch>2</vShortWch>
+                    <v6Lto>2</v6Lto>
+                    <v6WtE>2</v6WtE>
+                    <v6Rtti>2</v6Rtti>
+                    <VariousControls>
+                      <MiscControls></MiscControls>
+                      <Define></Define>
+                      <Undefine></Undefine>
+                      <IncludePath></IncludePath>
+                    </VariousControls>
+                  </Cads>
+                </FileArmAds>
+              </FileOption>
+            </File>
             <File>
               <FileName>main.c</FileName>
               <FileType>1</FileType>
@@ -534,35 +646,27 @@
               <FileType>1</FileType>
               <FilePath>.\Src\preloadCSM.c</FilePath>
             </File>
-          </Files>
-        </Group>
-        <Group>
-          <GroupName>tgtRev2B</GroupName>
-          <Files>
             <File>
-              <FileName>GPIO_STM32F4xx.c</FileName>
+              <FileName>W25Q64JV.c</FileName>
               <FileType>1</FileType>
-              <FilePath>.\Src\Rev2b\GPIO_STM32F4xx.c</FilePath>
+              <FilePath>.\Src\W25Q64JV.c</FilePath>
             </File>
             <File>
               <FileName>I2S_stm32F4xx.c</FileName>
               <FileType>1</FileType>
-              <FilePath>.\Src\Rev2b\I2S_stm32F4xx.c</FilePath>
+              <FilePath>.\Src\I2S_stm32F4xx.c</FilePath>
+            </File>
+            <File>
+              <FileName>GPIO_STM32F4xx.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\Src\GPIO_STM32F4xx.c</FilePath>
             </File>
             <File>
               <FileName>hardfault.s</FileName>
               <FileType>2</FileType>
-              <FilePath>.\Src\Rev2b\hardfault.s</FilePath>
-            </File>
-            <File>
-              <FileName>W25Q64JV.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>.\Src\Rev2b\W25Q64JV.c</FilePath>
+              <FilePath>.\Src\hardfault.s</FilePath>
             </File>
           </Files>
-        </Group>
-        <Group>
-          <GroupName>tgtSTM3210E</GroupName>
         </Group>
         <Group>
           <GroupName>libMAD</GroupName>
@@ -668,710 +772,6 @@
           </Files>
         </Group>
         <Group>
-          <GroupName>config</GroupName>
-          <Files>
-            <File>
-              <FileName>RTE_Components.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>.\Src\config\RTE_Components.h</FilePath>
-            </File>
-            <File>
-              <FileName>tbRTE_Components.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>.\Src\config\tbRTE_Components.h</FilePath>
-            </File>
-            <File>
-              <FileName>RTE_Device.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>.\Src\config\RTE_Device.h</FilePath>
-            </File>
-            <File>
-              <FileName>RTX_Config.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>.\Src\config\RTX_Config.h</FilePath>
-            </File>
-            <File>
-              <FileName>EventRecorderConf.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>.\Src\config\EventRecorderConf.h</FilePath>
-            </File>
-            <File>
-              <FileName>FS_Config.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>.\Keil\File System\FS_Config.c</FilePath>
-            </File>
-            <File>
-              <FileName>FS_Config_MC_0.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>.\Src\config\FS_Config_MC_0.h</FilePath>
-            </File>
-            <File>
-              <FileName>FS_Debug.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>.\Keil\File System\FS_Debug.c</FilePath>
-            </File>
-            <File>
-              <FileName>USBD_Config_0.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>.\Keil\USB\USBD_Config_0.c</FilePath>
-            </File>
-            <File>
-              <FileName>USBD_Config_MSC_0.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>.\Src\config\USBD_Config_MSC_0.h</FilePath>
-            </File>
-            <File>
-              <FileName>USB_Debug.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>.\Keil\USB\USB_Debug.c</FilePath>
-            </File>
-            <File>
-              <FileName>stm32f4xx_hal_conf.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>.\Src\config\stm32f4xx_hal_conf.h</FilePath>
-            </File>
-            <File>
-              <FileName>mbedTLS_config.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>.\Keil\inc\mbedtls\mbedTLS_config.h</FilePath>
-            </File>
-          </Files>
-        </Group>
-        <Group>
-          <GroupName>CMSIS</GroupName>
-          <Files>
-            <File>
-              <FileName>RTX_Config.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>.\Keil\CMSIS\RTX_Config.c</FilePath>
-            </File>
-            <File>
-              <FileName>rtx_delay.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>.\Keil\CMSIS\rtx_delay.c</FilePath>
-            </File>
-            <File>
-              <FileName>rtx_evflags.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>.\Keil\CMSIS\rtx_evflags.c</FilePath>
-            </File>
-            <File>
-              <FileName>rtx_evr.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>.\Keil\CMSIS\rtx_evr.c</FilePath>
-            </File>
-            <File>
-              <FileName>rtx_kernel.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>.\Keil\CMSIS\rtx_kernel.c</FilePath>
-            </File>
-            <File>
-              <FileName>rtx_lib.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>.\Keil\CMSIS\rtx_lib.c</FilePath>
-            </File>
-            <File>
-              <FileName>rtx_memory.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>.\Keil\CMSIS\rtx_memory.c</FilePath>
-            </File>
-            <File>
-              <FileName>rtx_mempool.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>.\Keil\CMSIS\rtx_mempool.c</FilePath>
-            </File>
-            <File>
-              <FileName>rtx_msgqueue.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>.\Keil\CMSIS\rtx_msgqueue.c</FilePath>
-            </File>
-            <File>
-              <FileName>rtx_mutex.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>.\Keil\CMSIS\rtx_mutex.c</FilePath>
-            </File>
-            <File>
-              <FileName>rtx_semaphore.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>.\Keil\CMSIS\rtx_semaphore.c</FilePath>
-            </File>
-            <File>
-              <FileName>rtx_system.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>.\Keil\CMSIS\rtx_system.c</FilePath>
-            </File>
-            <File>
-              <FileName>rtx_thread.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>.\Keil\CMSIS\rtx_thread.c</FilePath>
-            </File>
-            <File>
-              <FileName>rtx_timer.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>.\Keil\CMSIS\rtx_timer.c</FilePath>
-            </File>
-            <File>
-              <FileName>os_systick.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>.\Keil\CMSIS\os_systick.c</FilePath>
-            </File>
-            <File>
-              <FileName>irq_cm4f.s</FileName>
-              <FileType>2</FileType>
-              <FilePath>.\Keil\CMSIS\irq_cm4f.s</FilePath>
-            </File>
-          </Files>
-        </Group>
-        <Group>
-          <GroupName>CMSIS Driver</GroupName>
-        </Group>
-        <Group>
-          <GroupName>Compiler</GroupName>
-          <Files>
-            <File>
-              <FileName>EventRecorder.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>.\Keil\Compiler\EventRecorder.c</FilePath>
-              <FileOption>
-                <CommonProperty>
-                  <UseCPPCompiler>2</UseCPPCompiler>
-                  <RVCTCodeConst>0</RVCTCodeConst>
-                  <RVCTZI>5</RVCTZI>
-                  <RVCTOtherData>0</RVCTOtherData>
-                  <ModuleSelection>0</ModuleSelection>
-                  <IncludeInBuild>2</IncludeInBuild>
-                  <AlwaysBuild>2</AlwaysBuild>
-                  <GenerateAssemblyFile>2</GenerateAssemblyFile>
-                  <AssembleAssemblyFile>2</AssembleAssemblyFile>
-                  <PublicsOnly>2</PublicsOnly>
-                  <StopOnExitCode>11</StopOnExitCode>
-                  <CustomArgument></CustomArgument>
-                  <IncludeLibraryModules></IncludeLibraryModules>
-                  <ComprImg>1</ComprImg>
-                </CommonProperty>
-                <FileArmAds>
-                  <Cads>
-                    <interw>2</interw>
-                    <Optim>0</Optim>
-                    <oTime>2</oTime>
-                    <SplitLS>2</SplitLS>
-                    <OneElfS>2</OneElfS>
-                    <Strict>2</Strict>
-                    <EnumInt>2</EnumInt>
-                    <PlainCh>2</PlainCh>
-                    <Ropi>2</Ropi>
-                    <Rwpi>2</Rwpi>
-                    <wLevel>0</wLevel>
-                    <uThumb>2</uThumb>
-                    <uSurpInc>2</uSurpInc>
-                    <uC99>2</uC99>
-                    <uGnu>2</uGnu>
-                    <useXO>2</useXO>
-                    <v6Lang>0</v6Lang>
-                    <v6LangP>0</v6LangP>
-                    <vShortEn>2</vShortEn>
-                    <vShortWch>2</vShortWch>
-                    <v6Lto>2</v6Lto>
-                    <v6WtE>2</v6WtE>
-                    <v6Rtti>2</v6Rtti>
-                    <VariousControls>
-                      <MiscControls></MiscControls>
-                      <Define></Define>
-                      <Undefine></Undefine>
-                      <IncludePath></IncludePath>
-                    </VariousControls>
-                  </Cads>
-                </FileArmAds>
-              </FileOption>
-            </File>
-            <File>
-              <FileName>retarget_io.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>.\Keil\Compiler\retarget_io.c</FilePath>
-            </File>
-          </Files>
-        </Group>
-        <Group>
-          <GroupName>STM32F4xx</GroupName>
-          <GroupOption>
-            <CommonProperty>
-              <UseCPPCompiler>0</UseCPPCompiler>
-              <RVCTCodeConst>0</RVCTCodeConst>
-              <RVCTZI>0</RVCTZI>
-              <RVCTOtherData>0</RVCTOtherData>
-              <ModuleSelection>0</ModuleSelection>
-              <IncludeInBuild>2</IncludeInBuild>
-              <AlwaysBuild>2</AlwaysBuild>
-              <GenerateAssemblyFile>2</GenerateAssemblyFile>
-              <AssembleAssemblyFile>2</AssembleAssemblyFile>
-              <PublicsOnly>2</PublicsOnly>
-              <StopOnExitCode>11</StopOnExitCode>
-              <CustomArgument></CustomArgument>
-              <IncludeLibraryModules></IncludeLibraryModules>
-              <ComprImg>1</ComprImg>
-            </CommonProperty>
-            <GroupArmAds>
-              <Cads>
-                <interw>2</interw>
-                <Optim>0</Optim>
-                <oTime>2</oTime>
-                <SplitLS>2</SplitLS>
-                <OneElfS>2</OneElfS>
-                <Strict>2</Strict>
-                <EnumInt>2</EnumInt>
-                <PlainCh>2</PlainCh>
-                <Ropi>2</Ropi>
-                <Rwpi>2</Rwpi>
-                <wLevel>0</wLevel>
-                <uThumb>2</uThumb>
-                <uSurpInc>2</uSurpInc>
-                <uC99>2</uC99>
-                <uGnu>2</uGnu>
-                <useXO>2</useXO>
-                <v6Lang>0</v6Lang>
-                <v6LangP>0</v6LangP>
-                <vShortEn>2</vShortEn>
-                <vShortWch>2</vShortWch>
-                <v6Lto>2</v6Lto>
-                <v6WtE>2</v6WtE>
-                <v6Rtti>2</v6Rtti>
-                <VariousControls>
-                  <MiscControls></MiscControls>
-                  <Define></Define>
-                  <Undefine></Undefine>
-                  <IncludePath>.\Src\inc</IncludePath>
-                </VariousControls>
-              </Cads>
-              <Aads>
-                <interw>2</interw>
-                <Ropi>2</Ropi>
-                <Rwpi>2</Rwpi>
-                <thumb>2</thumb>
-                <SplitLS>2</SplitLS>
-                <SwStkChk>2</SwStkChk>
-                <NoWarn>2</NoWarn>
-                <uSurpInc>2</uSurpInc>
-                <useXO>2</useXO>
-                <ClangAsOpt>0</ClangAsOpt>
-                <VariousControls>
-                  <MiscControls></MiscControls>
-                  <Define></Define>
-                  <Undefine></Undefine>
-                  <IncludePath></IncludePath>
-                </VariousControls>
-              </Aads>
-            </GroupArmAds>
-          </GroupOption>
-          <Files>
-            <File>
-              <FileName>startup_stm32f412vx.s</FileName>
-              <FileType>2</FileType>
-              <FilePath>.\Keil\STM32F4xx\STM32F412VETx\startup_stm32f412vx.s</FilePath>
-            </File>
-            <File>
-              <FileName>I2C_STM32F4xx.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>.\Keil\STM32F4xx\I2C_STM32F4xx.c</FilePath>
-            </File>
-            <File>
-              <FileName>MCI_STM32F4xx.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>.\Keil\STM32F4xx\MCI_STM32F4xx.c</FilePath>
-            </File>
-            <File>
-              <FileName>OTG_FS_STM32F4xx.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>.\Keil\STM32F4xx\OTG_FS_STM32F4xx.c</FilePath>
-            </File>
-            <File>
-              <FileName>SPI_STM32F4xx.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>.\Keil\STM32F4xx\SPI_STM32F4xx.c</FilePath>
-            </File>
-            <File>
-              <FileName>USBD_FS_STM32F4xx.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>.\Keil\STM32F4xx\USBD_FS_STM32F4xx.c</FilePath>
-            </File>
-            <File>
-              <FileName>stm32f4xx_hal_conf.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>.\Keil\STM32F4xx\STM32F412VETx\stm32f4xx_hal_conf.h</FilePath>
-            </File>
-            <File>
-              <FileName>stm32f4xx_hal.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>.\Keil\STM32F4xx\stm32f4xx_hal.c</FilePath>
-            </File>
-            <File>
-              <FileName>stm32f4xx_hal_cortex.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>.\Keil\STM32F4xx\stm32f4xx_hal_cortex.c</FilePath>
-            </File>
-            <File>
-              <FileName>stm32f4xx_hal_dma.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>.\Keil\STM32F4xx\stm32f4xx_hal_dma.c</FilePath>
-            </File>
-            <File>
-              <FileName>stm32f4xx_hal_dma_ex.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>.\Keil\STM32F4xx\stm32f4xx_hal_dma_ex.c</FilePath>
-            </File>
-            <File>
-              <FileName>stm32f4xx_hal_gpio.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>.\Keil\STM32F4xx\stm32f4xx_hal_gpio.c</FilePath>
-            </File>
-            <File>
-              <FileName>stm32f4xx_hal_i2c.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>.\Keil\STM32F4xx\stm32f4xx_hal_i2c.c</FilePath>
-            </File>
-            <File>
-              <FileName>stm32f4xx_hal_pwr.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>.\Keil\STM32F4xx\stm32f4xx_hal_pwr.c</FilePath>
-            </File>
-            <File>
-              <FileName>stm32f4xx_hal_pwr_ex.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>.\Keil\STM32F4xx\stm32f4xx_hal_pwr_ex.c</FilePath>
-            </File>
-            <File>
-              <FileName>stm32f4xx_hal_qspi.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>.\Keil\STM32F4xx\stm32f4xx_hal_qspi.c</FilePath>
-            </File>
-            <File>
-              <FileName>stm32f4xx_hal_rcc.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>.\Keil\STM32F4xx\stm32f4xx_hal_rcc.c</FilePath>
-            </File>
-            <File>
-              <FileName>stm32f4xx_hal_rcc_ex.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>.\Keil\STM32F4xx\stm32f4xx_hal_rcc_ex.c</FilePath>
-            </File>
-            <File>
-              <FileName>stm32f4xx_hal_spi.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>.\Keil\STM32F4xx\stm32f4xx_hal_spi.c</FilePath>
-            </File>
-            <File>
-              <FileName>system_stm32f4xx.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>.\Src\Rev2b\system_stm32f4xx.c</FilePath>
-            </File>
-          </Files>
-        </Group>
-        <Group>
-          <GroupName>Keil</GroupName>
-          <GroupOption>
-            <CommonProperty>
-              <UseCPPCompiler>0</UseCPPCompiler>
-              <RVCTCodeConst>0</RVCTCodeConst>
-              <RVCTZI>0</RVCTZI>
-              <RVCTOtherData>0</RVCTOtherData>
-              <ModuleSelection>0</ModuleSelection>
-              <IncludeInBuild>1</IncludeInBuild>
-              <AlwaysBuild>2</AlwaysBuild>
-              <GenerateAssemblyFile>2</GenerateAssemblyFile>
-              <AssembleAssemblyFile>2</AssembleAssemblyFile>
-              <PublicsOnly>2</PublicsOnly>
-              <StopOnExitCode>11</StopOnExitCode>
-              <CustomArgument></CustomArgument>
-              <IncludeLibraryModules></IncludeLibraryModules>
-              <ComprImg>1</ComprImg>
-            </CommonProperty>
-            <GroupArmAds>
-              <Cads>
-                <interw>2</interw>
-                <Optim>0</Optim>
-                <oTime>2</oTime>
-                <SplitLS>2</SplitLS>
-                <OneElfS>2</OneElfS>
-                <Strict>2</Strict>
-                <EnumInt>2</EnumInt>
-                <PlainCh>2</PlainCh>
-                <Ropi>2</Ropi>
-                <Rwpi>2</Rwpi>
-                <wLevel>0</wLevel>
-                <uThumb>2</uThumb>
-                <uSurpInc>2</uSurpInc>
-                <uC99>2</uC99>
-                <uGnu>2</uGnu>
-                <useXO>2</useXO>
-                <v6Lang>0</v6Lang>
-                <v6LangP>0</v6LangP>
-                <vShortEn>2</vShortEn>
-                <vShortWch>2</vShortWch>
-                <v6Lto>2</v6Lto>
-                <v6WtE>2</v6WtE>
-                <v6Rtti>2</v6Rtti>
-                <VariousControls>
-                  <MiscControls></MiscControls>
-                  <Define></Define>
-                  <Undefine></Undefine>
-                  <IncludePath></IncludePath>
-                </VariousControls>
-              </Cads>
-              <Aads>
-                <interw>2</interw>
-                <Ropi>2</Ropi>
-                <Rwpi>2</Rwpi>
-                <thumb>2</thumb>
-                <SplitLS>2</SplitLS>
-                <SwStkChk>2</SwStkChk>
-                <NoWarn>2</NoWarn>
-                <uSurpInc>2</uSurpInc>
-                <useXO>2</useXO>
-                <ClangAsOpt>0</ClangAsOpt>
-                <VariousControls>
-                  <MiscControls></MiscControls>
-                  <Define></Define>
-                  <Undefine></Undefine>
-                  <IncludePath></IncludePath>
-                </VariousControls>
-              </Aads>
-            </GroupArmAds>
-          </GroupOption>
-          <Files>
-            <File>
-              <FileName>FS_Dbg_LFN_CM3_L.lib</FileName>
-              <FileType>4</FileType>
-              <FilePath>.\Keil\File System\FS_Dbg_LFN_CM3_L.lib</FilePath>
-            </File>
-            <File>
-              <FileName>USB_Dbg_CM3_L.lib</FileName>
-              <FileType>4</FileType>
-              <FilePath>.\Keil\USB\USB_Dbg_CM3_L.lib</FilePath>
-            </File>
-            <File>
-              <FileName>aes.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>.\Keil\mbedtls\aes.c</FilePath>
-            </File>
-            <File>
-              <FileName>aesni.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>.\Keil\mbedtls\aesni.c</FilePath>
-            </File>
-            <File>
-              <FileName>bignum.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>.\Keil\mbedtls\bignum.c</FilePath>
-            </File>
-            <File>
-              <FileName>entropy.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>.\Keil\mbedtls\entropy.c</FilePath>
-            </File>
-            <File>
-              <FileName>error.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>.\Keil\mbedtls\error.c</FilePath>
-            </File>
-            <File>
-              <FileName>pk.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>.\Keil\mbedtls\pk.c</FilePath>
-            </File>
-            <File>
-              <FileName>pk_wrap.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>.\Keil\mbedtls\pk_wrap.c</FilePath>
-            </File>
-            <File>
-              <FileName>rsa.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>.\Keil\mbedtls\rsa.c</FilePath>
-            </File>
-            <File>
-              <FileName>base64.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>.\Keil\mbedtls\base64.c</FilePath>
-            </File>
-            <File>
-              <FileName>ctr_drbg.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>.\Keil\mbedtls\ctr_drbg.c</FilePath>
-            </File>
-            <File>
-              <FileName>pkparse.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>.\Keil\mbedtls\pkparse.c</FilePath>
-            </File>
-            <File>
-              <FileName>platform.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>.\Keil\mbedtls\platform.c</FilePath>
-            </File>
-            <File>
-              <FileName>asn1parse.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>.\Keil\mbedtls\asn1parse.c</FilePath>
-            </File>
-            <File>
-              <FileName>rsa_internal.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>.\Keil\mbedtls\rsa_internal.c</FilePath>
-            </File>
-            <File>
-              <FileName>sha1.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>.\Keil\mbedtls\sha1.c</FilePath>
-            </File>
-            <File>
-              <FileName>sha512.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>.\Keil\mbedtls\sha512.c</FilePath>
-            </File>
-            <File>
-              <FileName>platform_util.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>.\Keil\mbedtls\platform_util.c</FilePath>
-            </File>
-            <File>
-              <FileName>oid.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>.\Keil\mbedtls\oid.c</FilePath>
-            </File>
-            <File>
-              <FileName>pem.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>.\Keil\mbedtls\pem.c</FilePath>
-            </File>
-            <File>
-              <FileName>md.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>.\Keil\mbedtls\md.c</FilePath>
-            </File>
-            <File>
-              <FileName>sha256.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>.\Keil\mbedtls\sha256.c</FilePath>
-            </File>
-          </Files>
-        </Group>
-        <Group>
-          <GroupName>tgtRev2C</GroupName>
-          <Files>
-            <File>
-              <FileName>codecI2C.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>.\Src\codecI2C.c</FilePath>
-              <FileOption>
-                <CommonProperty>
-                  <UseCPPCompiler>2</UseCPPCompiler>
-                  <RVCTCodeConst>0</RVCTCodeConst>
-                  <RVCTZI>0</RVCTZI>
-                  <RVCTOtherData>0</RVCTOtherData>
-                  <ModuleSelection>0</ModuleSelection>
-                  <IncludeInBuild>1</IncludeInBuild>
-                  <AlwaysBuild>2</AlwaysBuild>
-                  <GenerateAssemblyFile>2</GenerateAssemblyFile>
-                  <AssembleAssemblyFile>2</AssembleAssemblyFile>
-                  <PublicsOnly>2</PublicsOnly>
-                  <StopOnExitCode>11</StopOnExitCode>
-                  <CustomArgument></CustomArgument>
-                  <IncludeLibraryModules></IncludeLibraryModules>
-                  <ComprImg>1</ComprImg>
-                </CommonProperty>
-                <FileArmAds>
-                  <Cads>
-                    <interw>2</interw>
-                    <Optim>0</Optim>
-                    <oTime>2</oTime>
-                    <SplitLS>2</SplitLS>
-                    <OneElfS>2</OneElfS>
-                    <Strict>2</Strict>
-                    <EnumInt>2</EnumInt>
-                    <PlainCh>2</PlainCh>
-                    <Ropi>2</Ropi>
-                    <Rwpi>2</Rwpi>
-                    <wLevel>0</wLevel>
-                    <uThumb>2</uThumb>
-                    <uSurpInc>2</uSurpInc>
-                    <uC99>2</uC99>
-                    <uGnu>2</uGnu>
-                    <useXO>2</useXO>
-                    <v6Lang>0</v6Lang>
-                    <v6LangP>0</v6LangP>
-                    <vShortEn>2</vShortEn>
-                    <vShortWch>2</vShortWch>
-                    <v6Lto>2</v6Lto>
-                    <v6WtE>2</v6WtE>
-                    <v6Rtti>2</v6Rtti>
-                    <VariousControls>
-                      <MiscControls></MiscControls>
-                      <Define></Define>
-                      <Undefine></Undefine>
-                      <IncludePath></IncludePath>
-                    </VariousControls>
-                  </Cads>
-                </FileArmAds>
-              </FileOption>
-            </File>
-            <File>
-              <FileName>ti_aic3100.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>.\Src\ti_aic3100.c</FilePath>
-              <FileOption>
-                <CommonProperty>
-                  <UseCPPCompiler>2</UseCPPCompiler>
-                  <RVCTCodeConst>0</RVCTCodeConst>
-                  <RVCTZI>0</RVCTZI>
-                  <RVCTOtherData>0</RVCTOtherData>
-                  <ModuleSelection>0</ModuleSelection>
-                  <IncludeInBuild>1</IncludeInBuild>
-                  <AlwaysBuild>2</AlwaysBuild>
-                  <GenerateAssemblyFile>2</GenerateAssemblyFile>
-                  <AssembleAssemblyFile>2</AssembleAssemblyFile>
-                  <PublicsOnly>2</PublicsOnly>
-                  <StopOnExitCode>11</StopOnExitCode>
-                  <CustomArgument></CustomArgument>
-                  <IncludeLibraryModules></IncludeLibraryModules>
-                  <ComprImg>1</ComprImg>
-                </CommonProperty>
-                <FileArmAds>
-                  <Cads>
-                    <interw>2</interw>
-                    <Optim>0</Optim>
-                    <oTime>2</oTime>
-                    <SplitLS>2</SplitLS>
-                    <OneElfS>2</OneElfS>
-                    <Strict>2</Strict>
-                    <EnumInt>2</EnumInt>
-                    <PlainCh>2</PlainCh>
-                    <Ropi>2</Ropi>
-                    <Rwpi>2</Rwpi>
-                    <wLevel>0</wLevel>
-                    <uThumb>2</uThumb>
-                    <uSurpInc>2</uSurpInc>
-                    <uC99>2</uC99>
-                    <uGnu>2</uGnu>
-                    <useXO>2</useXO>
-                    <v6Lang>0</v6Lang>
-                    <v6LangP>0</v6LangP>
-                    <vShortEn>2</vShortEn>
-                    <vShortWch>2</vShortWch>
-                    <v6Lto>2</v6Lto>
-                    <v6WtE>2</v6WtE>
-                    <v6Rtti>2</v6Rtti>
-                    <VariousControls>
-                      <MiscControls></MiscControls>
-                      <Define></Define>
-                      <Undefine></Undefine>
-                      <IncludePath></IncludePath>
-                    </VariousControls>
-                  </Cads>
-                </FileArmAds>
-              </FileOption>
-            </File>
-          </Files>
-        </Group>
-        <Group>
           <GroupName>::CMSIS</GroupName>
           <GroupOption>
             <CommonProperty>
@@ -1380,7 +780,7 @@
               <RVCTZI>0</RVCTZI>
               <RVCTOtherData>0</RVCTOtherData>
               <ModuleSelection>0</ModuleSelection>
-              <IncludeInBuild>0</IncludeInBuild>
+              <IncludeInBuild>1</IncludeInBuild>
               <AlwaysBuild>2</AlwaysBuild>
               <GenerateAssemblyFile>2</GenerateAssemblyFile>
               <AssembleAssemblyFile>2</AssembleAssemblyFile>
@@ -1596,7 +996,7 @@
               <RVCTZI>0</RVCTZI>
               <RVCTOtherData>0</RVCTOtherData>
               <ModuleSelection>0</ModuleSelection>
-              <IncludeInBuild>0</IncludeInBuild>
+              <IncludeInBuild>1</IncludeInBuild>
               <AlwaysBuild>2</AlwaysBuild>
               <GenerateAssemblyFile>2</GenerateAssemblyFile>
               <AssembleAssemblyFile>2</AssembleAssemblyFile>
@@ -1668,7 +1068,7 @@
               <RVCTZI>0</RVCTZI>
               <RVCTOtherData>0</RVCTOtherData>
               <ModuleSelection>0</ModuleSelection>
-              <IncludeInBuild>0</IncludeInBuild>
+              <IncludeInBuild>1</IncludeInBuild>
               <AlwaysBuild>2</AlwaysBuild>
               <GenerateAssemblyFile>2</GenerateAssemblyFile>
               <AssembleAssemblyFile>2</AssembleAssemblyFile>
@@ -1733,75 +1133,6 @@
         </Group>
         <Group>
           <GroupName>::Security</GroupName>
-          <GroupOption>
-            <CommonProperty>
-              <UseCPPCompiler>0</UseCPPCompiler>
-              <RVCTCodeConst>0</RVCTCodeConst>
-              <RVCTZI>0</RVCTZI>
-              <RVCTOtherData>0</RVCTOtherData>
-              <ModuleSelection>0</ModuleSelection>
-              <IncludeInBuild>0</IncludeInBuild>
-              <AlwaysBuild>2</AlwaysBuild>
-              <GenerateAssemblyFile>2</GenerateAssemblyFile>
-              <AssembleAssemblyFile>2</AssembleAssemblyFile>
-              <PublicsOnly>2</PublicsOnly>
-              <StopOnExitCode>11</StopOnExitCode>
-              <CustomArgument></CustomArgument>
-              <IncludeLibraryModules></IncludeLibraryModules>
-              <ComprImg>1</ComprImg>
-            </CommonProperty>
-            <GroupArmAds>
-              <Cads>
-                <interw>2</interw>
-                <Optim>0</Optim>
-                <oTime>2</oTime>
-                <SplitLS>2</SplitLS>
-                <OneElfS>2</OneElfS>
-                <Strict>2</Strict>
-                <EnumInt>2</EnumInt>
-                <PlainCh>2</PlainCh>
-                <Ropi>2</Ropi>
-                <Rwpi>2</Rwpi>
-                <wLevel>0</wLevel>
-                <uThumb>2</uThumb>
-                <uSurpInc>2</uSurpInc>
-                <uC99>2</uC99>
-                <uGnu>2</uGnu>
-                <useXO>2</useXO>
-                <v6Lang>0</v6Lang>
-                <v6LangP>0</v6LangP>
-                <vShortEn>2</vShortEn>
-                <vShortWch>2</vShortWch>
-                <v6Lto>2</v6Lto>
-                <v6WtE>2</v6WtE>
-                <v6Rtti>2</v6Rtti>
-                <VariousControls>
-                  <MiscControls></MiscControls>
-                  <Define></Define>
-                  <Undefine></Undefine>
-                  <IncludePath></IncludePath>
-                </VariousControls>
-              </Cads>
-              <Aads>
-                <interw>2</interw>
-                <Ropi>2</Ropi>
-                <Rwpi>2</Rwpi>
-                <thumb>2</thumb>
-                <SplitLS>2</SplitLS>
-                <SwStkChk>2</SwStkChk>
-                <NoWarn>2</NoWarn>
-                <uSurpInc>2</uSurpInc>
-                <useXO>2</useXO>
-                <ClangAsOpt>0</ClangAsOpt>
-                <VariousControls>
-                  <MiscControls></MiscControls>
-                  <Define></Define>
-                  <Undefine></Undefine>
-                  <IncludePath></IncludePath>
-                </VariousControls>
-              </Aads>
-            </GroupArmAds>
-          </GroupOption>
         </Group>
         <Group>
           <GroupName>::USB</GroupName>
@@ -1812,7 +1143,7 @@
               <RVCTZI>0</RVCTZI>
               <RVCTOtherData>0</RVCTOtherData>
               <ModuleSelection>0</ModuleSelection>
-              <IncludeInBuild>0</IncludeInBuild>
+              <IncludeInBuild>1</IncludeInBuild>
               <AlwaysBuild>2</AlwaysBuild>
               <GenerateAssemblyFile>2</GenerateAssemblyFile>
               <AssembleAssemblyFile>2</AssembleAssemblyFile>
@@ -1925,133 +1256,127 @@
       <api Capiversion="2.3.0" Cclass="CMSIS Driver" Cgroup="I2C" exclusive="0">
         <package name="CMSIS" schemaVersion="1.3" url="http://www.keil.com/pack/" vendor="ARM" version="5.6.0"/>
         <targetInfos>
-          <targetInfo excluded="1" name="TBv2b" versionMatchMode=""/>
+          <targetInfo name="TBv2b" versionMatchMode=""/>
         </targetInfos>
       </api>
       <api Capiversion="2.3.0" Cclass="CMSIS Driver" Cgroup="MCI" exclusive="0">
         <package name="CMSIS" schemaVersion="1.3" url="http://www.keil.com/pack/" vendor="ARM" version="5.6.0"/>
         <targetInfos>
-          <targetInfo excluded="1" name="TBv2b" versionMatchMode=""/>
+          <targetInfo name="TBv2b" versionMatchMode=""/>
         </targetInfos>
       </api>
       <api Capiversion="2.2.0" Cclass="CMSIS Driver" Cgroup="SPI" exclusive="0">
         <package name="CMSIS" schemaVersion="1.3" url="http://www.keil.com/pack/" vendor="ARM" version="5.6.0"/>
         <targetInfos>
-          <targetInfo excluded="1" name="TBv2b" versionMatchMode=""/>
+          <targetInfo name="TBv2b" versionMatchMode=""/>
         </targetInfos>
       </api>
       <api Capiversion="2.2.0" Cclass="CMSIS Driver" Cgroup="USB Device" exclusive="0">
         <package name="CMSIS" schemaVersion="1.3" url="http://www.keil.com/pack/" vendor="ARM" version="5.6.0"/>
         <targetInfos>
-          <targetInfo excluded="1" name="TBv2b" versionMatchMode=""/>
+          <targetInfo name="TBv2b" versionMatchMode=""/>
         </targetInfos>
       </api>
       <api Capiversion="2.1.3" Cclass="CMSIS" Cgroup="RTOS2" exclusive="1">
         <package name="CMSIS" schemaVersion="1.3" url="http://www.keil.com/pack/" vendor="ARM" version="5.6.0"/>
         <targetInfos>
-          <targetInfo excluded="1" name="TBv2b" versionMatchMode=""/>
+          <targetInfo name="TBv2b" versionMatchMode=""/>
         </targetInfos>
       </api>
       <api Capiversion="1.0.0" Cclass="Device" Cgroup="STM32Cube Framework" exclusive="1">
         <package name="STM32F4xx_DFP" schemaVersion="1.3" url="http://www.keil.com/pack" vendor="Keil" version="2.13.0"/>
         <targetInfos>
-          <targetInfo excluded="1" name="TBv2b" versionMatchMode=""/>
+          <targetInfo name="TBv2b" versionMatchMode=""/>
         </targetInfos>
       </api>
     </apis>
     <components>
       <component Capiversion="2.3.0" Cclass="CMSIS Driver" Cgroup="Flash" Csub="Custom" Cvendor="ARM" Cversion="1.0.0" custom="1">
-        <package name="CMSIS" schemaVersion="1.3" url="http://www.keil.com/pack/" vendor="ARM" version="5.8.0"/>
+        <package name="CMSIS" schemaVersion="1.7.7" url="http://www.keil.com/pack/" vendor="ARM" version="5.9.0"/>
         <targetInfos>
           <targetInfo name="TBv2b"/>
         </targetInfos>
       </component>
-      <component Cclass="CMSIS" Cgroup="CORE" Cvendor="ARM" Cversion="5.5.0" condition="ARMv6_7_8-M Device">
-        <package name="CMSIS" schemaVersion="1.3" url="http://www.keil.com/pack/" vendor="ARM" version="5.8.0"/>
+      <component Cclass="CMSIS" Cgroup="CORE" Cvendor="ARM" Cversion="5.6.0" condition="ARMv6_7_8-M Device">
+        <package name="CMSIS" schemaVersion="1.7.7" url="http://www.keil.com/pack/" vendor="ARM" version="5.9.0"/>
         <targetInfos>
-          <targetInfo excluded="1" name="TBv2b" versionMatchMode=""/>
+          <targetInfo name="TBv2b" versionMatchMode=""/>
         </targetInfos>
       </component>
-      <component Capiversion="2.1.3" Cclass="CMSIS" Cgroup="RTOS2" Csub="Keil RTX5" Cvariant="Source" Cvendor="ARM" Cversion="5.5.3" condition="RTOS2 RTX5">
-        <package name="CMSIS" schemaVersion="1.3" url="http://www.keil.com/pack/" vendor="ARM" version="5.8.0"/>
+      <component Capiversion="2.1.3" Cclass="CMSIS" Cgroup="RTOS2" Csub="Keil RTX5" Cvariant="Source" Cvendor="ARM" Cversion="5.5.4" condition="RTOS2 RTX5">
+        <package name="CMSIS" schemaVersion="1.7.7" url="http://www.keil.com/pack/" vendor="ARM" version="5.9.0"/>
         <targetInfos>
-          <targetInfo excluded="1" name="TBv2b" versionMatchMode=""/>
+          <targetInfo name="TBv2b" versionMatchMode=""/>
         </targetInfos>
       </component>
       <component Cclass="Security" Cgroup="mbed Crypto" Cvendor="ARM" Cversion="3.0.1">
         <package name="mbedCrypto" schemaVersion="1.6" url="https://github.com/MDK-Packs/Pack/raw/master/mbedCrypto/" vendor="ARM" version="3.0.1"/>
         <targetInfos>
-          <targetInfo excluded="1" name="TBv2b" versionMatchMode=""/>
-        </targetInfos>
-      </component>
-      <component Cbundle="ARM Compiler" Cclass="Compiler" Cgroup="Event Recorder" Cvariant="DAP" Cvendor="Keil" Cversion="1.4.0" condition="Cortex-M Device">
-        <package name="ARM_Compiler" schemaVersion="1.6.3" url="http://www.keil.com/pack/" vendor="Keil" version="1.6.3"/>
-        <targetInfos>
-          <targetInfo excluded="1" name="TBv2b" versionMatchMode=""/>
-        </targetInfos>
-      </component>
-      <component Cbundle="ARM Compiler" Cclass="Compiler" Cgroup="I/O" Csub="File" Cvariant="File System" Cvendor="Keil" Cversion="1.2.0" condition="ARMCC Cortex-M with File System">
-        <package name="ARM_Compiler" schemaVersion="1.6.3" url="http://www.keil.com/pack/" vendor="Keil" version="1.6.3"/>
-        <targetInfos>
-          <targetInfo excluded="1" name="TBv2b" versionMatchMode=""/>
-        </targetInfos>
-      </component>
-      <component Cbundle="ARM Compiler" Cclass="Compiler" Cgroup="I/O" Csub="STDERR" Cvariant="ITM" Cvendor="Keil" Cversion="1.2.0" condition="ARMCC Cortex-M with ITM">
-        <package name="ARM_Compiler" schemaVersion="1.6.3" url="http://www.keil.com/pack/" vendor="Keil" version="1.6.3"/>
-        <targetInfos>
           <targetInfo name="TBv2b"/>
         </targetInfos>
       </component>
-      <component Cbundle="ARM Compiler" Cclass="Compiler" Cgroup="I/O" Csub="STDIN" Cvariant="ITM" Cvendor="Keil" Cversion="1.2.0" condition="ARMCC Cortex-M with ITM">
-        <package name="ARM_Compiler" schemaVersion="1.6.3" url="http://www.keil.com/pack/" vendor="Keil" version="1.6.3"/>
+      <component Cbundle="ARM Compiler" Cclass="Compiler" Cgroup="Event Recorder" Cvariant="DAP" Cvendor="Keil" Cversion="1.5.1" condition="Cortex-M Device">
+        <package name="ARM_Compiler" schemaVersion="1.7.7" url="https://www.keil.com/pack/" vendor="Keil" version="1.7.2"/>
+        <targetInfos>
+          <targetInfo name="TBv2b" versionMatchMode=""/>
+        </targetInfos>
+      </component>
+      <component Cbundle="ARM Compiler" Cclass="Compiler" Cgroup="I/O" Csub="File" Cvariant="File System" Cvendor="Keil" Cversion="1.2.0" condition="ARMCC Cortex-M with File System">
+        <package name="ARM_Compiler" schemaVersion="1.7.7" url="https://www.keil.com/pack/" vendor="Keil" version="1.7.2"/>
+        <targetInfos>
+          <targetInfo name="TBv2b" versionMatchMode=""/>
+        </targetInfos>
+      </component>
+      <component Cbundle="ARM Compiler" Cclass="Compiler" Cgroup="I/O" Csub="STDERR" Cvariant="ITM" Cvendor="Keil" Cversion="1.2.0" condition="ARMCC Cortex-M with ITM">
+        <package name="ARM_Compiler" schemaVersion="1.7.7" url="https://www.keil.com/pack/" vendor="Keil" version="1.7.2"/>
         <targetInfos>
           <targetInfo name="TBv2b"/>
         </targetInfos>
       </component>
       <component Cbundle="ARM Compiler" Cclass="Compiler" Cgroup="I/O" Csub="STDOUT" Cvariant="ITM" Cvendor="Keil" Cversion="1.2.0" condition="ARMCC Cortex-M with ITM">
-        <package name="ARM_Compiler" schemaVersion="1.6.3" url="http://www.keil.com/pack/" vendor="Keil" version="1.6.3"/>
+        <package name="ARM_Compiler" schemaVersion="1.7.7" url="https://www.keil.com/pack/" vendor="Keil" version="1.7.2"/>
         <targetInfos>
-          <targetInfo excluded="1" name="TBv2b" versionMatchMode=""/>
+          <targetInfo name="TBv2b" versionMatchMode=""/>
         </targetInfos>
       </component>
-      <component Cbundle="MDK-Plus" Cclass="File System" Cgroup="CORE" Cvariant="LFN Debug" Cvendor="Keil" Cversion="6.14.1" condition="CMSIS Core with RTOS and File System I/O and Event Recorder">
-        <package name="MDK-Middleware" schemaVersion="1.4" url="http://www.keil.com/pack/" vendor="Keil" version="7.13.0"/>
+      <component Cbundle="MDK-Plus" Cclass="File System" Cgroup="CORE" Cvariant="LFN Debug" Cvendor="Keil" Cversion="6.15.0" condition="CMSIS Core with RTOS and File System I/O and Event Recorder">
+        <package name="MDK-Middleware" schemaVersion="1.7.7" url="https://www.keil.com/pack/" vendor="Keil" version="7.15.0"/>
         <targetInfos>
-          <targetInfo excluded="1" name="TBv2b" versionMatchMode=""/>
+          <targetInfo name="TBv2b" versionMatchMode=""/>
         </targetInfos>
       </component>
-      <component Cbundle="MDK-Plus" Cclass="File System" Cgroup="Drive" Csub="Memory Card" Cvendor="Keil" Cversion="6.14.1" condition="File System and SD/MMC Driver" maxInstances="2">
-        <package name="MDK-Middleware" schemaVersion="1.4" url="http://www.keil.com/pack/" vendor="Keil" version="7.13.0"/>
+      <component Cbundle="MDK-Plus" Cclass="File System" Cgroup="Drive" Csub="Memory Card" Cvendor="Keil" Cversion="6.15.0" condition="File System and SD/MMC Driver" maxInstances="2">
+        <package name="MDK-Middleware" schemaVersion="1.7.7" url="https://www.keil.com/pack/" vendor="Keil" version="7.15.0"/>
         <targetInfos>
-          <targetInfo excluded="1" name="TBv2b" versionMatchMode=""/>
+          <targetInfo name="TBv2b" versionMatchMode=""/>
         </targetInfos>
       </component>
-      <component Cbundle="MDK-Plus" Cclass="USB" Cgroup="CORE" Cvariant="Debug" Cvendor="Keil" Cversion="6.15.0" condition="USB Core and Event Recorder">
-        <package name="MDK-Middleware" schemaVersion="1.4" url="http://www.keil.com/pack/" vendor="Keil" version="7.13.0"/>
+      <component Cbundle="MDK-Plus" Cclass="USB" Cgroup="CORE" Cvariant="Debug" Cvendor="Keil" Cversion="6.16.0" condition="CMSIS Core with RTOS and Event Recorder">
+        <package name="MDK-Middleware" schemaVersion="1.7.7" url="https://www.keil.com/pack/" vendor="Keil" version="7.15.0"/>
         <targetInfos>
-          <targetInfo excluded="1" name="TBv2b" versionMatchMode=""/>
+          <targetInfo name="TBv2b" versionMatchMode=""/>
         </targetInfos>
       </component>
-      <component Cbundle="MDK-Plus" Cclass="USB" Cgroup="Device" Cvendor="Keil" Cversion="6.15.0" condition="USB Core and Device Instance and Device Driver" maxInstances="4">
-        <package name="MDK-Middleware" schemaVersion="1.4" url="http://www.keil.com/pack/" vendor="Keil" version="7.13.0"/>
+      <component Cbundle="MDK-Plus" Cclass="USB" Cgroup="Device" Cvendor="Keil" Cversion="6.16.0" condition="USB Core and Device Driver and Class Instance" maxInstances="4">
+        <package name="MDK-Middleware" schemaVersion="1.7.7" url="https://www.keil.com/pack/" vendor="Keil" version="7.15.0"/>
         <targetInfos>
-          <targetInfo excluded="1" name="TBv2b" versionMatchMode=""/>
+          <targetInfo name="TBv2b" versionMatchMode=""/>
         </targetInfos>
       </component>
-      <component Cbundle="MDK-Plus" Cclass="USB" Cgroup="Device" Csub="MSC" Cvendor="Keil" Cversion="6.15.0" condition="USB Core and Device Instance and Device Driver" maxInstances="4">
-        <package name="MDK-Middleware" schemaVersion="1.4" url="http://www.keil.com/pack/" vendor="Keil" version="7.13.0"/>
+      <component Cbundle="MDK-Plus" Cclass="USB" Cgroup="Device" Csub="MSC" Cvendor="Keil" Cversion="6.16.0" condition="USB Core and Device Instance and Device Driver" maxInstances="4">
+        <package name="MDK-Middleware" schemaVersion="1.7.7" url="https://www.keil.com/pack/" vendor="Keil" version="7.15.0"/>
         <targetInfos>
-          <targetInfo excluded="1" name="TBv2b" versionMatchMode=""/>
+          <targetInfo name="TBv2b" versionMatchMode=""/>
         </targetInfos>
       </component>
       <component Capiversion="2.0.0" Cclass="CMSIS Driver" Cgroup="Flash" Csub="AT45DB641E" Cvendor="Keil" Cversion="1.3.0" condition="CMSIS Core and SPI Driver">
-        <package name="CMSIS-Driver" schemaVersion="1.4.9" url="http://www.keil.com/pack/" vendor="ARM" version="2.6.1"/>
+        <package name="CMSIS-Driver" schemaVersion="1.7.7" url="http://www.keil.com/pack/" vendor="ARM" version="2.7.1"/>
         <targetInfos>
           <targetInfo excluded="1" name="TBv2b" versionMatchMode=""/>
         </targetInfos>
       </component>
       <component Capiversion="2.0.0" Cclass="CMSIS Driver" Cgroup="Flash" Csub="AT45DB642D" Cvendor="Keil" Cversion="1.3.0" condition="CMSIS Core and SPI Driver">
-        <package name="CMSIS-Driver" schemaVersion="1.4.9" url="http://www.keil.com/pack/" vendor="ARM" version="2.6.1"/>
+        <package name="CMSIS-Driver" schemaVersion="1.7.7" url="http://www.keil.com/pack/" vendor="ARM" version="2.7.1"/>
         <targetInfos>
           <targetInfo excluded="1" name="TBv2b" versionMatchMode="">
             <c>
@@ -2061,141 +1386,141 @@
         </targetInfos>
       </component>
       <component Capiversion="2.0.0" Cclass="CMSIS Driver" Cgroup="Flash" Csub="N25Q032A" Cvendor="Keil" Cversion="1.1.0" condition="CMSIS Core and SPI Driver">
-        <package name="CMSIS-Driver" schemaVersion="1.4.9" url="http://www.keil.com/pack/" vendor="ARM" version="2.6.1"/>
+        <package name="CMSIS-Driver" schemaVersion="1.7.7" url="http://www.keil.com/pack/" vendor="ARM" version="2.7.1"/>
         <targetInfos>
           <targetInfo excluded="1" name="TBv2b" versionMatchMode=""/>
         </targetInfos>
       </component>
-      <component Capiversion="2.2" Cclass="CMSIS Driver" Cgroup="I2C" Cvendor="Keil" Cversion="2.10" condition="STM32F4 CMSIS_Driver I2C">
-        <package name="STM32F4xx_DFP" schemaVersion="1.6.3" url="http://www.keil.com/pack/" vendor="Keil" version="2.15.0"/>
+      <component Capiversion="2.2" Cclass="CMSIS Driver" Cgroup="I2C" Cvendor="Keil" Cversion="2.11" condition="STM32F4 CMSIS_Driver I2C">
+        <package name="STM32F4xx_DFP" schemaVersion="1.7.2" url="http://www.keil.com/pack/" vendor="Keil" version="2.16.0"/>
+        <targetInfos>
+          <targetInfo name="TBv2b" versionMatchMode=""/>
+        </targetInfos>
+      </component>
+      <component Capiversion="2.2" Cclass="CMSIS Driver" Cgroup="MCI" Cvendor="Keil" Cversion="2.10" condition="STM32F4 CMSIS_Driver MCI">
+        <package name="STM32F4xx_DFP" schemaVersion="1.7.2" url="http://www.keil.com/pack/" vendor="Keil" version="2.16.0"/>
+        <targetInfos>
+          <targetInfo name="TBv2b" versionMatchMode=""/>
+        </targetInfos>
+      </component>
+      <component Capiversion="2.1" Cclass="CMSIS Driver" Cgroup="SPI" Cvendor="Keil" Cversion="2.16" condition="STM32F4 CMSIS_Driver SPI">
+        <package name="STM32F4xx_DFP" schemaVersion="1.7.2" url="http://www.keil.com/pack/" vendor="Keil" version="2.16.0"/>
+        <targetInfos>
+          <targetInfo name="TBv2b" versionMatchMode=""/>
+        </targetInfos>
+      </component>
+      <component Capiversion="2.1" Cclass="CMSIS Driver" Cgroup="USB Device" Csub="Full-speed" Cvendor="Keil" Cversion="2.22" condition="STM32F4 CMSIS_Driver USB0">
+        <package name="STM32F4xx_DFP" schemaVersion="1.7.2" url="http://www.keil.com/pack/" vendor="Keil" version="2.16.0"/>
+        <targetInfos>
+          <targetInfo name="TBv2b" versionMatchMode=""/>
+        </targetInfos>
+      </component>
+      <component Capiversion="1.0.0" Cclass="Device" Cgroup="STM32Cube Framework" Csub="Classic" Cvendor="Keil" Cversion="1.7.13" condition="STM32F4 Framework Classic">
+        <package name="STM32F4xx_DFP" schemaVersion="1.7.2" url="http://www.keil.com/pack/" vendor="Keil" version="2.16.0"/>
+        <targetInfos>
+          <targetInfo name="TBv2b" versionMatchMode=""/>
+        </targetInfos>
+      </component>
+      <component Cclass="Device" Cgroup="STM32Cube HAL" Csub="ADC" Cvendor="Keil" Cversion="1.7.13" condition="STM32F4 HAL DMA">
+        <package name="STM32F4xx_DFP" schemaVersion="1.7.2" url="http://www.keil.com/pack/" vendor="Keil" version="2.16.0"/>
         <targetInfos>
           <targetInfo excluded="1" name="TBv2b" versionMatchMode=""/>
         </targetInfos>
       </component>
-      <component Capiversion="2.2" Cclass="CMSIS Driver" Cgroup="MCI" Cvendor="Keil" Cversion="2.9" condition="STM32F4 CMSIS_Driver MCI">
-        <package name="STM32F4xx_DFP" schemaVersion="1.6.3" url="http://www.keil.com/pack/" vendor="Keil" version="2.15.0"/>
+      <component Cclass="Device" Cgroup="STM32Cube HAL" Csub="Common" Cvendor="Keil" Cversion="1.7.13" condition="STM32F4 HAL Common">
+        <package name="STM32F4xx_DFP" schemaVersion="1.7.2" url="http://www.keil.com/pack/" vendor="Keil" version="2.16.0"/>
+        <targetInfos>
+          <targetInfo name="TBv2b" versionMatchMode=""/>
+        </targetInfos>
+      </component>
+      <component Cclass="Device" Cgroup="STM32Cube HAL" Csub="Cortex" Cvendor="Keil" Cversion="1.7.13" condition="STM32F4 HAL">
+        <package name="STM32F4xx_DFP" schemaVersion="1.7.2" url="http://www.keil.com/pack/" vendor="Keil" version="2.16.0"/>
+        <targetInfos>
+          <targetInfo name="TBv2b" versionMatchMode=""/>
+        </targetInfos>
+      </component>
+      <component Cclass="Device" Cgroup="STM32Cube HAL" Csub="DMA" Cvendor="Keil" Cversion="1.7.13" condition="STM32F4 HAL">
+        <package name="STM32F4xx_DFP" schemaVersion="1.7.2" url="http://www.keil.com/pack/" vendor="Keil" version="2.16.0"/>
+        <targetInfos>
+          <targetInfo name="TBv2b" versionMatchMode=""/>
+        </targetInfos>
+      </component>
+      <component Cclass="Device" Cgroup="STM32Cube HAL" Csub="Flash" Cvendor="Keil" Cversion="1.7.13" condition="STM32F4 HAL">
+        <package name="STM32F4xx_DFP" schemaVersion="1.7.2" url="http://www.keil.com/pack/" vendor="Keil" version="2.16.0"/>
         <targetInfos>
           <targetInfo excluded="1" name="TBv2b" versionMatchMode=""/>
         </targetInfos>
       </component>
-      <component Capiversion="2.1" Cclass="CMSIS Driver" Cgroup="SPI" Cvendor="Keil" Cversion="2.15" condition="STM32F4 CMSIS_Driver SPI">
-        <package name="STM32F4xx_DFP" schemaVersion="1.6.3" url="http://www.keil.com/pack/" vendor="Keil" version="2.15.0"/>
+      <component Cclass="Device" Cgroup="STM32Cube HAL" Csub="GPIO" Cvendor="Keil" Cversion="1.7.13" condition="STM32F4 HAL">
+        <package name="STM32F4xx_DFP" schemaVersion="1.7.2" url="http://www.keil.com/pack/" vendor="Keil" version="2.16.0"/>
+        <targetInfos>
+          <targetInfo name="TBv2b" versionMatchMode=""/>
+        </targetInfos>
+      </component>
+      <component Cclass="Device" Cgroup="STM32Cube HAL" Csub="I2C" Cvendor="Keil" Cversion="1.7.13" condition="STM32F4 HAL DMA RCC">
+        <package name="STM32F4xx_DFP" schemaVersion="1.7.2" url="http://www.keil.com/pack/" vendor="Keil" version="2.16.0"/>
+        <targetInfos>
+          <targetInfo name="TBv2b" versionMatchMode=""/>
+        </targetInfos>
+      </component>
+      <component Cclass="Device" Cgroup="STM32Cube HAL" Csub="NAND" Cvendor="Keil" Cversion="1.7.13" condition="STM32F40_41_412_42_43_44_46_47x HAL">
+        <package name="STM32F4xx_DFP" schemaVersion="1.7.2" url="http://www.keil.com/pack/" vendor="Keil" version="2.16.0"/>
         <targetInfos>
           <targetInfo excluded="1" name="TBv2b" versionMatchMode=""/>
         </targetInfos>
       </component>
-      <component Capiversion="2.1" Cclass="CMSIS Driver" Cgroup="USB Device" Csub="Full-speed" Cvendor="Keil" Cversion="2.21" condition="STM32F4 CMSIS_Driver USB0">
-        <package name="STM32F4xx_DFP" schemaVersion="1.6.3" url="http://www.keil.com/pack/" vendor="Keil" version="2.15.0"/>
+      <component Cclass="Device" Cgroup="STM32Cube HAL" Csub="NOR" Cvendor="Keil" Cversion="1.7.13" condition="STM32F40_41_412_42_43_44_46_47x_4x3 HAL">
+        <package name="STM32F4xx_DFP" schemaVersion="1.7.2" url="http://www.keil.com/pack/" vendor="Keil" version="2.16.0"/>
         <targetInfos>
           <targetInfo excluded="1" name="TBv2b" versionMatchMode=""/>
         </targetInfos>
       </component>
-      <component Capiversion="1.0.0" Cclass="Device" Cgroup="STM32Cube Framework" Csub="Classic" Cvendor="Keil" Cversion="1.7.9" condition="STM32F4 Framework Classic">
-        <package name="STM32F4xx_DFP" schemaVersion="1.6.3" url="http://www.keil.com/pack/" vendor="Keil" version="2.15.0"/>
+      <component Cclass="Device" Cgroup="STM32Cube HAL" Csub="PWR" Cvendor="Keil" Cversion="1.7.13" condition="STM32F4 HAL">
+        <package name="STM32F4xx_DFP" schemaVersion="1.7.2" url="http://www.keil.com/pack/" vendor="Keil" version="2.16.0"/>
         <targetInfos>
-          <targetInfo excluded="1" name="TBv2b" versionMatchMode=""/>
+          <targetInfo name="TBv2b" versionMatchMode=""/>
         </targetInfos>
       </component>
-      <component Cclass="Device" Cgroup="STM32Cube HAL" Csub="ADC" Cvendor="Keil" Cversion="1.7.9" condition="STM32F4 HAL DMA">
-        <package name="STM32F4xx_DFP" schemaVersion="1.6.3" url="http://www.keil.com/pack/" vendor="Keil" version="2.15.0"/>
+      <component Cclass="Device" Cgroup="STM32Cube HAL" Csub="QSPI" Cvendor="Keil" Cversion="1.7.13" condition="STM32F412_44_46_47x_4x3 HAL DMA">
+        <package name="STM32F4xx_DFP" schemaVersion="1.7.2" url="http://www.keil.com/pack/" vendor="Keil" version="2.16.0"/>
         <targetInfos>
-          <targetInfo excluded="1" name="TBv2b" versionMatchMode=""/>
+          <targetInfo name="TBv2b" versionMatchMode=""/>
         </targetInfos>
       </component>
-      <component Cclass="Device" Cgroup="STM32Cube HAL" Csub="Common" Cvendor="Keil" Cversion="1.7.9" condition="STM32F4 HAL Common">
-        <package name="STM32F4xx_DFP" schemaVersion="1.6.3" url="http://www.keil.com/pack/" vendor="Keil" version="2.15.0"/>
+      <component Cclass="Device" Cgroup="STM32Cube HAL" Csub="RCC" Cvendor="Keil" Cversion="1.7.13" condition="STM32F4 HAL GPIO">
+        <package name="STM32F4xx_DFP" schemaVersion="1.7.2" url="http://www.keil.com/pack/" vendor="Keil" version="2.16.0"/>
         <targetInfos>
-          <targetInfo excluded="1" name="TBv2b" versionMatchMode=""/>
+          <targetInfo name="TBv2b" versionMatchMode=""/>
         </targetInfos>
       </component>
-      <component Cclass="Device" Cgroup="STM32Cube HAL" Csub="Cortex" Cvendor="Keil" Cversion="1.7.9" condition="STM32F4 HAL">
-        <package name="STM32F4xx_DFP" schemaVersion="1.6.3" url="http://www.keil.com/pack/" vendor="Keil" version="2.15.0"/>
+      <component Cclass="Device" Cgroup="STM32Cube HAL" Csub="SPI" Cvendor="Keil" Cversion="1.7.13" condition="STM32F4 HAL DMA">
+        <package name="STM32F4xx_DFP" schemaVersion="1.7.2" url="http://www.keil.com/pack/" vendor="Keil" version="2.16.0"/>
         <targetInfos>
-          <targetInfo excluded="1" name="TBv2b" versionMatchMode=""/>
-        </targetInfos>
-      </component>
-      <component Cclass="Device" Cgroup="STM32Cube HAL" Csub="DMA" Cvendor="Keil" Cversion="1.7.9" condition="STM32F4 HAL">
-        <package name="STM32F4xx_DFP" schemaVersion="1.6.3" url="http://www.keil.com/pack/" vendor="Keil" version="2.15.0"/>
-        <targetInfos>
-          <targetInfo excluded="1" name="TBv2b" versionMatchMode=""/>
-        </targetInfos>
-      </component>
-      <component Cclass="Device" Cgroup="STM32Cube HAL" Csub="Flash" Cvendor="Keil" Cversion="1.7.9" condition="STM32F4 HAL">
-        <package name="STM32F4xx_DFP" schemaVersion="1.6.3" url="http://www.keil.com/pack/" vendor="Keil" version="2.15.0"/>
-        <targetInfos>
-          <targetInfo excluded="1" name="TBv2b" versionMatchMode=""/>
-        </targetInfos>
-      </component>
-      <component Cclass="Device" Cgroup="STM32Cube HAL" Csub="GPIO" Cvendor="Keil" Cversion="1.7.9" condition="STM32F4 HAL">
-        <package name="STM32F4xx_DFP" schemaVersion="1.6.3" url="http://www.keil.com/pack/" vendor="Keil" version="2.15.0"/>
-        <targetInfos>
-          <targetInfo excluded="1" name="TBv2b" versionMatchMode=""/>
-        </targetInfos>
-      </component>
-      <component Cclass="Device" Cgroup="STM32Cube HAL" Csub="I2C" Cvendor="Keil" Cversion="1.7.9" condition="STM32F4 HAL DMA RCC">
-        <package name="STM32F4xx_DFP" schemaVersion="1.6.3" url="http://www.keil.com/pack/" vendor="Keil" version="2.15.0"/>
-        <targetInfos>
-          <targetInfo excluded="1" name="TBv2b" versionMatchMode=""/>
-        </targetInfos>
-      </component>
-      <component Cclass="Device" Cgroup="STM32Cube HAL" Csub="NAND" Cvendor="Keil" Cversion="1.7.9" condition="STM32F40_41_412_42_43_44_46_47x HAL">
-        <package name="STM32F4xx_DFP" schemaVersion="1.6.3" url="http://www.keil.com/pack/" vendor="Keil" version="2.15.0"/>
-        <targetInfos>
-          <targetInfo excluded="1" name="TBv2b" versionMatchMode=""/>
-        </targetInfos>
-      </component>
-      <component Cclass="Device" Cgroup="STM32Cube HAL" Csub="NOR" Cvendor="Keil" Cversion="1.7.9" condition="STM32F40_41_412_42_43_44_46_47x_4x3 HAL">
-        <package name="STM32F4xx_DFP" schemaVersion="1.6.3" url="http://www.keil.com/pack/" vendor="Keil" version="2.15.0"/>
-        <targetInfos>
-          <targetInfo excluded="1" name="TBv2b" versionMatchMode=""/>
-        </targetInfos>
-      </component>
-      <component Cclass="Device" Cgroup="STM32Cube HAL" Csub="PWR" Cvendor="Keil" Cversion="1.7.9" condition="STM32F4 HAL">
-        <package name="STM32F4xx_DFP" schemaVersion="1.6.3" url="http://www.keil.com/pack/" vendor="Keil" version="2.15.0"/>
-        <targetInfos>
-          <targetInfo excluded="1" name="TBv2b" versionMatchMode=""/>
-        </targetInfos>
-      </component>
-      <component Cclass="Device" Cgroup="STM32Cube HAL" Csub="QSPI" Cvendor="Keil" Cversion="1.7.9" condition="STM32F412_44_46_47x_4x3 HAL DMA">
-        <package name="STM32F4xx_DFP" schemaVersion="1.6.3" url="http://www.keil.com/pack/" vendor="Keil" version="2.15.0"/>
-        <targetInfos>
-          <targetInfo excluded="1" name="TBv2b" versionMatchMode=""/>
-        </targetInfos>
-      </component>
-      <component Cclass="Device" Cgroup="STM32Cube HAL" Csub="RCC" Cvendor="Keil" Cversion="1.7.9" condition="STM32F4 HAL GPIO">
-        <package name="STM32F4xx_DFP" schemaVersion="1.6.3" url="http://www.keil.com/pack/" vendor="Keil" version="2.15.0"/>
-        <targetInfos>
-          <targetInfo excluded="1" name="TBv2b" versionMatchMode=""/>
-        </targetInfos>
-      </component>
-      <component Cclass="Device" Cgroup="STM32Cube HAL" Csub="SPI" Cvendor="Keil" Cversion="1.7.9" condition="STM32F4 HAL DMA">
-        <package name="STM32F4xx_DFP" schemaVersion="1.6.3" url="http://www.keil.com/pack/" vendor="Keil" version="2.15.0"/>
-        <targetInfos>
-          <targetInfo excluded="1" name="TBv2b" versionMatchMode=""/>
+          <targetInfo name="TBv2b" versionMatchMode=""/>
         </targetInfos>
       </component>
       <component Cclass="Device" Cgroup="Startup" Cvendor="Keil" Cversion="2.6.3" condition="STM32F4 CMSIS">
-        <package name="STM32F4xx_DFP" schemaVersion="1.6.3" url="http://www.keil.com/pack/" vendor="Keil" version="2.15.0"/>
+        <package name="STM32F4xx_DFP" schemaVersion="1.7.2" url="http://www.keil.com/pack/" vendor="Keil" version="2.16.0"/>
         <targetInfos>
-          <targetInfo excluded="1" name="TBv2b" versionMatchMode=""/>
+          <targetInfo name="TBv2b" versionMatchMode=""/>
         </targetInfos>
       </component>
     </components>
     <files>
       <file attr="config" category="source" name="CMSIS\RTOS2\RTX\Config\RTX_Config.c" version="5.1.0">
         <instance index="0">RTE\CMSIS\RTX_Config.c</instance>
-        <component Capiversion="2.1.3" Cclass="CMSIS" Cgroup="RTOS2" Csub="Keil RTX5" Cvariant="Source" Cvendor="ARM" Cversion="5.5.2" condition="RTOS2 RTX5"/>
-        <package name="CMSIS" schemaVersion="1.3" url="http://www.keil.com/pack/" vendor="ARM" version="5.7.0"/>
+        <component Capiversion="2.1.3" Cclass="CMSIS" Cgroup="RTOS2" Csub="Keil RTX5" Cvariant="Source" Cvendor="ARM" Cversion="5.5.4" condition="RTOS2 RTX5"/>
+        <package name="CMSIS" schemaVersion="1.7.7" url="http://www.keil.com/pack/" vendor="ARM" version="5.9.0"/>
         <targetInfos>
-          <targetInfo excluded="1" name="TBv2b"/>
+          <targetInfo name="TBv2b"/>
         </targetInfos>
       </file>
       <file attr="config" category="header" name="CMSIS\RTOS2\RTX\Config\RTX_Config.h" version="5.5.1">
         <instance index="0">RTE\CMSIS\RTX_Config.h</instance>
-        <component Capiversion="2.1.3" Cclass="CMSIS" Cgroup="RTOS2" Csub="Keil RTX5" Cvariant="Source" Cvendor="ARM" Cversion="5.5.2" condition="RTOS2 RTX5"/>
-        <package name="CMSIS" schemaVersion="1.3" url="http://www.keil.com/pack/" vendor="ARM" version="5.7.0"/>
+        <component Capiversion="2.1.3" Cclass="CMSIS" Cgroup="RTOS2" Csub="Keil RTX5" Cvariant="Source" Cvendor="ARM" Cversion="5.5.4" condition="RTOS2 RTX5"/>
+        <package name="CMSIS" schemaVersion="1.7.7" url="http://www.keil.com/pack/" vendor="ARM" version="5.9.0"/>
         <targetInfos>
-          <targetInfo excluded="1" name="TBv2b"/>
+          <targetInfo name="TBv2b"/>
         </targetInfos>
       </file>
       <file attr="config" category="header" name="Config\NAND_MemBus_Config.h" version="1.0.0">
@@ -2206,10 +1531,10 @@
       </file>
       <file attr="config" category="header" name="Config\EventRecorderConf.h" version="1.1.0">
         <instance index="0">RTE\Compiler\EventRecorderConf.h</instance>
-        <component Cbundle="ARM Compiler" Cclass="Compiler" Cgroup="Event Recorder" Cvariant="DAP" Cvendor="Keil" Cversion="1.4.0" condition="Cortex-M Device"/>
-        <package name="ARM_Compiler" schemaVersion="1.6.3" url="http://www.keil.com/pack/" vendor="Keil" version="1.6.3"/>
+        <component Cbundle="ARM Compiler" Cclass="Compiler" Cgroup="Event Recorder" Cvariant="DAP" Cvendor="Keil" Cversion="1.5.1" condition="Cortex-M Device"/>
+        <package name="ARM_Compiler" schemaVersion="1.7.7" url="https://www.keil.com/pack/" vendor="Keil" version="1.7.2"/>
         <targetInfos>
-          <targetInfo excluded="1" name="TBv2b"/>
+          <targetInfo name="TBv2b"/>
         </targetInfos>
       </file>
       <file attr="config" category="header" name="RTE_Driver\Config\RTE_Device.h" version="1.1.2">
@@ -2232,50 +1557,50 @@
       </file>
       <file attr="config" category="header" name="CMSIS\Driver\Config\RTE_Device.h" version="2.4.5">
         <instance index="0">RTE\Device\STM32F412VETx\RTE_Device.h</instance>
-        <component Capiversion="1.0.0" Cclass="Device" Cgroup="STM32Cube Framework" Csub="Classic" Cvendor="Keil" Cversion="1.7.9" condition="STM32F4 Framework Classic"/>
-        <package name="STM32F4xx_DFP" schemaVersion="1.6.3" url="http://www.keil.com/pack/" vendor="Keil" version="2.15.0"/>
+        <component Capiversion="1.0.0" Cclass="Device" Cgroup="STM32Cube Framework" Csub="Classic" Cvendor="Keil" Cversion="1.7.13" condition="STM32F4 Framework Classic"/>
+        <package name="STM32F4xx_DFP" schemaVersion="1.7.2" url="http://www.keil.com/pack/" vendor="Keil" version="2.16.0"/>
         <targetInfos>
-          <targetInfo excluded="1" name="TBv2b"/>
+          <targetInfo name="TBv2b"/>
         </targetInfos>
       </file>
       <file attr="config" category="source" condition="STM32F412Vx_ARMCC" name="Drivers\CMSIS\Device\ST\STM32F4xx\Source\Templates\arm\startup_stm32f412vx.s" version="2.6.2">
         <instance index="0">RTE\Device\STM32F412VETx\startup_stm32f412vx.s</instance>
         <component Cclass="Device" Cgroup="Startup" Cvendor="Keil" Cversion="2.6.3" condition="STM32F4 CMSIS"/>
-        <package name="STM32F4xx_DFP" schemaVersion="1.6.3" url="http://www.keil.com/pack/" vendor="Keil" version="2.15.0"/>
+        <package name="STM32F4xx_DFP" schemaVersion="1.7.2" url="http://www.keil.com/pack/" vendor="Keil" version="2.16.0"/>
         <targetInfos>
-          <targetInfo excluded="1" name="TBv2b"/>
+          <targetInfo name="TBv2b"/>
         </targetInfos>
       </file>
       <file attr="config" category="header" name="MDK\Templates\Inc\stm32f4xx_hal_conf.h" version="1.7.9">
         <instance index="0">RTE\Device\STM32F412VETx\stm32f4xx_hal_conf.h</instance>
-        <component Capiversion="1.0.0" Cclass="Device" Cgroup="STM32Cube Framework" Csub="Classic" Cvendor="Keil" Cversion="1.7.9" condition="STM32F4 Framework Classic"/>
-        <package name="STM32F4xx_DFP" schemaVersion="1.6.3" url="http://www.keil.com/pack/" vendor="Keil" version="2.15.0"/>
+        <component Capiversion="1.0.0" Cclass="Device" Cgroup="STM32Cube Framework" Csub="Classic" Cvendor="Keil" Cversion="1.7.13" condition="STM32F4 Framework Classic"/>
+        <package name="STM32F4xx_DFP" schemaVersion="1.7.2" url="http://www.keil.com/pack/" vendor="Keil" version="2.16.0"/>
         <targetInfos>
-          <targetInfo excluded="1" name="TBv2b"/>
+          <targetInfo name="TBv2b"/>
         </targetInfos>
       </file>
       <file attr="config" category="source" name="Drivers\CMSIS\Device\ST\STM32F4xx\Source\Templates\system_stm32f4xx.c" version="2.6.2">
         <instance index="0">RTE\Device\STM32F412VETx\system_stm32f4xx.c</instance>
         <component Cclass="Device" Cgroup="Startup" Cvendor="Keil" Cversion="2.6.3" condition="STM32F4 CMSIS"/>
-        <package name="STM32F4xx_DFP" schemaVersion="1.6.3" url="http://www.keil.com/pack/" vendor="Keil" version="2.15.0"/>
+        <package name="STM32F4xx_DFP" schemaVersion="1.7.2" url="http://www.keil.com/pack/" vendor="Keil" version="2.16.0"/>
         <targetInfos>
-          <targetInfo excluded="1" name="TBv2b"/>
+          <targetInfo name="TBv2b"/>
         </targetInfos>
       </file>
       <file attr="config" category="source" name="FileSystem\Config\FS_Config.c" version="6.3.0">
         <instance index="0">RTE\File_System\FS_Config.c</instance>
-        <component Cbundle="MDK-Plus" Cclass="File System" Cgroup="CORE" Cvariant="LFN Debug" Cvendor="Keil" Cversion="6.14.1" condition="CMSIS Core with RTOS and File System I/O and Event Recorder"/>
-        <package name="MDK-Middleware" schemaVersion="1.4" url="http://www.keil.com/pack/" vendor="Keil" version="7.13.0"/>
+        <component Cbundle="MDK-Plus" Cclass="File System" Cgroup="CORE" Cvariant="LFN Debug" Cvendor="Keil" Cversion="6.15.0" condition="CMSIS Core with RTOS and File System I/O and Event Recorder"/>
+        <package name="MDK-Middleware" schemaVersion="1.7.7" url="https://www.keil.com/pack/" vendor="Keil" version="7.15.0"/>
         <targetInfos>
-          <targetInfo excluded="1" name="TBv2b"/>
+          <targetInfo name="TBv2b"/>
         </targetInfos>
       </file>
       <file attr="config" category="header" name="FileSystem\Config\FS_Config_MC.h" version="6.2.0">
         <instance index="0">RTE\File_System\FS_Config_MC_0.h</instance>
-        <component Cbundle="MDK-Plus" Cclass="File System" Cgroup="Drive" Csub="Memory Card" Cvendor="Keil" Cversion="6.14.1" condition="File System and SD/MMC Driver" maxInstances="2"/>
-        <package name="MDK-Middleware" schemaVersion="1.4" url="http://www.keil.com/pack/" vendor="Keil" version="7.13.0"/>
+        <component Cbundle="MDK-Plus" Cclass="File System" Cgroup="Drive" Csub="Memory Card" Cvendor="Keil" Cversion="6.15.0" condition="File System and SD/MMC Driver" maxInstances="2"/>
+        <package name="MDK-Middleware" schemaVersion="1.7.7" url="https://www.keil.com/pack/" vendor="Keil" version="7.15.0"/>
         <targetInfos>
-          <targetInfo excluded="1" name="TBv2b"/>
+          <targetInfo name="TBv2b"/>
         </targetInfos>
       </file>
       <file attr="config" category="header" name="FileSystem\Config\FS_Config_MC.h" version="6.2.0">
@@ -2298,10 +1623,10 @@
       </file>
       <file attr="config" category="source" name="FileSystem\Config\FS_Debug.c" version="1.0.0">
         <instance index="0">RTE\File_System\FS_Debug.c</instance>
-        <component Cbundle="MDK-Plus" Cclass="File System" Cgroup="CORE" Cvariant="LFN Debug" Cvendor="Keil" Cversion="6.14.1" condition="CMSIS Core with RTOS and File System I/O and Event Recorder"/>
-        <package name="MDK-Middleware" schemaVersion="1.4" url="http://www.keil.com/pack/" vendor="Keil" version="7.13.0"/>
+        <component Cbundle="MDK-Plus" Cclass="File System" Cgroup="CORE" Cvariant="LFN Debug" Cvendor="Keil" Cversion="6.15.0" condition="CMSIS Core with RTOS and File System I/O and Event Recorder"/>
+        <package name="MDK-Middleware" schemaVersion="1.7.7" url="https://www.keil.com/pack/" vendor="Keil" version="7.15.0"/>
         <targetInfos>
-          <targetInfo excluded="1" name="TBv2b"/>
+          <targetInfo name="TBv2b"/>
         </targetInfos>
       </file>
       <file attr="config" category="header" name="configs\mbedTLS_config.h" version="1.0.0">
@@ -2309,23 +1634,23 @@
         <component Cclass="Security" Cgroup="mbed Crypto" Cvendor="ARM" Cversion="3.0.1"/>
         <package name="mbedCrypto" schemaVersion="1.6" url="https://github.com/MDK-Packs/Pack/raw/master/mbedCrypto/" vendor="ARM" version="3.0.1"/>
         <targetInfos>
-          <targetInfo excluded="1" name="TBv2b"/>
+          <targetInfo name="TBv2b"/>
         </targetInfos>
       </file>
       <file attr="config" category="source" name="USB\Config\USBD_Config.c" version="5.2.0">
         <instance index="0">RTE\USB\USBD_Config_0.c</instance>
-        <component Cbundle="MDK-Plus" Cclass="USB" Cgroup="Device" Cvendor="Keil" Cversion="6.15.0" condition="USB Core and Device Instance and Device Driver" maxInstances="4"/>
-        <package name="MDK-Middleware" schemaVersion="1.4" url="http://www.keil.com/pack/" vendor="Keil" version="7.13.0"/>
+        <component Cbundle="MDK-Plus" Cclass="USB" Cgroup="Device" Cvendor="Keil" Cversion="6.16.0" condition="USB Core and Device Driver and Class Instance" maxInstances="4"/>
+        <package name="MDK-Middleware" schemaVersion="1.7.7" url="https://www.keil.com/pack/" vendor="Keil" version="7.15.0"/>
         <targetInfos>
-          <targetInfo excluded="1" name="TBv2b"/>
+          <targetInfo name="TBv2b"/>
         </targetInfos>
       </file>
       <file attr="config" category="header" name="USB\Config\USBD_Config_MSC.h" version="5.1.1">
         <instance index="0">RTE\USB\USBD_Config_MSC_0.h</instance>
-        <component Cbundle="MDK-Plus" Cclass="USB" Cgroup="Device" Csub="MSC" Cvendor="Keil" Cversion="6.15.0" condition="USB Core and Device Instance and Device Driver" maxInstances="4"/>
-        <package name="MDK-Middleware" schemaVersion="1.4" url="http://www.keil.com/pack/" vendor="Keil" version="7.13.0"/>
+        <component Cbundle="MDK-Plus" Cclass="USB" Cgroup="Device" Csub="MSC" Cvendor="Keil" Cversion="6.16.0" condition="USB Core and Device Instance and Device Driver" maxInstances="4"/>
+        <package name="MDK-Middleware" schemaVersion="1.7.7" url="https://www.keil.com/pack/" vendor="Keil" version="7.15.0"/>
         <targetInfos>
-          <targetInfo excluded="1" name="TBv2b"/>
+          <targetInfo name="TBv2b"/>
         </targetInfos>
       </file>
       <file attr="config" category="source" name="USB\Config\USBD_Config_MSC.h" version="5.1.1">
@@ -2348,10 +1673,10 @@
       </file>
       <file attr="config" category="source" name="USB\Config\USB_Debug.c" version="1.0.0">
         <instance index="0">RTE\USB\USB_Debug.c</instance>
-        <component Cbundle="MDK-Plus" Cclass="USB" Cgroup="CORE" Cvariant="Debug" Cvendor="Keil" Cversion="6.15.0" condition="USB Core and Event Recorder"/>
-        <package name="MDK-Middleware" schemaVersion="1.4" url="http://www.keil.com/pack/" vendor="Keil" version="7.13.0"/>
+        <component Cbundle="MDK-Plus" Cclass="USB" Cgroup="CORE" Cvariant="Debug" Cvendor="Keil" Cversion="6.16.0" condition="CMSIS Core with RTOS and Event Recorder"/>
+        <package name="MDK-Middleware" schemaVersion="1.7.7" url="https://www.keil.com/pack/" vendor="Keil" version="7.15.0"/>
         <targetInfos>
-          <targetInfo excluded="1" name="TBv2b"/>
+          <targetInfo name="TBv2b"/>
         </targetInfos>
       </file>
     </files>

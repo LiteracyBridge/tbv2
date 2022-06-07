@@ -28,6 +28,15 @@
 	#include "eventrecorder.h"   
 #endif
 
+// from Keil_v5/ARM/PACK/Keil/STM32F4xx_DFP/2.16.0/Release_notes.html
+// V1.26.2 / 16-July-2021
+// CMSIS updates
+// Remove unsupported “GPIOF_BASE” and “GPIOG_BASE” defines from STM32F412Vx device
+#define GPIOF_BASE            (AHB1PERIPH_BASE + 0x1400UL)
+#define GPIOG_BASE            (AHB1PERIPH_BASE + 0x1800UL)
+#define GPIOF               ((GPIO_TypeDef *) GPIOF_BASE)
+#define GPIOG               ((GPIO_TypeDef *) GPIOG_BASE)
+
 #include "tb_enum.h"			// GrpID, Event, Action
 #include "log.h"				// logEvt...
 #include "ledMgr.h"				// ledFg, ledBg

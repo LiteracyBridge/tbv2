@@ -13,7 +13,7 @@
 //#define UID_BASE                     0x1FFF7A10U           /*STM32F412 !< Unique device ID register base address */
 //	#include "I2C_STM32F4xx.h"			
 #include "stm32f4xx.h"
-#include "GPIO_STM32F4xx.h"
+#include "GPIO_STM32F4xx.h"           //JEB May2022 enum GPIO_MODE_INPUT etc now conflict with defs in stm32f4xx_hal_gpio.h
 
 // select audio codec device being used-- V2_Rev1: AK4637  V2_Rev3: AIC3100
 //#define AK4637

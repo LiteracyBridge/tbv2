@@ -90,7 +90,7 @@ void setBootMode(){	// use key to to select value for BootMode
     }
     // Nothing other than Tree and/or Table. Whether either or both of Tree or Table are still
     // pressed after a Tree+Table boot is not deterministic.
-    bool hwCleanBoot = (keysDetectedAtBoot & ~(1<<kTREE|1<<kTABLE)) == 0;
+//    bool hwCleanBoot = (keysDetectedAtBoot & ~(1<<kTREE|1<<kTABLE)) == 0;
     // Tree and/or Table + nothing else but Plus, etc.
     bool hwPlusBoot = (keysDetectedAtBoot & ~(1<<kTREE|1<<kTABLE)) == 1<<kPLUS;
     bool hwStarBoot = (keysDetectedAtBoot & ~(1<<kTREE|1<<kTABLE)) == 1<<kSTAR;

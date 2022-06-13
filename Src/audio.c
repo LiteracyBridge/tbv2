@@ -578,7 +578,7 @@ void								audLoadBuffs(){																// called on mediaThread to preload a
 extern bool BootVerboseLog;
 
 void 								audPlaybackComplete( void ) {									// shut down after completed playback
-  int pct;
+  int pct ;
   haltPlayback();     // updates tsPause & msPlayed
   audPlayDone();
   #ifdef _SQUARE_WAVE_SIMULATOR
@@ -605,9 +605,9 @@ void 								audPlaybackComplete( void ) {									// shut down after completed 
       
       // playback completed, report difference between measured & expected elapsed time
       if ( BootVerboseLog ) logEvtNI("Play_Tim", "dif_ms", pSt.msecLength - pSt.msPlayed );
-      sendEvent( AudioDone, pct );				// end of file playback-- generate CSM event
       pSt.stats->Finish++;
   }
+  sendEvent( AudioDone, pct );				// end of file playback-- generate CSM event
 }
 
 

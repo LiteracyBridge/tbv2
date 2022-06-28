@@ -305,6 +305,7 @@ void 								audAdjPlayPos( int32_t adj ){									// shift current playback pos
     if ( adj > 0 ) pSt.msFwd += adj*1000;
     if ( adj < 0 ) pSt.msBack -= adj*1000;
     logEvtNINI( "adjPos", "bySec", adj, "newMs", newMS );
+    printf("Adjust position by %d seconds, ms %d -> %d\n", adj, pSt.msPlayed, newMS);
     LOG_AUDIO_PLAY_JUMP(pSt.msecLength, pSt.msPlayed, adj*1000);
     setWavPos( newMS  );
   } else
@@ -727,6 +728,7 @@ static void					haltPlayback(){																// shutdown device, free buffs & 
       pSt.tsPause = tbRtcStamp();  // if pbDone, was saved by saiEvent
 
     msec = (pSt.tsPause - pSt.tsResume);		// (tsResume == tsPlay, if 1st pause)
+    printf("Adjusting msPlayed: %d -> %d\n", pSt.msPlayed, pSt.msPlayed + msec);
     pSt.msPlayed += msec;  	// update position
     pSt.state = pbPaused;
   } 
@@ -847,13 +849,17 @@ static void					setWavPos( int msec ){
   if ( msec < 0 ) msec = 0;
   int stSample = msec * pSt.samplesPerSec / 1000;					// sample to start at
   if ( stSample > pSt.nSamples ){
+      printf("Audio seek past EOF; finishing\n");
     audPlaybackComplete();
     return;
   }
   pSt.audioEOF = false;   // in case restarting near end
 
   int fpos = pSt.dataStartPos + pSt.bytesPerSample * stSample;
+  printf("Audio seek to %d (start: %d, BPS: %d, S: %d)\n", fpos, pSt.dataStartPos, pSt.bytesPerSample, stSample);
   fseek( pSt.audF, fpos, SEEK_SET );			// seek wav file to byte pos of stSample
+  // TODO: "msPlayed" is used here as "positionInMs". If that's what it really is, change the name!
+  pSt.msPlayed = msec;
   dbgEvt( TB_audSetWPos, msec, pSt.msecLength, pSt.nLoaded, stSample);
 
   pSt.nLoaded = stSample;		// so loadBuff() will know where it's at

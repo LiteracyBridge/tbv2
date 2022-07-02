@@ -13,12 +13,12 @@ const char * 	TBV2_Version 				= BUILD_VERSION; // like "V3.1 of Tue 11/16/21 11
 
 //
 // Thread stack sizes
-const int 		TBOOK_STACK_SIZE 		= 6144;		// init, becomes control manager
+const int 		TBOOK_STACK_SIZE 		= 4000;		// init, becomes control manager
 const int 		POWER_STACK_SIZE 		= 2048;
-const int 		INPUT_STACK_SIZE 		= 1024;
-const int 		MEDIA_STACK_SIZE 		= 4096;		// opens in/out files
-const int 		FILEOP_STACK_SIZE 	    = 6144;		// opens in/out files, mp3 decode
-const int 		LED_STACK_SIZE 			= 512;
+const int 		INPUT_STACK_SIZE 		= 512;
+const int 		MEDIA_STACK_SIZE 		= 3000;		// opens in/out files
+const int 		FILEOP_STACK_SIZE 	    = 9000;		// opens in/out files, mp3 decode
+const int 		LED_STACK_SIZE 			= 400;
 // RTX_Config.h  sets OS_TIMER_THREAD_STACK_SIZE = 512;  // used by timer callbacks:  powerCheckTimerCallback, checkKeyTimer, tbTimer
 
 const int	pBOOTCNT 			= 0; 

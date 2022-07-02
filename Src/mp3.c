@@ -155,10 +155,11 @@ static enum mad_flow 				error( void *st, struct mad_stream *stream, struct mad_
  * possible MAD_ERROR_* errors can be found in the mad.h (or stream.h)
  * header file.
  */	
-
-    mp3ErrCnt++;
     fpos_t errLoc;
     fgetpos( decoder_state.fwav, &errLoc );    // OUTput file position
+    if ( errLoc.__pos > 0 || stream->error != MAD_ERROR_LOSTSYNC ){
+        mp3ErrCnt++;
+    }
     if ( mp3ErrCnt==1 ){
         mp3FirstErrLoc = (int) (errLoc.__pos);
         mp3FirstErrMsg = (char *) mad_stream_errorstr( stream );

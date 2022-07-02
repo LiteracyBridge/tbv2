@@ -26,7 +26,9 @@ TBook_t TBook;
 osTimerId_t  	timers[3]; 	// ShortIdle, LongIdle, Timer
 void									setCSMcurrState( short iSt );  // set TBook.iCurrSt & dependent fields
 extern bool     BootVerboseLog;	
-bool            DecodeMP3 = false;  // if set, decode MP3's to Wav before entering CSM
+
+osEventFlagsId_t	mFileOpSignal;     // osEvent shared with FileOps -- to signal MP3 decode done
+bool                DecodeMP3 = true;  // if set, decode MP3's to Wav before entering CSM
 
 
 // ------------  CSM Action execution
@@ -600,6 +602,10 @@ void 									initControlManager( void ){				// initialize control manager
 	EventRecorderDisable( evrAOD, 			EvtFsCore_No,   EvtFsMcSPI_No );  //FileSys library 
 	EventRecorderDisable( evrAOD, 	 		EvtUsbdCore_No, EvtUsbdEnd_No ); 	//USB library 
 
+	mFileOpSignal = osEventFlagsNew(NULL);			// osEvent channel for signal when .WAV's are ready
+	if ( mFileOpSignal == NULL )
+		tbErr( "mFileOpSignal alloc failed" );	
+
     bool onlyQcLoaded = false;
     if ( !loadControlDef() ){   // load csm_data.txt if it's there
         preloadCSM();           // or use the preloaded version for QcTest
@@ -631,11 +637,10 @@ void 									initControlManager( void ){				// initialize control manager
         
         if ( DecodeMP3 ){
             decodeAudio();    // start fileOps thread checking for .mp3 files that haven't been decoded
-            while (true ){
-                if ( Mp3FilesToConvert==0 ) break;
-                tbDelay_ms(100);
-            }
-        }
+            
+            // and wait for signal when complete
+            uint32_t flags = osEventFlagsWait( mFileOpSignal, FILE_DECODE_DONE,  osFlagsWaitAny, osWaitForever );
+         }
         
 		for ( int it=0; it<3; it++ ){
 			timers[it] = osTimerNew( tbTimer, osTimerOnce, (void *)it, NULL );

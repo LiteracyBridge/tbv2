@@ -6,6 +6,7 @@
 #include <stdint.h>
 #include "mad.h"
 #include "tbook.h"
+#include "fileOps.h"
 
 const int BUFF_SIZ = 4096;
 const int MAX_WAV_BYTES = 16000*2*200;
@@ -22,6 +23,7 @@ typedef struct {		// decode state passed to mp3 callbacks
 } decoder_state_t;
 
 static decoder_state_t decoder_state; 
+const bool reportAllMp3Errs = false; // true;   // all files seem to get "lost sync" at start
 
 //
 static char *								wav_header( int hz, int ch, int bips, int data_bytes ){  										// => ptr to valid .wav header
@@ -46,35 +48,36 @@ static enum mad_flow 				input( void *st, struct mad_stream *stream ){										
  * This is the input callback. The purpose of this callback is to (re)fill
  * the stream buffer which is to be decoded. 
  */
-  decoder_state_t *dcdr_st = st;
+    decoder_state_t *dcdr_st = st;
 
 	if ( dcdr_st->fmp3==NULL ) // file already closed, stop
 		return MAD_FLOW_STOP;
 
 	uint8_t *rdaddr = &dcdr_st->in_buff[0];
 	int rdlen = BUFF_SIZ;
-	if ( stream->next_frame ){			// SAVE UNUSED PART OF BUFFER
+	if ( stream->next_frame > stream->buffer ){			// SAVE UNUSED PART OF BUFFER
 		rdlen = stream->next_frame - dcdr_st->in_buff;	// amount that's been processed
-    memcpy( dcdr_st->in_buff, stream->next_frame, BUFF_SIZ - rdlen );
-		rdaddr = (uint8_t *) stream->next_frame;
+        int cpylen = BUFF_SIZ - rdlen;     // len of unprocessed data to keep
+        memcpy( dcdr_st->in_buff, stream->next_frame, cpylen );
+		rdaddr = (uint8_t *) dcdr_st->in_buff + cpylen;   // read new data after tail just copied
 	}
-//	    input->length = &input->data[input->length] - stream->next_frame);
-//  }	
+
+    showProgress( "R_", 200 );   // decode MP3's
 	
-  int len = fread( rdaddr, 1, rdlen, dcdr_st->fmp3 );     // fill rest of buffer
+    int len = fread( rdaddr, 1, rdlen, dcdr_st->fmp3 );     // fill rest of buffer
 	dbgLog( "7 mp3 in: nf=%x addr=%x rdlen=%d len=%d\n", stream->next_frame, rdaddr, rdlen, len );
-  if ( len==0 ){  // end of file encountered
-		memset( dcdr_st->in_buff, 0, BUFF_SIZ );	// set buff to 0
+    if ( len < rdlen ){  // end of file encountered
+		memset( rdaddr + len, 0, rdlen - len );	// set rest of buff to 0
 		tbCloseFile( dcdr_st->fmp3 );		// fclose( dcdr_st->fmp3 );
 		dcdr_st->fmp3 = NULL;		// mark as ready to stop
 	}
 
-  dcdr_st->in_pos += len;
-  mad_stream_buffer( stream, &dcdr_st->in_buff[0], len==0? BUFF_SIZ : len );		// if 0 => buff of 0's
-  return MAD_FLOW_CONTINUE;
+    dcdr_st->in_pos += len;
+    mad_stream_buffer( stream, &dcdr_st->in_buff[0], len );		// if 0 => buff of 0's
+    return MAD_FLOW_CONTINUE;
 }
 static enum mad_flow 				hdr( void *st,	struct mad_header const *stream ){																// cb fn for frame header
-	printf("hdr: %x \n", (uint32_t) stream );
+        //printf("hdr: %x \n", (uint32_t) stream );
   return MAD_FLOW_CONTINUE;
 }
 static inline int 					scale( mad_fixed_t sample ){																								// TODO: replace with dithering?
@@ -153,7 +156,18 @@ static enum mad_flow 				error( void *st, struct mad_stream *stream, struct mad_
  * header file.
  */	
 
-	mp3Err( stream, stream->error );
+    mp3ErrCnt++;
+    fpos_t errLoc;
+    fgetpos( decoder_state.fwav, &errLoc );    // OUTput file position
+    if ( mp3ErrCnt==1 ){
+        mp3FirstErrLoc = (int) (errLoc.__pos);
+        mp3FirstErrMsg = (char *) mad_stream_errorstr( stream );
+    }
+    if ( reportAllMp3Errs )
+      logEvtNSNINS("mp3Err", "nm", mp3Name,  "pos", (int) (errLoc.__pos), "msg", mad_stream_errorstr( stream ) );
+
+    //dbgLog("! Mp3: %s at %d: %s\n", mp3Name, stream->this_frame, s);
+	//mp3Err( stream, stream->error );
 //  fprintf(stderr, "decoding error 0x%04x (%s) in buff at offset %d \n",
 //	  stream->error, mad_stream_errorstr(stream), dcdr_st->in_pos );
 //	  (unsigned int)(stream->this_frame - buffer->start));

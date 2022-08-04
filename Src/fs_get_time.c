@@ -7,8 +7,8 @@
 /// \return     execution status \ref fsStatus
 ///               - fsOK               = Operation successful.
 ///               - fsError            = Failed to get the current time.
-fsStatus fs_get_time (fsTime *time) {
-  uint32_t msec;
-  getRTC( time, &msec );
-  return fsOK;
+fsStatus fs_get_time( fsTime *time ) {
+    uint32_t msec;
+    getRTC( time, &msec );
+    return fsOK;
 }

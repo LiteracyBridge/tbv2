@@ -28,6 +28,7 @@ Listings/*
 Artifacts/*
 *.geneb
 *.uvoptx
+*.uvguix.*
 old/*
 
 

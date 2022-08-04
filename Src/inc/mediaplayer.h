@@ -1,5 +1,5 @@
-#ifndef MEDIAPLYR_H
-#define MEDIAPLYR_H
+#ifndef MEDIAPLAYER_H
+#define MEDIAPLAYER_H
 
 #include "tbook.h"
 #include "audio.h"			// interface definitions for audio.c

@@ -934,18 +934,13 @@ struct mad_decoder {
   enum mad_flow (*message_func)(void *, void *, unsigned int *);
 };
 
-void mad_decoder_init(struct mad_decoder *, void *,
+void mad_decoder_init(struct mad_decoder *,
+          void *,
 		      enum mad_flow (*)(void *, struct mad_stream *),
 		      enum mad_flow (*)(void *, struct mad_header const *),
-		      enum mad_flow (*)(void *,
-					struct mad_stream const *,
-					struct mad_frame *),
-		      enum mad_flow (*)(void *,
-					struct mad_header const *,
-					struct mad_pcm *),
-		      enum mad_flow (*)(void *,
-					struct mad_stream *,
-					struct mad_frame *),
+		      enum mad_flow (*)(void *,	struct mad_stream const *, struct mad_frame *),
+		      enum mad_flow (*)(void *, struct mad_header const *, struct mad_pcm *),
+		      enum mad_flow (*)(void *, struct mad_stream *, struct mad_frame *),
 		      enum mad_flow (*)(void *, void *, unsigned int *));
 int mad_decoder_finish(struct mad_decoder *);
 

@@ -28,7 +28,7 @@ void setCSMcurrState( short iSt );  // set TBook.iCurrSt & dependent fields
 extern bool         BootVerboseLog;
 
 osEventFlagsId_t    mFileOpSignal;     // osEvent shared with FileOps -- to signal MP3 decode done
-bool                DecodeMP3 = true;  // if set, decode MP3's to Wav before entering CSM
+bool                DecodeMP3 = false;  // if set, decode MP3's to Wav before entering CSM
 
 
 // ------------  CSM Action execution
@@ -77,28 +77,31 @@ void playSubjAudio( char *arg ) {       // play current Subject: arg must be 'nm
     char path[MAX_PATH];
     AudioFile_t *aud = NULL;
     MsgStats        *stats = NULL;
-    playback_type_t playtyp;
+    PlaybackType_t playbackType;
     resetAudio();
     if ( strcasecmp( arg, "nm" ) == 0 ) {
+        // Playlist name
         aud     = subj->shortPrompt;
-        playtyp = ptNm;
+        playbackType = kPlayTypePlaylist;
         if ( BootVerboseLog ) logEvtNSNS( "PlayNm", "Subj", subj->subjName, "nm", aud->filename );
         if ( BootVerboseLog ) LOG_AUDIO_PLAY_SPROMPT( subj->subjName, aud->filename );
     } else if ( strcasecmp( arg, "pr" ) == 0 ) {
+        // Playlist invitation / call to action
         aud     = subj->invitation;
-        playtyp = ptInv;
+        playbackType = kPlayTypeInvitation;
         if ( BootVerboseLog ) logEvtNSNS( "PlayInv", "Subj", subj->subjName, "pr", aud->filename );
         if ( BootVerboseLog ) LOG_AUDIO_PLAY_LPROMPT( subj->subjName, aud->filename );
     } else if ( strcasecmp( arg, "msg" ) == 0 ) {
+        // Program content message
         aud     = gMsg( subj, TBook.iMsg );
-        playtyp = ptMsg;
+        playbackType = kPlayTypeMessage;
         logEvtFmt( "PlayMsg", "Msg: %s, iM: %d, fn: %s", subj->subjName, TBook.iMsg, aud->filename );
         if ( BootVerboseLog ) LOG_AUDIO_PLAY_MESSAGE( TBook.iMsg, subj->subjName, aud->filename );
         stats = loadStats( subj->subjName, TBook.iSubj, TBook.iMsg ); // load stats for message
     }
     getAudioPath( path, aud );
     clearIdle();
-    playAudio( path, stats, playtyp );
+    playAudio( path, stats, playbackType );
 }
 
 
@@ -111,7 +114,7 @@ void playNxtPackage() {                    // play name of next available Packag
     char path[MAX_PATH];
     getAudioPath( path, pkg->pkg_prompt );
     clearIdle();
-    playAudio( path, NULL, ptPkg );
+    playAudio( path, NULL, kPlayTypePackagePrompt );
 }
 
 void playSqrTune( char *notes ) {       // play seq of notes as sqrwaves
@@ -158,7 +161,7 @@ void playSysAudio( char *arg ) {        // play system file 'arg'
         if ( strcmp( gSysAud( i ), arg ) == 0 ) {
             findAudioPath( path, currPkg->prompt_paths, arg );  // find path based on current Package promptPaths
             clearIdle();
-            playAudio( path, NULL, ptSys );
+            playAudio( path, NULL, kPlayTypeSystemPrompt );
             //  logEvtNS( "PlaySys", "file", arg );
             if ( BootVerboseLog ) logEvtFmt( "PlayAud", "system: '%s', file: '%s'", arg, path );
             LOG_AUDIO_PLAY_SYSTEM( arg, path );
@@ -210,7 +213,7 @@ void saveWriteMsg( char *txt ) {        // save 'txt' in Msg file
     int  mCnt      = makeAuxFileName( path, AUX_FILE_MESSAGE );
     FILE *outFP = tbOpenWrite( path ); //fopen( fNm, "w" );
     int nch = fprintf( outFP, "%s\n", txt );
-    tbCloseFile( outFP );  //int err = fclose( outFP );
+    tbFclose( outFP );  //int err = fclose( outFP );
     saveAuxProperties( path );
 
     dbgEvt( TB_wrMsgFile, nch, 0, 0, 0 );
@@ -623,6 +626,11 @@ void initControlManager( void ) {       // initialize control manager
         preloadCSM();           // or use the preloaded version for QcTest
         logEvtNS( "TB_CSM", "Ver", CSM->Version );        // log CSM version comment
         onlyQcLoaded = true;
+    }
+
+    if (BootToUSB) {
+        USBmode(true);
+        return;
     }
 
     if ( CSM != NULL ) {     // have a CSM definition

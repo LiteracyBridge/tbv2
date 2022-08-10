@@ -289,7 +289,7 @@ Package_t *loadPackage( FILE *inF, int pkgIdx ) {           // parse one content
     pkg->pkg_prompt   = loadAudio( inF, "pkg_pr" );      // audio prompt for package
     pkg->prompt_paths = loadSearchPath( inF );         // search path for prompts
 
-    int nSubjs = ldDepInt( inF, "nSubjs" );            // number of subjects in package
+    int nSubjs = ldDepInt( inF, "nSubjs" );            // number of playlists (subjects) in package
     pkg->subjects         = (SubjList_t *) tbAlloc( sizeof( int ) + nSubjs * sizeof( void * ), "subj_list" );
     pkg->subjects->nSubjs = nSubjs;
     for (int i = 0; i < nSubjs; i++) {
@@ -334,7 +334,7 @@ bool loadPackageData( void ) {                        // load structured TBook p
     }
 
     if ( inFile != NULL ) {
-        tbCloseFile( inFile );
+        tbFclose( inFile );
     } else {
         if ( errCount == 0 ) {
             errLog( "null file but errCount is 0", errCount );
@@ -466,7 +466,7 @@ bool loadControlDef( void ) {                         // load structured Control
         CSM->CsmDef->CS[i] = loadCState( inFile, i );
     }
 
-    if ( inFile != NULL ) tbCloseFile( inFile );
+    if ( inFile != NULL ) tbFclose( inFile );
     if ( errCount > 0 ) {
         errLog( "csm_data: %d parse errors", errCount );
         return false;

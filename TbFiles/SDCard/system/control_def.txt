@@ -141,7 +141,7 @@
     stInterMsg:     { Actions: [ playSys(9) ],                                  CGroups:[ whenAwake, whenPlaying, whenNav ], AudioDone: stWait },
     
     stOnRepeatMsg:  { Actions: [ msgAdj(  1),  playSubj(msg) ],                 CGroups:[ whenAwake, whenPlaying, whenNav ], AudioStart: stRepeating },
-    stRepeating:    { Actions: [ showCharge ],                                  CGroups:[ whenAwake, whenPlaying, whenNav ], AudioDone: stOnRepeatMsg },
+    stRepeating:    {                                                           CGroups:[ whenAwake, whenPlaying, whenNav ], AudioDone: stOnRepeatMsg },
 
     #
     # One-touch implementation of recording

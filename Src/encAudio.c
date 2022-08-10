@@ -161,7 +161,7 @@ void startEncrypt( char *fname ) {   // init session key & save public encrypted
     sprintf( txtnm, "%s.key", fname );
     FILE *f = tbOpenWrite( txtnm ); //fopen( txtnm, "w" );
     fwrite( enc_sess_b64, 1, b64_len, f );
-    tbCloseFile( f );  //res = fclose( f );
+    tbFclose( f );  //res = fclose( f );
     //if ( res != 0 ) tbErr(".key fclose => %d", res );
 }
 

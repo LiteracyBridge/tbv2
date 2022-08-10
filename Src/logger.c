@@ -87,7 +87,7 @@ char *loadLine( char *line, const char *fpath, fsTime *tm ) {    // => 1st line 
     if ( stF == NULL ) return line;
 
     char *txt = fgets( line, 200, stF );
-    tbCloseFile( stF );   //fclose( stF );
+    tbFclose( stF );   //fclose( stF );
 
     if ( txt == NULL ) return line;
 
@@ -134,7 +134,7 @@ void writeLine( char *line, const char *fpath ) {
     FILE *stF = tbOpenWriteBinary( fpath ); //fopen( fpath, "wb" );
     if ( stF != NULL ) {
         int nch = fprintf( stF, "%s\n", line );
-        tbCloseFile( stF );        //int err = fclose( stF );
+        tbFclose( stF );        //int err = fclose( stF );
         dbgEvt( TB_wrLnFile, nch, 0, 0, 0 );
     }
 }
@@ -168,7 +168,7 @@ void checkLog() {       //DEBUG: verify tbLog.txt is readable
         linecnt++;
         charcnt += strlen( line );
     }
-    tbCloseFile( logF );    //int err = fclose( logF );
+    tbFclose( logF );    //int err = fclose( logF );
     logF = NULL;
     dbgEvt( TB_chkLog, linecnt, charcnt, 0, 0 );
     dbgLog( "6 checkLog: %d lns, %d chs \n", linecnt, charcnt );
@@ -177,7 +177,7 @@ void checkLog() {       //DEBUG: verify tbLog.txt is readable
 void closeLog() {
     if ( logF != NULL ) {
         int err1 = fflush( logF );
-        tbCloseFile( logF );    //int err2 = fclose( logF );
+        tbFclose( logF );    //int err2 = fclose( logF );
         dbgLog( "6 closeLog fflush=%d \n", err1 );
         dbgEvt( TB_wrLogFile, totLogCh, err1, 0, 0 );
     }
@@ -477,7 +477,7 @@ void saveAuxProperties( char *baseFilename ) {
             }
         }
         fprintf( outFP, "DEVICE_ID:%s\n", TB_ID );
-        tbCloseFile( outFP );
+        tbFclose( outFP );
     }
 }
 
@@ -485,7 +485,7 @@ void saveStats( MsgStats *st ) {                        // save statistics block
     char *fnm = statFNm( st->SubjNm, st->iSubj, st->iMsg );
     FILE *stF = tbOpenWriteBinary( fnm ); //fopen( fnm, "wb" );
     int  cnt  = fwrite( st, STAT_SIZ, 1, stF );
-    tbCloseFile( stF );   //int err = fclose( stF );
+    tbFclose( stF );   //int err = fclose( stF );
     dbgEvt( TB_wrStatFile, st->iSubj, st->iMsg, cnt, 0 );
 }
 
@@ -525,7 +525,7 @@ MsgStats *loadStats( const char *subjNm, short iSubj, short iMsg ) {   // load s
     if ( stF == NULL || fread( st, STAT_SIZ, 1, stF ) != 1 ) {  // file not defined
         if ( stF != NULL ) {
             dbgLog( "! stats S%d, M%d size wrong \n", iSubj, iMsg );
-            tbCloseFile( stF );   //fclose( stF );
+            tbFclose( stF );   //fclose( stF );
         }
         memset( st, 0, STAT_SIZ );    // initialize new block
         st->iSubj = iSubj;
@@ -534,7 +534,7 @@ MsgStats *loadStats( const char *subjNm, short iSubj, short iMsg ) {   // load s
         st->SubjNm[MAX_SUBJ_NM - 1] = '\0';
     } else { // success--
         dbgEvt( TB_LdStatFile, iSubj, iMsg, 0, 0 );
-        tbCloseFile( stF );   //fclose( stF );
+        tbFclose( stF );   //fclose( stF );
     }
     lastRef[newStatIdx] = nRefs;
     touched[newStatIdx] = 1;

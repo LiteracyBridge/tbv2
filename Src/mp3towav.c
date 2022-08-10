@@ -4,6 +4,7 @@
 
 #include <stdio.h>
 #include <stdint.h>
+#include "wav.h"
 #include "mad.h"
 #include "tbook.h"
 #include "fileOps.h"
@@ -19,27 +20,43 @@ typedef struct {    // decode state passed to mp3 callbacks
 
     FILE *fwav;
 
-    unsigned char in_buff[BUFF_SIZ];
+    unsigned char *in_buff;
 }         decoder_state_t;
 
+static bool initialized = false;
 static decoder_state_t decoder_state;
 const bool             reportAllMp3Errs = false; // true;   // all files seem to get "lost sync" at start
 
 //
-static char *wav_header( int hz, int ch, int bips, int data_bytes ) {                     // => ptr to valid .wav header
+static void *wav_header( int samplesPerSecond, int channels, int bitsPerSample, int audioSize ) {                     // => ptr to valid .wav header
     static char   hdr[44]         = "RIFFsizeWAVEfmt \x10\0\0\0\1\0ch_hz_abpsbabsdatasize";
-    unsigned long nAvgBytesPerSec = bips * ch * hz >> 3;
-    unsigned int  nBlockAlign     = bips * ch >> 3;
+    unsigned long bytesPerSecond = (bitsPerSample * channels * samplesPerSecond) / 8;
+    unsigned int  blockSize      = (bitsPerSample * channels) / 8;
     // @formatter:off
-    *(int32_t *)(void*)(hdr + 0x04) = 44 + data_bytes - 8;   /* File size - 8 */
+    *(int32_t *)(void*)(hdr + 0x04) = 44 + audioSize - 8;   /* File size - 8 */
     *(int16_t *)(void*)(hdr + 0x14) = 1;                     /* Integer PCM format */
-    *(int16_t *)(void*)(hdr + 0x16) = ch;
-    *(int32_t *)(void*)(hdr + 0x18) = hz;
-    *(int32_t *)(void*)(hdr + 0x1C) = nAvgBytesPerSec;
-    *(int16_t *)(void*)(hdr + 0x20) = nBlockAlign;
-    *(int16_t *)(void*)(hdr + 0x22) = bips;
-    *(int32_t *)(void*)(hdr + 0x28) = data_bytes;
+    *(int16_t *)(void*)(hdr + 0x16) = channels;
+    *(int32_t *)(void*)(hdr + 0x18) = samplesPerSecond;
+    *(int32_t *)(void*)(hdr + 0x1C) = bytesPerSecond;
+    *(int16_t *)(void*)(hdr + 0x20) = blockSize;
+    *(int16_t *)(void*)(hdr + 0x22) = bitsPerSample;
+    *(int32_t *)(void*)(hdr + 0x28) = audioSize;
     // @formatter:on
+
+    WavFileHeader_t header;
+    header = newWavHeader;
+    header.wavHeader.waveSize       = 44 + audioSize - 8; // file size -8 (eventually)
+    header.fmtData.formatCode       = 1; // PCM
+    header.fmtData.numChannels      = channels;
+    header.fmtData.samplesPerSecond = samplesPerSecond;
+    header.fmtData.bytesPerSecond   = bytesPerSecond;
+    header.fmtData.blockSize        = blockSize;
+    header.fmtData.bitsPerSample    = bitsPerSample;
+    header.audioHeader.chunkSize    = audioSize; // The initial value is just made up
+
+    // @TODO: verify that the "named" header matches the "hand-rolled" one, then return it.
+    int cmp = memcmp(&header, &hdr, sizeof(header));
+
     return hdr;
 }
 
@@ -49,32 +66,32 @@ static enum mad_flow input( void *st, struct mad_stream *stream ) {             
      * This is the input callback. The purpose of this callback is to (re)fill
      * the stream buffer which is to be decoded.
      */
-    decoder_state_t *dcdr_st = st;
+    decoder_state_t *decoder_state = (decoder_state_t *) st;
 
-    if ( dcdr_st->fmp3 == NULL ) // file already closed, stop
+    if ( decoder_state->fmp3 == NULL ) // file already closed, stop
         return MAD_FLOW_STOP;
 
-    uint8_t *rdaddr = &dcdr_st->in_buff[0];
+    uint8_t *rdaddr = &decoder_state->in_buff[0];
     int     rdlen   = BUFF_SIZ;
     if ( stream->next_frame > stream->buffer ) {     // SAVE UNUSED PART OF BUFFER
-        rdlen      = stream->next_frame - dcdr_st->in_buff;  // amount that's been processed
+        rdlen      = stream->next_frame - decoder_state->in_buff;  // amount that's been processed
         int cpylen = BUFF_SIZ - rdlen;     // len of unprocessed data to keep
-        memcpy( dcdr_st->in_buff, stream->next_frame, cpylen );
-        rdaddr = (uint8_t *) dcdr_st->in_buff + cpylen;   // read new data after tail just copied
+        memcpy( decoder_state->in_buff, stream->next_frame, cpylen );
+        rdaddr = (uint8_t *) decoder_state->in_buff + cpylen;   // read new data after tail just copied
     }
 
     showProgress( "R_", 200 );   // decode MP3's
 
-    int len = fread( rdaddr, 1, rdlen, dcdr_st->fmp3 );     // fill rest of buffer
+    int len = fread( rdaddr, 1, rdlen, decoder_state->fmp3 );     // fill rest of buffer
     dbgLog( "7 mp3 in: nf=%x addr=%x rdlen=%d len=%d\n", stream->next_frame, rdaddr, rdlen, len );
     if ( len < rdlen ) {  // end of file encountered
         memset( rdaddr + len, 0, rdlen - len ); // set rest of buff to 0
-        tbCloseFile( dcdr_st->fmp3 );   // fclose( dcdr_st->fmp3 );
-        dcdr_st->fmp3 = NULL;   // mark as ready to stop
+        tbFclose( decoder_state->fmp3 );   // fclose( decoder_state->fmp3 );
+        decoder_state->fmp3 = NULL;   // mark as ready to stop
     }
 
-    dcdr_st->in_pos += len;
-    mad_stream_buffer( stream, &dcdr_st->in_buff[0], len );   // if 0 => buff of 0's
+    decoder_state->in_pos += len;
+    mad_stream_buffer( stream, &decoder_state->in_buff[0], len );   // if 0 => buff of 0's
     return MAD_FLOW_CONTINUE;
 }
 
@@ -110,16 +127,17 @@ static enum mad_flow output( void *st, struct mad_header const *header, struct m
      * MPEG audio data has been completely decoded. The purpose of this callback
      * is to output (or play) the decoded PCM audio.
      */
-    decoder_state_t *dcdr_st = st;
+    decoder_state_t * decoder_state = (decoder_state_t *) st;
 
     unsigned int      nchannels, nsamples;
     mad_fixed_t const *left_ch, *right_ch;
 
     /* pcm->samplerate contains the sampling frequency */
 
-    if ( dcdr_st->freq == 0 ) {
-        dcdr_st->freq = pcm->samplerate;
-        fwrite( wav_header( dcdr_st->freq, pcm->channels, 16, MAX_WAV_BYTES ), 1, 44, dcdr_st->fwav );
+    // If the frequency hasn't been set, this must be the first time, so write the header.
+    if ( decoder_state->freq == 0 ) {
+        decoder_state->freq = pcm->samplerate;
+        fwrite( wav_header( decoder_state->freq, pcm->channels, 16, MAX_WAV_BYTES ), 1, 44, decoder_state->fwav );
     }
 
     nchannels = pcm->channels;
@@ -133,13 +151,13 @@ static enum mad_flow output( void *st, struct mad_header const *header, struct m
         /* output sample(s) in 16-bit signed little-endian PCM */
 
         sample = scale( *left_ch++ );
-        fputc(( sample >> 0 ) & 0xff, dcdr_st->fwav );
-        fputc(( sample >> 8 ) & 0xff, dcdr_st->fwav );
+        fputc(( sample >> 0 ) & 0xff, decoder_state->fwav );
+        fputc(( sample >> 8 ) & 0xff, decoder_state->fwav );
 
         if ( nchannels == 2 ) {
             sample = scale( *right_ch++ );
-            fputc(( sample >> 0 ) & 0xff, dcdr_st->fwav );
-            fputc(( sample >> 8 ) & 0xff, dcdr_st->fwav );
+            fputc(( sample >> 0 ) & 0xff, decoder_state->fwav );
+            fputc(( sample >> 8 ) & 0xff, decoder_state->fwav );
         }
     }
 
@@ -190,12 +208,14 @@ void mp3ToWav( const char *nm ) {   // decode nm.mp3 to nm.wav
      * MAD_FLOW_STOP (to stop decoding) or MAD_FLOW_BREAK (to stop decoding and
      * signal an error).
      */
-    decoder_state_t *dcdr_st = &decoder_state;
-    dcdr_st->freq   = 0;
-    dcdr_st->fmp3   = NULL;
-    dcdr_st->in_pos = 0;
-    dcdr_st->fwav   = NULL;
-    memset( &dcdr_st->in_buff, 0, BUFF_SIZ );
+    if (!initialized) {
+        decoder_state.in_buff = tbAlloc(BUFF_SIZ, "mp3buf");
+    }
+    decoder_state.freq   = 0;
+    decoder_state.fmp3   = NULL;
+    decoder_state.in_pos = 0;
+    decoder_state.fwav   = NULL;
+    memset( decoder_state.in_buff, 0, BUFF_SIZ );
 
     struct mad_decoder decoder;
     int                result;
@@ -207,31 +227,31 @@ void mp3ToWav( const char *nm ) {   // decode nm.mp3 to nm.wav
     if ( pdot ) *pdot = 0; else pdot = &fnm[strlen( fnm )];
     strcpy( pdot, ".mp3" );
 
-    dcdr_st->freq = 0;
+    decoder_state.freq = 0;
 
-    dcdr_st->fmp3 = tbOpenReadBinary( fnm ); //fopen( fnm, "rb" );
+    decoder_state.fmp3 = tbOpenReadBinary( fnm ); //fopen( fnm, "rb" );
 
     strcpy( pdot, ".wav" );
-    dcdr_st->fwav = tbOpenWriteBinary( fnm ); //fopen( fnm, "wb");
+    decoder_state.fwav = tbOpenWriteBinary( fnm ); //fopen( fnm, "wb");
 
-    if ( dcdr_st->fmp3 == NULL || dcdr_st->fwav == NULL ) {
-        dbgLog( "7 Mp3 fopen %s: %d %d \n", fnm, dcdr_st->fmp3, dcdr_st->fwav );
+    if ( decoder_state.fmp3 == NULL || decoder_state.fwav == NULL ) {
+        dbgLog( "7 Mp3 fopen %s: %d %d \n", fnm, decoder_state.fmp3, decoder_state.fwav );
         return;
     }
 
     /* configure input, output, and error functions */
-    mad_decoder_init( &decoder, dcdr_st, input, hdr, 0 /* filter */, output, error, 0 /* message */);
+    mad_decoder_init( &decoder, &decoder_state, input, hdr, 0 /* filter */, output, error, 0 /* message */);
     result = mad_decoder_run( &decoder, MAD_DECODER_MODE_SYNC );  // start decoding
     if ( result != 0 )
         mp3Err( NULL, result );
 
     mad_decoder_finish( &decoder );  // release the decoder
-    if ( dcdr_st->fmp3 != NULL ) {
-        tbCloseFile( dcdr_st->fmp3 );
-        dcdr_st->fmp3 = NULL;
+    if ( decoder_state.fmp3 != NULL ) {
+        tbFclose( decoder_state.fmp3 );
+        decoder_state.fmp3 = NULL;
     }
-    if ( dcdr_st->fwav != NULL ) {
-        tbCloseFile( dcdr_st->fwav );
-        dcdr_st->fwav = NULL;
+    if ( decoder_state.fwav != NULL ) {
+        tbFclose( decoder_state.fwav );
+        decoder_state.fwav = NULL;
     }
 }

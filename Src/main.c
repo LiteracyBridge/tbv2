@@ -20,9 +20,9 @@ extern bool RebootOnKeyInt;
 
 int DbgPwrDn = 0; // DEBUG**********************************
 // DbgPwdDn-- power down meanings
-// LHAND  1: after CODEC_DATA_TX_DN  3uA
-// RHAND  2: after CODEC_PLAYBACK_DN
-// CIRCLE 3: after CODEC_PLAYBACK_DN 2nd time
+// LHAND  1: after CODEC_DATA_SEND_DONE  3uA
+// RHAND  2: after CODEC_PLAYBACK_DONE
+// CIRCLE 3: after CODEC_PLAYBACK_DONE 2nd time
 // TREE   4: after checkPower
 // STAR   5: after 
 

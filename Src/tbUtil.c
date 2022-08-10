@@ -240,6 +240,12 @@ static bool FSysPowered     = false;
 bool        FSysPowerAlways = false;
 bool        SleepWhenIdle   = true;
 
+FILE *tbFopen( const char *fname, const char *flags) {
+    FileSysPower( true );
+    dbgLog( "F tbFOpen( %s, %s )\n", fname, flags );
+    return fopen( fname, flags );
+}
+
 FILE *tbOpenRead( const char *nm ) {                  // repower if necessary, & open file
     FileSysPower( true );
     dbgLog( "F tbOpenRd( %s )\n", nm );
@@ -266,13 +272,13 @@ FILE *tbOpenWriteBinary( const char *nm ) {           // repower if necessary, &
     return fopen( nm, "wb" );
 }
 
-void tbCloseFile( FILE *f ) {                        // close file errLog if error
+void tbFclose( FILE *f ) {                        // close file errLog if error
     if ( f == NULL ) tbErr( "closing NULL file" );
     int st = fclose( f );
     if ( st != fsOK ) errLog( "fclose => %d", st );
 }
 
-void tbRenameFile( const char *src, const char *dst ) {  // rename path to path
+void tbFrename( const char *src, const char *dst ) {  // rename path to path
     // delete dst if it exists (why path is needed)
     // fails if paths are in the same directory
     if ( fexists( dst )) {
@@ -809,7 +815,7 @@ void usrLog( const char *fmt, ... ) {
 }
 
 const char *DbgFlags     = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";  // flags 0..35
-char       DebugMask[40] = "! ";  //  add 'X' to enable dbgLog() calls starting with 'X'
+char       DebugMask[40] = "!D8 ";  //  add 'X' to enable dbgLog() calls starting with 'X'
 /* DEFINED DEBUG FLAGS:
     //  '1' system clock
     //  '2' audio codec debugging
@@ -873,7 +879,6 @@ void errLog( const char *fmt, ... ) {
     vsprintf( msg, fmt, arg_ptr );
     va_end( arg_ptr );
     logEvtNS( "errLog", "msg", msg );
-    //  printf("%s \n", msg );
     disableLCD();
 }
 

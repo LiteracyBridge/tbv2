@@ -89,8 +89,8 @@ void copyFile( const char *src, const char *dst ) {
 
         fwrite( buf, 1, 512, fdst );
     }
-    tbCloseFile( fsrc );
-    tbCloseFile( fdst );
+    tbFclose( fsrc );
+    tbFclose( fdst );
 }
 
 extern bool BootToQCtest;
@@ -160,7 +160,8 @@ void talking_book( void *tbAttr ) {    // talking book initialization & control 
 
     initInputManager();               //  Initialize keypad handler & thread
 
-    initFileOps();                    //  decode mp3's
+    // I think this uses too much memory, and the mp3 decode thread can't launch. Need some other solution.
+//  initFileOps();                    //  decode mp3's
 
     const char *startUp = "R3_3G3";
     ledFg( startUp );

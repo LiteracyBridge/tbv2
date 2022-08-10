@@ -118,20 +118,20 @@ typedef struct {    // AIC_reg_def -- definitions for TLV320AIC3100 registers to
 } AIC_REG;
 
 typedef __packed struct { // pg=0  reg=4 
-    unsigned int CODEC_IN: 2;   // d0..1
-    unsigned int PLL_IN: 2;     // d2..3
-    unsigned int z4: 4;         // d4..7 == 0
+    unsigned int CODEC_IN   : 2;    // d0..1
+    unsigned int PLL_IN     : 2;    // d2..3
+    unsigned int z4         : 4;    // d4..7 == 0
 } TI_ClkGenMux_val;
 
 typedef __packed struct { // pg=0  reg=5 
-    unsigned int PLL_R: 4;      // d0..3
-    unsigned int PLL_P: 3;      // d4..6
-    unsigned int PLL_PWR: 1;    // d7  1 => PLL on
+    unsigned int PLL_R      : 4;    // d0..3
+    unsigned int PLL_P      : 3;    // d4..6
+    unsigned int PLL_PWR    : 1;    // d7  1 => PLL on
 } TI_PllPR_val;
 
 typedef __packed struct { // pg=0  reg=6 
-    unsigned int PLL_J: 6;      // d0..5
-    unsigned int z2: 2;         // d6..7
+    unsigned int PLL_J      : 6;    // d0..5
+    unsigned int z2         : 2;    // d6..7
 } TI_PLL_J_val;
 
 

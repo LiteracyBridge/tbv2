@@ -94,12 +94,13 @@ extern void setCpuClock( int mHz, int apbshift2,
                          int apbshift1 );                         // config & enable PLL & PLLI2S, bus dividers, flash latency & switch HCLK to PLL at 'mHz' MHz
 extern void LED_Init( GPIO_ID led );                        // ledManager-- for debugging
 extern bool        ledMgrActive;
+extern FILE *tbFopen( const char *fname, const char *flags); // repower i fnecessary & open file.
 extern FILE *tbOpenRead( const char *nm );                  // repower if necessary, & open file
 extern FILE *tbOpenReadBinary( const char *nm );            // repower if necessary, & open file
 extern FILE *tbOpenWrite( const char *nm );                 // repower if necessary, & open file
 extern FILE *tbOpenWriteBinary( const char *nm );           // repower if necessary, & open file
-extern void tbCloseFile( FILE *f );                        // close file, errLog if error
-extern void tbRenameFile( const char *src, const char *dst ); // rename path to path
+extern void tbFclose( FILE *f );                        // close file, errLog if error
+extern void tbFrename( const char *src, const char *dst ); // rename path to path
 
 extern void FileSysPower( bool enable );                    // power up/down eMMC & SD 3V supply
 extern fsStatus fsMount(

@@ -1,5 +1,5 @@
 // TB CSM 2022-06-28: v23 re-commenting the defaults to avoid quoted strings in output
-org.amplio.CSMcompile 9(2022-5-16) from C:\Users\bill\workspace\tbv2\TbFiles\SDCard\system\control_def.txt of 2022-06-28 10:53:48
+org.amplio.CSMcompile 9(2022-5-16) from C:\Users\bill\workspace\CSMcompile\..\tbv2\TbFiles\SDCard\system\control_def.txt of 2022-08-31 14:24:48
 4
 180000
 5000
@@ -501,9 +501,7 @@ playSys
 stRepeating
 49
 54,  1, 54, 13, 14, 21, 19, 20, 15, 25, 23,  2, 54, 54, 54, 22, 16, 17, 54, 54, 54, 54, 54, 11, 54, 54, 54, 54, 54, 54, 54, 54, 22, 24,  3,  8,  4,  7, 10,  6, 54, 54, 54, 54, 54, 54, 54,  5,  9, 
-1
-showCharge
-_
+0
 55
 stRecording
 49

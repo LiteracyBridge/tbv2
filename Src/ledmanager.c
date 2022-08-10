@@ -51,7 +51,6 @@ static ledSeq *         currSeq = NULL;
 static ledSeq *         bgSeq   = &ledA;
 static ledSeq *         fgSeq   = &ledB;
 static ledSeq *         prepSeq = &ledC;
-static osThreadAttr_t   thread_attr;
 
 void LED_Init( GPIO_ID led ) {    // configure GPIO for output PUSH_PULL slow
     gConfigOut( led );
@@ -226,6 +225,7 @@ void ledThread( void *arg ) {
         wkup      = osEventFlagsWait( osFlag_LedThr, LED_EVT, osFlagsWaitAny, delay );  // wait for delay or ledFg/ledBg wakeup
     }
 }
+
 //PUBLIC
 
 /*
@@ -290,9 +290,12 @@ void initLedManager() {       // initialize & spawn LED thread
     if ( osFlag_LedThr == NULL )
         tbErr( "osFlag_LedThr alloc failed" );
 
-    thread_attr.name       = "led_thread";
-    thread_attr.stack_size = LED_STACK_SIZE;
-    Dbg.thread[3] = (osRtxThread_t *) osThreadNew( ledThread, NULL, &thread_attr );
+    static osThreadAttr_t threadAttr = {
+                .name = "led_thread",
+                .priority = osPriorityHigh
+        };
+    threadAttr.stack_size = LED_STACK_SIZE;
+    Dbg.thread[3] = (osRtxThread_t *) osThreadNew( ledThread, NULL, &threadAttr );
     if ( Dbg.thread[3] == NULL )
         tbErr( "ledThread spawn failed" );
 

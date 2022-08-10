@@ -591,14 +591,14 @@ void copyNorLog( const char *fpath ) {           // copy curr Nor log into file 
             dbgLog( "! copying: %d maxLogs\n", maxLogCnt );
         }
     }
-    tbCloseFile( f );   //fclose( f );  // tbTmpLog
+    tbFclose( f );   //fclose( f );  // tbTmpLog
     endProgress();
 
     if ( !validLog ) {  // bad log-- save to different filename
         sprintf( fnm, badLogPatt, NLg.currLogIdx );  // save invalid log-- no path
         dbgLog( "! inconsistent NorLog-- saving to %s \n", fnm );
     }
-    tbRenameFile( tmpNm, fnm );
+    tbFrename( tmpNm, fnm );
 
     msec = tbTimeStamp() - tsStart;
     dbgLog( "6 copyNorLog: %s: %d in %d msec \n", fnm, totcnt, msec );
@@ -615,7 +615,7 @@ void restoreNorLog( const char *fpath ) {        // copy file into current log
         appendNorLog( NLg.pg );   // append string to log
         cnt = fread( NLg.pg, 1, NLg.PGSZ, f );
     }
-    tbCloseFile( f );   //fclose( f );
+    tbFclose( f );   //fclose( f );
 }
 //end logger.c
 

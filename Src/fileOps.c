@@ -77,10 +77,10 @@ static void encryptCopy() {
         flen += cnt;
         if ( cnt != BUFF_SIZ ) tbErr( "encryptCopy fwrite => %d", cnt );
     }
-    tbCloseFile( fwav );    //int res = fclose( fwav );
+    tbFclose( fwav );    //int res = fclose( fwav );
     //if ( res != fsOK ) tbErr("wav fclose => %d", res );
 
-    tbCloseFile( fdat );    //res = fclose( fdat );
+    tbFclose( fdat );    //res = fclose( fdat );
     //if ( res != fsOK ) tbErr("dat fclose => %d", res );
     logEvtNS( "encF", "dat", basenm );
 

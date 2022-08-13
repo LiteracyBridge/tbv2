@@ -19,20 +19,21 @@ static int    I2C_ErrCnt[] = { 0, 0, 0, 0, 0 };
 
 static volatile int32_t I2C_Event      = 0;
 static int              MaxBusyWaitCnt = 0;
-static int              eCnt           = 0;
 const int               maxErrLog      = 100;        // max errors to add to log
 
 static int reinitCnt = 0;
 
 void Codec_WrReg( uint8_t Reg, uint8_t Value );   // FORWARD
-
+    
+#if defined(DEBUG_CODEC)
 void cntErr( int8_t grp, int8_t exp, int8_t got, int32_t iReg, int16_t caller ) {  // count and/or report ak errors
+    static int              errorCount           = 0;
     if ( got == exp ) return;  // || codecDummyWrite ) return;
     //  codecDummyWrite = false;
     I2C_ErrCnt[grp]++;
-    eCnt++;
+    errorCount++;
     dbgEvt( TB_i2cErr, ( caller << 8 ) + grp, exp, got, iReg );
-    if ( eCnt < maxErrLog && grp != I2C_Evt ) {  // can't report I2C_Evt (from ISR)
+    if ( errorCount < maxErrLog && grp != I2C_Evt ) {  // can't report I2C_Evt (from ISR)
         char    pgRg[20];
         uint8_t pg = codec_regs[iReg].pg, reg = codec_regs[iReg].reg;
         sprintf( pgRg, "%d=P%d:R%02d ", iReg, pg, reg );
@@ -52,6 +53,7 @@ void cntErr( int8_t grp, int8_t exp, int8_t got, int32_t iReg, int16_t caller ) 
         //errLog("%s err, exp=0x%x, got=0x%x %s caller=%d", cdcGrp[grp], exp, got, pgRg, caller );
     }
 }
+#endif // DEBUG_CODEC
 
 void i2c_Sig_Event( uint32_t event ) {                            // called from ISR for I2C errors or complete
     I2C_Event = event;
@@ -94,6 +96,7 @@ void i2c_Reinit( int lev ) {                                       // lev&1 SWRS
 }
 
 uint8_t i2c_rdReg( uint8_t reg ) {                                   // return value of codec register Reg
+#pragma diag_suppress=550
     int     status;
     uint8_t value;
 
@@ -119,8 +122,10 @@ uint8_t i2c_rdReg( uint8_t reg ) {                                   // return v
 
     return value;
 }
+#pragma diag_warning=550
 
 void i2c_wrReg( uint8_t reg, uint8_t val ) {                  // write codec register reg with val
+#pragma diag_suppress=550
     dbgEvt( TB_cdWrReg, 0, 0, reg, val );
 
     uint32_t status;
@@ -151,6 +156,7 @@ void i2c_wrReg( uint8_t reg, uint8_t val ) {                  // write codec reg
     dbgLog( "3     w %02d = %02x\n", reg, val );
     reinitCnt = 0;      // success-- reset recursive counter
 }
+#pragma diag_warning=550
 
 void i2c_ReportErrors() {                                         // report I2C error counts
     static int prevI2CerrTot = 0;

@@ -44,7 +44,7 @@ void cdc_RecordEnable( bool enable );
 void cdc_SpeakerEnable( bool enable );
 void cdc_SetMute( bool muted );
 void cdc_SetMasterFreq( int freq );
-void showCdcRegs( bool always, bool nonReset ); //void           showCdcRegs( bool always );
+void showCdcRegs( bool always, bool nonReset );
 void debugTimingRegs( bool );
 
 void tglUSBmode() {

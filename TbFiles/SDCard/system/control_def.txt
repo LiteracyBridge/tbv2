@@ -127,8 +127,8 @@
     # It would be nice to reference "long idle" here.
     stPlayPause:    { Actions: [ saveSt( 2),  setTimer(180000), pausePlay ],    CGroups:[ whenAwake, whenPlaying, whenNav, whenPlayPaused ], Timer:stSleepy },
     stPlayResume:   { Actions: [ resumePlay,  goSavedSt(2) ],                   CGroups:[ whenAwake, whenPlaying, whenNav ] },
-    stPlayJumpBack: { Actions: [ posAdj(-7), goPrevSt ],                        CGroups:[ whenAwake, whenPlaying, whenNav ] },
-    stPlayJumpFwd:  { Actions: [ posAdj(60), goPrevSt ],                        CGroups:[ whenAwake, whenPlaying, whenNav ] },
+    stPlayJumpBack: { Actions: [ posAdj(-10), goPrevSt ],                       CGroups:[ whenAwake, whenPlaying, whenNav ] },
+    stPlayJumpFwd:  { Actions: [ posAdj(45), goPrevSt ],                        CGroups:[ whenAwake, whenPlaying, whenNav ] },
 
     stOnPrevSubj:   { Actions: [ subjAdj(-1),  playSubj(nm) ],                  CGroups:[ whenAwake, whenPlaying, whenNav ], AudioStart: stAnnouncing },
     stOnNextSubj:   { Actions: [ subjAdj( 1),  playSubj(nm) ],                  CGroups:[ whenAwake, whenPlaying, whenNav ], AudioStart: stAnnouncing },

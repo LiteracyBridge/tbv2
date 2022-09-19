@@ -1,5 +1,5 @@
 // TB CSM 2022-06-28: v23 re-commenting the defaults to avoid quoted strings in output
-org.amplio.CSMcompile 9(2022-5-16) from C:\Users\bill\workspace\CSMcompile\..\tbv2\TbFiles\SDCard\system\control_def.txt of 2022-08-31 14:24:48
+org.amplio.CSMcompile 9(2022-5-16) from C:\Users\bill\workspace\CSMcompile\..\tbv2\TbFiles\SDCard\system\control_def.txt of 2022-09-06 17:14:32
 4
 180000
 5000
@@ -195,7 +195,7 @@ stPlayJumpBack
 16,  1, 16, 13, 14, 21, 19, 20, 15, 25, 23,  2, 16, 16, 16, 22, 16, 17, 16, 16, 16, 16, 16, 11, 16, 16, 16, 16, 16, 16, 16, 16, 24, 24,  3,  8,  4,  7, 10,  6, 16, 16, 16, 16, 16, 16, 16,  5,  9, 
 2
 posAdj
--7
+-10
 goPrevSt
 _
 17
@@ -204,7 +204,7 @@ stPlayJumpFwd
 17,  1, 17, 13, 14, 21, 19, 20, 15, 25, 23,  2, 17, 17, 17, 22, 16, 17, 17, 17, 17, 17, 17, 11, 17, 17, 17, 17, 17, 17, 17, 17, 24, 24,  3,  8,  4,  7, 10,  6, 17, 17, 17, 17, 17, 17, 17,  5,  9, 
 2
 posAdj
-60
+45
 goPrevSt
 _
 18

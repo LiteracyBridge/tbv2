@@ -561,10 +561,10 @@ void copyNorLog( const char *fpath ) {           // copy curr Nor log into file 
     int  maxLogSz     = ( NLg.MAX_ADDR - NLg.PGSZ ) / N_SADDR;  // 1/64th of capacity
     int  maxLogCnt    = 0;
     int  invalidpgcnt = 0;   // count invalid pages found
-    dbgLog( "! copyNorLog: %d bytes\n", NLg.Nxt - NLg.logBase );
+    dbgLog( "! copyNorLog: %d bytes to %s\n", NLg.Nxt - NLg.logBase, tmpNm );
     for (int p = NLg.logBase; p < NLg.Nxt; p += NLg.PGSZ) {   // log always starts at page boundary, is full from logBase..Nxt-1
         stat = NLg.pNor->ReadData( p, NLg.pg, NLg.PGSZ );
-        if ( stat != NLg.PGSZ ) fprintf( f, "\n cpyNor read 0x%08x => %d \n", p, stat );
+        if ( stat != NLg.PGSZ ) fprintf( f, "\n copyNorLog read 0x%08x => %d \n", p, stat );
 
         int cnt = NLg.Nxt - p;
         if ( cnt > NLg.PGSZ ) cnt = NLg.PGSZ;
@@ -580,7 +580,7 @@ void copyNorLog( const char *fpath ) {           // copy curr Nor log into file 
         stat       = fwrite( NLg.pg, 1, cnt, f );
         showProgress( "RG___", 200 );   // copyNorLog
         if ( stat != cnt )
-            fprintf( f, "\n cpyNor fwrite => %d  totcnt=%d \n", stat, totcnt );
+            fprintf( f, "\n copyNorLog fwrite => %d  totcnt=%d \n", stat, totcnt );
         if ( invalidpgcnt > 20 ) {
             fprintf( f, "\n >20 invalid pages-- stop copying after %d bytes \n", totcnt );
             break;

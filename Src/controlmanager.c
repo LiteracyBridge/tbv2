@@ -38,15 +38,17 @@ static void clearIdle() {       // clear timers started by AudioDone to generate
 }
 
 static void adjSubj( int adj ) {               // adjust current Subj # in TBook
-    short nS   = TBook.iSubj + adj;
-    short numS = nSubjs();
-    if ( nS < 0 )
-        nS = numS - 1;
-    if ( nS >= numS )
-        nS = 0;
-    logEvtNI( "chngSubj", "iSubj", nS );
-    TBook.iSubj = nS;
+    // "subject" means playlist.
+    short newSubjectIx   = TBook.iSubj + adj;
+    short numSubjects = nSubjs();
+    if ( newSubjectIx < 0 )
+        newSubjectIx = numSubjects - 1;
+    if ( newSubjectIx >= numSubjects )
+        newSubjectIx = 0;
+    logEvtNI( "chngSubj", "iSubj", newSubjectIx );
+    TBook.iSubj = newSubjectIx;
     TBook.iMsg  = -1; // "next" will yield 0, "prev" -> -2 -> numMessages-1
+    resetAudio();
 }
 
 
@@ -55,17 +57,18 @@ static void adjMsg( int adj ) {                // adjust current Msg # in TBook
     if ( TBook.iSubj < 0 || TBook.iSubj >= nSubjs())
         return;
     // adj must be +1 or -1
-    short nM = TBook.iMsg + adj;
+    short newMessageIx = TBook.iMsg + adj;
     Subject_t *subj = gSubj( TBook.iSubj );
-    short numM = nMsgs( subj );
-    if ( numM == 1 )
-        numM = 0;
-    if ( nM < 0 )
-        nM   = numM - 1;
-    if ( nM >= numM )
-        nM   = 0;
-    logEvtNI( "chgMsg", "iMsg", nM );
-    TBook.iMsg = nM;
+    short numMessages = nMsgs( subj );
+    if ( numMessages == 1 )
+        numMessages = 0;
+    if ( newMessageIx < 0 )
+        newMessageIx   = numMessages - 1;
+    if ( newMessageIx >= numMessages )
+        newMessageIx   = 0;
+    logEvtNI( "chgMsg", "iMsg", newMessageIx );
+    TBook.iMsg = newMessageIx;
+    resetAudio();
 }
 
 
@@ -83,20 +86,17 @@ void playSubjAudio( char *arg ) {       // play current Subject: arg must be 'nm
         // Playlist name
         aud     = subj->shortPrompt;
         playbackType = kPlayTypePlaylist;
-        if ( BootVerboseLog ) logEvtNSNS( "PlayNm", "Subj", subj->subjName, "nm", aud->filename );
-        if ( BootVerboseLog ) LOG_AUDIO_PLAY_SPROMPT( subj->subjName, aud->filename );
+        logEvtFmt("PlayNm", "iPl: %d, nm: %s, fn: %s", TBook.iSubj, subj->subjName, aud->filename);
     } else if ( strcasecmp( arg, "pr" ) == 0 ) {
         // Playlist invitation / call to action
         aud     = subj->invitation;
         playbackType = kPlayTypeInvitation;
-        if ( BootVerboseLog ) logEvtNSNS( "PlayInv", "Subj", subj->subjName, "pr", aud->filename );
-        if ( BootVerboseLog ) LOG_AUDIO_PLAY_LPROMPT( subj->subjName, aud->filename );
+        logEvtFmt("PlayInv", "iPl: %d, nm: %s, fn: %s", TBook.iSubj, subj->subjName, aud->filename);
     } else if ( strcasecmp( arg, "msg" ) == 0 ) {
         // Program content message
         aud     = gMsg( subj, TBook.iMsg );
         playbackType = kPlayTypeMessage;
         logEvtFmt( "PlayMsg", "Msg: %s, iM: %d, fn: %s", subj->subjName, TBook.iMsg, aud->filename );
-        if ( BootVerboseLog ) LOG_AUDIO_PLAY_MESSAGE( TBook.iMsg, subj->subjName, aud->filename );
         stats = loadStats( subj->subjName, TBook.iSubj, TBook.iMsg ); // load stats for message
     }
     getAudioPath( path, aud );
@@ -110,7 +110,7 @@ void playNxtPackage() {                    // play name of next available Packag
     if ( iPkg >= nPkgs()) iPkg = 0;
 
     Package_t *pkg = gPkg( iPkg );
-    logEvtNSNI( "PlayPkg", "Pkg", pkg->packageName, "Idx", iPkg );
+    logEvtFmt("PlayPkg", "Pkg: %s, iPkg: %d", pkg->packageName, iPkg);
     char path[MAX_PATH];
     getAudioPath( path, pkg->pkg_prompt );
     clearIdle();
@@ -161,10 +161,8 @@ void playSysAudio( char *arg ) {        // play system file 'arg'
         if ( strcmp( gSysAud( i ), arg ) == 0 ) {
             findAudioPath( path, currPkg->prompt_paths, arg );  // find path based on current Package promptPaths
             clearIdle();
+            logEvtFmt("PlaySys", "Sys: %s, fn: %s", arg, path);
             playAudio( path, NULL, kPlayTypeSystemPrompt );
-            //  logEvtNS( "PlaySys", "file", arg );
-            if ( BootVerboseLog ) logEvtFmt( "PlayAud", "system: '%s', file: '%s'", arg, path );
-            LOG_AUDIO_PLAY_SYSTEM( arg, path );
             return;
         }
     tbErr( "playSys %s not found", arg );

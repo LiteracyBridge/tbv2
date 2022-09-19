@@ -285,25 +285,25 @@ void logPowerUp( bool reboot ) {                      // re-init logger after re
                 rtcDt.year = 0; //if invalid  
 
             int    major, minor;
-            fsTime fware;
+            fsTime firmwareTime;
             // set fw to date from TBV2_Version  (e.g. V3.1 of 2022-22-04 13:43:36)
-            if ( sscanf( TBV2_Version, "V%u.%u of %hu-%hhu-%hhu %hhu:%hhu:%hhu", &major, &minor, &fware.year,
-                         &fware.mon, &fware.day, &fware.hr, &fware.min, &fware.sec ) != 8 )
-                fware.year = 0;  // firmware date invalid
+            if ( sscanf( TBV2_Version, "V%u.%u of %hu-%hhu-%hhu %hhu:%hhu:%hhu", &major, &minor, &firmwareTime.year,
+                         &firmwareTime.mon, &firmwareTime.day, &firmwareTime.hr, &firmwareTime.min, &firmwareTime.sec ) != 8 )
+                firmwareTime.year = 0;  // firmware date invalid
 
             dateStr( dt, rtcDt );
             logEvtNS( "foundRTC", "lastRtc", dt );
-            dateStr( dt, fware );
+            dateStr( dt, firmwareTime );
             logEvtNS( "foundRTC", "firmwareRtc", dt );
             dateStr( dt, lastRTCinLog );
             logEvtNS( "foundRTC", "lastRtcInLog", dt );
 
             fsTime *latest = &jan22;                        // default if all others invalid
             latest = laterDtTm( latest, &rtcDt );           // use lastRTC timestamp if valid
-            latest = laterDtTm( latest, &fware );           // use firmware date if later than lastRTC
+            latest = laterDtTm( latest, &firmwareTime );           // use firmware date if later than lastRTC
             latest = laterDtTm( latest, &lastRTCinLog );    // lastRTCinLog may have been set by initNorLog -- from last RTC log entry
 
-            // latest -> most recent valid time of jan22, rtcDt, fware, lastRTCinLog
+            // latest -> most recent valid time of jan22, rtcDt, firmwareTime, lastRTCinLog
 
             /*
             bool useFileTime = haveTime && (rtcDt.year >= lastRTCinLog.year) && (rtcDt.mon >= lastRTCinLog.mon) && (rtcDt.day >= lastRTCinLog.day) &&

@@ -81,18 +81,6 @@ extern bool         BootVerboseLog;
 #define LOG_AUDIO_PLAY_ERRORS(errorCount, lastError) \
           logEvtFmt(AUDIO_EVENT, "evt: errors, count: %d, last: %x")
 
-#define LOG_AUDIO_PLAY_SPROMPT(playlist, filename) \
-          logEvtFmt(AUDIO_EVENT, "sprompt: '%s', file: '%s'", playlist, filename)
-
-#define LOG_AUDIO_PLAY_LPROMPT(playlist, filename) \
-          if (BootVerboseLog) logEvtFmt(AUDIO_EVENT, "lprompt: '%s', file: '%s'", playlist, filename)
-
-#define LOG_AUDIO_PLAY_MESSAGE(position,playlist, filename) \
-          if (BootVerboseLog) logEvtFmt(AUDIO_EVENT, "message#: %d, playlist: '%s', file: '%s'", position, playlist, filename)
-
-#define LOG_AUDIO_PLAY_SYSTEM(prompt, filename) \
-          if (BootVerboseLog) logEvtFmt(AUDIO_EVENT, "system: '%s', file: '%s'", prompt, filename)
-
 #define LOG_AUDIO_PLAY_WAVE(filename, lenMs, lenBytes, samplesPerSec, isMono) \
           if (BootVerboseLog) logEvtFmt(AUDIO_EVENT, "wave_file: '%s', length_ms: %d, size: %d, samples/sec: %d, isMono: %s", \
               filename, lenMs, lenBytes, samplesPerSec, isMono?"t":"f")

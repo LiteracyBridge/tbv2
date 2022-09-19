@@ -8,7 +8,7 @@
 //  The W25Q64JV device is directly handled by W25Q64JV.c 
 // �The driver sends commands to the chip over SPI, this file only access a few driver functions:
 //   � pNor->Initialize,� pNor->PowerControl, & pNor->GetInfo  -- from initNorLog()
-//     pNor->ReadData             -- from NLogReadPage() and copyNorLog()
+//     pNor->ReadData             -- from NLogReadPage() and saveNorLog()
 //   � pNor->ProgramData          -- from NLogWrite()
 //   � pNor->EraseSector()        -- from eraseNorFlash()
 //
@@ -33,7 +33,7 @@
 //-- appendNorLog( text ) 
 //   writes text to NOR flash, starting at NLg.Nxt 
 //      splits into two calls to NLogWrite if data crosses into next page
-//-- copyNorLog( path ) -- writes contents of current log to specified file path
+//-- saveNorLog( path ) -- writes contents of current log to specified file path
 //-- eraseNorFlash( saveCurrLog ) -- erases entire NOR flash, a page at a time
 //       (page at a time, which is slow, because pNor->eraseChip() didn't work)
 //       if saveCurrLog was requested, writes the current log before erasing, 
@@ -62,8 +62,7 @@ const char *    fgNOR_Erasing = "R5G5!";    // alternate 1/2 sec red & green
 
 //
 // NOR-flash LOG
-const char *    norTmpFile = "M0:/system/svLog.txt";
-const char *    norLogPath = "M0:/log";
+const char *    norTmpFile = "M0:/log/svLog.txt";
 const int       BUFFSZ  = 260;   // 256 plus space for null to terminate string
 const int       N_SADDR = 64;   // number of startAddresses in page0
 
@@ -412,11 +411,11 @@ void findCurrNLog( bool startNewLog ) {           // read 1st pg (startAddrs) & 
     }
 }
 
-void eraseNorFlash( bool svCurrLog ) {            // erase entire chip & re-init with fresh log (or copy of current)
+void eraseNorFlash( bool retainCurrentLog ) {            // erase entire chip & re-init with fresh log (or copy of current)
     if ( NLg.pNor == NULL ) return;       // Nor not initialized
 
-    if ( svCurrLog )
-        copyNorLog( norTmpFile );
+    if ( retainCurrentLog )
+        saveNorLog( norTmpFile );
 
     osMutexAcquire( logLock, 0 );     // acquire lock, if not already locked (e.g. filled up during append)
 
@@ -450,8 +449,11 @@ void eraseNorFlash( bool svCurrLog ) {            // erase entire chip & re-init
     //int stat = NLg.pNor->EraseChip( );  //DOESN'T WORK!
     //if ( stat != ARM_DRIVER_OK ) norErr(" pNor erase => %d", stat );
 
-    if ( svCurrLog )    // could have some new entries that will be out of order
-        restoreNorLog( norTmpFile );
+    if (retainCurrentLog) {
+        // TODO: What does this mean: "could have some new entries that will be out of order"
+        restoreNorLog(norTmpFile);
+        fdelete( norTmpFile, NULL );
+    }
 }
 
 void initNorLog( bool startNewLog ) {             // init driver for W25Q64JV NOR flash
@@ -536,72 +538,86 @@ void CheckNLog( FILE *f ) {                      // reads & checks Nor Pg0, msgs
     }
 }
 
-void copyNorLog( const char *fpath ) {           // copy curr Nor log into file at path
+/**
+ * Copy the current NOR log to the given file, or to a default name if nothing specified.
+ * @param fpath Optional path to which the log file will be written. MUST be in the 
+ *     /log directory.
+ */
+void saveNorLog( const char *fpath ) {           // copy curr Nor log into file at path
     if ( NLg.pNor == NULL ) return;       // Nor not initialized
 
+    const char *tempLogPath       = "/log/tbTmpLog.txt";
+    const char *goodLogPathFormat = "/log/tbLog_%d.txt";
+    const char *badLogPathFormat  = "/log/badLog_%d.txt";
+
     osMutexAcquire( logLock, 0 );     // acquire lock, if not already locked (e.g. filled up during append)
-    dbgLog( "6 copyNorLog %s \n", fpath );
-    char     fnm[40];
-    uint32_t stat, msec, tsStart = tbTimeStamp(), totcnt = 0;
+    dbgLog( "6 saveNorLog %s \n", fpath );
+    char     logFilePath[40];
+    uint32_t stat, msec, tsStart = tbTimeStamp();
 
-    strcpy( fnm, fpath );
-    if ( strlen( fnm ) == 0 ) // generate tmp log name
-        sprintf( fnm, "M0:/log/tbLog_%d.txt", NLg.currLogIdx );  // e.g. LOG/tbLog_x.txt
-
-    const char *tmpNm      = "M0:/log/tbTmpLog.txt";
-    const char *badLogPatt = "M0:/log/badLog_%d.txt";
-
-    FILE *f = tbOpenWrite( tmpNm ); //fopen( tmp, "w" );
+    FILE *f = tbOpenWrite( tempLogPath ); //fopen( tmp, "w" );
     if ( f == NULL )
         return; // try to make it into USBmode anyway 
     //norErr("cpyNor fopen err");
 
     CheckNLog( f );     // check & correct any consistency issues in NLg or Page0
-    bool validLog     = true;
-    int  maxLogSz     = ( NLg.MAX_ADDR - NLg.PGSZ ) / N_SADDR;  // 1/64th of capacity
-    int  maxLogCnt    = 0;
-    int  invalidpgcnt = 0;   // count invalid pages found
-    dbgLog( "! copyNorLog: %d bytes to %s\n", NLg.Nxt - NLg.logBase, tmpNm );
+    bool isLogValid     = true;
+    int  totalBytesWritten = 0;
+    // See comment below.
+//    int  maxLogSz     = ( NLg.MAX_ADDR - NLg.PGSZ ) / N_SADDR;  // 1/64th of capacity
+//    int  maxLogCnt    = 0;
+    int  numInvalidPages = 0;   // count invalid pages found
+    dbgLog( "! saveNorLog: %d bytes to %s\n", NLg.Nxt - NLg.logBase, tempLogPath );
     for (int p = NLg.logBase; p < NLg.Nxt; p += NLg.PGSZ) {   // log always starts at page boundary, is full from logBase..Nxt-1
         stat = NLg.pNor->ReadData( p, NLg.pg, NLg.PGSZ );
-        if ( stat != NLg.PGSZ ) fprintf( f, "\n copyNorLog read 0x%08x => %d \n", p, stat );
+        if ( stat != NLg.PGSZ ) fprintf( f, "\n saveNorLog read 0x%08x => %d \n", p, stat );
 
-        int cnt = NLg.Nxt - p;
-        if ( cnt > NLg.PGSZ ) cnt = NLg.PGSZ;
-        for (int i = 0; i < cnt; i++) {   // verify validity of data
+        int bytesToWrite = NLg.Nxt - p;
+        if ( bytesToWrite > NLg.PGSZ ) bytesToWrite = NLg.PGSZ;
+        for (int i = 0; i < bytesToWrite; i++) {   // verify validity of data
             if ( !isValidChar( NLg.pg[i] )) {
-                invalidpgcnt++;
-                if ( validLog ) // first bad char found
+                numInvalidPages++;
+                if ( isLogValid ) // first bad char found
                     fprintf( f, "\n bad Log%d 0x%08x: [%d] = 0x%02x logBase=0x%08x Nxt=0x%08x \n", NLg.currLogIdx, p, i,
                              NLg.pg[i], NLg.logBase, NLg.Nxt );
-                validLog = false;
+                isLogValid = false;
             }
         }
-        stat       = fwrite( NLg.pg, 1, cnt, f );
-        showProgress( "RG___", 200 );   // copyNorLog
-        if ( stat != cnt )
-            fprintf( f, "\n copyNorLog fwrite => %d  totcnt=%d \n", stat, totcnt );
-        if ( invalidpgcnt > 20 ) {
-            fprintf( f, "\n >20 invalid pages-- stop copying after %d bytes \n", totcnt );
+        stat       = fwrite( NLg.pg, 1, bytesToWrite, f );
+        showProgress( "RG___", 200 );   // saveNorLog
+        if ( stat != bytesToWrite )
+            fprintf( f, "\n saveNorLog fwrite => %d  totalBytesWritten=%d \n", stat, totalBytesWritten );
+        if ( numInvalidPages > 20 ) {
+            fprintf( f, "\n >20 invalid pages-- stop copying after %d bytes \n", totalBytesWritten );
             break;
         }
-        totcnt += cnt;
-        if ( totcnt / maxLogSz > maxLogCnt ) {
-            maxLogCnt++;
-            dbgLog( "! copying: %d maxLogs\n", maxLogCnt );
-        }
+        totalBytesWritten += bytesToWrite;
+        // TODO: This seems to count how many times "maxLogCnt" the size of this log is. I don't see how
+        //  that is useful, or even interesting, and it is never used.
+//        if ( totalBytesWritten / maxLogSz > maxLogCnt ) {
+//            maxLogCnt++;
+//            dbgLog( "! copying: %d maxLogs\n", maxLogCnt );
+//        }
     }
     tbFclose( f );   //fclose( f );  // tbTmpLog
     endProgress();
 
-    if ( !validLog ) {  // bad log-- save to different filename
-        sprintf( fnm, badLogPatt, NLg.currLogIdx );  // save invalid log-- no path
-        dbgLog( "! inconsistent NorLog-- saving to %s \n", fnm );
+    if ( !isLogValid ) {  
+        // bad log-- save to different filename, no matter what caller requested.
+        sprintf( logFilePath, badLogPathFormat, NLg.currLogIdx );  // save invalid log-- no path
+        dbgLog( "! inconsistent NorLog-- saving to %s \n", logFilePath );
+    } else if (fpath == NULL || strlen(fpath) == 0) {
+        // If no file name was provided, generate a name based on the log chunk index.
+        sprintf(logFilePath, goodLogPathFormat, NLg.currLogIdx);
+    } else {
+        // otherwise use the provided name.
+        strcpy(logFilePath, fpath);
     }
-    tbFrename( tmpNm, fnm );
+
+    tbFrename( tempLogPath, logFilePath );
 
     msec = tbTimeStamp() - tsStart;
-    dbgLog( "6 copyNorLog: %s: %d in %d msec \n", fnm, totcnt, msec );
+    dbgLog( "6 saveNorLog: %s: %d in %d msec \n", logFilePath, totalBytesWritten, msec );
     osMutexRelease( logLock );  // allow other threads to continue
 }
 

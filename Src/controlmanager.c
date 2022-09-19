@@ -263,7 +263,7 @@ void USBmode( bool start ) {            // start (or stop) USB storage mode
         saveLastTime( rtcTm );
 
         logEvt( "enterUSB" );
-        copyNorLog( "" );
+        saveNorLog( "" );
         logPowerDown();       // flush & shut down logs
         setDbgFlag( 'F', false );
         enableMassStorage( "M0:", NULL, NULL, NULL );

@@ -66,10 +66,10 @@ extern void         logEvtNSNS( const char *evtID, const char *nm, const char *v
 extern void         logEvtNSNSNS( const char *evtID, const char *nm, const char *val, const char *nm2, const char *val2, const char *nm3, const char *val3 ); // write log entry
 
 extern void         appendNorLog( const char * s );           // append text to Nor flash
-extern void         copyNorLog( const char * fpath );         // copy Nor log into file at path
+extern void         saveNorLog( const char * fpath );         // copy Nor log into file at path
 extern void         restoreNorLog( const char * fpath );      // copy file into current log
 extern void         initNorLog( bool startNewLog );           // init driver for W25Q64JV NOR flash
-extern void         eraseNorFlash( bool svCurrLog );          // erase entire chip & re-init with fresh log (or copy of current)
+extern void         eraseNorFlash( bool retainCurrentLog );   // erase entire chip & re-init with fresh log or copy of current
 extern void         NLogShowStatus( void );
 extern int          NLogIdx( void );
 extern bool         LogSizeOk( void );                        // TRUE if log below 1/64 of NLog

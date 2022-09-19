@@ -201,7 +201,7 @@ void dateStr( char *s, fsTime dttm ) {
 
 void startNextLog() {         // save current log, switch to next index
     if ( !BootResetLog )   // if Reset-- skip saving a log with problems
-        copyNorLog( "" );     // save with default name
+        saveNorLog( "" );     // save with default name
     initNorLog( true );
 }
 
@@ -384,7 +384,7 @@ void logPowerDown( void ) {                             // save & shut down logg
     //  if ( !fexists( lastRtcFile )) writeLine( "---", lastRtcFile );  // make sure it's there
     //  ftime_set( lastRtcFile, &rtcTm, &rtcTm, &rtcTm );  // set create,access,write times to RTC
 
-    //  copyNorLog( "" );   // auto log name
+    //  saveNorLog( "" );   // auto log name
 
     if ( logF == NULL ) return;
     //  logEvtNI( "WrLog", "nCh", totLogCh );

@@ -439,6 +439,8 @@ static void decodeMp3(struct Mp3ToStream *pMp3ToStream) {
     releaseBuffer(pMp3ToStream->inputBuf);
     dbgLog("D MP3 playback finished\n");
 
+    FileSysPower( false );
+
     osMutexRelease(mp3ToStreamMutex);
 }
 

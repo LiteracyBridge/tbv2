@@ -499,7 +499,7 @@ bool getRTC( struct _fsTime *fsTime, uint32_t *pMSec ) {
         *pMSec = msec;
     }
     ///////////////////////////////////////////////////////////////////////////
-    // HACK to try to ensure clock grows monotonically, in spite of occassionally seeing sec fail to increment (especially when power is low)
+    // HACK to try to ensure clock grows monotonically, in spite of occasionally seeing sec fail to increment (especially when power is low)
     if ( prevGetRtcTime.min == fsTime->min && prevGetRtcTime.sec == fsTime->sec &&
          prevGetRtcMs > msec ) {  // earlier than previous time (sec didn't incr)
         fsTime->sec++;

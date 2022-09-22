@@ -85,18 +85,18 @@ void playSubjAudio( char *arg ) {       // play current Subject: arg must be 'nm
     if ( strcasecmp( arg, "nm" ) == 0 ) {
         // Playlist name
         aud     = subj->shortPrompt;
-        playbackType = kPlayTypePlaylist;
-        logEvtFmt("PlayNm", "iPl: %d, nm: %s, fn: %s", TBook.iSubj, subj->subjName, aud->filename);
+        playbackType = kTypeSubject;
+        logEvtFmt("PlayNm", "iS:%d, nm:%s, fn:%s", TBook.iSubj, subj->subjName, aud->filename);
     } else if ( strcasecmp( arg, "pr" ) == 0 ) {
         // Playlist invitation / call to action
         aud     = subj->invitation;
         playbackType = kPlayTypeInvitation;
-        logEvtFmt("PlayInv", "iPl: %d, nm: %s, fn: %s", TBook.iSubj, subj->subjName, aud->filename);
+        logEvtFmt("PlayInv", "iS:%d, nm:%s, fn:%s", TBook.iSubj, subj->subjName, aud->filename);
     } else if ( strcasecmp( arg, "msg" ) == 0 ) {
         // Program content message
         aud     = gMsg( subj, TBook.iMsg );
         playbackType = kPlayTypeMessage;
-        logEvtFmt( "PlayMsg", "Msg: %s, iM: %d, fn: %s", subj->subjName, TBook.iMsg, aud->filename );
+        logEvtFmt( "PlayMsg", "iS:%d, iM:%d, fn:%s", TBook.iSubj, TBook.iMsg, aud->filename );
         stats = loadStats( subj->subjName, TBook.iSubj, TBook.iMsg ); // load stats for message
     }
     getAudioPath( path, aud );

@@ -71,7 +71,7 @@ typedef enum PlaybackType {      // PlaybackType_t
     kPlayTypeNone,          // reset value
     kPlayTypePackagePrompt, // package prompt
     kPlayTypeSystemPrompt,  // system prompt
-    kPlayTypePlaylist,      // subject name
+    kTypeSubject,      // subject name
     kPlayTypeInvitation,    // subject invitation
     kPlayTypeMessage,       // subject message
     kPlayTypeRecording,     // recorded file

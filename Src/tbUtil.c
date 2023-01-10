@@ -21,12 +21,15 @@ extern bool BootVerboseLog;
 // GPIO utilities based on GPIO_ID enumeration & GPIO_Signal[] in main.h
 GPIO_Def_t gpio_def[MAX_GPIO];                           // array of signal definitions, indexed by GPIO_ID
 void gDef( GPIO_ID gpid, char *signal ) {             // define gpio_signal[ ID ] from name e.g. "PC8"
-    // GPIO_ID  signal                  eg   'PA4'   => GPIOA, pin 4, active high
-    //          "Pxdd_|cc" where:         e.g. 'PE12_' => GPIOE, pin 12, active low
-    //             x  = A,B,C,D,E,F,G,H -- GPIO port
-    //             dd = 0..15  -- GPIO pin #
-    //             _  = means 'active low', i.e, 0 if pressed
-    //             cc = 0..15 -- alternate function code
+    // GPIO_ID  signal
+    //  "Pxdd_|cc" where:
+    //      x  = A,B,C,D,E,F,G,H -- GPIO port
+    //      dd = 0..15  -- GPIO pin #
+    //      _  = means 'active low', i.e, 0 if pressed
+    //      cc = 0..15 -- alternate function code
+    //  Thus: "PA4"     means GPIOA, pin 4, considered active when input is high
+    //        "PE12_"   means GPIOE, pin 12, considered active when input is low
+    //        "PA2|7"   means GPIOA, pin 2, considered active when input is high, alternate function 7
     if ( gpio_def[gpid].id == gpid ) tbErr( "GPIO redefined" );
 
     GPIO_TypeDef *port = NULL;    // address of GPIO port -- from STM32Fxxxx.h
@@ -196,7 +199,8 @@ bool gGet( GPIO_ID gpio ) {                           // => LOGICAL state of a G
 bool gOutVal( GPIO_ID gpio ) {                        // => LOGICAL state of a GPIO OUTput, e.g. True if 'PA0_'.ODR==0 or 'PB3'.ODR==1
     GPIO_TypeDef *port = gpio_def[gpio].port;
     if ( port == NULL ) return false;   // undefined: always false
-    int pin = gpio_def[gpio].pin, actval = gpio_def[gpio].active;
+    int pin = gpio_def[gpio].pin;
+    int actval = gpio_def[gpio].active;
     return (( port->ODR >> pin ) & 1 ) == actval;
 }
 

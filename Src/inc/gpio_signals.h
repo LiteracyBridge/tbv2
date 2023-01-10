@@ -95,7 +95,7 @@ typedef enum {			// GPIO_ID -- gpio signal IDs
   
 } GPIO_ID;
 
-typedef struct	{	// GPIO_Def_t -- define GPIO port/pins/interrupt #, signal name, & st when pressed for a GPIO_ID
+typedef struct	{	// GPIO_Signal -- define GPIO port/pins/interrupt #, signal name, & st when pressed for a GPIO_ID
 	GPIO_ID					id;			// GPIO_ID connected to this line
 	char *					name;		// "PC7_" => { GPIOC, 7, EXTI15_10_IRQn, "PC7_", 0 }
 } GPIO_Signal;

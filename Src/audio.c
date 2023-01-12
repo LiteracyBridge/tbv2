@@ -1,10 +1,12 @@
 // audio.c  -- playback & record functions called by mediaplayer
 
 #include "audio.h"
+#include "encAudio.h"
 #include "mediaplayer.h"
 #include "controlmanager.h"
 #include "mp3toStream.h"
 #include "buffers.h"
+#include "fileOps.h"
 
 extern TBook_t TBook;
 
@@ -24,7 +26,8 @@ const int RECORD_SEC            = 30;
 const int WAV_DATA_SIZE         = RECORD_SAMPLE_RATE * 2 * RECORD_SEC;    // 30sec at 8K 16bit samples
 
 const int WAV_FILE_SIZE         = WAV_DATA_SIZE + sizeof(WavFileHeader_t);
-
+            
+extern volatile char                   mRecordFilePath[MAX_PATH];
 
 const WavFileHeader_t newWavHeader =  {
     0x46464952,             //  riffId = 'RIFF'
@@ -87,10 +90,13 @@ static struct {       // PlaybackFile_t     -- audio state block
     //  uint32_t              msPos;          // msec position in file
 
     // recording
+    const char *            recordFilename; // Pointer to mediaplayer's file name buffer.
     uint32_t                samplesPerBuff; // number of mono samples in kBufferSize (stereo) buffer
     uint32_t                msRecorded;     // elapsed msec recording file
     uint32_t                nRecorded;      // n samples in filled record buffers
     uint32_t                nSaved;         // recorded samples sent to file so far
+    bool                    needHeader;     // True when we need to add the WAV header to the next buffer;
+    bool                    privateFeedback;
 
     // simulated square wave data
     bool                    SqrWAVE;        // T => wavHdr pre-filled to generate square wave
@@ -133,6 +139,7 @@ void                testSaveWave( void );
 void                fillSqrBuff( Buffer_t * pB, int nSamp, bool stereo );
 // EXTERNAL functions
 
+
 /**
  * Initialize the audio module. Once per execution.
  * Allocate buffers, set up SAI (Serial Audio Interface).
@@ -140,7 +147,9 @@ void                fillSqrBuff( Buffer_t * pB, int nSamp, bool stereo );
 void audInitialize( void ) { 
     pSt.state = pbIdle;
     initBufferPool();
-    streamMp3Init();
+    fileOpInit();
+    encUfAudioInit();
+    pSt.privateFeedback = encUfAudioEnabled;
 
     assert( sizeof( newWavHeader ) == WaveHdrBytes );
 
@@ -184,6 +193,7 @@ void audInitState( void ) {
             break;
         }
     }
+
     pSt.audioFormat     = kAudioNone;
     pSt.playbackTyp = kPlayTypeNone;
     pSt.playSubj    = -1;
@@ -201,8 +211,8 @@ void audInitState( void ) {
         dbgLog( "! audInit close audF\n" );
         tbFclose( pSt.audF );  //int res = fclose( pSt.audF );
         //if ( res!=fsOK ) dbgLog( "! audInit fclose => %d \n", res );
+        pSt.audF = NULL;
     }
-    pSt.audF = NULL;
 
     pSt.samplesPerSec  = 1;    // avoid /0 if never set
     pSt.bytesPerSample = 0;   // eg. 4 for 16bit stereo
@@ -472,7 +482,7 @@ void audStopAudio( void ) {                         // abort any leftover operat
     }
 }
 
-void audStartRecording( FILE *outFP, MsgStats *stats ) {  // start recording into file
+bool audStartRecording( const char * fname, MsgStats *stats ) {  // start recording into file
     //  EventRecorderEnable( evrEAO,    EvtFsCore_No,  EvtFsCore_No );
     //  EventRecorderEnable( evrEAO,    EvtFsFAT_No,   EvtFsFAT_No );
     //  EventRecorderEnable( evrEAO,    EvtFsMcSPI_No, EvtFsMcSPI_No );
@@ -481,21 +491,32 @@ void audStartRecording( FILE *outFP, MsgStats *stats ) {  // start recording int
 
     //  testSaveWave( );    //DEBUG
 
+    FILE *audF = tbOpenWriteBinary( fname );
+    if ( audF != NULL ) {
+        dbgLog( "8 Rec fnm: %s \n", fname );
+    } else {
+        printf( "Cannot open record file to write\n\r" );
+        return false;
+    }
+    pSt.recordFilename = fname;
+
     minFreeBuffs = numBuffersAvailable();
     audInitState();
     pSt.audioFormat = kAudioWav;
-
+    
     dbgEvt( TB_recWv, 0, 0, 0, 0 );
     pSt.stats = stats;
     stats->RecStart++;
 
-    pSt.audF = outFP;
+    pSt.audF = audF;
     memcpy( &pSt.fmtData, &newWavHeader.fmtData, sizeof( WavFmtData_t ));
 
-    int cnt = fwrite( &newWavHeader, 1, WaveHdrBytes, pSt.audF );
-    if ( cnt != WaveHdrBytes ) tbErr( ".wav header write failed, wrote cnt=%d", cnt );
+    // Create key file, prepare for encryption.
+    if (pSt.privateFeedback) {
+        encUfAudioPrepare((char*)mRecordFilePath);
+    }
 
-    pSt.state = pbWroteHdr;
+    pSt.needHeader  = true;
     int audioFreq = pSt.fmtData.samplesPerSecond;
     if (( audioFreq < SAMPLE_RATE_MIN ) || ( audioFreq > SAMPLE_RATE_MAX ))
         errLog( "bad audioFreq, %d", audioFreq );
@@ -508,6 +529,7 @@ void audStartRecording( FILE *outFP, MsgStats *stats ) {  // start recording int
                     ARM_SAI_MODE_SLAVE |
                     ARM_SAI_ASYNCHRONOUS |
                     ARM_SAI_PROTOCOL_I2S |
+                    ARM_SAI_MONO_MODE |
                     ARM_SAI_DATA_SIZE( 16 );
     Driver_SAI0.Control( ctrl, 0, pSt.samplesPerSec );  // set sample rate, init codec clock
 
@@ -517,6 +539,7 @@ void audStartRecording( FILE *outFP, MsgStats *stats ) {  // start recording int
     pSt.msecLength     = pSt.nSamples * 1000 / pSt.samplesPerSec;
     pSt.samplesPerBuff = kBufferWords / 2;
     startRecord();
+    return true;
 }
 
 
@@ -587,8 +610,12 @@ void audPauseResumeAudio( void ) {                  // signal playback to reques
             dbgLog( "8 resumeRec at %d ms \n", pSt.msRecorded );
             pSt.stats->RecResume++;
             Driver_SAI0.PowerControl( ARM_POWER_FULL );   // power audio back up
-            ctrl = ARM_SAI_CONFIGURE_RX | ARM_SAI_MODE_SLAVE | ARM_SAI_ASYNCHRONOUS | ARM_SAI_PROTOCOL_I2S |
-                   ARM_SAI_DATA_SIZE( 16 );
+            ctrl = ARM_SAI_CONFIGURE_RX |
+                            ARM_SAI_MODE_SLAVE |
+                            ARM_SAI_ASYNCHRONOUS |
+                            ARM_SAI_PROTOCOL_I2S |
+                            ARM_SAI_MONO_MODE |
+                            ARM_SAI_DATA_SIZE( 16 );
             Driver_SAI0.Control( ctrl, 0, pSt.samplesPerSec );  // set sample rate, init codec clock
             startRecord(); // restart recording
             break;
@@ -661,6 +688,11 @@ void audRecordComplete( void ) {                    // last buff recorded, finis
     freeBuffs();
     audSaveBuffs();     // write all filled writeQueue[]
     tbFclose( pSt.audF );  //int err = fclose( pSt.audF );
+    if (pSt.privateFeedback) {
+        size_t fSize = fsize(pSt.recordFilename);
+        encUfAudioFinalize(fSize);
+    }
+
     pSt.audF = NULL;
     ledFg( NULL );
     dbgLog( "8 RecComp %d errs \n", pSt.ErrCnt );
@@ -678,6 +710,9 @@ void audRecordComplete( void ) {                    // last buff recorded, finis
     pSt.state = pbIdle;
 }
 
+void audFinalizeRecord( bool keep) {
+    // TODO: delete files here.
+}
 
 //
 // INTERNAL functions
@@ -775,16 +810,28 @@ static void saveBuff(Buffer_t *pB) {                    // save buff to file, th
     int nS = kBufferWords / 2;   // num mono samples
     for (int i = 2; i < kBufferWords; i += 2)  // nS*2 stereo samples
         pB[i / 2] = pB[i];  // pB[1]=pB[2], [2]=[4], [3]=[6], ... [(kBufferWords-2)/2]=[kBufferWords-2]
+
+    if (pSt.needHeader) {
+        // This overwrites 22 samples with the WAVE header. About 1ms.
+        pSt.needHeader = false;
+        memcpy(pB, &newWavHeader, sizeof(newWavHeader));
+    }
+
     int nB = fwrite(pB, 1, nS * 2, pSt.audF);   // write nS*2 bytes (1/2 buffer)
-    if (nB != nS * 2) tbErr("svBuf write(%d)=>%d", nS * 2, nB);
+    if (nB != nS * 2) 
+        tbErr("svBuf write(%d)=>%d", nS * 2, nB);
 
     pSt.nSaved += nS;     // count of samples saved
     dbgEvt(TB_wrRecBuff, nS, pSt.nSaved, nB, (int) pB);
-    releaseBuffer(pB);
+    if (pSt.privateFeedback) {
+        encUfAudioAppend(pB, nS * 2);
+    } else {
+        releaseBuffer(pB);
+    }
 }
 
-
-static void startRecord( void ) {                          // preload buffers & start recording
+// preload buffers & start recording
+static void startRecord( ) {
     for (int i = 0; i < kAudioQueueSize; i++)     // allocate empty buffers for recording
         pSt.audioQueue[i] = allocBuff("start record");
     minFreeBuffs = min(minFreeBuffs, numBuffersAvailable());
@@ -972,7 +1019,7 @@ extern bool playWave( const char *fname ) {          // play WAV file, true if s
     pSt.state   = pbLdHdr;
 
     // Open file, start reading the header(s).
-    pSt.audF = tbOpenRead( fname ); //fopen( fname, "r" );
+    pSt.audF = tbOpenRead( fname );
     if ( pSt.audF == NULL ) {
         errLog( "open wav failed, %s", fname );
         audStopAudio();
@@ -1099,7 +1146,7 @@ extern void saiEvent( uint32_t event ) {                   // called by ISR on b
             osEventFlagsSet( mMediaEventId, CODEC_RECORD_DONE );    // tell mediaThread to finish recording
             freeBuffs();            // free buffers waiting to record -- pSt.audioQueue[*]
         } else {
-            pSt.audioQueue[kAudioQueueSize - 1] = allocateBufferNoLock("receive");    // add new empty buff for reception
+            pSt.audioQueue[kAudioQueueSize - 1] = allocateBuffer("receive");    // add new empty buff for reception
             minFreeBuffs = min(minFreeBuffs, numBuffersAvailable());
             if ( pSt.audioQueue[kAudioQueueSize - 1] == NULL ) { // out of buffers-- try to shut down
                 pSt.state     = pbRecStop;

@@ -7,117 +7,80 @@
 
 #define DEBUG_BUFFERS
 
-static osMutexId_t allocationMutexId;
-static Buffer_t *freeList[kBufferPoolSize];
+osMemoryPoolId_t mpid_MemPool;
+
 #if defined(DEBUG_BUFFERS)
-// To verify that buffers being freed are, in fact, from our pool.
-static Buffer_t *bufferList[kBufferPoolSize];
-static const char * ownerList[kBufferPoolSize];
+// To track which buffer is which.
+static Buffer_t *buffers;
+static int bufferIx(Buffer_t *buffer) {
+    return (buffer-buffers)/kBufferSize;
+}
+static const char *ownerList[kBufferPoolSize];
 #endif
 
 void initBufferPool(void) {
-    for (int ix = 0; ix < kBufferPoolSize; ++ix) {
-        freeList[ix] = (Buffer_t *) tbAlloc(kBufferSize, "audio buffer");
+    if (mpid_MemPool != NULL) {
+        return;
     }
-    osMutexAttr_t mutexAttr = {.attr_bits = osMutexRobust | osMutexPrioInherit};
-    allocationMutexId = osMutexNew(&mutexAttr);
+    // For an unknown reason we must provide the memory to the buffer pool. My speculation is because
+    // the C runtime already owns too much memory, but that's just speculation.
+    // Regardless, the buffer pool is still useful because it is thread safe and ISR safe, and when
+    // recording we need to allocate buffers from an ISR, and free them from a thread context.
+    osMemoryPoolAttr_t mem_attr = {.name="io buffers",
+            .mp_size = kBufferSize * kBufferPoolSize,
+            .mp_mem = tbAlloc(kBufferSize * kBufferPoolSize, "io buffers")
+    };
+    mpid_MemPool = osMemoryPoolNew(kBufferPoolSize, kBufferSize, &mem_attr);
+    if (mpid_MemPool == NULL) {
+        tbErr("buffer pool alloc failed");
+    }
 #if defined(DEBUG_BUFFERS)
-    
-    memcpy(bufferList, freeList, sizeof(bufferList));
+    buffers = mem_attr.mp_mem;
 #endif
 }
 
 /**
  * Allocate a buffer from the pool.
  *
- * This, and the companion releaseBuffer() only work because there is only one
- * allocator process and one release process at a time. If there ever could be
- * multiple allocators or releasers, the code would need to use compare-and-swap
- * operations.
- *
  * @return a pointer to the buffer, or NULL if no buffers are available.
  */
-Buffer_t *allocateBufferNoLock(const char * owner) {
-    Buffer_t *result = NULL;
-    for (int ix = 0; ix < kBufferPoolSize; ++ix) {
-        if (freeList[ix]) {
-            // Want to use: __atomic_compare_exchange(&freeList[ix], &found, &null, false, 0, 0);
-            result = freeList[ix];
-            freeList[ix] = NULL;
+Buffer_t *allocateBuffer(const char *owner) {
+    #if defined(DEBUG_BUFFERS)
+    int inUse = osMemoryPoolGetCount(mpid_MemPool);
+    int available = osMemoryPoolGetSpace(mpid_MemPool);
+    #endif
+    Buffer_t *buffer = (Buffer_t *) osMemoryPoolAlloc(mpid_MemPool, 0U);  // get Mem Block
+    if (buffer == NULL) {
+         printf("Buffer allocation failed.");
+   }
 #if defined(DEBUG_BUFFERS)
-            ownerList[ix] = owner;
-#endif
-            break;
-        }
-    }
-    return result;
-}
-
-Buffer_t *allocateBuffer(const char * owner) {
-    Buffer_t *result = NULL;
-    osStatus_t status = osMutexAcquire(allocationMutexId, osWaitForever);
-    if (status != osOK) {
-        tbErr("Couldn't acquire buffer allocation mutex\n");
-    }
-
-    result = allocateBufferNoLock(owner);
-
-    status = osMutexRelease(allocationMutexId);
-    if (status != osOK) {
-        tbErr("Couldn't release buffer allocation mutex\n");
-    }
-    return result;
-}
-
-extern void transferBuffer( Buffer_t * buffer, const char * newOwner) {
-#if defined(DEBUG_BUFFERS)
-    for (int ix=0; ix<kBufferPoolSize; ++ix) {
-        if (bufferList[ix] == buffer) {
-            ownerList[ix] = newOwner;
-            return;
-        }
+    else {
+        int ix =  bufferIx(buffer);
+        ownerList[ix] = owner;
     }
 #endif
+    return buffer;
 }
 
+extern void transferBuffer(Buffer_t *buffer, const char *newOwner) {
+#if defined(DEBUG_BUFFERS)
+    ownerList[bufferIx(buffer)] = newOwner;
+#endif
+}
 
 void releaseBuffer(Buffer_t *buffer) {
     if (buffer == NULL) return;
 #if defined(DEBUG_BUFFERS)
-    bool owned = false;
-    bool free = false;
-    int bufferIx = -1;
-    for (int ix=0; ix<kBufferPoolSize; ++ix) {
-        owned |= bufferList[ix] == buffer;
-        free |= freeList[ix] == buffer;
-        if (buffer == bufferList[ix]) bufferIx = ix;
-    }
-    if (!owned) {
-        tbErr( "Attempt to free non-pool buffer" );
-    } else if (free) {
-        tbErr( "Attempt to double-free pool buffer" );
-    }
+    ownerList[bufferIx(buffer)] = NULL;
 #endif
-//    for (int ix = 0; ix < kBufferPoolSize; ++ix) {
-        if (freeList[bufferIx] == NULL) {
-#if defined(DEBUG_BUFFERS)
-            ownerList[bufferIx] = NULL;
-#endif
-            freeList[bufferIx] = buffer;
-//            break;
-        }
-//    }
-    dbgEvt( TB_relBuff, (int) buffer, numBuffersAvailable(), 0, 0 );
+    osMemoryPoolFree(mpid_MemPool, buffer);
+    dbgEvt(TB_relBuff, (int) buffer, numBuffersAvailable(), 0, 0);
 }
 
 extern int numBuffersAvailable(void) {
-    int result = 0;
-    for (int ix = 0; ix < kBufferPoolSize; ++ix) {
-        if (freeList[ix]) ++result;
-    }
-    return result;
+    return osMemoryPoolGetSpace(mpid_MemPool);
 }
 
 extern int numBuffersInUse(void) {
-    return kBufferPoolSize - numBuffersAvailable();
+    return osMemoryPoolGetCount(mpid_MemPool);
 }

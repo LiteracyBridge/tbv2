@@ -25,7 +25,6 @@ extern void initBufferPool( void );
  * Allocate a buffer from the pool.
  * @return a pointer to the buffer, or NULL if no buffers are available.
  */
-extern Buffer_t * allocateBufferNoLock( const char * owner );
 extern Buffer_t * allocateBuffer( const char * owner );
 
 extern void transferBuffer( Buffer_t * buffer, const char * newOwner);

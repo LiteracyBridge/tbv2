@@ -37,18 +37,18 @@ const char * const m3tExtension = ".m3t";
 * @return true if the file was opened successfully, and the header matched.
 */
 bool openMp3Timings(const char *m3tFilename, struct M3tContext *pContext) {
-  FILE *offsetsFile = fopen(m3tFilename, "rb");
+    FILE *offsetsFile = tbFopen(m3tFilename, "rb");
     if (offsetsFile == NULL) return false;
     struct M3tHeader m3tHeader;
     int32_t nRead = fread(&m3tHeader, sizeof(struct M3tHeader), 1, offsetsFile);
     if (nRead != 1) {
         fprintf(stderr, "Can't read .m3t file\n");
-        fclose(offsetsFile);
+        tbFclose(offsetsFile);
         return false;
     }
     if (memcmp(&m3tHeader.signature, &m3tSignature, sizeof(m3tSignature)) != 0) {
         fprintf(stderr, "Bad signature in .m3t file\n");
-        fclose(offsetsFile);
+        tbFclose(offsetsFile);
         return false;
     }
 
@@ -83,7 +83,7 @@ bool openMp3Timings(const char *m3tFilename, struct M3tContext *pContext) {
  */
 void closeMp3Timings(struct M3tContext *pContext) {
     if (pContext->offsetsFile)
-        fclose(pContext->offsetsFile);
+        tbFclose(pContext->offsetsFile);
     memset(pContext, 0, sizeof(struct M3tContext));
 }
 

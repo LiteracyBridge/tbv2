@@ -63,7 +63,8 @@ const int GPIO_ERR_INVALIDPIN = 2;
 const int MEDIA_ALREADY_IN_USE = 1;
 
 const int MALLOC_HEAP_SIZE = 20000;
-char      MallocHeap[20000];    // MALLOC_HEAP_SIZE ];
+// This doesn't seem to be used *anywhere*. Commenting it out seems to make no difference.
+//char      MallocHeap[20000];    // MALLOC_HEAP_SIZE ];
 bool      FileSysOK        = false;
 bool      TBDataOK         = true;     // false if no TB config found
 bool      RunQCTest        = false;
@@ -161,7 +162,7 @@ void talking_book( void *tbAttr ) {    // talking book initialization & control 
     initInputManager();               //  Initialize keypad handler & thread
 
     // I think this uses too much memory, and the mp3 decode thread can't launch. Need some other solution.
-//  initFileOps();                    //  decode mp3's
+//  fileOpInit();                    //  decode mp3's
 
     const char *startUp = "R3_3G3";
     ledFg( startUp );

@@ -9,23 +9,11 @@
 #include "mp3timing.h"
 #include "mp3tostream.h"
 
+#include "encAudio.h"
+
 static const int INPUT_BUF_SIZE = kBufferSize;
 static const int OUTPUT_BUF_SIZE = kBufferSize;
 static const int MP3_FRAME_SIZE = 2881;
-
-static const int kDecodeRequest = 1;
-static const int kSeekRequest = 2;
-static const int kStopRequest = 4;
-static const int kFillRequest = 8;
-static const int kAnyRequest = kDecodeRequest | kSeekRequest | kStopRequest | kFillRequest;
-static osEventFlagsId_t requestEventId;
-
-static const int kFilledResult = 1;
-static const int kHeaderResult = 2;
-static const int kAnyResult = kFilledResult | kHeaderResult;
-static osEventFlagsId_t resultEventId;
-
-
 
 static struct Mp3ToStream {
     FILE *          mp3File;
@@ -50,34 +38,6 @@ static struct Mp3ToStream {
 } mp3ToStream = {0};
 
 struct M3tContext m3tContext;
-
-static osThreadId_t         decoderThread = NULL;
-static osMutexId_t mp3ToStreamMutex;
-
-static void mp3StreamThreadProc(void *args);
-
-/**
- * Initializes the MP3 decoder thread.
- */
-void streamMp3Init( void ) {
-    struct Mp3ToStream *pMp3ToStream = &mp3ToStream;
-
-    mp3ToStreamMutex = osMutexNew(NULL);
-    requestEventId = osEventFlagsNew (NULL );
-    resultEventId = osEventFlagsNew (NULL );
-
-    // Keil documentation is silent on the required lifetime of this struct.
-    // The examples do show sharing this between multiple concurrent threads.
-    static osThreadAttr_t threadAttr = {
-            .name = "Mp3Stream",
-            .priority = osPriorityAboveNormal1 // osPriorityHigh
-    };
-    threadAttr.stack_size = 10000; //FILEOP_STACK_SIZE;
-    decoderThread = osThreadNew(mp3StreamThreadProc, pMp3ToStream, &threadAttr);
-    if (decoderThread == NULL) {
-        tbErr("mp3 decode spawn failed");
-    }
-}
 
 #if defined(HD_HEX_DUMP)
 void hexDump(const char * pTitle, const void * pRaw, int len) {
@@ -163,7 +123,7 @@ static enum mad_flow input_func(void *context, struct mad_stream *stream) {
     int keep; /* Number of bytes to keep from the previous buffer. */
 
     // Any commands from the caller? (seek, quit)
-    uint32_t eventFlags = osEventFlagsWait(requestEventId, kStopRequest|kSeekRequest, osFlagsWaitAny, 0);
+    uint32_t eventFlags = osEventFlagsWait(fileOpRequestEventId, kStopRequest|kSeekRequest, osFlagsWaitAny, 0);
     if ((eventFlags & 1u<<31) == 0) {
         if (eventFlags & kStopRequest) {
             return MAD_FLOW_STOP;
@@ -252,7 +212,7 @@ static enum mad_flow header_func(void *context, struct mad_header const *header)
 }
 
 /**
- * Scales a sample to the output size. This is fast, not high-fidelity. 
+ * Scales a sample to the output size. This is fast, not high-fidelity.
  * TODO: replace with dithering?
  * @param sample to be scaled
  * @return scaled sample
@@ -278,7 +238,7 @@ static inline int scale(mad_fixed_t sample) {
 }
 
 static void sendHeader(struct Mp3ToStream *pMp3ToStream) {
-    osEventFlagsSet(resultEventId, kHeaderResult);
+    osEventFlagsSet(fileOpResultEventId, kHeaderResult);
     pMp3ToStream->sentHeader = true;
 }
 
@@ -287,7 +247,7 @@ static void sendBuffer(struct Mp3ToStream *pMp3ToStream) {
     pMp3ToStream->resultBytes = pMp3ToStream->outputBytes;
     pMp3ToStream->resultPosition = pMp3ToStream->outputPosition;
     // Let the media thread know it owns the buffer again.
-    osEventFlagsSet(resultEventId, kFilledResult);
+    osEventFlagsSet(fileOpResultEventId, kFilledResult);
     // Remember that this thread does not own the buffer.
     pMp3ToStream->outputBuffer = NULL;
     pMp3ToStream->outputBytes = 0;
@@ -295,7 +255,7 @@ static void sendBuffer(struct Mp3ToStream *pMp3ToStream) {
 
 static bool acquireOutputBuffer(struct Mp3ToStream *pMp3ToStream) {
     // Wait for the media thread to ask for a buffer of decoded data.
-    uint32_t eventFlags = osEventFlagsWait(requestEventId, kAnyRequest, osFlagsWaitAny, osWaitForever);
+    uint32_t eventFlags = osEventFlagsWait(fileOpRequestEventId, kAnyRequest, osFlagsWaitAny, osWaitForever);
     if ((eventFlags & 1u<<31) == 0) {
         if (eventFlags & (kStopRequest|kSeekRequest)) {
             return false;
@@ -326,7 +286,7 @@ static enum mad_flow output_func(void *context, struct mad_header const *header,
         return MAD_FLOW_IGNORE;
     }
     // Any commands from the caller? (seek, quit)
-    uint32_t eventFlags = osEventFlagsWait(requestEventId, kStopRequest, osFlagsWaitAny, 0);
+    uint32_t eventFlags = osEventFlagsWait(fileOpRequestEventId, kStopRequest, osFlagsWaitAny, 0);
     if ((eventFlags & 1u<<31) == 0) {
         if (eventFlags & kStopRequest) {
             return MAD_FLOW_STOP;
@@ -420,10 +380,11 @@ static enum mad_flow error_func(void *context, struct mad_stream *stream, struct
     return MAD_FLOW_CONTINUE;
 }
 
-static void decodeMp3(struct Mp3ToStream *pMp3ToStream) {
+void streamMp3DecodeLoop(void) {
     struct mad_decoder decoder;
+    struct Mp3ToStream *pMp3ToStream = &mp3ToStream;
 
-    osMutexAcquire(mp3ToStreamMutex, osWaitForever);
+    osMutexAcquire(fileOpMutex, osWaitForever);
 
     // Set up and run the decoder.
     mad_decoder_init(&decoder, pMp3ToStream, input_func, header_func, 0 /* filter */, output_func, error_func,
@@ -441,24 +402,7 @@ static void decodeMp3(struct Mp3ToStream *pMp3ToStream) {
 
     FileSysPower( false );
 
-    osMutexRelease(mp3ToStreamMutex);
-}
-
-
-/**
- * Thread proc for mp3 streamer.
- * @param args arguments provided to the thread.
- */
-void mp3StreamThreadProc(void *args) {
-    struct Mp3ToStream *pMp3ToStream = (struct Mp3ToStream *) args;
-
-    while (true) {
-        uint32_t eventFlags = osEventFlagsWait(requestEventId, kDecodeRequest, osFlagsWaitAny, osWaitForever);
-
-        if (eventFlags & kDecodeRequest) {
-            decodeMp3(pMp3ToStream);
-        }  
-    }
+    osMutexRelease(fileOpMutex);
 }
 
 /**
@@ -467,7 +411,7 @@ void mp3StreamThreadProc(void *args) {
  * @param pMp3ToStream The decoding context.
  * @return true if the file opened OK, false otherwise.
  */
-static bool initMp3(const char *fname, struct Mp3ToStream *pMp3ToStream) {
+static bool initMp3FileForStreaming(const char *fname, struct Mp3ToStream *pMp3ToStream) {
     pMp3ToStream->mp3Eof = false;
     pMp3ToStream->quitRequested = false;
     pMp3ToStream->seekAddress = 0;
@@ -478,7 +422,6 @@ static bool initMp3(const char *fname, struct Mp3ToStream *pMp3ToStream) {
 
     printf("Open mp3 file %s\n", fname);
     pMp3ToStream->mp3File = tbFopen(fname, "rb");
-    //pMp3ToStream->mp3File = tbFopen("/content/prompts/en/10.mp3", "rb");
     if (!pMp3ToStream->mp3File) {
         errLog("mp3 file %s not found\n", fname);
         return false;
@@ -509,21 +452,21 @@ static bool initMp3(const char *fname, struct Mp3ToStream *pMp3ToStream) {
 bool streamMp3Start(const char *fname, WavFmtData_t *pWavFormat, int *pMp3FileLength) {
     struct Mp3ToStream *pMp3ToStream = &mp3ToStream;
 
-    osEventFlagsSet(requestEventId, kStopRequest);
-    osMutexAcquire(mp3ToStreamMutex, osWaitForever);
+    osEventFlagsSet(fileOpRequestEventId, kStopRequest);
+    osMutexAcquire(fileOpMutex, osWaitForever);
 
-    bool result = initMp3(fname, &mp3ToStream);
+    bool result = initMp3FileForStreaming(fname, &mp3ToStream);
     if (result) {
         *pMp3FileLength = pMp3ToStream->mp3FileLength;
 
-        osEventFlagsClear(requestEventId, kAnyRequest);
-        osEventFlagsClear(resultEventId, kAnyResult);
-        osEventFlagsSet(requestEventId, kDecodeRequest);
+        osEventFlagsClear(fileOpRequestEventId, kAnyRequest);
+        osEventFlagsClear(fileOpResultEventId, kAnyResult);
+        osEventFlagsSet(fileOpRequestEventId, kDecodeRequest);
     }
     // Release this now so the decoder can proceed, so we can get the header from the first frame.
-    osMutexRelease(mp3ToStreamMutex);
+    osMutexRelease(fileOpMutex);
     if (result) {
-        osEventFlagsWait(resultEventId, kHeaderResult, osFlagsWaitAny, osWaitForever);
+        osEventFlagsWait(fileOpResultEventId, kHeaderResult, osFlagsWaitAny, osWaitForever);
         *pWavFormat = pMp3ToStream->wavFormat;
     }
     return result;
@@ -535,25 +478,14 @@ bool streamMp3Start(const char *fname, WavFmtData_t *pWavFormat, int *pMp3FileLe
 void streamMp3Stop(void) {
     dbgLog("D Requesting libmad quit\n");
     mp3ToStream.quitRequested = true;
-    osEventFlagsSet(requestEventId, kStopRequest);
-}
-
-/**
- * Seek to an address in the mp3 file. Byte offsets are somewhat unpredictably correlated with audio position.
- * @param seekAddress The file offset at which to start reading.
- * @param assumedTimestamp The assumed timestamp at that location.
- */
-void streamMp3Seek( int seekAddress, int assumedTimestamp ) {
-    mp3ToStream.seekAddress = seekAddress;
-    mp3ToStream.seekPending = true;
-    osEventFlagsSet(requestEventId, kSeekRequest);
+    osEventFlagsSet(fileOpRequestEventId, kStopRequest);
 }
 
 void streamMp3JumpToTime(int newMs) {
     int seekAddress = offsetForTimestamp(mp3ToStream.pM3tContext, newMs);
     mp3ToStream.seekAddress = seekAddress;
     mp3ToStream.seekPending = true;
-    osEventFlagsSet(requestEventId, kSeekRequest);
+    osEventFlagsSet(fileOpRequestEventId, kSeekRequest);
 }
 
 int streamMp3GetLatestTime() {
@@ -577,12 +509,14 @@ int streamMp3FillBuffer( Buffer_t *pBuffer) {
     }
     // Give the decoder a buffer to fill, and request the filling of it.
     pMp3ToStream->outputBuffer = pBuffer;
-    osEventFlagsSet(requestEventId, kFillRequest);
+    osEventFlagsSet(fileOpRequestEventId, kFillRequest);
     // Wait for it to fill the buffer.
-    osEventFlagsWait(resultEventId, kFilledResult, osFlagsWaitAny, osWaitForever);
+    osEventFlagsWait(fileOpResultEventId, kFilledResult, osFlagsWaitAny, osWaitForever);
     pMp3ToStream->outputBuffer = NULL;
     
     hd("DQ", pBuffer, pMp3ToStream->resultBytes);
 
     return pMp3ToStream->resultBytes;
 }
+
+

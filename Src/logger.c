@@ -83,7 +83,7 @@ char *loadLine( char *line, const char *fpath, fsTime *tm ) {    // => 1st line 
     const fsTime nullTm = { 0, 0, 0, 1, 1, 2020 };  // midnight 1-Jan-2020
     if ( tm != NULL ) *tm = nullTm;
     strcpy( line, "---" );
-    FILE *stF = tbOpenReadBinary( fpath ); //fopen( fpath, "rb" );
+    FILE *stF = tbOpenReadBinary( fpath );
     if ( stF == NULL ) return line;
 
     char *txt = fgets( line, 200, stF );
@@ -131,7 +131,7 @@ bool getFileTime( char *path, fsTime *time ) {
 /// \param[in] fpath    Name of the file to be created / truncated.
 /// \return             nothing
 void writeLine( char *line, const char *fpath ) {
-    FILE *stF = tbOpenWriteBinary( fpath ); //fopen( fpath, "wb" );
+    FILE *stF = tbOpenWriteBinary( fpath );
     if ( stF != NULL ) {
         int nch = fprintf( stF, "%s\n", line );
         tbFclose( stF );        //int err = fclose( stF );
@@ -483,7 +483,7 @@ void saveAuxProperties( char *baseFilename ) {
 
 void saveStats( MsgStats *st ) {                        // save statistics block to file
     char *fnm = statFNm( st->SubjNm, st->iSubj, st->iMsg );
-    FILE *stF = tbOpenWriteBinary( fnm ); //fopen( fnm, "wb" );
+    FILE *stF = tbOpenWriteBinary( fnm );
     int  cnt  = fwrite( st, STAT_SIZ, 1, stF );
     tbFclose( stF );   //int err = fclose( stF );
     dbgEvt( TB_wrStatFile, st->iSubj, st->iMsg, cnt, 0 );
@@ -521,7 +521,7 @@ MsgStats *loadStats( const char *subjNm, short iSubj, short iMsg ) {   // load s
 
     short newStatIdx = oldestIdx;
     char *fnm = statFNm( subjNm, iSubj, iMsg );
-    FILE *stF           = tbOpenReadBinary( fnm ); //fopen( fnm, "rb" );
+    FILE *stF           = tbOpenReadBinary( fnm );
     if ( stF == NULL || fread( st, STAT_SIZ, 1, stF ) != 1 ) {  // file not defined
         if ( stF != NULL ) {
             dbgLog( "! stats S%d, M%d size wrong \n", iSubj, iMsg );

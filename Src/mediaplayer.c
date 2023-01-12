@@ -5,6 +5,7 @@
 #include "fileOps.h"
 #include "packageData.h"    // for current content selection
 #include "controlmanager.h" // for TBook
+#include "mp3tostream.h"    // for encryptUf
 
 const int   CODEC_DATA_SEND_DONE    =  0x0001;      // signal sent by SAI callback when an buffer completes
 const int   CODEC_PLAYBACK_DONE     =  0x0002;      // signal from SAI on playback done
@@ -32,7 +33,6 @@ osEventFlagsId_t                mMediaEventId;      // for signals to mediaThrea
 // current volume, overwritten from CSM config (setVolume)    (external for powermanager)
 volatile int                    mAudioVolume    = DEFAULT_VOLUME_SETTING;
 static volatile int             mAudioSpeed     = 5;      // current speed, NYI
-bool                            PrivateFeedback = false;
 
 const int                       MAX_NOTE_CNT = 80;
 static volatile int             mNoteCnt     = 0;
@@ -44,7 +44,7 @@ static volatile int             mAdjPosSec;
 static volatile char            mPlaybackFilePath[MAX_PATH];
 static volatile PlaybackType_t mPlayType;              //  sys/pkg/msg/nm/pr
 static volatile MsgStats        *mPlaybackStats;
-static volatile char            mRecordFilePath[MAX_PATH];
+volatile char                   mRecordFilePath[MAX_PATH];
 static volatile MsgStats        *mRecordStats;
 static volatile MsgStats        *sysStats;           // subst buffer for system files
 
@@ -271,13 +271,7 @@ static void mediaThread( void *arg ) {           // communicates with audio code
         //******* record wav file:  R1) start, R2) bufferDone, R3) rec done, R4) play rec, R5) save, or R5a) delete
         if (( flags & MEDIA_RECORD_START ) != 0 ) {   // R1) request to start recording
             resetAudio();     // clean up anything in progress
-            FILE *outFP = tbOpenWriteBinary( (const char *) mRecordFilePath ); //fopen( (const char *)mRecordFilePath, "wb" );
-            if ( outFP != NULL ) {
-                dbgLog( "8 Rec fnm: %s \n", (char *) mRecordFilePath );
-                audStartRecording( outFP, (MsgStats *) mRecordStats );
-            } else {
-                printf( "Cannot open record file to write\n\r" );
-            }
+            audStartRecording( (const char *)mRecordFilePath, (MsgStats *) mRecordStats );
         }
 
         if (( flags & MEDIA_PLAY_RECORD ) != 0 ) {  // R4) request to play recording
@@ -286,13 +280,13 @@ static void mediaThread( void *arg ) {           // communicates with audio code
         }
 
         if (( flags & MEDIA_SAVE_RECORD ) != 0 ) {  // R5) request to save recording
-            if ( PrivateFeedback )
-                copyEncrypted((char *) mRecordFilePath );
+            audFinalizeRecord( true /* keep */);
             mRecordFilePath[0] = 0;
         }
 
         if (( flags & MEDIA_DEL_RECORD ) != 0 ) {     // R5a) request to delete recording
             int res = fdelete((char *) mRecordFilePath, "" );
+            audFinalizeRecord( false /* keep */);
             mRecordFilePath[0] = 0;
             FileSysPower( false );      // power down SDIO after finished with recording
         }

@@ -555,7 +555,7 @@ void saveNorLog( const char *fpath ) {           // copy curr Nor log into file 
     char     logFilePath[40];
     uint32_t stat, msec, tsStart = tbTimeStamp();
 
-    FILE *f = tbOpenWrite( tempLogPath ); //fopen( tmp, "w" );
+    FILE *f = tbOpenWrite( tempLogPath );
     if ( f == NULL )
         return; // try to make it into USBmode anyway 
     //norErr("cpyNor fopen err");
@@ -622,7 +622,7 @@ void saveNorLog( const char *fpath ) {           // copy curr Nor log into file 
 }
 
 void restoreNorLog( const char *fpath ) {        // copy file into current log
-    FILE *f = tbOpenRead( fpath ); //fopen( fpath, "r" );
+    FILE *f = tbOpenRead( fpath );
     if ( f == NULL ) norErr( "rstrNor fopen err" );
 
     int cnt = fread( NLg.pg, 1, NLg.PGSZ, f );

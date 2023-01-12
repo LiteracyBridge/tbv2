@@ -6,7 +6,7 @@
 #include "tbook.h"        // enableMassStorage 
 #include "mediaplayer.h"    // audio operations
 #include "inputmanager.h"     // osMsg_TBEvents
-#include "fileOps.h"      // decodeAudio
+#include "fileOps.h"
 
 #include "packageData.h"
 
@@ -28,8 +28,6 @@ void setCSMcurrState( short iSt );  // set TBook.iCurrSt & dependent fields
 extern bool         BootVerboseLog;
 
 osEventFlagsId_t    mFileOpSignal;     // osEvent shared with FileOps -- to signal MP3 decode done
-bool                DecodeMP3 = false;  // if set, decode MP3's to Wav before entering CSM
-
 
 // ------------  CSM Action execution
 static void clearIdle() {       // clear timers started by AudioDone to generate shortIdle & longIdle
@@ -209,7 +207,7 @@ void saveWriteMsg( char *txt ) {        // save 'txt' in Msg file
     char *subjName = TBook.iSubj >= 0 ? gSubj( TBook.iSubj )->subjName : "-no-subject-";
     char path[MAX_PATH];
     int  mCnt      = makeAuxFileName( path, AUX_FILE_MESSAGE );
-    FILE *outFP = tbOpenWrite( path ); //fopen( fNm, "w" );
+    FILE *outFP = tbOpenWrite( path );
     int nch = fprintf( outFP, "%s\n", txt );
     tbFclose( outFP );  //int err = fclose( outFP );
     saveAuxProperties( path );
@@ -652,13 +650,6 @@ void initControlManager( void ) {       // initialize control manager
         //setPowerCheckTimer( TB_Config->powerCheckMS );
         if ( RunQCTest )
             PowerChecksEnabled = false;     // disable powerChecks during QC
-
-        if ( DecodeMP3 ) {
-            decodeAudio();    // start fileOps thread checking for .mp3 files that haven't been decoded
-
-            // and wait for signal when complete
-            uint32_t flags = osEventFlagsWait( mFileOpSignal, FILE_DECODE_DONE, osFlagsWaitAny, osWaitForever );
-        }
 
         for (int   it       = 0; it < 3; it++) {
             timers[it] = osTimerNew( tbTimer, osTimerOnce, (void *) it, NULL );

@@ -42,6 +42,9 @@
 #include "powermanager.h"      // registerPowerEventHandler
 #include "inputmanager.h"            // sendEvent
 
+extern void __breakpoint( int );
+extern void abort( void );
+
 // global state
 extern bool BootToUSB;
 extern bool BootDebugLoop;
@@ -119,7 +122,8 @@ extern void tbDelay_ms( int ms );           //  Delay execution for a specified 
 extern void *tbAlloc( int nbytes, const char *msg );
 extern void checkMem( void );
 extern void showMem( void );
-extern bool fexists( const char *fname );   // return true if file path exists
+extern int fsize( const char *fname);       // size of file, -1 if not exist
+extern bool fexists( const char *fname );
 extern char *findOnPathList( char *destpath, const char *search_path,
                              const char *nm );  // store path to 1st 'nm' on 'search_path' in 'destpath'
 extern void saveLastTime( fsTime rtc );         // update lastRTC.txt modified time

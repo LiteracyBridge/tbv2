@@ -244,42 +244,56 @@ static bool FSysPowered     = false;
 bool        FSysPowerAlways = false;
 bool        SleepWhenIdle   = true;
 
+int numFilesOpen = 0;
+FILE *tbFOpenInternal(const char *fname, const char *flags, const char *debugStr) {
+    ++numFilesOpen;
+    FileSysPower( true );
+    dbgLog( "F %s( %s, %s )\n", debugStr, fname, flags );
+    return fopen( fname, flags );   
+}
+
 FILE *tbFopen( const char *fname, const char *flags) {
-    FileSysPower( true );
-    dbgLog( "F tbFOpen( %s, %s )\n", fname, flags );
-    return fopen( fname, flags );
+//    FileSysPower( true );
+//    dbgLog( "F tbFOpen( %s, %s )\n", fname, flags );
+//    return fopen( fname, flags );
+    return tbFOpenInternal(fname, flags, "tbFopen");
 }
 
-FILE *tbOpenRead( const char *nm ) {                  // repower if necessary, & open file
-    FileSysPower( true );
-    dbgLog( "F tbOpenRd( %s )\n", nm );
-    return fopen( nm, "r" );
+FILE *tbOpenRead( const char *fname ) {                  // repower if necessary, & open file
+//    FileSysPower( true );
+//    dbgLog( "F tbOpenRd( %s )\n", nm );
+//    return fopen( nm, "r" );
+    return tbFOpenInternal(fname, "r", "tbOpenRead");
 }
 
-FILE *tbOpenReadBinary( const char *nm ) {            // repower if necessary, & open file
-    FileSysPower( true );
-    dbgLog( "F tbOpenRdBin( %s )\n", nm );
-    return fopen( nm, "rb" );
+FILE *tbOpenReadBinary( const char *fname ) {            // repower if necessary, & open file
+//    FileSysPower( true );
+//    dbgLog( "F tbOpenRdBin( %s )\n", nm );
+//    return fopen( nm, "rb" );
+    return tbFOpenInternal(fname, "rb", "tbOpenReadBinary");
 }
 
-FILE *tbOpenWrite( const char *nm ) {                 // repower if necessary, & open file (delete if already exists)
+FILE *tbOpenWrite( const char *fname ) {                 // repower if necessary, & open file (delete if already exists)
     FileSysPower( true );
-    dbgLog( "F tbOpenWr( %s )\n", nm );
-    if ( fexists( nm ))
-        fdelete( nm, NULL );
-    return fopen( nm, "w" );
+//    dbgLog( "F tbOpenWr( %s )\n", nm );
+    if ( fexists( fname ))
+        fdelete( fname, NULL );
+//    return fopen( nm, "w" );
+    return tbFOpenInternal(fname, "w", "tbOpenWrite");
 }
 
-FILE *tbOpenWriteBinary( const char *nm ) {           // repower if necessary, & open file
-    FileSysPower( true );
-    dbgLog( "F tbOpenWrBin( %s )\n", nm );
-    return fopen( nm, "wb" );
+FILE *tbOpenWriteBinary( const char *fname ) {           // repower if necessary, & open file
+//    FileSysPower( true );
+//    dbgLog( "F tbOpenWrBin( %s )\n", nm );
+//    return fopen( nm, "wb" );
+    return tbFOpenInternal(fname, "wb", "tbOpenWriteBinary");
 }
 
 void tbFclose( FILE *f ) {                        // close file errLog if error
     if ( f == NULL ) tbErr( "closing NULL file" );
     int st = fclose( f );
     if ( st != fsOK ) errLog( "fclose => %d", st );
+    --numFilesOpen;
 }
 
 void tbFrename( const char *src, const char *dst ) {  // rename path to path
@@ -758,6 +772,16 @@ bool fexists( const char *fname ) {                   // return true if file pat
     return ( stat == fsOK );
 }
 
+int fsize( const char *fname) {
+    FileSysPower( true );
+    fsFileInfo info;
+    info.fileID = 0;
+    fsStatus stat = ffind( fname, &info );
+    int size = ( stat == fsOK ) ? info.size : -1;   
+    dbgLog( "F fisize( %s: %d )\n", fname, size );
+    return size;
+}
+
 char *findOnPathList( char *destpath, const char *search_path, const char *nm ) {  // store path to 1st 'nm' on 'search_path' in 'destpath'
     FileSysPower( true );
     const char *p = search_path;
@@ -888,7 +912,9 @@ void errLog( const char *fmt, ... ) {
 
 static int tbErrNest = 0;
 
-void tbErr( const char *fmt, ... ) {                 // report fatal error
+// report fatal error
+void tbErr( const char *fmt, ... ) { 
+    bool debug = false;
     if ( tbErrNest == 0 ) {
         char s[100];
         tbErrNest++;
@@ -903,9 +929,10 @@ void tbErr( const char *fmt, ... ) {                 // report fatal error
         dbgEvtS( TB_Error, s );
         __breakpoint( 0 );    // halt if in debugger
 
-        USBmode( true );
+        if (!debug)
+            USBmode( true );
     }
-    while (true) {}
+    while (!debug) {}
 }
 
 void tbShw( const char *s, char **p1, char **p2 ) {   // assign p1, p2 to point into s for debugging

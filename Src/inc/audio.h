@@ -92,7 +92,8 @@ extern void audPlayAudio( const char *audioFileName, MsgStats *stats,
 extern void audPlayTone( int i, int freq,
                          int nEighths );                // play 'i'th note: 'freq' sqr wave tone for 'nEighths' 128 msec buffers
 extern void audStopAudio( void );                       // signal playback loop to stop
-extern void audStartRecording( FILE *outFP, MsgStats *stats );  // start recording into file -- TBV2_REV1 version
+extern bool audStartRecording( const char *recordFilename, MsgStats *stats );  // start recording into file
+extern void audFinalizeRecord( bool keep);
 extern void audRequestRecStop( void );                  // signal record loop to stop
 extern void audPauseResumeAudio( void );                // signal playback loop to request Pause or Resume
 extern void audPlaybackDn( void );                      // handle end of buffer event

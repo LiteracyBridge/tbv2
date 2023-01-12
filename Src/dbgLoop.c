@@ -96,16 +96,13 @@ void PlayRecCmd( GPIO_ID k ) {   // PlayRec mode subcommands --
         case gCIRCLE:
             if ( audGetState() == Ready ) {
                 sprintf( fname, "M0:/REC_%d_%d.WAV", RecDBG, dbgIdx );
-                FILE *outFP = tbOpenWriteBinary( fname );
-                if ( outFP != NULL ) {
-                    resetAudio();     // clean up anything in progress
-                    dbgLog( " Cir: record 5sec to: %s  RecDbg=%d\n", fname, RecDBG );
-                    gSet( gGREEN, 0 ); gSet( gRED, 1 );
-                    ts_recStart = tbTimeStamp();
-                    audStartRecording( outFP, &tstStats );
-                    showCdcRegs( false, true );     // regs during record
-                    dbgIdx++;
-                }
+                resetAudio();     // clean up anything in progress
+                dbgLog( " Cir: record 5sec to: %s  RecDbg=%d\n", fname, RecDBG );
+                gSet( gGREEN, 0 ); gSet( gRED, 1 );
+                ts_recStart = tbTimeStamp();
+                audStartRecording( fname, &tstStats );
+                showCdcRegs( false, true );     // regs during record
+                dbgIdx++;
             }
             break;
 

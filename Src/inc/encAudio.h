@@ -1,46 +1,61 @@
 // encAudio.h
 //   encryption of data for export to Amplio
 //
+#ifndef _ENC_AUDIO_H_
+#define _ENC_AUDIO_H_
 
-#include <stdarg.h>
 #include <stdbool.h>
 #include <stdint.h>
 
-#include "mbedtls/aes.h"
-#include "mbedtls/pk.h"
-#include "mbedtls/base64.h"
-#include "mbedtls/error.h"
-#include "mbedtls/entropy.h"
-#include "mbedtls/ctr_drbg.h"
+#include "buffers.h"
+#include "tbook.h"
 
-#define AES_KEY_WDS  6
-#define BUFF_SIZ  512
+#define ENCRYPT_QUEUE_LENGTH 8
+struct EncryptCb {
+    char                fname[MAX_PATH];
+    FILE                *encrypteFile;
+    size_t              fileSize;
+    osMessageQueueId_t  encryptQueueId;
+    uint32_t            mq_mem[osRtxMessageQueueMemSize(ENCRYPT_QUEUE_LENGTH, sizeof(Buffer_t *))/4U];
+};
+extern struct EncryptCb encryptCb;
 
-typedef struct encryptState {
-		bool 								initialized;
-		uint32_t 							sessionkey[ AES_KEY_WDS+1 ];
-		mbedtls_aes_context 				aes;
-		uint8_t								iv[ 16 ];
-		mbedtls_pk_context					pk;
-        mbedtls_ctr_drbg_context            drbg;
-        mbedtls_entropy_context             entr;
+/**
+ * When true, a 'uf.der' file was found and successfully used to initialize encryption.
+ */
+extern bool encUfAudioEnabled;
 
-} encryptState_t;
-extern  encryptState_t  Enc;
+/**
+ * Called one time to initialize the encryption sub-system.
+ */
+extern void encUfAudioInit(void);
 
-extern  const int       KEY_BYTES;
-extern  const int       SESS_SIZE;
-extern  const int       AES_BLOCK_SIZE;
-extern  const uint32_t  SessMARKER;
+/**
+ *  Encryption loop, called from the FileOps thread. Iteratively encrypts blocks of data,
+ *  and writes the encrypted blocks to a file.
+ */
+extern void encUfAudioLoop(void);
 
-void                            initRandom( char *pers );                                       // reset RNG before encrypt or decrypt
-int 							genRand( void *pRNG, unsigned char* output, size_t out_len );   // fill output with true random data from STM32F412 RNG dev
+/**
+ * Prepares to encrypt a file of the given name. Allocates a random session key, encrypts
+ * it with the public key, and saves the encrypted key and IV to ${fname-base}.key. Creates a
+ * file ${fname-base}.enc to receive the encrypted blocks.
+ * @param fname Full name of the audio file to be encrypted.
+ */
+extern void encUfAudioPrepare(char *fname);
 
-void 							startEncrypt( char * fname );								    // init session key & save public encrypted copy in 'fname.key'
-void 							encryptBlock( const uint8_t *in, uint8_t *out, int len );	    // AES CBC encrypt in[0..len] => out[] (len%16===0)
-void 							endEncrypt( void );											    // destroy session key
+/**
+ * Encrypts the next blcok of data and appends the result the the .enc file.
+ * @param pData The data to be encrypted and saved.
+ * @param dataLen Lenth of the data.
+ */
+extern void encUfAudioAppend(Buffer_t *pData, size_t dataLen);
 
-void 							tbErr( const char * fmt, ... );								    // report fatal error
-void 							TlsErr( char *msg, int cd );                                    // report mbedtls error
+/**
+ * Called after all of the data has been given. Closes the .enc file, appends the length value
+ * to the .key file.
+ * @param fileLen The actual length of the un-encrypted data.
+ */
+extern void encUfAudioFinalize(size_t fileLen);
 
-// end encAudio.h
+#endif // _ENC_AUDIO_H_

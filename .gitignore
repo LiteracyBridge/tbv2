@@ -38,3 +38,4 @@ old/*
 # OS generated files #
 ######################
 Thumbs.db
+.idea/

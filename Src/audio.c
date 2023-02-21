@@ -499,6 +499,8 @@ bool audStartRecording( const char * fname, MsgStats *stats ) {  // start record
         return false;
     }
     pSt.recordFilename = fname;
+    // Write the recording props file here. Heavy lifting of encryption will be done on another thread.
+    saveAuxProperties((char *) mRecordFilePath );
 
     minFreeBuffs = numBuffersAvailable();
     audInitState();

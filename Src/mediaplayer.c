@@ -143,8 +143,6 @@ void playRecording() { // play back just recorded audio
 void saveRecording() { // encrypt recorded audio & delete original
     if ( mRecordFilePath[0] == 0 ) return;
     ledFg( TB_Config->fgSaveRec );
-    // Write the recording props file here. Heavy lifting of encryption will be done on another thread.
-    saveAuxProperties((char *) mRecordFilePath );
     osEventFlagsSet( mMediaEventId, MEDIA_SAVE_RECORD );
 }
 

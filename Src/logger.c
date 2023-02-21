@@ -412,16 +412,19 @@ static char *statFNm( const char *nm, short iS, short iM ) {   // INTERNAL: fill
 }
 
 /**
- * Given a pattern of the form "xxxx_*.xxxx", return the next unused value.
+ * Given a pattern of the form "xxxx_*yyyy", return the next unused value.
  * Gaps are ignored, and the next value greater than the highest value found is
  * returned. If no matching files are found, returns 0.
+ * The uniquifier starts after the final '_' in the matching filenames. If no
+ * '_', the uniquifier will be 0.
+ *
  * @param fnPatt Search pattern of filenames for which to search.
- * @return the next suffix greater than the largest suffix found, 0 if none found.
+ * @return the next uniquifier greater than the largest suffix found, 0 if none found.
  */
-int fileMatchNext( const char *fnPatt ) {
+int findFilenameUniquifier( const char *fnPatt ) {
     fsFileInfo fInfo;
     fInfo.fileID = 0;
-    int nextSuffix = 0;
+    int nextUniquifier = 0;
 
     FileSysPower( true );
     while (ffind( fnPatt, &fInfo ) == fsOK) {
@@ -429,24 +432,30 @@ int fileMatchNext( const char *fnPatt ) {
         char *pSep = strrchr( fInfo.name, '_' );
         if ( pSep ) {
             int v = atoi( pSep + 1 );
-            if ( v >= nextSuffix ) nextSuffix = v + 1;
+            if ( v >= nextUniquifier ) nextUniquifier = v + 1;
         }
     }
-    return nextSuffix;
+    return nextUniquifier;
 }
 
 /**
  * Create a filename for an "auxillary" file, associated with the current content message.
  * The filename will be appended with a uniquifier to avoid collisions.
+ *
+ * There are two kinds of "auxillary" files, ".wav" files, which are audio recordings,
+ * and ".txt" files which are created by the control.def script. Every call to this for
+ * a given audio file will return a new uniquifier for the file, irrespective of
+ * the auxillary file type.
+ *
  * @param buf Buffer into which to build the filename. Should be [MAX_PATH]
  * @param auxFileType enum AUX_FILE_TYPE describing what flavor of auxillary file.
  * @return the uniquifier.
  */
 int makeAuxFileName( char *buf, enum AUX_FILE_TYPE auxFileType ) {
     char pattern[MAX_PATH];
-    sprintf( pattern, "%s%s_pkg%d_pl%d_msg%d_*%s", TBP[pRECORDINGS_PATH], auxFilePrefixes[auxFileType], iPkg,
-             TBook.iSubj, TBook.iMsg, auxFileExtensions[auxFileType] );
-    int uniquifier = fileMatchNext( pattern );
+    sprintf( pattern, "%s%s_pkg%d_pl%d_msg%d_*", TBP[pRECORDINGS_PATH], auxFilePrefixes[auxFileType], iPkg,
+             TBook.iSubj, TBook.iMsg );
+    int uniquifier = findFilenameUniquifier( pattern );
     sprintf( buf, "%s%s_pkg%d_pl%d_msg%d_%d%s", TBP[pRECORDINGS_PATH], auxFilePrefixes[auxFileType], iPkg, TBook.iSubj,
              TBook.iMsg, uniquifier, auxFileExtensions[auxFileType] );
     return uniquifier;

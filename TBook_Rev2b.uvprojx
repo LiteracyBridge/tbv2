@@ -597,9 +597,9 @@
               <FilePath>.\Src\preloadCSM.c</FilePath>
             </File>
             <File>
-              <FileName>tbook.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>.\Src\tbook.c</FilePath>
+              <FileName>tbook.cpp</FileName>
+              <FileType>8</FileType>
+              <FilePath>.\Src\tbook.cpp</FilePath>
             </File>
             <File>
               <FileName>tbook_rev2.c</FileName>

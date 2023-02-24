@@ -234,7 +234,7 @@ extern const int CONTROL_STACK_SIZE;   // opens in/out files
 extern const int LED_STACK_SIZE;
 
 // SD card path definitions  
-extern char *TBP[];      // indexed by 0.. pLAST
+extern const char *TBP[];      // indexed by 0.. pLAST
 extern const int pBOOTCNT;
 extern const int pCSM_DEF;
 extern const int pLOG_TXT;

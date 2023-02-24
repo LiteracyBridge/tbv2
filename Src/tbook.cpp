@@ -37,7 +37,7 @@ const int pPKG_DAT         = 12;
 const int pAUDIO           = 13;    // DEBUG
 const int pLAST            = 12;
 
-char *TBP[] = {            // as static array, so they can be switched to a different device if necessary
+const char *TBP[] = {            // as static array, so they can be switched to a different device if necessary
         "M0:/system/bootcount.txt",             //    pBOOTCNT         = 0;
         "M0:/system/csm_data.txt",              //    pCSM_DEF         = 1;
         "M0:/log/tbLog.txt",                    //    pLOG_TXT         = 2;
@@ -76,7 +76,7 @@ void setDev( char *fname, const char *dev ) {  // replace front of fname with de
         fname[i] = dev[i];
 }
 
-char *fsDevs[] = { "M0:", "M1:", "N0:", "F0:", "F1:", NULL };
+const char *fsDevs[] = { "M0:", "M1:", "N0:", "F0:", "F1:", NULL };
 int fsNDevs = 0;
 
 void copyFile( const char *src, const char *dst ) {
@@ -118,7 +118,7 @@ void talking_book( void *tbAttr ) {    // talking book initialization & control 
     // eMMC &/or SDCard are powered up-- check to see if we have usable devices
     EventRecorderEnable( evrEAOD, EvtFsCore_No, EvtFsMcSPI_No );    //FileSys library
     for (int i = 0; fsDevs[i] != NULL; i++) {
-        fsStatus stat = fsMount( fsDevs[i] );
+        fsStatus stat = fsMount( const_cast<char*>(fsDevs[i]) );
         if ( stat == fsOK ) {  // found a formatted device
             fsDevs[fsNDevs] = fsDevs[i];
             fsNDevs++;

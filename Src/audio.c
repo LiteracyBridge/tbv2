@@ -18,8 +18,10 @@ const int WaveHdrBytes          = 44;           // length of .WAV file header
 const int SAMPLE_RATE_MIN       = 8000;
 const int SAMPLE_RATE_MAX       = 48000;
 
-const int kAudioQueueSize   = 3;            // Max read-ahead play/rec buffers.
-const int kWriteQueueSize     = kBufferPoolSize;  // Max recording buffers waiting to be written.
+#define AUDIO_QUEUE_SIZE 3
+#define WRITE_QUEUE_SIZE BUFFER_POOL_SIZE
+const int kAudioQueueSize   = AUDIO_QUEUE_SIZE;            // Max read-ahead play/rec buffers.
+const int kWriteQueueSize     = WRITE_QUEUE_SIZE;  // Max recording buffers waiting to be written.
 
 const int MIN_AUDIO_PAD         = 37;           // minimum 0-padding samples at end of file, to clear codec pipeline before powering down
 
@@ -80,8 +82,8 @@ static struct {       // PlaybackFile_t     -- audio state block
     uint32_t                ErrCnt;         // # of audio errors
     MsgStats *              stats;          // statistics to go to logger
 
-    Buffer_t *              audioQueue[ kAudioQueueSize ];// pointers to playback/record buffers (for double buffering)
-    Buffer_t *              writeQueue[ kWriteQueueSize ];// pointers to save buffers (waiting to write to file)
+    Buffer_t *              audioQueue[ AUDIO_QUEUE_SIZE ];// pointers to playback/record buffers (for double buffering)
+    Buffer_t *              writeQueue[ WRITE_QUEUE_SIZE ];// pointers to save buffers (waiting to write to file)
 
     // playback
     int32_t                 buffNum;        // idx in file of buffer currently playing

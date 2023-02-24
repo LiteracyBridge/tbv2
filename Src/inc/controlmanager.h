@@ -5,10 +5,14 @@
 #include "tbook.h"
 #include "packageData.h"
 
-typedef struct {
-    Action act;
-    char *arg;
-} csmAction;
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+//typedef struct {
+//    Action act;
+//    char *arg;
+//} csmAction;
 
 
 #define   MAX_SUBJ_MSGS      20   // allocates: (array of ptrs) per subject
@@ -27,7 +31,7 @@ typedef struct {  // csmState
     char *      nm;                     // str name of this state
     short       evtNxtState[eUNDEF];    // nxtState for each incoming event (as idx in TBookCSM[])
     short       nActions;
-    csmAction   Actions[MAX_ACTIONS];
+    csmAction_t   Actions[MAX_ACTIONS];
 } csmState;
 
 typedef struct {    // paths for all playSys() prompts used in CSM
@@ -118,5 +122,9 @@ extern void changePackage( void );
 extern void executeCSM( void );
 
 extern void controlTest( void );
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

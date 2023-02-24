@@ -4,6 +4,11 @@
 #define PACKAGE_DATA_H
 #include "tbook.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif    
+
+
 //  ------------  TBook Content
 
 // package_data.txt  file structure:
@@ -156,5 +161,9 @@ extern int nActs( CState_t *st );                          // # of actions for C
 extern csmAction_t *gAct( CState_t *st, int idx );                 // return Action[idx] of CState
 extern int nSysAud( void );                                // return # of SysAudio names used by CSM
 extern char *gSysAud( int idx );                             // return SysAudio[ idx ]
-#endif           // PACKAGE_DATA_H
 
+#ifdef __cplusplus
+}
+#endif
+
+#endif           // PACKAGE_DATA_H`

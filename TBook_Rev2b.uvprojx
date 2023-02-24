@@ -557,9 +557,9 @@
               <FilePath>.\Src\logger.c</FilePath>
             </File>
             <File>
-              <FileName>main.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>.\Src\main.c</FilePath>
+              <FileName>main.cpp</FileName>
+              <FileType>8</FileType>
+              <FilePath>.\Src\main.cpp</FilePath>
             </File>
             <File>
               <FileName>mediaplayer.c</FileName>

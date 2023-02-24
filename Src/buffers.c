@@ -5,7 +5,7 @@
 #include "tbook.h"
 #include "buffers.h"
 
-#define DEBUG_BUFFERS
+//#define DEBUG_BUFFERS
 
 osMemoryPoolId_t mpid_MemPool;
 
@@ -15,7 +15,7 @@ static Buffer_t *buffers;
 static int bufferIx(Buffer_t *buffer) {
     return (buffer-buffers)/kBufferSize;
 }
-static const char *ownerList[kBufferPoolSize];
+static const char *ownerList[BUFFER_POOL_SIZE];
 #endif
 
 void initBufferPool(void) {

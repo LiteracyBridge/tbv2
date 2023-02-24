@@ -5,6 +5,8 @@
 //
 //  Nov2019 
 
+#include <arm_compat.h>
+
 #include "main.h"
 #include "tbook.h"
 #include "os_tick.h"
@@ -644,6 +646,7 @@ static uint32_t lastTmStmp  = 0;
 static uint32_t lastHalTick = 0, HalSameCnt = 0;
 static uint32_t nDelays     = 0, totDelay = 0;
 
+//extern int __nop(void);
 uint32_t tbTimeStamp() {                                  // return msecs since boot
     //   int msPerTick = 1000 / osKernelGetTickFreq();
     osKernelState_t st = osKernelGetState();
@@ -672,7 +675,8 @@ uint32_t HAL_GetTick( void ) {                              // OVERRIDE for CMSI
     return lastHalTick;
 }
 
-void tbDelay_ms( int ms ) {                          // Delay execution for a specified number of milliseconds
+void tbDelay_ms( int ms ) { 
+    // Delay execution for a specified number of milliseconds
     int stTS = tbTimeStamp();
     if ( ms == 0 ) ms = 1;
     delayReq    = ms;
@@ -692,7 +696,7 @@ void tbDelay_ms( int ms ) {                          // Delay execution for a sp
 }
 
 /******** DEBUG tbAlloc ****/
-const int ALLOC_OPS = 30;
+#define ALLOC_OPS 30
 struct {
     short sz;
     void *blk;

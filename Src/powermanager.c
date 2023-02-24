@@ -829,7 +829,8 @@ enum BATTERY_CHARGE_LEVEL latestChargeLevel() {
 void showBattCharge() {     // generate ledFG to signal power state
     char fg[30];
     checkPower( true );
-    char *LED = "RRRRGGGG" + (int) latestChargeLevel();
+    char *LED = "RRRRGGGG";
+    LED += (int) latestChargeLevel();
 
     sprintf( fg, "_5%c5_5%c5_5%c5_5%c5_15", LED[0], LED[1], LED[2], LED[3] );
     ledFg( fg );

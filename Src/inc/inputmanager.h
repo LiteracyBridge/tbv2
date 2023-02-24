@@ -73,19 +73,23 @@ typedef struct {  // TB_Event --  event & downMS for event Q
 //      AudioDone,  AudioStart, ShortIdle,  LongIdle, LowBattery, BattCharging, BattCharged,  FirmwareUpdate, Timer, anyKey, eUNDEF
 //} Event;
 
-inline bool TB_isShort( TB_Event evt ) { return evt.typ >= Home && evt.typ <= Table; }
+// Thesse don't compile with compiler6 -O0 (no optimization)
+//inline bool TB_isShort( TB_Event evt ) { return evt.typ >= Home && evt.typ <= Table; }
+//inline bool TB_isLong( TB_Event evt ) { return evt.typ >= Home__ && evt.typ <= Table__; }
+//inline bool TB_isStar( TB_Event evt ) { return evt.typ >= starHome && evt.typ <= starTable; }
+//inline bool TB_isSystem( TB_Event evt ) { return evt.typ >= AudioDone && evt.typ <= eUNDEF; }
+//inline Event toShortEvt( KEY k ) { return (Event) ((int) k + Home ); }
+//inline Event toLongEvt( KEY k ) { return (Event) ((int) k + Home__ ); }
+//inline Event toStarEvt( KEY k ) { return (Event) ((int) k + starHome ); }
 
-inline bool TB_isLong( TB_Event evt ) { return evt.typ >= Home__ && evt.typ <= Table__; }
+#define TB_isShort( evt ) ( evt.typ >= Home && evt.typ <= Table )
+#define TB_isLong( evt ) ( evt.typ >= Home__ && evt.typ <= Table__ )
+#define TB_isStar( evt ) ( evt.typ >= starHome && evt.typ <= starTable )
+#define TB_isSystem( evt ) ( evt.typ >= AudioDone && evt.typ <= eUNDEF )
+#define toShortEvt( k ) ( (Event) ((int) k + Home ) )
+#define toLongEvt( k ) ( (Event) ((int) k + Home__ ) )
+#define toStarEvt( k ) ( (Event) ((int) k + starHome ) )
 
-inline bool TB_isStar( TB_Event evt ) { return evt.typ >= starHome && evt.typ <= starTable; }
-
-inline bool TB_isSystem( TB_Event evt ) { return evt.typ >= AudioDone && evt.typ <= eUNDEF; }
-
-inline Event toShortEvt( KEY k ) { return (Event) ((int) k + Home ); }
-
-inline Event toLongEvt( KEY k ) { return (Event) ((int) k + Home__ ); }
-
-inline Event toStarEvt( KEY k ) { return (Event) ((int) k + starHome ); }
 
 extern void initInputManager( void );
 extern void disableKeyInterrupts( enum KEYS_MASK keysToRemainEnabled );

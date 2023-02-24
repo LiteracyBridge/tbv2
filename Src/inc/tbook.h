@@ -23,6 +23,11 @@
 #include "rtx_os.h"
 #include "rl_fs.h"
 
+#ifdef __packed
+#undef __packed
+#endif
+#define __packed
+
 #if  defined( RTE_Compiler_EventRecorder )
 #include "eventrecorder.h"
 #endif
@@ -42,7 +47,7 @@
 #include "powermanager.h"      // registerPowerEventHandler
 #include "inputmanager.h"            // sendEvent
 
-extern void __breakpoint( int );
+//extern void __breakpoint( int );
 extern void abort( void );
 
 // global state

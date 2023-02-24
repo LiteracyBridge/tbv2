@@ -140,9 +140,9 @@ void talking_book( void *tbAttr ) {    // talking book initialization & control 
             flashCode( 10 );    // R G R G : not M0:
             flashLED( "__" );
         }
-        for (int i = 0; i <= pLAST; i++) {   // change paths to fsDevs[0]
-            setDev( TBP[i], fsDevs[0] );
-        }
+        //for (int i = 0; i <= pLAST; i++) {   // change paths to fsDevs[0]
+        //    setDev( TBP[i], fsDevs[0] );
+        //}
 
         if ( BootToQCtest || !fexists( TBP[pQC_PASS] )) {
             RunQCTest = true;

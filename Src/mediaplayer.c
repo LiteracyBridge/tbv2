@@ -34,7 +34,7 @@ osEventFlagsId_t                mMediaEventId;      // for signals to mediaThrea
 volatile int                    mAudioVolume    = DEFAULT_VOLUME_SETTING;
 static volatile int             mAudioSpeed     = 5;      // current speed, NYI
 
-const int                       MAX_NOTE_CNT = 80;
+#define MAX_NOTE_CNT 80
 static volatile int             mNoteCnt     = 0;
 static volatile int             mNxtNote;
 static volatile int             mNoteFreq[MAX_NOTE_CNT];

@@ -40,9 +40,11 @@
 //          then appends the file to log0 afterward
 **********************/
 
+#include <arm_compat.h>
+
 #include "tbook.h"
 
-const int NOR_BUFFSZ = 260;   // PGSZ + at least one for /0
+#define NOR_BUFFSZ  260   // PGSZ + at least one for /0
 struct {        // NOR LOG state
     ARM_DRIVER_FLASH *  pNor;
     ARM_FLASH_INFO   *  pI;

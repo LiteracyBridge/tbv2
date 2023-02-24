@@ -1,5 +1,7 @@
 // audio.c  -- playback & record functions called by mediaplayer
 
+#include <arm_compat.h>
+
 #include "audio.h"
 #include "encAudio.h"
 #include "mediaplayer.h"
@@ -722,7 +724,7 @@ void audFinalizeRecord( bool keep) {
 /**
  * Allocates a buffer. If no buffer is available, logs an error.
  */
-static Buffer_t *allocBuff( const char * owner ) {                      // get a buffer for use
+Buffer_t *allocBuff( const char * owner ) {                      // get a buffer for use
     Buffer_t * result = allocateBuffer(owner);
     if ( !result )
         errLog( "out of aud buffs" );
@@ -730,7 +732,7 @@ static Buffer_t *allocBuff( const char * owner ) {                      // get a
 }
 
 
-static void startPlayback( void ) {                    // power up codec, preload buffers & start playback
+void startPlayback( void ) {                    // power up codec, preload buffers & start playback
     dbgEvt( TB_stPlay, pSt.nLoaded, 0, 0, 0 );
 
     Driver_SAI0.PowerControl( ARM_POWER_FULL );   // power up audio
@@ -769,7 +771,7 @@ static void startPlayback( void ) {                    // power up codec, preloa
 }
 
 
-static void haltPlayback( void ) {                               // shutdown device, free buffs & update timestamps
+void haltPlayback( void ) {                               // shutdown device, free buffs & update timestamps
     int msec;
     if ( pSt.state == pbPlaying || pSt.state == pbDone ) {
         if ( pSt.state == pbPlaying )   // record timestamp before shutdown
@@ -792,7 +794,7 @@ static void haltPlayback( void ) {                               // shutdown dev
  * Free any audio buffers in pSt->audioBuffers. If this is done after SAI shutdown no more
  * buffers (should) complete, and no more buffers will be read or enqueued.
  */
-static void freeBuffs() {
+void freeBuffs() {
 //    dbgLog( "D freeBuffs, %d free before \n", numBuffersAvailable() );
     for (int i = 0; i < kAudioQueueSize; i++) {    // free any allocated audio buffers
         releaseBuffer( pSt.audioQueue[i] );
@@ -807,7 +809,7 @@ static void freeBuffs() {
  * write finishes.
  * @param pB The buffer to be written
  */
-static void saveBuff(Buffer_t *pB) {                    // save buff to file, then free it
+void saveBuff(Buffer_t *pB) {                    // save buff to file, then free it
     // collapse to Left channel only
     int nS = kBufferWords / 2;   // num mono samples
     for (int i = 2; i < kBufferWords; i += 2)  // nS*2 stereo samples
@@ -833,7 +835,7 @@ static void saveBuff(Buffer_t *pB) {                    // save buff to file, th
 }
 
 // preload buffers & start recording
-static void startRecord( ) {
+void startRecord( ) {
     for (int i = 0; i < kAudioQueueSize; i++)     // allocate empty buffers for recording
         pSt.audioQueue[i] = allocBuff("start record");
     minFreeBuffs = min(minFreeBuffs, numBuffersAvailable());
@@ -857,7 +859,7 @@ static void startRecord( ) {
 }
 
 
-static void haltRecord( void ) {                           // ISR callable: stop audio input
+void haltRecord( void ) {                           // ISR callable: stop audio input
     Driver_SAI0.Control( ARM_SAI_ABORT_RECEIVE, 0, 0 ); // shut down I2S device
     Driver_SAI0.PowerControl( ARM_POWER_OFF );          // shut off I2S & I2C devices entirely
 
@@ -869,7 +871,7 @@ static void haltRecord( void ) {                           // ISR callable: stop
     ledFg( TB_Config->fgSavingRec );        // Switch foreground LED to saving
 }
 
-static void setMp3Pos(int newMs) {
+void setMp3Pos(int newMs) {
     if (pSt.state != pbPaused)
         tbErr("setMp3Pos not paused");
 
@@ -885,7 +887,7 @@ static void setMp3Pos(int newMs) {
     startPlayback();  // preload & play
 }
 
-static void setWavPos( int msec ) {
+void setWavPos( int msec ) {
     if ( pSt.state != pbPaused )
         tbErr( "setWavPos not paused" );
 
@@ -906,7 +908,7 @@ static void setWavPos( int msec ) {
     startPlayback();  // preload & play
 }
 
-static void fillSqrBuff( Buffer_t *pB, int nSamp, bool stereo ) { // DEBUG: fill buffer with current square wave
+void fillSqrBuff( Buffer_t *pB, int nSamp, bool stereo ) { // DEBUG: fill buffer with current square wave
     pSt.sqrSamples -= nSamp;    // decrement SqrWv samples to go
 
     int      phase = pSt.sqrWvPh;      // start from end of previous
@@ -958,7 +960,7 @@ static Buffer_t * fillFromMp3( int *pSamplesReceived ) {
  *
  * @return
  */
-static Buffer_t *loadBuff(void) {                                  // read next block of audio into a buffer
+Buffer_t *loadBuff(void) {                                  // read next block of audio into a buffer
     if ( pSt.audioEOF )
         return NULL;      // all data & padding finished
 

@@ -4,6 +4,8 @@
 //
 //  Feb2020 
 
+#include <arm_compat.h>
+
 #include "main.h"       // platform specific defines
 #include "tbook.h"
 

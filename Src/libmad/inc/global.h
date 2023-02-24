@@ -47,7 +47,8 @@
 #  define USE_ASYNC
 # endif
 
-
+ extern void abort(void);
+ 
 # if !defined(HAVE_ASSERT_H)
 #  if defined(NDEBUG)
 #   define assert(x)	/* nothing */

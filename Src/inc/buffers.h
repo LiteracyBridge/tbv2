@@ -14,7 +14,8 @@ static const int kBufferSize = 4096;
 static const int kBufferWords = kBufferSize / 2;
 
 // Number of audio buffers to be allocated
-static const int kBufferPoolSize = 8;
+#define BUFFER_POOL_SIZE 8
+static const int kBufferPoolSize = BUFFER_POOL_SIZE;
 
 /**
  * Allocate the pool buffers and initialize the control structures.

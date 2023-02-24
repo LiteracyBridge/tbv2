@@ -4,6 +4,8 @@
 //
  */
 
+#include <arm_compat.h>
+
 #include <stdio.h>
 #include <time.h>
 #include <string.h>

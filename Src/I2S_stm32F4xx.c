@@ -82,6 +82,9 @@
  *  Version 1.0
  *    - Initial release
  */
+ 
+#include <arm_compat.h>
+
 #include "tbook.h"            // includes main.h with GPIO_IDs:   gI2S2_SD, gI2S2_WS, gI2S2_CK, gI2S2_MCK
 
 #include "I2S_STM32F4xx.h"    // could be SAI instead of I2S

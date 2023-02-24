@@ -28,7 +28,7 @@ ledShade                oShd         = { 1, 0, 0, 8 };    // RG on 10%
 ledShade                O_Shd        = { 4, 0, 2, 4 };    // RG on 40%  G on 20%
 ledShade                OffShd       = { 0, 0, 0, 255 };  // special marker value-- no multi-plexing required
 
-const int MAX_SEQ_STEPS = 10;  //avoid NONSTANDARD C
+#define MAX_SEQ_STEPS 10  //avoid NONSTANDARD C
 typedef struct ledSeq {
     // definition of sequence
     uint8_t     nSteps;                 // # of shades displayed in sequence

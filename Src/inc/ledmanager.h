@@ -14,6 +14,8 @@ void ledPowerDown(void);
 
 extern void     ledFg( const char *def );             // install 'def' as foreground pattern
 extern void     ledBg( const char *def );             // install 'def' as background pattern
-extern void     ledBgShade( short pctRed, short pctGrn );
+
+extern void showProgress(const char *s, uint32_t stepMs);      // step through LED string, min stepMs msec each
+extern void endProgress(void);                                 // finish showing progress
 
 #endif // LED_MANAGER_H

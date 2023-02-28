@@ -130,49 +130,6 @@ void disableKeyInterrupts( enum KEYS_MASK keysToRemainEnabled ) {
     EXTI->IMR &= ~KeypadIMR;    // disable keypad EXTI interrupts for the specified keys
 }
 
-
-/*bool          updateKeyState( KEY k ){    // read keypad pin, update keydef[k] if changed, & generate osEvt if UP transition
-  bool keydown = gGet( keydef[k].id ); 
-  Dbg.keypad[ k ] = keydown? keyNm[k] : '_';  //DEBUG
-  
-  if ( k==kSTAR ) KSt.starDown = keydown; //  keep track for <STAR-other> control sequences
-  if ( keydef[k].down != keydown ){ // state has changed 
-    keydef[k].down = keydown;
-    if ( keydown ){   // keyDown transition -- remember starttime
-      if ( KSt.DownKey==kINVALID ){ // first key down
-        // ((osRtxTimer_t *) keyDownTimer )-> 
-        osTimerStart( keyDownTimer, TB_Config->minLongPressMS );  // interrupts if key down that long
-      } else { // multiple keys down-- disable long press timer
-        osTimerStop( keyDownTimer );
-      }
-      keydef[k].tstamp = tbTimeStamp(); 
-      dbgEvt( TB_keyDn, k, keydef[k].tstamp, 0, 0 );
-    } else {  // keyUp transition
-      if ( KSt.LongPressKey == k ){   // already reported long press, so ignore actual up transition
-        KSt.LongPressKey = kINVALID;
-        return false;
-      }
-      if ( KSt.DownKey==k ){
-        osTimerStop( keyDownTimer );
-        KSt.DownKey = kINVALID;
-      }
-      if ( k==kSTAR && KSt.starAltUsed ){ // no event for Star UP, if it was used for <star-X>
-        KSt.starAltUsed = false;
-        dbgEvt( TB_keyStUp, k,0, 0, 0 );
-        return false;
-      }
-      keydef[k].dntime = tbTimeStamp() - keydef[k].tstamp; 
-      dbgEvt( TB_keyUp, k, keydef[k].dntime, 0, 0 );
-      if ( KSt.detectedUpKey == kINVALID ){   // no event detected yet
-        KSt.detectedUpKey = k; 
-        osEventFlagsSet( osFlag_InpThr, KEYPAD_EVT );   // wakeup for inputThread
-        return true;
-      } 
-    }
-  }
-  return false;
-} */
-
 extern bool RebootOnKeyInt;   // from powermanager -- reboot if interrupt
 
 void sendKeyTran( KEY k, uint32_t ts, bool down ) {   // send transition message to input thread

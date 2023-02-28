@@ -547,9 +547,9 @@
               <FilePath>.\Src\inputmanager.c</FilePath>
             </File>
             <File>
-              <FileName>ledmanager.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>.\Src\ledmanager.c</FilePath>
+              <FileName>ledmanager.cpp</FileName>
+              <FileType>8</FileType>
+              <FilePath>.\Src\ledmanager.cpp</FilePath>
             </File>
             <File>
               <FileName>logger.c</FileName>

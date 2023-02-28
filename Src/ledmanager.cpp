@@ -279,6 +279,26 @@ void EnableLedMngr( bool enable ) {
     enableLedManager = enable;
 }
 
+uint32_t lastProgress = 0, nextProgressStep = 0;
+
+void showProgress( const char *s, uint32_t stepMs ) {      // step through LED string, min stepMs msec each
+    uint32_t tm = tbRtcStamp();
+    if ( tm < lastProgress + stepMs ) return;  // avoid flashing too fast
+    lastProgress = tm;
+    EnableLedMngr( false );
+
+    if ( nextProgressStep >= strlen( s )) nextProgressStep = 0;
+    char clr = s[nextProgressStep];
+    nextProgressStep++;
+
+    switch (clr) {
+        case 'G': gSet( gGREEN, 1 ); gSet( gRED, 0 ); break;
+        case 'R': gSet( gGREEN, 0 ); gSet( gRED, 1 ); break;
+        default: gSet( gGREEN, 0 ); gSet( gRED, 0 ); break;
+    }
+}
+
+
 void initLedManager() {       // initialize & spawn LED thread
     handlePowerEvent( POWER_UP );
     //  registerPowerEventHandler( handlePowerEvent );

@@ -179,17 +179,10 @@ void initPwrSignals( void ) {         // configure power GPIO pins, & EXTI on NO
     gSet( gEN1V8, 0 );          // initially codec DVDD unpowered PD5
     gSet( gBOOT1_PDN, 0 );      // initially codec in reset state  PB2
 
-#if defined(TBook_V2_Rev3)
     gConfigOut( gEN_IOVDD_N );  // 0 to supply 3V to AIC3100 IOVDD
     gConfigOut( gEN_AVDD_N );   // 0 to supply 3V to AIC3100 AVDD & HPVDD
     gSet( gEN_IOVDD_N, 1 );     // initially codec IOVDD unpowered  PE4
     gSet( gEN_AVDD_N, 1 );      // initially codec AVDD & HPVDD unpowered PE5
-#endif
-
-#if defined(TBook_V2_Rev1)
-    gConfigOut( gPA_EN );       // 1 to power headphone jack
-    gSet( gPA_EN, 0 );          // initially audio external amplifier OFF
-#endif
 
     tbDelay_ms( 5 ); // pwr start up: 3 );    // wait 3 msec to make sure everything is stable
 }

@@ -201,8 +201,6 @@ void handleInterrupt( bool fromThread ) {         // called for external interru
     enableInputs( fromThread );     // no detectedUpKey -- re-enable interrupts
 }
 
-// STM3210E_EVAL  EXTI ints 0 Wk,         3 JDn,        5-9 JCe/Key,          10-15 Tam&JRi/JLe/JUp
-// TBook_V2_Rev1  EXTI ints 0 Hom, 1 Pot, 3 Tab, 4 Plu, 5-9 Min/LHa/Sta/Cir,  10-15 RHa/Tre
 //****** TBook_V2_Rev3  EXTI ints 0 Hom, 1 Pot, 3 Tab, 4 Plu, 5-9 Min/LHa/Sta/Cir,  10-15 RHa/Tre
 // BOTH:  EXTI0 EXTI3 EXTI9_5 EXTI15_10
 void EXTI0_IRQHandler( void ) {     // call handleInterrupt( )
@@ -220,15 +218,12 @@ void EXTI9_5_IRQHandler( void ) {   // call handleInterrupt( )
 void EXTI15_10_IRQHandler( void ) { // call handleInterrupt( )
     handleInterrupt( false );
 }
-// TBOOK_V2 ONLY:  EXTI1 EXTI4
-#if defined ( TBOOK_V2 )
 void          EXTI1_IRQHandler(void){     // call handleInterrupt( )
   handleInterrupt( false );
 }
 void          EXTI4_IRQHandler(void){     // call handleInterrupt( )
   handleInterrupt( false );
 }
-#endif
 
 /*
  * Configure interrupts on the STM32 line for a given membrane switch key.
@@ -249,22 +244,15 @@ void configInputKey( KEY k ) {    // set up GPIO & external interrupt
         case (int) GPIOE: portCode = 4; break;
         case (int) GPIOF: portCode = 5; break;
         case (int) GPIOG: portCode = 6; break;
+        case (int) GPIOH: portCode = 7; break;
         // @formatter: on
-#if defined( TBOOK_V2 )
-            case (int)GPIOH:  portCode = 7; break;
-#endif
     }
     // AFIO->EXTICR[0..3] -- set of 4bit fields for pin#0..15
     int pin = keydef[k].pin;
     int iWd = pin >> 2, iPos = ( pin & 0x3 ), fbit = iPos << 2;
     int msk = ( 0xF << fbit ), val = ( portCode << fbit );
     //  dbgLog( "A K%d %s ICR[%d] m%04x v%04x \n", k, keydef[ k ].signal, iWd, msk, val );
-#if defined( STM3210E_EVAL )
-    AFIO->EXTICR[ iWd ] = ( AFIO->EXTICR[ iWd ] & ~msk ) | val;   // replace bits <fbit..fbit+3> with portCode
-#endif
-#if defined( TBOOK_V2 )
     SYSCFG->EXTICR[ iWd ] = ( SYSCFG->EXTICR[ iWd ] & ~msk ) | val;   // replace bits <fbit..fbit+3> with portCode
-#endif
 
     int pinBit = 1 << pin;      // bit mask for EXTI->IMR, RTSR, FTSR
     EXTI->RTSR |= pinBit;       // Enable a rising trigger 

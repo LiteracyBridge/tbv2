@@ -19,19 +19,10 @@
 //#define AK4637
 #define AIC3100
 
-#ifdef AK4637
-// I2C slave address for ak4637	--  shifted <<1 by I2C, so differs from HAL 0x27 which is masked with 0xFFFE
-#define AUDIO_I2C_ADDR                    0x12
-#endif
-
 #ifdef AIC3100
 // I2C slave address for tlv320aic3100 0x18 specified by AIC3100 datasheet pg 20 (matches start byte of 0x30 in eval bd initscript)
 #define AUDIO_I2C_ADDR                     0x18
 #endif 
-
-// #define USE_LCD
-// define NO_PRINTF if user printf (retargetio.c) not included
-// #define NO_PRINTF
 
 // define USE_FILESYS if filesystem is included
 #define USE_FILESYS

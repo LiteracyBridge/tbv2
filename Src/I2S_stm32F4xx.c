@@ -294,7 +294,6 @@ static void I2S3_ClockEnable( bool enab ) {                // enable/disable I2S
 }
 
 static int32_t I2S_Configure( I2S_RESOURCES *i2s, uint32_t freq, bool monoMode, bool slaveMode, bool xmt ) {    // set audio frequency
-#ifdef TBOOK_V2
     // RM0402  STM32F412xx Reference Manual
     //  I2SCLK from PLLI2S = 48MHz by default
     //    fs = PLLI2S/ (256*( 2*I2SDIV + ODD )
@@ -354,63 +353,7 @@ static int32_t I2S_Configure( I2S_RESOURCES *i2s, uint32_t freq, bool monoMode, 
 */  
   }
   i2s->info->flags |= I2S_FLAG_CONFIGURED;
-#endif
 
-#ifdef STM3210E_EVAL
-    //----------------------- I2SPR: I2SDIV and ODD Calculation -----------------
-      // RM0008  STM32F103xx Reference Manual, Table 183:
-      //  SYSCLK    I2S_DIV     I2S_ODD   MCLK  Target     Real fS (KHz)       Error
-      //  (MHz) 16-bit 32-bit 16-bit 32-b       fS(Hz)  16-bit    32-bit    16-bit  32-bit
-      //   72     2      2      0    0    Yes   96000   70312.15  70312.15  26.76%  26.76%
-      //   72     3      3      0    0    Yes   48000   46875     46875     2.34%   2.34%
-      //   72     3      3      0    0    Yes   44100   46875     46875     6.29%   6.29%
-      //   72     4      4      1    1    Yes   32000   31250     31250     2.34%   2.34%
-      //   72     6      6      1    1    Yes   22050   21634.61  21634.61  1.88%   1.88%
-      //   72     9      9      0    0    Yes   16000   15625     15625     2.34%   2.34%
-      //   72    13     13      0    0    Yes   11025   10817.30  10817.30  1.88%   1.88%
-      //   72    17     17      1    1    Yes    8000    8035.71   8035.71  0.45%   0.45%
-      // FS = SysClk / ( 256*( 2* I2SDIV + ODD )
-      int f = freq;
-      int div = I2S_clk/(512*freq);
-      int f1 = I2S_clk /(256 * (2*div+0));   // freq for div & odd=0
-      int f2 = I2S_clk /(256 * (2*div+1));   // freq for div & odd=1
-      int f3 = I2S_clk /(256 * (2*div+2));   // freq for div+1 & odd=0
-      // f1 > f2 > f3  -- which is closest to f?
-      int e1 = abs(f-f1), e2 = abs(f-f2), e3 = abs(f-f3);
-      int odd = 0;
-      if ( e2 < e1 && e2 < e3 )
-        odd = 1;    // f2 closest: DIV,   ODD=1
-      else if ( e3 < e1 && e3 < e2 )
-        div++;      // f3 closest: DIV+1, ODD=1
-      // else       // f1 closest: DIV,   ODD=0
-
-    // I2s config    SPI_I2SCFGR: I2SMOD, I2SE, I2SCFG, PCMSYNC, I2SSTD, CKPOL, DATLEN, CHLEN
-
-      uint16_t i2s_cfg = 0;
-      i2s_cfg |= I2S_MODE;                // I2SMOD Selected
-      i2s_cfg |= I2S_CFG_MASTER_TX;       // I2SCFG = Master Transmit
-      i2s->info->monoMode = monoMode;
-
-      i2s_cfg |= I2S_STANDARD_PHILIPS;    // I2SSTD = 00 = Phillips
-      i2s_cfg |= I2S_CPOL_LOW;            // CKPOL = 0
-      i2s_cfg |= I2S_DATAFORMAT_16B;      // DATLEN = 00, CHLEN = 0  16bits/channel
-
-      // I2S pre-scaler  SPI_I2SPR: MCKOE, ODD, I2SDIV
-      uint16_t i2s_pr = 0;
-      i2s_pr |= I2S_MCLKOUTPUT_ENABLE;        // MCKOE
-      i2s_pr |= (odd? SPI_I2SPR_ODD : 0);     // ODD
-      i2s_pr |= div;                          // I2SDIV
-
-      // set SPI2 I2SCFGR & I2SPR registers
-      i2s->instance->I2SCFGR = I2S_MODE;  // set I2S Mode, but reset rest ( esp. I2SE = 0 )
-
-      i2s->instance->I2SPR   = i2s_pr;    // store PreScaler  (while I2S disabled)
-      i2s->instance->I2SCFGR = i2s_cfg;   // store I2S config (while disabled)
-
-      // I2S_Send will enable:  i2s->instance->I2SCFGR |= I2S_MODE_ENAB;    // enable I2S device
-
-      i2s->info->flags |= I2S_FLAG_CONFIGURED;
-#endif
     return ARM_DRIVER_OK;
 }
 
@@ -449,19 +392,7 @@ static int32_t I2S_Initialize( ARM_SAI_SignalEvent_t cb_event,
     i2s->info->cb_event = cb_event;
     reset_I2S_Info( i2s );
 
-#ifdef STM3210E_EVAL
-    // RCC clocks configuration ??
-    // RCC_CFGR2 bit I2S2SRC -- should be configured to 0, to select SYSCLOCK as basis of I2S MCLK
-    //   not done explicitly, as this is the default (and stm32f10x.h RCC_TypeDef doesn't include CFGR2)
-    I2S_clk = SystemCoreClock;    // 72MHz on STM32F103xx of STM3210E_EVAL
 
-    // configure GPIOs using gpio_id's from main.h
-    // Configure SCK Pin (stm32F103zg: PB13 (SPI2_SCK / I2S2_CK ))
-    // Configure SD Pin  (stm32F103zg: PB15 (SPI2_MOSI / I2S2_SD))
-    // Configure WS Pin  (stm32F103zg: PB12 (SPI2_NSS / I2S2_WS))
-#endif
-
-#ifdef TBOOK_V2
     // RM0402  STM32F412xx Reference Manual  6.3.23
     //  I2SCLK comes from PLLI2S
     //  set to 48 MHz from HSE by setCpuClk()
@@ -502,7 +433,6 @@ static int32_t I2S_Initialize( ARM_SAI_SignalEvent_t cb_event,
 
     RCC->APB1RSTR |=  RCC_APB1RSTR_SPI3RST;   // reset spi3 (i2s3 & i2s3_ext)
     RCC->APB1RSTR &= ~RCC_APB1RSTR_SPI3RST; // un-reset spi3
-#endif
 
     // configure GPIOs using gpio_id's from tbook_rev2b.h -- also specifies AFn for STM32F412
     gConfigI2S( gI2S2_CK );     // TBookV2B { gI2S2_CK,     "PB13|5"  },  // AK4637 BICK == CK == SCK       (RTE_I2SDevice.h I2S0==SPI2 altFn=5)

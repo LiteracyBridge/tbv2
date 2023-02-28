@@ -4,7 +4,7 @@
 
 
 /* Includes ------------------------------------------------------------------*/
-#include "tbook.h"          // defines TBook_V2_Rev3
+#include "tbook.h"
 
 #include "codecI2C.h"       // I2C access utilities
 #include "Driver_I2C.h"     // CMSIS-Driver I2C interface

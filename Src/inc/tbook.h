@@ -172,9 +172,6 @@ extern void chkDevState(char *loc, bool reset);
 extern void stdout_putchar(char);
 
 extern int divTst(int lho, int rho);   // for fault handler testing
-extern void enableLCD(void);
-
-extern void disableLCD(void);
 
 extern void printAudSt(void); // print audio state
 extern void setDbgFlag(char ch, bool enab);

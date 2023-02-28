@@ -11,11 +11,6 @@
 #include "tbook.h"
 #include "os_tick.h"
 
-#if defined( USE_LCD )
-#include "GLCD_Config.h"
-#include "Board_GLCD.h"
-#endif
-
 #include <stdlib.h>
 
 extern bool BootVerboseLog;
@@ -101,46 +96,25 @@ void GPIO_DefineSignals( const GPIO_Signal def[] ) {
 
 
 void gUnconfig( GPIO_ID id ) {      // reset GPIO to default
-#if defined( TBOOK_V2 )
     GPIO_PinConfigure( gpio_def[ id ].port, gpio_def[ id ].pin, GPIO__MODE_INPUT, GPIO_OTYP_PUSHPULL, GPIO_SPD_LOW, GPIO_PUPD_NONE );
     GPIO_AFConfigure ( gpio_def[ id ].port, gpio_def[ id ].pin, AF0 );   // reset to AF0
-  //#undefine STM3210E_EVAL
-#endif
-#if defined( STM3210E_EVAL )
-    GPIO_PinConfigure( gpio_def[ id ].port, gpio_def[ id ].pin, GPIO_IN_ANALOG, GPIO__MODE_INPUT );
-#endif
 }
 
 void gConfigI2S( GPIO_ID id ) {   // config gpio as high speed pushpull in/out
-#if defined( TBOOK_V2 )
     GPIO_PinConfigure( gpio_def[ id ].port, gpio_def[ id ].pin, GPIO__MODE_AF, GPIO_OTYP_PUSHPULL, GPIO_SPD_FAST, GPIO_PUPD_NONE );
     GPIO_AFConfigure ( gpio_def[ id ].port, gpio_def[ id ].pin, gpio_def[ id ].altFn );   // set AF
-#endif
-#if defined( STM3210E_EVAL )
-    GPIO_PinConfigure( gpio_def[ led ].port, gpio_def[ led ].pin, GPIO_OUT_PUSH_PULL, GPIO__MODE_OUT10MHZ );
-#endif
 }
 
 void gConfigOut( GPIO_ID id ) {   // config gpio as low speed pushpull output -- power control, etc
-#if defined( TBOOK_V2 )
     AFIO_REMAP af = gpio_def[ id ].altFn;
     GPIO__MODE md = af!=0? GPIO__MODE_AF : GPIO__MODE_OUT;
     GPIO_PinConfigure( gpio_def[ id ].port, gpio_def[ id ].pin, md, GPIO_OTYP_PUSHPULL, GPIO_SPD_LOW, GPIO_PUPD_NONE );
     GPIO_AFConfigure ( gpio_def[ id ].port, gpio_def[ id ].pin, af );   // set AF
-#endif
-#if defined( STM3210E_EVAL )
-    GPIO_PinConfigure( gpio_def[ led ].port, gpio_def[ led ].pin, GPIO_OUT_PUSH_PULL, GPIO__MODE_OUT10MHZ );
-#endif
 }
 
 void gConfigIn( GPIO_ID key, bool pulldown ) {    // configure GPIO as low speed input, either pulldown or pullup
-#if defined( TBOOK_V2 )
     GPIO_PinConfigure( gpio_def[ key ].port, gpio_def[ key ].pin, GPIO__MODE_INPUT, GPIO_OTYP_PUSHPULL, GPIO_SPD_LOW, pulldown? GPIO_PUPD_PDN : GPIO_PUPD_PUP );
     GPIO_AFConfigure ( gpio_def[ key ].port, gpio_def[ key ].pin, AF0 );   //  AF 0
-#endif
-#if defined( STM3210E_EVAL )
-    GPIO_PinConfigure( gpio_def[ key ].port, gpio_def[ key ].pin, GPIO_IN_FLOATING, GPIO__MODE_INPUT );
-#endif
 }
 
 void gConfigKey( GPIO_ID key ) {    // configure GPIO as low speed pulldown input ( keys )
@@ -177,13 +151,8 @@ void enableEXTI( GPIO_ID key, bool asKey ) {   // configure EXTI for key or pwrF
 }
 
 void gConfigADC( GPIO_ID id ) {   // configure GPIO as ANALOG input ( battery voltage levels )
-#if defined( TBOOK_V2 )
     GPIO_PinConfigure( gpio_def[ id ].port, gpio_def[ id ].pin, GPIO__MODE_ANALOG, GPIO_OTYP_PUSHPULL, GPIO_SPD_LOW, GPIO_PUPD_NONE );
     GPIO_AFConfigure ( gpio_def[ id ].port, gpio_def[ id ].pin, gpio_def[ id ].altFn );   //  set AF
-#endif
-#if defined( STM3210E_EVAL )
-    //?? GPIO_PinConfigure( gpio_def[ key ].port, gpio_def[ key ].pin, GPIO_IN_FLOATING, GPIO__MODE_INPUT );
-#endif
 }
 
 void gSet( GPIO_ID gpio, uint8_t on ) {               // set the LOGICAL state of a GPIO output pin
@@ -787,44 +756,12 @@ char *findOnPathList( char *destpath, const char *search_path, const char *nm ) 
 }
 //
 // debug logging & printf to Dbg.Scr  & EVR events  *****************************
-#define LCD_COLOR_RED           (uint16_t)0xF800
-#define LCD_COLOR_BLACK         (uint16_t)0x0000
-#define LCD_COLOR_BLUE          (uint16_t)0x001F
-#if !defined( USE_LCD )       // dummy LCD routines
-
-void InitLCD( const char *hdr ) {
-}
-
-void LCDwriteln( char *s ) {
-}
-
-void enableLCD( void ) {
-}
-
-void disableLCD( void ) {
-}
-
-void clearHdr( void ) {
-}
-
-void printHdr( int x, int y, const char *s ) {
-}
-
-void setTxtColor( uint16_t c ) { // set color of scroll text
-}
-
-#endif
-
 
 void usrLog( const char *fmt, ... ) {
     va_list arg_ptr;
     va_start( arg_ptr, fmt );
-    enableLCD();
-    setTxtColor(LCD_COLOR_BLACK );
-    //  printf(" ");
     vprintf( fmt, arg_ptr );
     va_end( arg_ptr );
-    disableLCD();
 }
 
 const char *DbgFlags     = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";  // flags 0..35
@@ -872,27 +809,21 @@ void tglDebugFlag( int idx ) {   // toggle debug flag: "0123456789ABCDEFGHIJK"[i
 void dbgLog( const char *fmt, ... ) {
     va_list arg_ptr;
     va_start( arg_ptr, fmt );
-    enableLCD();
-    setTxtColor(LCD_COLOR_BLUE );
     bool show = dbgEnab( fmt[0] );  // messages can be prefixed with a digit-- then only show if that bit of DebugMask = 1
     if ( show ) {
         vprintf( fmt, arg_ptr );
         va_end( arg_ptr );
         //tbDelay_ms(100);            // add delay to reduce debugLog buffer overrun
     }
-    disableLCD();
 }
 
 void errLog( const char *fmt, ... ) {
     va_list arg_ptr;
     va_start( arg_ptr, fmt );
-    enableLCD();
-    setTxtColor(LCD_COLOR_RED );
     char msg[200];
     vsprintf( msg, fmt, arg_ptr );
     va_end( arg_ptr );
     logEvtNS( "errLog", "msg", msg );
-    disableLCD();
 }
 
 static int tbErrNest = 0;
@@ -1149,7 +1080,6 @@ void HardFault_Handler_C( svFault_t *svFault, uint32_t linkReg ) {
     int  cfsr    = svSCB.CFSR, usgF = cfsr >> 16, busF = ( cfsr & 0xFF00 ) >> 8, memF = cfsr & 0xFF;
     dbgEvt( TB_Fault, vAct, cfsr, svFault->PC, 0 );
 
-    enableLCD();
     dbgLog( "Fault: 0x%x = %s \n", vAct, vAct < 7 ? fNms[vAct] : "" );
     dbgLog( "PC: 0x%08x \n", svFault->PC );
     dbgLog( "CFSR: 0x%08x \n", cfsr );

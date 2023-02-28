@@ -157,18 +157,10 @@ void handlePowerEvent( int powerEvent ) {
             //dbgLog("Led Power up \n");
             LED_Init( gGREEN );
             LED_Init( gRED );
-#if defined( STM3210E_EVAL )
-            LED_Init( gORANGE );
-            LED_Init( gBLUE );
-#endif
             break;
         case POWER_DOWN:
             gUnconfig( gGREEN );
             gUnconfig( gRED );
-#if defined( STM3210E_EVAL )
-            gUnconfig( gORANGE );
-            gUnconfig( gBLUE );
-#endif
             //dbgLog("Led Power Down \n");
             break;
     }

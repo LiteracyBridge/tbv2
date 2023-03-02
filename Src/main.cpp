@@ -12,43 +12,7 @@
 //
 //********  main
 DbgInfo Dbg;      // things to make visible in debugger
-//extern uint16_t           KeypadIMR;
-//bool NO_OS_DEBUG = true;
-/* Stop mode power debugging
-void ResetGPIO( void );      // powermanager.c
 
-
-extern bool RebootOnKeyInt;
-
-int DbgPwrDn = 0; // DEBUG**********************************
-// DbgPwdDn-- power down meanings
-// LHAND  1: after CODEC_DATA_SEND_DONE  3uA
-// RHAND  2: after CODEC_PLAYBACK_DONE
-// CIRCLE 3: after CODEC_PLAYBACK_DONE 2nd time
-// TREE   4: after checkPower
-// STAR   5: after 
-
-extern bool FakeCodec;
-bool        FakeCodec = false;
-extern bool NoI2S;
-bool        NoI2S     = false;
-
-void MarcDebug() {       // DEBUG test for Marc -- for Stop mode power calcs
-    flashInit();      // enable keyboard to decode boot type
-
-    //  if ( gGet( gCIRCLE ) ){ FakeCodec = true; NoI2S = true; return; }
-    //  if ( gGet( gRHAND ) ){ FakeCodec = true; return; }
-
-    if ( gGet( gLHAND )) DbgPwrDn = 1;
-    else if ( gGet( gRHAND )) DbgPwrDn = 2;
-    else if ( gGet( gCIRCLE )) DbgPwrDn = 3;
-    else if ( gGet( gTREE )) DbgPwrDn = 4;
-    else if ( gGet( gSTAR )) DbgPwrDn = 5;
-
-    flashCode( DbgPwrDn );
-}
-
-*/
 int  BootMode; // DEBUG**********************************
 char BootKey;
 // BootOption-- 
@@ -160,6 +124,7 @@ int main( void ) {
     //  gConfigI2S( gMCO2 );  // TBookV2B   { gMCO2,          "PC9|0"   },  // DEBUG: MCO2 for external SystemClock/4 on PC9
 
     initPrintf( TBV2_Version );
+    printf("Keys at boot: %02x\n", keysDetectedAtBoot);
     initIDs();
 
     osKernelInitialize();                 // Initialize CMSIS-RTOS

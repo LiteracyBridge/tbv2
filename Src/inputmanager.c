@@ -203,26 +203,28 @@ void handleInterrupt( bool fromThread ) {         // called for external interru
 
 //****** TBook_V2_Rev3  EXTI ints 0 Hom, 1 Pot, 3 Tab, 4 Plu, 5-9 Min/LHa/Sta/Cir,  10-15 RHa/Tre
 // BOTH:  EXTI0 EXTI3 EXTI9_5 EXTI15_10
-void EXTI0_IRQHandler( void ) {     // call handleInterrupt( )
-    handleInterrupt( false );
+void EXTI0_IRQHandler(void) {
+    handleInterrupt(false);
 }
 
-void EXTI3_IRQHandler( void ) {     // call handleInterrupt( )
-    handleInterrupt( false );
+void EXTI3_IRQHandler(void) {
+    handleInterrupt(false);
 }
 
-void EXTI9_5_IRQHandler( void ) {   // call handleInterrupt( )
-    handleInterrupt( false );
+void EXTI9_5_IRQHandler(void) {
+    handleInterrupt(false);
 }
 
-void EXTI15_10_IRQHandler( void ) { // call handleInterrupt( )
-    handleInterrupt( false );
+void EXTI15_10_IRQHandler(void) {
+    handleInterrupt(false);
 }
-void          EXTI1_IRQHandler(void){     // call handleInterrupt( )
-  handleInterrupt( false );
+
+void EXTI1_IRQHandler(void) {
+    handleInterrupt(false);
 }
-void          EXTI4_IRQHandler(void){     // call handleInterrupt( )
-  handleInterrupt( false );
+
+void EXTI4_IRQHandler(void) {
+    handleInterrupt(false);
 }
 
 /*

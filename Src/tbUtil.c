@@ -60,17 +60,13 @@ void gDef( GPIO_ID gpid, char *signal ) {             // define gpio_signal[ ID 
             case 6:
             case 7:
             case 8:
-            case 9:
-            intnum = EXTI9_5_IRQn;
-            break;
+            case 9:   intnum = EXTI9_5_IRQn; break;
             case 10:
             case 11:
             case 12:
             case 13:
             case 14:
-            case 15:
-            intnum = EXTI15_10_IRQn;
-            break;
+            case 15:  intnum = EXTI15_10_IRQn; break;
         // @formatter:on
         }
         if ( strchr( signal, '_' ) != NULL )  // contains a _ => active low

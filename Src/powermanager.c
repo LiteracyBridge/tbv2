@@ -267,9 +267,13 @@ void enterStopMode( void ) {                    // put STM32F4 into Stop mode
     int pin = gpio_def[gPWR_FAIL_N].pin;
     EXTI->IMR &= ~( 1 << pin );             // disable the interrupt
 
-    disableKeyInterrupts( KM_HOME );
+    disableKeyInterrupts( KM_HOME|KM_RHAND );
 
     ResetGPIO();
+
+    // Enable interrupt on the power good line, so we can turn on the charging indicator.
+    gConfigIn(gBAT_PG_N, false);
+    enableEXTI( gBAT_PG_N, false );
 
     extern uint16_t KeypadIMR;        // inputmanager.c -- keyboard IMR flags
 

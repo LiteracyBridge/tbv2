@@ -4,11 +4,6 @@
 #define PACKAGE_DATA_H
 #include "tbook.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif    
-
-
 //  ------------  TBook Content
 
 // package_data.txt  file structure:
@@ -95,12 +90,12 @@ typedef struct Deployment {
 // ControlStateMachine structures--  read from  system/control_def.txt  
 typedef struct AudioList {  // AudioList_t--  lists all names used in CSM PlaySys() actions
     int             nSysA;          // number of different sysAudios
-    char *          sysA[10];       // sysAudio names
+    const char *    sysA[10];       // sysAudio names
 } AudioList_t;
 
 typedef struct csmAction {  // csmAction_t -- enum Action & string arg
     Action          act;
-    char *          arg;
+    const char *    arg;
 } csmAction_t;
 
 typedef struct ActionList { // ActionList_t--  holds cnt & ptrs to csmActions
@@ -110,9 +105,9 @@ typedef struct ActionList { // ActionList_t--  holds cnt & ptrs to csmActions
 
 typedef struct CState { // CState_t --  Control State definition
     short           idx;                // idx of this state
-    char *          nm;                 // name of this state
+    const char *    nm;                 // name of this state
     short           nNxtStates;         // # possible events
-    short *         evtNxtState;        // index of next state for each possible event
+    const short *   evtNxtState;        // index of next state for each possible event
     ActionList_t *  Actions;            // cnt & array of csmAction_t
 } CState_t;
 
@@ -122,7 +117,7 @@ typedef struct CSList { // CSList_t --  cnt & ptrs to each ControlState
 } CSList_t;
 
 typedef struct CSM {
-    char *          Version;            // CSM version
+    const char *    Version;            // CSM version
     TBConfig_t *    TBConfig;           // TBook config values
     AudioList_t *   SysAudio;           // cnt & names of PlaySys() args in CSM
 
@@ -147,8 +142,8 @@ extern int nMsgs( Subject_t *subj );                      // return # of message
 extern AudioFile_t *gMsg( Subject_t *subj, int iMsg );             // return audioFile [iMsg] from subject subj
 extern int nPkgs( void );                                  // return # of packages in current deployment
 extern Package_t *gPkg( int iPkg );                               // return iPkg'th package from current deployment
-extern char *pkgNm( void );                                  // return text name of current Package
-extern char *subjNm( Subject_t *subj );                      // return text name of Subject
+extern const char *pkgNm( void );                                  // return text name of current Package
+extern const char *subjNm( Subject_t *subj );                      // return text name of Subject
 
 // ControlStateMachine  data from  control_def.txt
 extern CSM_t *CSM;                                            // extern ptr to definition of CSM
@@ -156,14 +151,10 @@ extern CSM_t *CSM;                                            // extern ptr to d
 extern bool loadControlDef( void );                         // load structured Control State Machine
 extern void preloadCSM( void );                             // load pre-defined CSM for empty filesys-- QcTest
 extern CState_t *gCSt( int idx );                                // return ptr to CState[ idx ]
-extern char *gStNm( CState_t *st );                          // return name of CSt
+extern const char *gStNm( CState_t *st );                          // return name of CSt
 extern int nActs( CState_t *st );                          // # of actions for CState
 extern csmAction_t *gAct( CState_t *st, int idx );                 // return Action[idx] of CState
 extern int nSysAud( void );                                // return # of SysAudio names used by CSM
-extern char *gSysAud( int idx );                             // return SysAudio[ idx ]
-
-#ifdef __cplusplus
-}
-#endif
+extern const char *gSysAud( int idx );                             // return SysAudio[ idx ]
 
 #endif           // PACKAGE_DATA_H`

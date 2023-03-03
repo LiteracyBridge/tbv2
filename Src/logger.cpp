@@ -26,10 +26,10 @@ const int               STAT_SIZ = sizeof( MsgStats );
 const char *            deviceIdFile = "/system/device_ID.txt";
 const char *            firmwareIdFile = "/system/firmware_ID.txt";
 const char *            norEraseFile = "M0:/system/EraseNorLog.txt";      // flag file to force full erase of NOR flash
-char *                  rtcSetFile = "M0:/system/SetRTC.txt";             // flag file to force setting RTC to last modification time of SetRTC.txt
-char *                  rtcDontSetFile = "dontSetRTC.txt";                // renamed version of SetRTC.txt
-char *                  rtcDontSetPath = "M0:/system/dontSetRTC.txt";           // full path for fexists
-char *                  lastRtcFile = "M0:/system/lastRTC.txt";           // written at powerdown-- modification date used to reset clock
+const char *            rtcSetFile = "M0:/system/SetRTC.txt";             // flag file to force setting RTC to last modification time of SetRTC.txt
+const char *            rtcDontSetFile = "dontSetRTC.txt";                // renamed version of SetRTC.txt
+const char *            rtcDontSetPath = "M0:/system/dontSetRTC.txt";           // full path for fexists
+const char *            lastRtcFile = "M0:/system/lastRTC.txt";           // written at powerdown-- modification date used to reset clock
 const char *            logFilePatt = "M0:/log/tbLog_%d.txt";     // file name of previous log on first boot
 
 const int               MAX_EVT_LEN1 = 32, MAX_EVT_LEN2 = 64;
@@ -110,7 +110,7 @@ char *loadLine( char *line, const char *fpath, fsTime *tm ) {    // => 1st line 
 //   char   *path   - The path to the file for which to get the timestamp
 //   fsTime *time   - Where to store the time, if possible.
 // return true if the time was obtained, false otherwise.
-bool getFileTime( char *path, fsTime *time ) {
+bool getFileTime( const char *path, fsTime *time ) {
     fsFileInfo fAttr;
     fAttr.fileID = 0;
     fsStatus fStat = ffind( path, &fAttr );
@@ -130,7 +130,7 @@ bool getFileTime( char *path, fsTime *time ) {
 /// \param[in] line     Nul terminated string.
 /// \param[in] fpath    Name of the file to be created / truncated.
 /// \return             nothing
-void writeLine( char *line, const char *fpath ) {
+void writeLine( const char *line, const char *fpath ) {
     FILE *stF = tbOpenWriteBinary( fpath );
     if ( stF != NULL ) {
         int nch = fprintf( stF, "%s\n", line );
@@ -565,7 +565,7 @@ void norEvt( const char *s1, const char *s2 ) {
 }
 
 void logEvtS( const char *evtID, const char *args ) {   // write log entry: 'm.ss.s: EVENT, ARGS'
-    char     evtBuff[MAX_EVT_LEN1];
+    char     evtBuff[MAX_EVT_LEN2];
     fsTime   tmdt;
     uint32_t msec;
     getRTC( &tmdt, &msec );

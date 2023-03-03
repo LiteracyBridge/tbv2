@@ -7,7 +7,7 @@
 // MUST MATCH:  typedef Action in tknTable.h 
 // MUST MATCH:  CsmToken.java -- enum TknAction
 // @formatter:off
-char *  ANms[] = { "aNull",
+const char *  ANms[] = { "aNull",
     "LED",          "bgLED",        "playSys",
     "playSubj",     "pausePlay",    "resumePlay",
     "stopPlay",     "volAdj",       "spdAdj",
@@ -23,12 +23,12 @@ char *  ANms[] = { "aNull",
     NULL
 };
 // @formatter:on
-char *actionNm( Action a ) { return ANms[(int) a]; }
+const char *actionNm( Action a ) { return ANms[(int) a]; }
 
 // MUST MATCH:  typedef Event in tknTable.h  
 // MUST MATCH:  CsmToken.java -- enum TknEvent
 // @formatter:off
-char *  ENms[] = {
+const char *  ENms[] = {
     "eNull",
         "Home",     "Circle",     "Plus",     "Minus",     "Tree",     "Lhand",     "Rhand",     "Pot",     "Star",     "Table",     //=10
         "Home__",   "Circle__",   "Plus__",   "Minus__",   "Tree__",   "Lhand__",   "Rhand__",   "Pot__",   "Star__",   "Table__",   //=20
@@ -49,7 +49,7 @@ char *  ENms[] = {
 //    "Ti", "cF", "LH", "MH", "fS", "fF", "aK", "eU",
 //    NULL
 //};
-char *eventNm( Event e ) { return ENms[(int) e];; }
+const char *eventNm( Event e ) { return ENms[(int) e];; }
 //char *  shEvntNm( Event e ) { return shENms[ (int)e ];; }
 //
 //
@@ -63,7 +63,7 @@ TBConfig_t *    TB_Config;                  // TBook configuration variables
 char            line[202];                  // internal text line buffer shared by all packageData routines
 int             errCount;                   // # errors while parsing this file
 int             lineNum = 0;
-char *          errType;                    // name of file type being loaded, for error messages
+const char *    errType;                    // name of file type being loaded, for error messages
 
 // local shared utilities
 void *loadErr( const char *msg ) {                    // report & count error in 'errType' file, when parsing 'msg'
@@ -80,7 +80,7 @@ void appendIf( char *path, const char *suffix ) {  // append 'suffix' if not the
 }
 
 char *allocStr( const char *s, const char *strType ) { // allocate & copy s
-    char *pStr = tbAlloc( strlen( s ) + 1, strType );
+    char *pStr = static_cast<char*>(tbAlloc( strlen( s ) + 1, strType ));
     strcpy( pStr, s );
     return pStr;
 }
@@ -179,11 +179,11 @@ Package_t *gPkg( int iPkg ) {                               // return iPkg'th pa
     return Deployment->packages->pkg[iPkg];
 }
 
-char *pkgNm( void ) {                                  // return text name of current Package
+const char *pkgNm( void ) {                                  // return text name of current Package
     return currPkg->packageName;
 }
 
-char *subjNm( Subject_t *subj ) {                      // return text name of Subject
+const char *subjNm( Subject_t *subj ) {                      // return text name of Subject
     return subj->subjName;
 }
 
@@ -241,7 +241,7 @@ PathList_t *loadSearchPath( FILE *inF ) {                    // parse next pkg_d
     ldDepLn( inF, "prompts_paths" );
     int dcnt = sscanf( line, "%d;%d;%d;%d;%d;%d;%d;%d;%d;%d; \n",
                        &d[0], &d[1], &d[2], &d[3], &d[4], &d[5], &d[6], &d[7], &d[8], &d[9] );
-    PathList_t *plist = tbAlloc( sizeof( PathList_t ), "pathList" );        // always allocate space for 10  (only 1 per package)
+    PathList_t *plist = static_cast<PathList_t*>(tbAlloc( sizeof( PathList_t ), "pathList" ));        // always allocate space for 10  (only 1 per package)
     plist->PathLen = dcnt;
     for (int i = 0; i < dcnt; i++) {
         plist->DirIdx[i] = d[i];
@@ -251,7 +251,7 @@ PathList_t *loadSearchPath( FILE *inF ) {                    // parse next pkg_d
 
 AudioFile_t *loadAudio( FILE *inF, const char *typ ) {        // load dirIdx & filename from pkg_dat line
     if ( errCount > 0 ) return NULL;
-    AudioFile_t *audfile = tbAlloc( sizeof( AudioFile_t ), "audFile" );
+    AudioFile_t *audfile = static_cast<AudioFile_t*>(tbAlloc( sizeof( AudioFile_t ), "audFile" ));
     ldDepLn( inF, typ );
     char fname[100];
     if ( sscanf( line, "%d %s ", &audfile->pathIdx, fname ) == 2 ) {
@@ -262,7 +262,7 @@ AudioFile_t *loadAudio( FILE *inF, const char *typ ) {        // load dirIdx & f
 
 Subject_t *loadSubject( FILE *inF ) {                       // parse content subject from pkg_dat
     if ( errCount > 0 ) return NULL;
-    Subject_t *subj = tbAlloc( sizeof( Subject_t ), "subject" );
+    Subject_t *subj = static_cast<Subject_t*>(tbAlloc( sizeof( Subject_t ), "subject" ));
 
     subj->subjName = ldDepStr( inF, "subjName" );
 
@@ -272,7 +272,7 @@ Subject_t *loadSubject( FILE *inF ) {                       // parse content sub
     int nMsgs = ldDepInt( inF, "nMsgs" );
 
     subj->messages        = (MsgList_t *) tbAlloc( sizeof( int ) + nMsgs * sizeof( void * ), "subjList" );
-    subj->stats           = tbAlloc( sizeof( MsgStats ), "stats" );
+    subj->stats           = static_cast<MsgStats*>(tbAlloc( sizeof( MsgStats ), "stats" ));
     subj->messages->nMsgs = nMsgs;
     for (int i = 0; i < nMsgs; i++) {
         subj->messages->msg[i] = loadAudio( inF, "msg" );
@@ -411,7 +411,7 @@ csmAction_t *loadAction( FILE *inF ) {                        // load & return e
 
 CState_t *loadCState( FILE *inF, int idx ) {               // load & return definition of one CSM state
     if ( errCount > 0 ) return NULL;
-    CState_t *st = tbAlloc( sizeof( CState_t ), "CState" );
+    CState_t *st = static_cast<CState_t*>(tbAlloc( sizeof( CState_t ), "CState" ));
 
     st->idx = (short) ldDepInt( inF, "st.Idx" );
     if ( st->idx != idx )
@@ -482,7 +482,7 @@ int nSysAud( void ) {                                // return # of SysAudio nam
     return CSM->SysAudio->nSysA;
 }
 
-char *gSysAud( int idx ) {                             // return SysAudio[ idx ]
+const char *gSysAud( int idx ) {                             // return SysAudio[ idx ]
     if ( idx < 0 || idx >= nSysAud())
         errLog( "gSysAud(%d) bad idx", idx );
     return CSM->SysAudio->sysA[idx];
@@ -494,7 +494,7 @@ CState_t *gCSt( int idx ) {                                // return ptr to CSta
     return CSM->CsmDef->CS[idx];
 }
 
-char *gStNm( CState_t *st ) {                          // return name of CSt
+const char *gStNm( CState_t *st ) {                          // return name of CSt
     if ( st == NULL ) {
         errLog( "bad CState" );
         return "bad";

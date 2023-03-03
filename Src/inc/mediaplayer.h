@@ -4,16 +4,12 @@
 #include "tbook.h"
 #include "audio.h"      // interface definitions for audio.c
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 extern  osEventFlagsId_t      mMediaEventId;    // event channel for signals to mediaThread
 
 extern void     initMediaPlayer( void );        // init mediaPlayer & spawn thread to handle  playback & record requests
 extern void     mediaPowerDown( void );
 extern void     playAudio( const char * fileName, MsgStats *stats, PlaybackType_t typ ); // start playback from fileName
-extern void     playNotes( char *notes );       // play square tones for 1/4 sec per 'notes'
+extern void     playNotes( const char *notes );       // play square tones for 1/4 sec per 'notes'
 extern void     pauseResume( void );
 extern void     stopPlayback( void );
 extern int      playPosition( void );
@@ -30,9 +26,5 @@ extern void     playRecording( void );          // play back just recorded audio
 extern void     saveRecording( void );          // encrypt recorded audio & delete original
 extern void     cancelRecording( void );        // delete recorded message
 extern void     resetAudio( void );             // stop any playback/recording in progress
-
-#ifdef __cplusplus
-}
-#endif
 
 #endif

@@ -389,7 +389,10 @@ static int32_t PowerControl( ARM_POWER_STATE state ) {                         /
 
 static int32_t ReadData( uint32_t addr, void *data, uint32_t cnt ) {            // read 'cnt' bytes into 'data' from 'addr' in flash --> status
     const int FN              = 50;
-    uint8_t   buf[]           = { CMD_PAGE_READ, (( addr >> 16 ) & 0xFF ), (( addr >> 8 ) & 0xFF ), ( addr & 0xFF ) };
+    uint8_t   buf[]           = { CMD_PAGE_READ, 
+                                  static_cast<uint8_t>(( addr >> 16 ) & 0xFF ), 
+                                  static_cast<uint8_t>(( addr >> 8 ) & 0xFF ), 
+                                  static_cast<uint8_t>( addr & 0xFF ) };
     int32_t   result, waitcnt = 0;
 
     if ( data == NULL ) return ARM_DRIVER_ERROR_PARAMETER;
@@ -419,7 +422,7 @@ static int32_t ReadData( uint32_t addr, void *data, uint32_t cnt ) {            
 
 static int32_t ProgramData( uint32_t addr, const void *data, uint32_t cnt ) {   // write 'cnt' bytes of 'data' at 'addr' in flash
     if ( !SendWriteCommand( 0 )) return ARM_DRIVER_ERROR;
-    if ( !SendCommand(CMD_PAGE_PROGRAM, addr, data, cnt, true )) return ARM_DRIVER_ERROR;
+    if ( !SendCommand(CMD_PAGE_PROGRAM, addr, static_cast<const uint8_t *>(data), cnt, true )) return ARM_DRIVER_ERROR;
 
     return ARM_DRIVER_OK;
 }

@@ -91,8 +91,6 @@ typedef struct {
 static PwrState     pS;                     // state of powermanager
 extern int          mAudioVolume;           // current audio volume
 
-extern void ADC_IRQHandler( void );         // override default (weak) ADC_Handler
-extern void EXTI2_IRQHandler( void );       // override default (weak) EXTI2 handler for PowerFail
 static void powerThreadProc( void *arg );   // forward
 static void initPwrSignals( void );         // forward
 
@@ -267,7 +265,7 @@ void enterStopMode( void ) {                    // put STM32F4 into Stop mode
     int pin = gpio_def[gPWR_FAIL_N].pin;
     EXTI->IMR &= ~( 1 << pin );             // disable the interrupt
 
-    disableKeyInterrupts( KM_HOME|KM_RHAND );
+    disableKeyInterrupts( static_cast<KEYS_MASK>(KM_HOME|KM_RHAND) );
 
     ResetGPIO();
 
@@ -350,11 +348,13 @@ short readADC( int chan, int enableBit ) { // readADC channel 'chan' value
  *
  * A function with this name will be called when the ADC conversion finishes.
  */
-void ADC_IRQHandler( void ) {
-    if (( Adc->SR & ADC_SR_EOC ) == 0 ) tbErr( "ADC no EOC" ); // Interrupt, but not end of conversion???
+extern "C" {
+void ADC_IRQHandler(void) {
+    if ((Adc->SR & ADC_SR_EOC) == 0) tbErr("ADC no EOC"); // Interrupt, but not end of conversion???
 
-    osEventFlagsSet( pwrEvents, PM_ADCDONE );   // wakeup powerThread
-    Adc->SR = ~( ADC_SR_STRT | ADC_SR_EOC );      // Clear regular group conversion flag
+    osEventFlagsSet(pwrEvents, PM_ADCDONE);   // wakeup powerThread
+    Adc->SR = ~(ADC_SR_STRT | ADC_SR_EOC);      // Clear regular group conversion flag
+}
 }
 
 static void EnableADC( bool enable ) {       // power up & enable ADC interrupts
@@ -826,7 +826,7 @@ enum BATTERY_CHARGE_LEVEL latestChargeLevel() {
 void showBattCharge() {     // generate ledFG to signal power state
     char fg[30];
     checkPower( true );
-    char *LED = "RRRRGGGG";
+    const char *LED = "RRRRGGGG";
     LED += (int) latestChargeLevel();
 
     sprintf( fg, "_5%c5_5%c5_5%c5_5%c5_15", LED[0], LED[1], LED[2], LED[3] );
@@ -838,12 +838,14 @@ void showBattCharge() {     // generate ledFG to signal power state
 
 // ========================================================
 //    powerFail ISR
-void EXTI2_IRQHandler( void ) {          // PWR_FAIL_N interrupt-- PE2==0 => power failure, shut down
-    if ( gGet( gPWR_FAIL_N ) == 0 ) {
-        logEvt( "PWRFAIL" );
+extern "C" {
+void EXTI2_IRQHandler(void) {          // PWR_FAIL_N interrupt-- PE2==0 => power failure, shut down
+    if (gGet(gPWR_FAIL_N) == 0) {
+        logEvt("PWRFAIL");
         showRTC();
         enterStopMode();
     }
+}
 }
 
 // ========================================================

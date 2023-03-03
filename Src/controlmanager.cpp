@@ -115,7 +115,7 @@ void playNxtPackage() {                    // play name of next available Packag
     playAudio( path, NULL, kPlayTypePackagePrompt );
 }
 
-void playSqrTune( char *notes ) {       // play seq of notes as sqrwaves
+void playSqrTune( const char *notes ) {       // play seq of notes as sqrwaves
     clearIdle();
     playNotes( notes );   // mediaPlayer op -- switch threads
 }
@@ -204,7 +204,7 @@ void saveRecAudio( char *arg ) {              // encrypt user message .wav => .k
  * @param txt The text to be written.
  */
 void saveWriteMsg( char *txt ) {        // save 'txt' in Msg file
-    char *subjName = TBook.iSubj >= 0 ? gSubj( TBook.iSubj )->subjName : "-no-subject-";
+    const char *subjName = TBook.iSubj >= 0 ? gSubj( TBook.iSubj )->subjName : "-no-subject-";
     char path[MAX_PATH];
     int  mCnt      = makeAuxFileName( path, AUX_FILE_MESSAGE );
     FILE *outFP = tbOpenWrite( path );
@@ -219,7 +219,7 @@ void saveWriteMsg( char *txt ) {        // save 'txt' in Msg file
 
 void QCfilesTest(
         char *arg ) {          // write & re-read system/qc_test.txt -- gen Event FilesSuccess if identical, or FilesFail if not
-    char *testNm = "/system/QC_Test.txt";
+    const char *testNm = "/system/QC_Test.txt";
     char   qcmsg[50], qcres[50];
     fsTime ftime;
     strcpy( qcres, "------------------" );
@@ -280,7 +280,7 @@ void assertValidState( int stateIndex ) {
         tbErr( "invalid state index" );
 }
 
-char *ledStr( char *s ) {     // lookup TBConfig LED sequences
+const char *ledStr( char *s ) {     // lookup TBConfig LED sequences
     // @formatter:off
     if ( strcasecmp( s, "bgPulse" )==0 )        return TB_Config->bgPulse;          // set by CSM (background while navigating)           default: _49G
     if ( strcasecmp( s, "fgPlaying" )==0 )      return TB_Config->fgPlaying;        // set by startPlayback()                             default: G!
@@ -475,12 +475,12 @@ static void changeCSMstate( short nSt, short lastEvtTyp ) {
     for (short i  = 0; i < nA; i++) {         // For each action defined on the state...
         csmAction_t *action = gAct( TBook.cSt, i );
         Action act = action->act;  // unpack action, and arg
-        char *arg = action->arg;
+        const char *arg = action->arg;
         if ( arg == NULL ) arg = "";                // make sure its a string for digit test
         // Parse the argument if it looks like it might be numeric.
         int iarg = arg[0] == '-' || isdigit( arg[0] ) ? atoi( arg ) : 0;
 
-        doAction( act, arg, iarg );   // And invoke the action.
+        doAction( act, const_cast<char*>(arg), iarg );   // And invoke the action.
         // NB: actions goPrevSt & goSavedSt change TBook.iCurrSt
     }
 }
@@ -656,9 +656,9 @@ void initControlManager( void ) {       // initialize control manager
             if ( timers[it] == NULL )
                 tbErr( "timer not alloc'd" );
         }
-        for (Event e        = eNull; e < eUNDEF; e++) {  //DBG fill in static parts of debug transition table
-            TBook.evtNxtSt[e].evt   = e;
-            TBook.evtNxtSt[e].evtNm = eventNm( e );
+        for (int e        = eNull; e < eUNDEF; e++) {  //DBG fill in static parts of debug transition table
+            TBook.evtNxtSt[e].evt   = static_cast<Event>(e);
+            TBook.evtNxtSt[e].evtNm = eventNm( static_cast<Event>(e) );
         }
         TBook.prevStateName = "<start>";
         executeCSM();

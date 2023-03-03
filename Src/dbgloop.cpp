@@ -13,9 +13,9 @@ char       lstKey, dnKey;
 GPIO_ID keyDown() {
     // gHOME, gCIRCLE, gPLUS,  gMINUS, gTREE, gLHAND, gRHAND, gPOT, gSTAR, gTABLE
     GPIO_ID      dnK     = gINVALID;
-    for (GPIO_ID k       = gHOME; k <= gTABLE; k++) {
-        if ( gGet( k ))
-            dnK = k;
+    for (int k       = gHOME; k <= gTABLE; k++) {
+        if ( gGet( static_cast<GPIO_ID>(k) ))
+            dnK = static_cast<GPIO_ID>(k);
     }
     //                gORANGE, gBLUE, gRED,  gGREEN, gINVALID,  gHOME, gCIRCLE, gPLUS,  gMINUS, gTREE, gLHAND, gRHAND, gPOT,   gSTAR,  gTABLE
     //  const char *    dbgNm[]= { "Or",   "Bl",  "Rd",  "Gr",   "In",    "Hm",   "Ci",   "Pl",   "Mi",   "Tr",  "Lh",   "Rh",   "Po",   "St",   "Ta" };
@@ -213,7 +213,7 @@ void debugLoop( bool autoUSB ) {     // called if boot-MINUS, no file system,  a
     dbgLog( " DebugLoop: +/-: Dbg, St:chgMode, Ta: shRegs \n" );
 
     const int nMDs = 2;
-    char *cmdMd[] = { "Rec/Play= Tr: play, Cir: record, LH: mask, RH: USB",
+    const char *cmdMd[] = { "Rec/Play= Tr: play, Cir: record, LH: mask, RH: USB",
                       "Codec= Tr: pwr, Cir: freq, LH: mute, Pot: spkrEn, RH: recEn" };
     int iMd = 0;
     while (true) {   // loop processing debug commands

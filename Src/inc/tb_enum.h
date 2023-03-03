@@ -35,13 +35,13 @@ typedef enum CSM_ACTION { 	// Action -- TBook actions
                 playNxtPkg, changePkg,  playTune, 
                 filesTest
 }	Action;
-extern char *   ANms[];                                             // to translate enum Action values to strings
-extern char *   ENms[];                                             // to translate Event values to strings
+extern const char *   ANms[];                                             // to translate enum Action values to strings
+extern const char *   ENms[];                                             // to translate Event values to strings
 //extern char *   shENms[];                                           // to translate Event values to 2-char strings
 
-extern char *	eventNm( Event e );									// => string for enum Event 
+extern const char *	eventNm( Event e );									// => string for enum Event
 //extern char *	shEvntNm( Event e );								// => 2-char for enum Event
-extern char *	actionNm( Action a );								// => string for enum Action
+extern const char *	actionNm( Action a );								// => string for enum Action
 
 
 #endif	/* tb_enum.h */

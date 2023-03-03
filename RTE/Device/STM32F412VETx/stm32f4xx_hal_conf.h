@@ -45,10 +45,6 @@
 #include "RTE_Components.h"             /* Component selection */
 #endif
 
-#ifdef __cplusplus
- extern "C" {
-#endif
-
 /* Exported types ------------------------------------------------------------*/
 /* Exported constants --------------------------------------------------------*/
 
@@ -611,10 +607,6 @@
 /**
   * @}
   */
-
-#ifdef __cplusplus
-}
-#endif
 
 #endif /* __STM32F4xx_HAL_CONF_H */
  

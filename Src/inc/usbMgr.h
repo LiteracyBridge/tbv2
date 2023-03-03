@@ -5,7 +5,6 @@
 
 extern void		initUSBManager( void );
 extern bool		isMassStorageEnabled( void );
-extern bool		enableMassStorage( void );
 extern bool		disableMassStorage( void );
 
 #endif /* USB_MGR_H */

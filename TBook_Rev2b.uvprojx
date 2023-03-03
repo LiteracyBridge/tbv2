@@ -330,7 +330,7 @@
             <uGnu>0</uGnu>
             <useXO>0</useXO>
             <v6Lang>3</v6Lang>
-            <v6LangP>5</v6LangP>
+            <v6LangP>3</v6LangP>
             <vShortEn>1</vShortEn>
             <vShortWch>1</vShortWch>
             <v6Lto>1</v6Lto>
@@ -385,151 +385,49 @@
           <GroupName>TBook</GroupName>
           <Files>
             <File>
-              <FileName>audio.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>.\Src\audio.c</FilePath>
+              <FileName>audio.cpp</FileName>
+              <FileType>8</FileType>
+              <FilePath>.\Src\audio.cpp</FilePath>
             </File>
             <File>
-              <FileName>buffers.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>.\Src\buffers.c</FilePath>
+              <FileName>buffers.cpp</FileName>
+              <FileType>8</FileType>
+              <FilePath>.\Src\buffers.cpp</FilePath>
             </File>
             <File>
-              <FileName>codecI2C.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>.\Src\codecI2C.c</FilePath>
-              <FileOption>
-                <CommonProperty>
-                  <UseCPPCompiler>2</UseCPPCompiler>
-                  <RVCTCodeConst>0</RVCTCodeConst>
-                  <RVCTZI>0</RVCTZI>
-                  <RVCTOtherData>0</RVCTOtherData>
-                  <ModuleSelection>0</ModuleSelection>
-                  <IncludeInBuild>1</IncludeInBuild>
-                  <AlwaysBuild>2</AlwaysBuild>
-                  <GenerateAssemblyFile>2</GenerateAssemblyFile>
-                  <AssembleAssemblyFile>2</AssembleAssemblyFile>
-                  <PublicsOnly>2</PublicsOnly>
-                  <StopOnExitCode>11</StopOnExitCode>
-                  <CustomArgument></CustomArgument>
-                  <IncludeLibraryModules></IncludeLibraryModules>
-                  <ComprImg>1</ComprImg>
-                </CommonProperty>
-                <FileArmAds>
-                  <Cads>
-                    <interw>2</interw>
-                    <Optim>0</Optim>
-                    <oTime>2</oTime>
-                    <SplitLS>2</SplitLS>
-                    <OneElfS>2</OneElfS>
-                    <Strict>2</Strict>
-                    <EnumInt>2</EnumInt>
-                    <PlainCh>2</PlainCh>
-                    <Ropi>2</Ropi>
-                    <Rwpi>2</Rwpi>
-                    <wLevel>0</wLevel>
-                    <uThumb>2</uThumb>
-                    <uSurpInc>2</uSurpInc>
-                    <uC99>2</uC99>
-                    <uGnu>2</uGnu>
-                    <useXO>2</useXO>
-                    <v6Lang>0</v6Lang>
-                    <v6LangP>0</v6LangP>
-                    <vShortEn>2</vShortEn>
-                    <vShortWch>2</vShortWch>
-                    <v6Lto>2</v6Lto>
-                    <v6WtE>2</v6WtE>
-                    <v6Rtti>2</v6Rtti>
-                    <VariousControls>
-                      <MiscControls></MiscControls>
-                      <Define></Define>
-                      <Undefine></Undefine>
-                      <IncludePath></IncludePath>
-                    </VariousControls>
-                  </Cads>
-                </FileArmAds>
-              </FileOption>
+              <FileName>codeci2c.cpp</FileName>
+              <FileType>8</FileType>
+              <FilePath>.\Src\codeci2c.cpp</FilePath>
             </File>
             <File>
-              <FileName>controlmanager.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>.\Src\controlmanager.c</FilePath>
+              <FileName>controlmanager.cpp</FileName>
+              <FileType>8</FileType>
+              <FilePath>.\Src\controlmanager.cpp</FilePath>
             </File>
             <File>
-              <FileName>dbgLoop.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>.\Src\dbgLoop.c</FilePath>
+              <FileName>dbgloop.cpp</FileName>
+              <FileType>8</FileType>
+              <FilePath>.\Src\dbgloop.cpp</FilePath>
             </File>
             <File>
-              <FileName>encAudio.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>.\Src\encAudio.c</FilePath>
-              <FileOption>
-                <CommonProperty>
-                  <UseCPPCompiler>2</UseCPPCompiler>
-                  <RVCTCodeConst>0</RVCTCodeConst>
-                  <RVCTZI>0</RVCTZI>
-                  <RVCTOtherData>0</RVCTOtherData>
-                  <ModuleSelection>0</ModuleSelection>
-                  <IncludeInBuild>1</IncludeInBuild>
-                  <AlwaysBuild>2</AlwaysBuild>
-                  <GenerateAssemblyFile>2</GenerateAssemblyFile>
-                  <AssembleAssemblyFile>2</AssembleAssemblyFile>
-                  <PublicsOnly>2</PublicsOnly>
-                  <StopOnExitCode>11</StopOnExitCode>
-                  <CustomArgument></CustomArgument>
-                  <IncludeLibraryModules></IncludeLibraryModules>
-                  <ComprImg>1</ComprImg>
-                </CommonProperty>
-                <FileArmAds>
-                  <Cads>
-                    <interw>2</interw>
-                    <Optim>0</Optim>
-                    <oTime>2</oTime>
-                    <SplitLS>2</SplitLS>
-                    <OneElfS>2</OneElfS>
-                    <Strict>2</Strict>
-                    <EnumInt>2</EnumInt>
-                    <PlainCh>2</PlainCh>
-                    <Ropi>2</Ropi>
-                    <Rwpi>2</Rwpi>
-                    <wLevel>0</wLevel>
-                    <uThumb>2</uThumb>
-                    <uSurpInc>2</uSurpInc>
-                    <uC99>2</uC99>
-                    <uGnu>2</uGnu>
-                    <useXO>2</useXO>
-                    <v6Lang>0</v6Lang>
-                    <v6LangP>0</v6LangP>
-                    <vShortEn>2</vShortEn>
-                    <vShortWch>2</vShortWch>
-                    <v6Lto>2</v6Lto>
-                    <v6WtE>2</v6WtE>
-                    <v6Rtti>2</v6Rtti>
-                    <VariousControls>
-                      <MiscControls></MiscControls>
-                      <Define></Define>
-                      <Undefine></Undefine>
-                      <IncludePath></IncludePath>
-                    </VariousControls>
-                  </Cads>
-                </FileArmAds>
-              </FileOption>
+              <FileName>encaudio.cpp</FileName>
+              <FileType>8</FileType>
+              <FilePath>.\Src\encaudio.cpp</FilePath>
             </File>
             <File>
-              <FileName>fileOps.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>.\Src\fileOps.c</FilePath>
+              <FileName>fileops.cpp</FileName>
+              <FileType>8</FileType>
+              <FilePath>.\Src\fileops.cpp</FilePath>
             </File>
             <File>
-              <FileName>fs_get_time.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>.\Src\fs_get_time.c</FilePath>
+              <FileName>fs_get_time.cpp</FileName>
+              <FileType>8</FileType>
+              <FilePath>.\Src\fs_get_time.cpp</FilePath>
             </File>
             <File>
-              <FileName>GPIO_STM32F4xx.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>.\Src\GPIO_STM32F4xx.c</FilePath>
+              <FileName>gpio_stm32f4xx.cpp</FileName>
+              <FileType>8</FileType>
+              <FilePath>.\Src\gpio_stm32f4xx.cpp</FilePath>
             </File>
             <File>
               <FileName>hardfault.s</FileName>
@@ -537,14 +435,14 @@
               <FilePath>.\Src\hardfault.s</FilePath>
             </File>
             <File>
-              <FileName>I2S_stm32F4xx.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>.\Src\I2S_stm32F4xx.c</FilePath>
+              <FileName>i2s_stm32f4xx.cpp</FileName>
+              <FileType>8</FileType>
+              <FilePath>.\Src\i2s_stm32f4xx.cpp</FilePath>
             </File>
             <File>
-              <FileName>inputmanager.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>.\Src\inputmanager.c</FilePath>
+              <FileName>inputmanager.cpp</FileName>
+              <FileType>8</FileType>
+              <FilePath>.\Src\inputmanager.cpp</FilePath>
             </File>
             <File>
               <FileName>ledmanager.cpp</FileName>
@@ -552,9 +450,9 @@
               <FilePath>.\Src\ledmanager.cpp</FilePath>
             </File>
             <File>
-              <FileName>logger.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>.\Src\logger.c</FilePath>
+              <FileName>logger.cpp</FileName>
+              <FileType>8</FileType>
+              <FilePath>.\Src\logger.cpp</FilePath>
             </File>
             <File>
               <FileName>main.cpp</FileName>
@@ -562,39 +460,39 @@
               <FilePath>.\Src\main.cpp</FilePath>
             </File>
             <File>
-              <FileName>mediaplayer.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>.\Src\mediaplayer.c</FilePath>
+              <FileName>mediaplayer.cpp</FileName>
+              <FileType>8</FileType>
+              <FilePath>.\Src\mediaplayer.cpp</FilePath>
             </File>
             <File>
-              <FileName>mp3timing.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>.\Src\mp3timing.c</FilePath>
+              <FileName>mp3timing.cpp</FileName>
+              <FileType>8</FileType>
+              <FilePath>.\Src\mp3timing.cpp</FilePath>
             </File>
             <File>
-              <FileName>mp3tostream.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>.\Src\mp3tostream.c</FilePath>
+              <FileName>mp3tostream.cpp</FileName>
+              <FileType>8</FileType>
+              <FilePath>.\Src\mp3tostream.cpp</FilePath>
             </File>
             <File>
-              <FileName>norLog.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>.\Src\norLog.c</FilePath>
+              <FileName>norlog.cpp</FileName>
+              <FileType>8</FileType>
+              <FilePath>.\Src\norlog.cpp</FilePath>
             </File>
             <File>
-              <FileName>packageData.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>.\Src\packageData.c</FilePath>
+              <FileName>packagedata.cpp</FileName>
+              <FileType>8</FileType>
+              <FilePath>.\Src\packagedata.cpp</FilePath>
             </File>
             <File>
-              <FileName>powermanager.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>.\Src\powermanager.c</FilePath>
+              <FileName>powermanager.cpp</FileName>
+              <FileType>8</FileType>
+              <FilePath>.\Src\powermanager.cpp</FilePath>
             </File>
             <File>
-              <FileName>preloadCSM.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>.\Src\preloadCSM.c</FilePath>
+              <FileName>preloadCSM.cpp</FileName>
+              <FileType>8</FileType>
+              <FilePath>.\Src\preloadCSM.cpp</FilePath>
             </File>
             <File>
               <FileName>tbook.cpp</FileName>
@@ -602,85 +500,34 @@
               <FilePath>.\Src\tbook.cpp</FilePath>
             </File>
             <File>
-              <FileName>tbook_rev2.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>.\Src\tbook_rev2.c</FilePath>
+              <FileName>tbook_rev2.cpp</FileName>
+              <FileType>8</FileType>
+              <FilePath>.\Src\tbook_rev2.cpp</FilePath>
             </File>
             <File>
-              <FileName>tbUtil.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>.\Src\tbUtil.c</FilePath>
+              <FileName>tbutil.cpp</FileName>
+              <FileType>8</FileType>
+              <FilePath>.\Src\tbutil.cpp</FilePath>
             </File>
             <File>
-              <FileName>ti_aic3100.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>.\Src\ti_aic3100.c</FilePath>
-              <FileOption>
-                <CommonProperty>
-                  <UseCPPCompiler>2</UseCPPCompiler>
-                  <RVCTCodeConst>0</RVCTCodeConst>
-                  <RVCTZI>0</RVCTZI>
-                  <RVCTOtherData>0</RVCTOtherData>
-                  <ModuleSelection>0</ModuleSelection>
-                  <IncludeInBuild>1</IncludeInBuild>
-                  <AlwaysBuild>2</AlwaysBuild>
-                  <GenerateAssemblyFile>2</GenerateAssemblyFile>
-                  <AssembleAssemblyFile>2</AssembleAssemblyFile>
-                  <PublicsOnly>2</PublicsOnly>
-                  <StopOnExitCode>11</StopOnExitCode>
-                  <CustomArgument></CustomArgument>
-                  <IncludeLibraryModules></IncludeLibraryModules>
-                  <ComprImg>1</ComprImg>
-                </CommonProperty>
-                <FileArmAds>
-                  <Cads>
-                    <interw>2</interw>
-                    <Optim>0</Optim>
-                    <oTime>2</oTime>
-                    <SplitLS>2</SplitLS>
-                    <OneElfS>2</OneElfS>
-                    <Strict>2</Strict>
-                    <EnumInt>2</EnumInt>
-                    <PlainCh>2</PlainCh>
-                    <Ropi>2</Ropi>
-                    <Rwpi>2</Rwpi>
-                    <wLevel>0</wLevel>
-                    <uThumb>2</uThumb>
-                    <uSurpInc>2</uSurpInc>
-                    <uC99>2</uC99>
-                    <uGnu>2</uGnu>
-                    <useXO>2</useXO>
-                    <v6Lang>0</v6Lang>
-                    <v6LangP>0</v6LangP>
-                    <vShortEn>2</vShortEn>
-                    <vShortWch>2</vShortWch>
-                    <v6Lto>2</v6Lto>
-                    <v6WtE>2</v6WtE>
-                    <v6Rtti>2</v6Rtti>
-                    <VariousControls>
-                      <MiscControls></MiscControls>
-                      <Define></Define>
-                      <Undefine></Undefine>
-                      <IncludePath></IncludePath>
-                    </VariousControls>
-                  </Cads>
-                </FileArmAds>
-              </FileOption>
+              <FileName>ti_aic3100.cpp</FileName>
+              <FileType>8</FileType>
+              <FilePath>.\Src\ti_aic3100.cpp</FilePath>
             </File>
             <File>
-              <FileName>USBD_User_Device_MSC_LUN.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>.\Src\USBD_User_Device_MSC_LUN.c</FilePath>
+              <FileName>USBD_User_Device_MSC_LUN.cpp</FileName>
+              <FileType>8</FileType>
+              <FilePath>.\Src\USBD_User_Device_MSC_LUN.cpp</FilePath>
             </File>
             <File>
-              <FileName>W25Q64JV.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>.\Src\W25Q64JV.c</FilePath>
+              <FileName>w25q64jv.cpp</FileName>
+              <FileType>8</FileType>
+              <FilePath>.\Src\w25q64jv.cpp</FilePath>
             </File>
             <File>
-              <FileName>wav.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>.\Src\wav.c</FilePath>
+              <FileName>wav.cpp</FileName>
+              <FileType>8</FileType>
+              <FilePath>.\Src\wav.cpp</FilePath>
             </File>
           </Files>
         </Group>

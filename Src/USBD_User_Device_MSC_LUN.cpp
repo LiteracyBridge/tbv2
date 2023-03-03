@@ -100,7 +100,7 @@ void uninitLUN( uint8_t lun ) {       // release LUN[ lun ].drive for TBook acce
     dbgEvt( TB_usbLnUninit, lun, 0, 0, 0 );
 }
 
-void addLUN( char *drv ) {            // add drive name ( e.g. "M0:") to LUN[]
+void addLUN( const char *drv ) {            // add drive name ( e.g. "M0:") to LUN[]
     if ( drv == NULL ) return;
     int dlen = strlen( drv );
     if ( dlen == 0 || dlen > 5 ) return;
@@ -116,7 +116,7 @@ bool isMassStorageEnabled( void ) {             // => true if usb is providing F
     return usbProvidingMassStorage;
 }
 
-bool enableMassStorage( char *drv0, char *drv1, char *drv2, char *drv3 ) {  // init drives as MSC Logical Units 0..3
+bool enableMassStorage( const char *drv0, const char *drv1, const char *drv2, const char *drv3 ) {  // init drives as MSC Logical Units 0..3
     if ( usbProvidingMassStorage ) return true;
     ledFg( NULL );
     if ( !haveUSBpower())

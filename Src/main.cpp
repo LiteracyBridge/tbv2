@@ -51,17 +51,17 @@ uint16_t keysDetectedAtBoot = 0;          // Which keys were detected at boot ti
 void setBootMode() { // use key to to select value for BootMode
     GPIO_ID key_gpios[] = { gHOME, gCIRCLE, gPLUS, gMINUS, gTREE, gLHAND, gRHAND, gPOT, gSTAR, gTABLE };
     flashInit();      // enable keyboard to decode boot type
-    for (int i          = 0; i <= kTABLE; i++) {
+    for (int i          = 0; i <= KEY::TABLE; i++) {
         if ( gGet( key_gpios[i] )) keysDetectedAtBoot |= 1 << i;
     }
     // Nothing other than Tree and/or Table. Whether either or both of Tree or Table are still
     // pressed after a Tree+Table boot is not deterministic.
-    //    bool hwCleanBoot = (keysDetectedAtBoot & ~(1<<kTREE|1<<kTABLE)) == 0;
+    //    bool hwCleanBoot = (keysDetectedAtBoot & ~(1<<KEY::TREE|1<<KEY::TABLE)) == 0;
     // Tree and/or Table + nothing else but Plus, etc.
-    bool     hwPlusBoot = ( keysDetectedAtBoot & ~( 1 << kTREE | 1 << kTABLE )) == 1 << kPLUS;
-    bool     hwStarBoot = ( keysDetectedAtBoot & ~( 1 << kTREE | 1 << kTABLE )) == 1 << kSTAR;
+    bool     hwPlusBoot = ( keysDetectedAtBoot & ~( 1 << KEY::TREE | 1 << KEY::TABLE )) == 1 << KEY::PLUS;
+    bool     hwStarBoot = ( keysDetectedAtBoot & ~( 1 << KEY::TREE | 1 << KEY::TABLE )) == 1 << KEY::STAR;
 #if DEBUG
-    bool     hwMinusBoot = ( keysDetectedAtBoot & ~( 1 << kTREE | 1 << kTABLE )) == 1 << kMINUS;
+    bool     hwMinusBoot = ( keysDetectedAtBoot & ~( 1 << KEY::TREE | 1 << KEY::TABLE )) == 1 << KEY::MINUS;
 #endif
     char prog[20] = "R_G_";
 

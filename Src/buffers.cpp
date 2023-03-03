@@ -27,8 +27,8 @@ void initBufferPool(void) {
     // Regardless, the buffer pool is still useful because it is thread safe and ISR safe, and when
     // recording we need to allocate buffers from an ISR, and free them from a thread context.
     osMemoryPoolAttr_t mem_attr = {.name="io buffers",
-            .mp_size = kBufferSize * kBufferPoolSize,
-            .mp_mem = tbAlloc(kBufferSize * kBufferPoolSize, "io buffers")
+            .mp_mem = tbAlloc(kBufferSize * kBufferPoolSize, "io buffers"),
+            .mp_size = kBufferSize * kBufferPoolSize
     };
     mpid_MemPool = osMemoryPoolNew(kBufferPoolSize, kBufferSize, &mem_attr);
     if (mpid_MemPool == NULL) {

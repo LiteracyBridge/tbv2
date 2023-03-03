@@ -27,7 +27,7 @@ static const uint8_t M3tVersion = 1;
 //static const uint8_t M3tSignature[4] = M3T_SIGNATURE;
 
 const M3tSignature_t m3tSignature = {M3T_SIGNATURE};
-const struct M3tHeader m3tProtoHeader = {.signature=M3T_SIGNATURE, 0};
+const struct M3tHeader m3tProtoHeader = {.signature=M3T_SIGNATURE};
 const char * const m3tExtension = ".m3t";
 
 /**

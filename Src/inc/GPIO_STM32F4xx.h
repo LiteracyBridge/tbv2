@@ -35,7 +35,7 @@ typedef struct _GPIO_PIN_ID {
 /// Port Mode            // JEB  May2022 -- add _ to avoid name conflicts added in stm32f4xx_hal_gpio.h 2.16.0
 typedef enum {
   GPIO__MODE_INPUT     = 0x00,             // GPIO is input
-  GPIO__MODE_OUT			  = 0x01,             // General purpose output
+  GPIO__MODE_OUT       = 0x01,             // General purpose output
   GPIO__MODE_AF        = 0x02,             // Alternate Function
   GPIO__MODE_ANALOG    = 0x03              // Analog
 } GPIO__MODE;
@@ -43,7 +43,7 @@ typedef enum {
 /// Port Output Type
 typedef enum {
   GPIO_OTYP_PUSHPULL  = 0x0,              // GPIO is push/pull
-  GPIO_OTYP_OPENDRAIN	= 0x01							// GPIO is Open Drain
+  GPIO_OTYP_OPENDRAIN	= 0x01	          // GPIO is Open Drain
 } GPIO_OTYPE;
 
 /// Port Speed

@@ -43,7 +43,7 @@ extern void         initLogger( void );                                     // i
 extern void         logPowerUp( bool reboot );                              // re-init logger after USB or sleeping
 extern char *       loadLine( char * line, const char * fpath, fsTime *tm ); // => 1st 200 chars of 'fpath' & *tm to lastAccessed
 extern void         logPowerDown( void );                                   // save & shut down logger for USB or sleeping
-extern void         writeLine( char * line, const char * fpath );           // write one line to file
+extern void         writeLine( const char * line, const char * fpath );     // write one line to file
 extern void         saveStats( MsgStats *st );                              // save statistics block to file
 extern int          makeAuxFileName( char *buf, enum AUX_FILE_TYPE auxFileType); // fn for recording or msg
 extern void         saveAuxProperties( char *baseFilename );                // auxillary "sidecar" file with info about selected content.

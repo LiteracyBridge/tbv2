@@ -48,7 +48,7 @@ void startEncrypt(char *fname );
 void encryptBlock( const uint8_t *in, uint8_t *out, int len );
 void endEncrypt( size_t fSize );
 
-void TlsErr(char *msg, int cd) {
+void TlsErr(const char *msg, int cd) {
     char ebuf[100];
     mbedtls_strerror(cd, ebuf, sizeof(ebuf));
     tbErr("tlsErr: %s => %s", msg, ebuf);
@@ -59,7 +59,7 @@ void TlsErr(char *msg, int cd) {
 #include "stm32f412vx.h"
 
 int getRandom( void *pRNG, unsigned char *pBuffer, size_t buffer_len );
-void initRandom( char *pers ) {   // reset RNG before encrypt or decrypt
+void initRandom( const char *pers ) {   // reset RNG before encrypt or decrypt
     mbedtls_ctr_drbg_init( &encryptState.drbg_context );
     int ret = mbedtls_ctr_drbg_seed( &encryptState.drbg_context, getRandom, &encryptState.entropy_context, (const unsigned char *) pers, strlen( pers ));
     if ( ret != 0 ) TlsErr( "drbg_seed", ret );
@@ -135,7 +135,7 @@ void encUfAudioInit() {
         if (derFile == NULL) {
             return;
         }
-        uint8_t *derBytes = tbAlloc(derSize, "der");
+        uint8_t *derBytes = static_cast<uint8_t*>(tbAlloc(derSize, "der"));
         int result = fread(derBytes, 1, derSize, derFile);
         tbFclose(derFile);
         if (result == derSize) {
@@ -160,7 +160,7 @@ void encUfAudioLoop() {
 #if STATIC_ENCTYPE_BUFFER
     static uint8_t encrypted[2048];
 #else
-    uint8_t *encrypted = tbAlloc(2048, "der");
+    uint8_t *encrypted = static_cast<uint8_t *>(tbAlloc(2048, "der"));
 #endif
     char basename[MAX_PATH];
     strcpy( basename, pEncryptCb->fname );   // copy *.wav path

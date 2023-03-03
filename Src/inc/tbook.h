@@ -23,10 +23,6 @@
 #include "rtx_os.h"
 #include "rl_fs.h"
 
-# ifdef __cplusplus
-extern "C" {
-# endif
-
 #ifdef __packed
 #undef __packed
 #endif
@@ -118,9 +114,8 @@ extern void tbFclose(FILE *f);                        // close file, errLog if e
 extern void tbFrename(const char *src, const char *dst); // rename path to path
 
 extern void FileSysPower(bool enable);                    // power up/down eMMC & SD 3V supply
-extern fsStatus fsMount(
-        char *drv);                           // try to finit() & mount()  drv:   finit() code, fmount() code
-extern osMutexId_t logLock;                                    // mutex for access to NorFlash
+extern fsStatus fsMount(const char *drv);                 // try to finit() & mount()  drv:   finit() code, fmount() code
+extern osMutexId_t logLock;                               // mutex for access to NorFlash
 
 extern void talking_book(void *tbAttr);     // talking book initialization & control manager thread
 extern bool getRTC(struct _fsTime *fsTime, uint32_t *pMSec);          // load current RTC into fsTime & *pMSec
@@ -180,7 +175,7 @@ extern void tglDebugFlag(int idx);   // toggle debug flag: "0123456789ABCDEFGHIJ
 
 extern void USBmode(bool start);            // start (or stop) USB storage mode
 
-extern bool enableMassStorage(char *drv0, char *drv1, char *drv2, char *drv3);
+extern bool enableMassStorage(const char *drv0, const char *drv1, const char *drv2, const char *drv3);
 
 extern bool disableMassStorage(void);           // disable USB MSC & return FSys to TBook
 extern bool isMassStorageEnabled(void);         // => true if usb is providing FileSys as MSC
@@ -191,7 +186,7 @@ typedef struct { // GPIO_Def_t -- define GPIO port/pins/interrupt # for a GPIO_I
     uint16_t pin;    // GPIO pin within port
     AFIO_REMAP altFn;  // alternate function value
     IRQn_Type intq;   // specifies INTQ num  -- from STM32Fxxxx.h
-    char *signal; // string name of signal, e.g. PA0
+    const char *signal; // string name of signal, e.g. PA0
     int active; // gpio value when active: 'PA3_' => 0, 'PC12' => 1
 } GPIO_Def_t;
 
@@ -266,20 +261,20 @@ typedef struct TBConfig {       // TBConfig
     int qcTestState;          // first state if running QC acceptance test
     int initState;
 
-    char *systemAudio;          // path to system audio files
-    char *bgPulse;              // LED sequences used in Firmware
-    char *fgPlaying;
-    char *fgPlayPaused;
-    char *fgRecording;
-    char *fgRecordPaused;
-    char *fgSavingRec;
-    char *fgSaveRec;
-    char *fgCancelRec;
-    char *fgUSB_MSC;
-    char *fgTB_Error;
-    char *fgNoUSBcable;
-    char *fgUSBconnect;
-    char *fgPowerDown;
+    const char *systemAudio;          // path to system audio files
+    const char *bgPulse;              // LED sequences used in Firmware
+    const char *fgPlaying;
+    const char *fgPlayPaused;
+    const char *fgRecording;
+    const char *fgRecordPaused;
+    const char *fgSavingRec;
+    const char *fgSaveRec;
+    const char *fgCancelRec;
+    const char *fgUSB_MSC;
+    const char *fgTB_Error;
+    const char *fgNoUSBcable;
+    const char *fgUSBconnect;
+    const char *fgPowerDown;
 } TBConfig_t;
 
 extern TBConfig_t *TB_Config;    // global TBook configuration
@@ -299,9 +294,9 @@ typedef struct {
     char keyState[11];
 
     // state updated by inputThread in response to keyTransition msgs
-    KEY firstDown;        // kINVALID or 1st key to go down
+    KEY firstDown;        // KEY::INVALID or 1st key to go down
     int firstDownTS;
-    KEY secondDown;       // kINVALID or 2nd key to go down
+    KEY secondDown;       // KEY::INVALID or 2nd key to go down
     int secondDownTS;
     bool multipleDown;     // true if third key goes down-- reset when all are up
     bool starUsed;         // true if STAR used as shift-- Star up is ignored
@@ -342,11 +337,6 @@ typedef struct {      // Dbg -- pointers for easy access to debug info
 
 } DbgInfo;
 extern DbgInfo Dbg;  // in main.c -- visible at start
-
-# ifdef __cplusplus
-}
-# endif
-
 
 #endif /* __TBOOK_H__ */
 

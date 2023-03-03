@@ -57,8 +57,18 @@
 #  endif
 # endif
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 void *mp3_malloc(unsigned int);
+
 void mp3_free(void *);
+
 void *mp3_calloc(unsigned int, unsigned int);
+
+#ifdef __cplusplus
+}
+#endif
 
 # endif

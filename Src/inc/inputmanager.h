@@ -4,34 +4,40 @@
 #include  "tbook.h"
 
 // TalkingBook keypad has 10 keys, each connected to a line of the keypad cable
-//  plus kINVALID for no key value, & kTIMER for long press timer elapsed
-typedef enum {
-    kHOME = 0, kCIRCLE, kPLUS, kMINUS, kTREE, kLHAND, kRHAND, kPOT, kSTAR, kTABLE, kINVALID, kTIMER
+//  plus KEY::INVALID for no key value, & KEY::TIMER for long press timer elapsed
+typedef enum ENUM_KEY {
+     HOME = 0, CIRCLE, PLUS, MINUS, TREE, LHAND, RHAND, POT, STAR, TABLE, INVALID, TIMER
 } KEY;
 
+#if defined __cplusplus
 // Mask bits for keys, so they can be or'd together.
-typedef enum KEYS_MASK {
-    KM_HOME   = 1 << kHOME,
-    KM_CIRCLE = 1 << kCIRCLE,
-    KM_PLUS   = 1 << kPLUS,
-    KM_MINUS  = 1 << kMINUS,
-    KM_TREE   = 1 << kTREE,
-    KM_LHAND  = 1 << kLHAND,
-    KM_RHAND  = 1 << kRHAND,
-    KM_POT    = 1 << kPOT,
-    KM_STAR   = 1 << kSTAR,
-    KM_TABLE  = 1 << kTABLE
-} KEYS_MASK_T;
+constexpr int operator<<(int v, enum ENUM_KEY s) {
+    return v << static_cast<int>(s);
+}
+#endif
+
+typedef enum {
+    KM_HOME   = 1 << KEY::HOME,
+    KM_CIRCLE = 1 << KEY::CIRCLE,
+    KM_PLUS   = 1 << KEY::PLUS,
+    KM_MINUS  = 1 << KEY::MINUS,
+    KM_TREE   = 1 << KEY::TREE,
+    KM_LHAND  = 1 << KEY::LHAND,
+    KM_RHAND  = 1 << KEY::RHAND,
+    KM_POT    = 1 << KEY::POT,
+    KM_STAR   = 1 << KEY::STAR,
+    KM_TABLE  = 1 << KEY::TABLE
+} KEYS_MASK;
 
 typedef struct { // KeyPadKey -- assignments to GPIO pins, in inputManager.cpp
     GPIO_ID      id;     // idx in gpio_def
     KEY          key;    // KEYPAD key connected to this line
     GPIO_TypeDef *port;  // specifies GPIO port
     uint16_t     pin;    // specifies GPIO pin within port
-    IRQn_Type    intq;   // specifies INTQ mask
-    uint16_t     extiBit; // mask bit == 1 << pin
-    char *signal; // string name of GPIO
-    int pressed;  // GPIO input state when pressed
+    IRQn_Type    intq;      // specifies INTQ mask
+    uint16_t     extiBit;   // mask bit == 1 << pin
+    const char * signal;    // string name of GPIO
+    int          pressed;   // GPIO input state when pressed
 
     //  in order to destinguish between SHORT and LONG press,  keep track of the last transition of each keypad line
     bool     down;     // true if key is currently depressed
@@ -52,7 +58,7 @@ extern KeyPadKey_t  keydef[10];
 */
 
 typedef struct {  // TB_Key --  msg for key Q from ISR to InputThread
-    KEY      k;         // keyboard key that changed (or kTIMER)
+    KEY      k;         // keyboard key that changed (or KEY::TIMER)
     bool     down;      // down transition
     uint32_t tstamp;    // timestamp
 } TB_Key;
@@ -92,7 +98,7 @@ typedef struct {  // TB_Event --  event & downMS for event Q
 
 
 extern void initInputManager( void );
-extern void disableKeyInterrupts( enum KEYS_MASK keysToRemainEnabled );
+extern void disableKeyInterrupts( KEYS_MASK keysToRemainEnabled );
 extern void keyPadPowerDown( void );            // shut down keypad GPIOs
 extern void keyPadPowerUp( void );              // re-initialize keypad GPIOs
 extern void sendEvent( Event, int32_t );

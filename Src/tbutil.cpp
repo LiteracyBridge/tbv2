@@ -13,11 +13,16 @@
 
 #include <stdlib.h>
 
+GPIO_ID& operator++( GPIO_ID &k , int ) {
+    return k = static_cast<GPIO_ID>( static_cast<int>(k) + 1 );
+}
+
+
 extern bool BootVerboseLog;
 
 // GPIO utilities based on GPIO_ID enumeration & GPIO_Signal[] in main.h
 GPIO_Def_t gpio_def[MAX_GPIO];                           // array of signal definitions, indexed by GPIO_ID
-void gDef( GPIO_ID gpid, char *signal ) {             // define gpio_signal[ ID ] from name e.g. "PC8"
+void gDef( GPIO_ID gpid, const char *signal ) {             // define gpio_signal[ ID ] from name e.g. "PC8"
     // GPIO_ID  signal
     //  "Pxdd_|cc" where:
     //      x  = A,B,C,D,E,F,G,H -- GPIO port
@@ -71,7 +76,7 @@ void gDef( GPIO_ID gpid, char *signal ) {             // define gpio_signal[ ID 
         }
         if ( strchr( signal, '_' ) != NULL )  // contains a _ => active low
             active = 0; // '_' for active low input
-        char *af = strchr( signal, '|' );
+        const char *af = strchr( signal, '|' );
         if ( af != NULL ) // alternate function-- "|12" => AF=0xC
             altFn = atoi( &af[1] );
     }
@@ -269,7 +274,7 @@ void tbFrename( const char *src, const char *dst ) {  // rename path to path
     if ( fexists( dst )) {
         fdelete( dst, NULL );
     }
-    char *fpart = strrchr( dst, '/' ) + 1;  // ptr to file part of path
+    const char *fpart = strrchr( dst, '/' ) + 1;  // ptr to file part of path
 
     uint32_t stat = frename( src, fpart );    // rename requires no path
     if ( stat != fsOK )
@@ -278,7 +283,7 @@ void tbFrename( const char *src, const char *dst ) {  // rename path to path
 
 extern bool BootFormatFileSys;
 
-fsStatus fsMount( char *drv ) {   // try to finit() & mount()  drv:   finit() code, fmount() code
+fsStatus fsMount( const char *drv ) {   // try to finit() & mount()  drv:   finit() code, fmount() code
     // gSDIO_DAT0 PB4, gSDIO_DAT1 PA8, gSDIO_DAT2 PC10, gSDIO_DAT3 PB5, gSDIO_CLK PC12, gSDIO_CMD PD2
     fsStatus stat = finit( drv );     // init file system driver for device-- configures PA8, PB4,PB5, PC10,PC12, PD2 to (PP+PU)
     if ( stat != fsOK ) {
@@ -697,6 +702,8 @@ void *tbAlloc( int nbytes, const char *msg ) {         // malloc() & check for e
     return mem;
 }
 
+// extern "C" for the mad library.
+extern "C" {
 void *mp3_malloc( int size ) {
     return tbAlloc( size, "mp3" );
 }
@@ -707,10 +714,11 @@ void mp3_free( void *ptr ) {
 
 void *mp3_calloc( int num, int size ) {
     unsigned char *ptr;
-    ptr = tbAlloc( size * num, "mp3c" );
+    ptr = static_cast<unsigned char *>(tbAlloc( size * num, "mp3c" ));
     for (int i = 0; i < num * size; i++)
         ptr[i] = 0;
     return ptr;
+}
 }
 
 bool fexists( const char *fname ) {                   // return true if file path exists
@@ -847,7 +855,7 @@ void tbErr( const char *fmt, ... ) {
     while (!debug) {}
 }
 
-void tbShw( const char *s, char **p1, char **p2 ) {   // assign p1, p2 to point into s for debugging
+void tbShw( const char *s, const char **p1, const char **p2 ) {   // assign p1, p2 to point into s for debugging
     short len = strlen( s );
     *p1     = len > 32 ? (char *) &s[32] : "";
     if ( p2 != p1 )
@@ -1046,7 +1054,7 @@ typedef struct {     // static svSCB for easy access in debugger
 }              svSCB_t;
 static svSCB_t svSCB;
 
-void HardFault_Handler_C( svFault_t *svFault, uint32_t linkReg ) {
+extern "C" void HardFault_Handler_C( svFault_t *svFault, uint32_t linkReg ) {
     // fault handler --- added to startup_stm32f10x_xl.s
     // for 2:NMIHandler, 3:HardFaultHandler, 4:MemManage_Handler, 5:BusFault_Handler, 6:UsageFault_Handler
     // It extracts the location of stack frame and passes it to the handler written
@@ -1066,7 +1074,7 @@ void HardFault_Handler_C( svFault_t *svFault, uint32_t linkReg ) {
     svSCB.EXC_RET = linkReg;  // save exception_return
     svSCB.SP      = (uint32_t) svFault;    // sv point to svFault block on (active) stack
 
-    char *fNms[] = { "??", "??", "NMI", //2
+    const char *fNms[] = { "??", "??", "NMI", //2
                      "Hard", // 3
                      "MemManage", // 4
                      "Bus", // 5
@@ -1076,10 +1084,10 @@ void HardFault_Handler_C( svFault_t *svFault, uint32_t linkReg ) {
     int  cfsr    = svSCB.CFSR, usgF = cfsr >> 16, busF = ( cfsr & 0xFF00 ) >> 8, memF = cfsr & 0xFF;
     dbgEvt( TB_Fault, vAct, cfsr, svFault->PC, 0 );
 
-    dbgLog( "Fault: 0x%x = %s \n", vAct, vAct < 7 ? fNms[vAct] : "" );
-    dbgLog( "PC: 0x%08x \n", svFault->PC );
-    dbgLog( "CFSR: 0x%08x \n", cfsr );
-    dbgLog( "EXC_R: 0x%08x \n", svSCB.EXC_RET );
+    dbgLog( " Fault: 0x%x = %s \n", vAct, vAct < 7 ? fNms[vAct] : "" );
+    dbgLog( " PC: 0x%08x \n", svFault->PC );
+    dbgLog( " CFSR: 0x%08x \n", cfsr );
+    dbgLog( " EXC_R: 0x%08x \n", svSCB.EXC_RET );
     dbgLog( "  sp: 0x%08x \n ", svSCB.SP + ( sizeof svFault ));
     if ( usgF ) dbgLog( "  Usg: 0x%04x \n", usgF );
     if ( busF ) dbgLog( "  Bus: 0x%02x \n   BFAR: 0x%08x \n", busF, svSCB.BFAR );

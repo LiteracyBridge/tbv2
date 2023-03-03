@@ -55,7 +55,7 @@ void initMediaPlayer( void ) {            // init mediaPlayer & spawn thread to 
     if ( mMediaEventId == NULL )
         tbErr( "mMediaEventId alloc failed" );
 
-    sysStats = tbAlloc( sizeof( MsgStats ), "sysStats" );
+    sysStats = static_cast<MsgStats*>(tbAlloc( sizeof( MsgStats ), "sysStats" ));
 
     mPlaybackFilePath[0] = 0;
     mRecordFilePath[0]   = 0;
@@ -85,7 +85,7 @@ void playAudio( const char *fileName, MsgStats *stats, PlaybackType_t typ ) { //
     osEventFlagsSet( mMediaEventId, MEDIA_PLAY_EVENT );
 }
 
-void playNotes(char *notes) {     // play square tones for 1/4 sec per 'notes'
+void playNotes(const char *notes) {     // play square tones for 1/4 sec per 'notes'
     mNoteCnt = 0;
     int nSyms = strlen( notes );
     mNxtNote = 0;

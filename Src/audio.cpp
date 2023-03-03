@@ -157,7 +157,7 @@ void audInitialize( void ) {
 
     assert( sizeof( newWavHeader ) == WaveHdrBytes );
 
-    sysStats = tbAlloc( sizeof( MsgStats ), "sysStats" );
+    sysStats = static_cast<MsgStats*>(tbAlloc( sizeof( MsgStats ), "sysStats" ));
     pSt.SqrWAVE = false;      // unless audSquareWav is called
     // Initialize I2S & register callback
     //  I2S_TX_DMA_Handler() overides DMA_STM32F10x.c's definition of DMA1_Channel5_Handler

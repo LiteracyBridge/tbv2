@@ -21,7 +21,7 @@ WavFmtData_t * initWavFormat( WavFmtData_t *pFormat, int samplesPerSecond, int c
 
 WavFileHeader_t * initWavHeader( WavFileHeader_t * pHeader, int samplesPerSecond, int channels, int bitsPerSample ) {
     int audioSize = 100000; // just made up.
-    char   hdr[44]         = "RIFFsizeWAVEfmt \x10\0\0\0\1\0ch_hz_abpsbabsdatasize";
+    const char *hdr         = "RIFFsizeWAVEfmt \x10\0\0\0\1\0ch_hz_abpsbabsdatasize";
     unsigned long bytesPerSecond = (bitsPerSample * channels * samplesPerSecond) / 8;
     unsigned int  blockSize      = (bitsPerSample * channels) / 8;
     // @formatter:off

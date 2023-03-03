@@ -5,9 +5,6 @@
 #include "tbook.h"
 #include "packageData.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif
 
 //typedef struct {
 //    Action act;
@@ -79,9 +76,9 @@ extern void writeCSM( void );                     // controlmanagertest.c -- wri
 
 typedef struct {                    //DBG:  Evt -> NxtSt  (both numbers & names)
     Event       evt;
-    char *      evtNm;
+    const char *evtNm;
     short       nxtSt;
-    char *      nstStNm;
+    const char *nstStNm;
 } StTrans;
 
 typedef struct {            // CSM state variables
@@ -90,11 +87,11 @@ typedef struct {            // CSM state variables
     short       iSavedSt[5];            // possible saved states
 
     Event       lastEvent;              //DBG: id of last event
-    char *      lastEventName;          //DBG: str nm of last event
-    char *      currStateName;          //DBG: str nm of current state
+    const char * lastEventName;          //DBG: str nm of last event
+    const char * currStateName;         //DBG: str nm of current state
     StTrans     evtNxtSt[eUNDEF];       //DBG: expanded transitions for current state
-    char *      prevStateName;          //DBG: name of prev
-    char *      saveStName[5];          //DBG: names of remembered states
+    const char * prevStateName;         //DBG: name of prev
+    const char * saveStName[5];          //DBG: names of remembered states
 
     short       volume;
     short       speed;
@@ -123,8 +120,5 @@ extern void executeCSM( void );
 
 extern void controlTest( void );
 
-#ifdef __cplusplus
-}
-#endif
 
 #endif

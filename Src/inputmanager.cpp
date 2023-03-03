@@ -7,6 +7,11 @@
 #include "logger.h"   // logEvt
 #include "tb_evr.h"
 
+// Define a postfix ++  operator for KEY
+KEY& operator++( KEY &k , int ) {
+    return k = static_cast<KEY>( static_cast<int>(k) + 1 );
+}
+
 const int KEYPAD_EVT   = 1;
 const int TB_EVT_QSIZE = 4;
 const int TB_KEY_QSIZE = 4;
@@ -58,19 +63,19 @@ EXTI_IMR                  87BB
 
 KeyPadKey_t keydef[10] = {
     // @formatter: off
-    // keypad GPIO in order: kHOME, kCIRCLE, kPLUS, kMINUS, kTREE, kLHAND, kPOT, kRHAND, kSTAR, kTABLE
+    // keypad GPIO in order: kHOME, kCIRCLE, KEY::PLUS, KEY::MINUS, KEY::TREE, KEY::LHAND, KEY::POT, KEY::RHAND, KEY::STAR, KEY::TABLE
     // static placeholders, filled in by initializeInterrupts
     //  GPIO_ID    key,    port,    pin,         intq       extiBit   signal    pressed  down   tstamp dntime
-    { gHOME,   kHOME,   NULL, 0, WWDG_IRQn, 0, "", 0, false, 0, 0 },
-    { gCIRCLE, kCIRCLE, NULL, 0, WWDG_IRQn, 0, "", 0, false, 0, 0 },
-    { gPLUS,   kPLUS,   NULL, 0, WWDG_IRQn, 0, "", 0, false, 0, 0 },
-    { gMINUS,  kMINUS,  NULL, 0, WWDG_IRQn, 0, "", 0, false, 0, 0 },
-    { gTREE,   kTREE,   NULL, 0, WWDG_IRQn, 0, "", 0, false, 0, 0 },
-    { gLHAND,  kLHAND,  NULL, 0, WWDG_IRQn, 0, "", 0, false, 0, 0 },
-    { gRHAND,  kRHAND,  NULL, 0, WWDG_IRQn, 0, "", 0, false, 0, 0 },
-    { gPOT,    kPOT,    NULL, 0, WWDG_IRQn, 0, "", 0, false, 0, 0 },
-    { gSTAR,   kSTAR,   NULL, 0, WWDG_IRQn, 0, "", 0, false, 0, 0 },
-    { gTABLE,  kTABLE,  NULL, 0, WWDG_IRQn, 0, "", 0, false, 0, 0 }
+    { gHOME,   KEY::HOME,   NULL, 0, WWDG_IRQn, 0, "", 0, false, 0, 0 },
+    { gCIRCLE, KEY::CIRCLE, NULL, 0, WWDG_IRQn, 0, "", 0, false, 0, 0 },
+    { gPLUS,   KEY::PLUS,   NULL, 0, WWDG_IRQn, 0, "", 0, false, 0, 0 },
+    { gMINUS,  KEY::MINUS,  NULL, 0, WWDG_IRQn, 0, "", 0, false, 0, 0 },
+    { gTREE,   KEY::TREE,   NULL, 0, WWDG_IRQn, 0, "", 0, false, 0, 0 },
+    { gLHAND,  KEY::LHAND,  NULL, 0, WWDG_IRQn, 0, "", 0, false, 0, 0 },
+    { gRHAND,  KEY::RHAND,  NULL, 0, WWDG_IRQn, 0, "", 0, false, 0, 0 },
+    { gPOT,    KEY::POT,    NULL, 0, WWDG_IRQn, 0, "", 0, false, 0, 0 },
+    { gSTAR,   KEY::STAR,   NULL, 0, WWDG_IRQn, 0, "", 0, false, 0, 0 },
+    { gTABLE,  KEY::TABLE,  NULL, 0, WWDG_IRQn, 0, "", 0, false, 0, 0 }
     // @formatter: on
 };
 void handleInterrupt( bool fromThread );   // forward
@@ -88,15 +93,15 @@ void enableInputs( bool fromThread ) {              // check for any unprocessed
     //BUG CHECK-- sometimes this is called when the keydef[].down state doesn't match the IDR state
     // which can happen if a transitions occurs while interrupts are disabled -- seems more common than one would expect
     // AND new interrupt doesn't happen when re-enabled! 
-    for (KEY k = kHOME; k < kINVALID; k++) {   // process key transitions
+    for (KEY k = KEY::HOME; k < KEY::INVALID; k++) {   // process key transitions
         //    int idr = keydef[k].port->IDR;    // port Input data register
-        bool kdn = gGet( keydef[k].id );  // gets LOGICAL value of port/pin
-        if ( kdn != keydef[k].down ) {     // should == current state
-            int pendR = EXTI->PR, iw = keydef[k].intq >> 5UL, irq = NVIC->ICPR[iw];
-            dbgEvt( TBkeyMismatch, k, ( fromThread << 8 ) + kdn, pendR, irq );
+        bool kdn = gGet( keydef[(int)k].id );  // gets LOGICAL value of port/pin
+        if ( kdn != keydef[(int)k].down ) {     // should == current state
+            int pendR = EXTI->PR, iw = keydef[(int)k].intq >> 5UL, irq = NVIC->ICPR[iw];
+            dbgEvt( TBkeyMismatch, (int)k, ( fromThread << 8 ) + kdn, pendR, irq );
             //if (irq != 0 || pendR!= 0)
             //  dbgLog( "! pR%04x ICPR[%d]%04x \n", pendR, iw, irq );
-            dbgLog( "A %s K%c%c %dDn pR%x irq%x \n", fromThread ? "*" : "I", keyNm[k], keydef[k].down ? 'd' : 'u',
+            dbgLog( "A %s K%c%c %dDn pR%x irq%x \n", fromThread ? "*" : "I", keyNm[(int)k], keydef[(int)k].down ? 'd' : 'u',
                     KSt.downCnt, pendR, irq );
 
             handleInterrupt( true );    // re-invoke, to process missed transition
@@ -112,12 +117,12 @@ void enableInputs( bool fromThread ) {              // check for any unprocessed
  * it is a very good idea to disable the Bowl, because that will silently boot
  * to DFU mode, likely causing confusion.
  *
- * enum KEYS_MASK keysToRemainEnabled: A mask of KEYS_MASKs for the keys NOT to be
+ * KEYS_MASK keysToRemainEnabled: A mask of KEYS_MASKs for the keys NOT to be
  *     disabled.
  */
-void disableKeyInterrupts( enum KEYS_MASK keysToRemainEnabled ) {
+void disableKeyInterrupts( KEYS_MASK keysToRemainEnabled ) {
     // iterate over the membrane switch (keypad) keys
-    for (KEY k = kHOME; k < kINVALID; k++) {
+    for (KEY k = KEY::HOME; k < KEY::INVALID; k++) {
         if ((( 1 << k ) & keysToRemainEnabled ) == 0 ) {
             int pin    = keydef[k].pin;
             int pinBit = 1 << pin;      // bit mask for EXTI->IMR, RTSR, FTSR
@@ -145,7 +150,7 @@ void sendKeyTran( KEY k, uint32_t ts, bool down ) {   // send transition message
 
 void checkKeyTimer( void *arg ) {  // called by OS when keyDownTimer expires ==> key down for minLongPressMS
     osTimerStop( keyDownTimer );  // reset necessary?
-    sendKeyTran( kTIMER, tbTimeStamp(), false );  // treat similarly to key up
+    sendKeyTran( KEY::TIMER, tbTimeStamp(), false );  // treat similarly to key up
 }
 
 void handleInterrupt( bool fromThread ) {         // called for external interrupt on specified keypad pin
@@ -168,7 +173,7 @@ void handleInterrupt( bool fromThread ) {         // called for external interru
     dbgEvt( TB_keyIRQ, KSt.msecSince, fromThread, 0, 0 );
 
     int downCnt = 0;
-    for (k      = kHOME; k < kINVALID; k++) {   // process key transitions
+    for (k      = KEY::HOME; k < KEY::INVALID; k++) {   // process key transitions
         if (( EXTI->PR & keydef[k].extiBit ) != 0 ) {  // pending bit for this key set?
             EXTI->PR = keydef[k].extiBit;           // clear pending bit
             NVIC_ClearPendingIRQ( keydef[k].intq ); // and the corresponding interrupt
@@ -190,9 +195,9 @@ void handleInterrupt( bool fromThread ) {         // called for external interru
     // POT HOME -- start keytest
     // POT TABLE -- software DFU?
     /*
-    if ( keydef[kPOT].down ){ // detect keytest sequence
-      KSt.keytestKeysDown = keydef[kHOME].down;     // POT HOME => keytest
-      KSt.DFUkeysDown = keydef[kTABLE].down;        // POT TABLE => reboot
+    if ( keydef[KEY::POT].down ){ // detect keytest sequence
+      KSt.keytestKeysDown = keydef[KEY::HOME].down;     // POT HOME => keytest
+      KSt.DFUkeysDown = keydef[KEY::TABLE].down;        // POT TABLE => reboot
       if ( KSt.keytestKeysDown || KSt.DFUkeysDown ){
         osEventFlagsSet( osFlag_InpThr, KEYPAD_EVT );   // wakeup for inputThread
         return;
@@ -203,6 +208,7 @@ void handleInterrupt( bool fromThread ) {         // called for external interru
 
 //****** TBook_V2_Rev3  EXTI ints 0 Hom, 1 Pot, 3 Tab, 4 Plu, 5-9 Min/LHa/Sta/Cir,  10-15 RHa/Tre
 // BOTH:  EXTI0 EXTI3 EXTI9_5 EXTI15_10
+extern "C" {
 void EXTI0_IRQHandler(void) {
     handleInterrupt(false);
 }
@@ -226,7 +232,7 @@ void EXTI1_IRQHandler(void) {
 void EXTI4_IRQHandler(void) {
     handleInterrupt(false);
 }
-
+}
 /*
  * Configure interrupts on the STM32 line for a given membrane switch key.
  */
@@ -237,18 +243,18 @@ void configInputKey( KEY k ) {    // set up GPIO & external interrupt
     NVIC_EnableIRQ( keydef[k].intq );   //
 
     int portCode = 0;
-    switch ((int) keydef[k].port) {    // EXTICR code: which port controls EXTI for 'pin'
-        // @formatter: off
-        case (int) GPIOA: portCode = 0; break;
-        case (int) GPIOB: portCode = 1; break;
-        case (int) GPIOC: portCode = 2; break;
-        case (int) GPIOD: portCode = 3; break;
-        case (int) GPIOE: portCode = 4; break;
-        case (int) GPIOF: portCode = 5; break;
-        case (int) GPIOG: portCode = 6; break;
-        case (int) GPIOH: portCode = 7; break;
-        // @formatter: on
-    }
+    GPIO_TypeDef *port = keydef[k].port;
+    // @formatter: off
+    if (port == GPIOA) portCode=0;
+    else if (port == GPIOB) portCode=1;
+    else if (port == GPIOC) portCode=2;
+    else if (port == GPIOD) portCode=3;
+    else if (port == GPIOE) portCode=4;
+    else if (port == GPIOF) portCode=5;
+    else if (port == GPIOG) portCode=6;
+    else if (port == GPIOH) portCode=7;
+    // @formatter: on
+    
     // AFIO->EXTICR[0..3] -- set of 4bit fields for pin#0..15
     int pin = keydef[k].pin;
     int iWd = pin >> 2, iPos = ( pin & 0x3 ), fbit = iPos << 2;
@@ -270,7 +276,7 @@ void initializeInterrupts() {     // configure each keypad GPIO pin to input, pu
     KEY k;
     // using CMSIS GPIO
     // iterate over the membrane switch (keypad) keys
-    for (k = kHOME; k < kINVALID; k++) {
+    for (k = KEY::HOME; k < KEY::INVALID; k++) {
         GPIO_ID id = keydef[k].id;      // gpio_def idx for this key
         keydef[k].port    = gpio_def[id].port;
         keydef[k].pin     = gpio_def[id].pin;
@@ -283,19 +289,19 @@ void initializeInterrupts() {     // configure each keypad GPIO pin to input, pu
             configInputKey( keydef[k].key );
     }
     // load initial state of keypad pins
-    for (k           = kHOME; k < kINVALID; k++) {
+    for (k           = KEY::HOME; k < KEY::INVALID; k++) {
         keydef[k].down   = gGet( keydef[k].id );
         keydef[k].tstamp = tbTimeStamp();
     }
-    KSt.firstDown    = kINVALID;
-    KSt.secondDown   = kINVALID;
+    KSt.firstDown    = KEY::INVALID;
+    KSt.secondDown   = KEY::INVALID;
     KSt.multipleDown = false;
     KSt.starUsed     = false;
 
-    //  KSt.detectedUpKey = kINVALID;
-    //  KSt.DownKey = kINVALID;
-    //  KSt.LongPressKey = kINVALID;
-    /*  if ( keydef[kSTAR].down ){    // STAR held down on restart?
+    //  KSt.detectedUpKey = KEY::INVALID;
+    //  KSt.DownKey = KEY::INVALID;
+    //  KSt.LongPressKey = KEY::INVALID;
+    /*  if ( keydef[KEY::STAR].down ){    // STAR held down on restart?
         if (keydef[kHOME].down ){   // STAR-HOME => USB
     //      RebootToDFU();        // perform reboot into system memory to invoke Device Firmware Update bootloader
         }
@@ -311,9 +317,9 @@ void initializeInterrupts() {     // configure each keypad GPIO pin to input, pu
 // keypadTest -- 
 //     -- green for each new key pressed, red if duplicate, G_G_G when all have been clicked, long press to restart test
 /*void          resetKeypadTest(){
-  for ( KEY k = kHOME; k < kINVALID; k++ )
+  for ( KEY k = KEY::HOME; k < KEY::INVALID; k++ )
     KTest.Status[ k ] = '_';
-  KTest.Status[ kINVALID ] = 0;  // so its a string
+  KTest.Status[ KEY::INVALID ] = 0;  // so its a string
   KTest.Count = 0;
   KTest.Active = false;
 }
@@ -369,55 +375,55 @@ void inputThread( void *arg ) {     // converts TB_Key msgs from keypad ISR's to
 
         dbgLog( "A keyTr: %c%c %d %dDn 1:%c 2:%c %c%c \n", keyNm[k], keydown ? 'v' : '^', ts, KSt.downCnt,
                 keyNm[KSt.firstDown], keyNm[KSt.secondDown], KSt.multipleDown ? '_' : 'M', KSt.starUsed ? '_' : 'S' );
-        if (( KSt.keyState[kPOT] != '_' ) && ( KSt.keyState[kHOME] != '_' )) {
+        if (( KSt.keyState[KEY::POT] != '_' ) && ( KSt.keyState[KEY::HOME] != '_' )) {
             KeypadTestActive = !KeypadTestActive;
             dbgLog( "A KeypadTestMode %s \n", KeypadTestActive ? "on" : "off" );
         }
 
         int dntime = 0;
         if ( keydown ) {   //****************** KEY DOWN TRANSITION
-            if ( KSt.firstDown == kINVALID ) {
+            if ( KSt.firstDown == KEY::INVALID ) {
                 KSt.firstDown   = k;
                 KSt.firstDownTS = ts;
                 osTimerStart( keyDownTimer, TB_Config->minLongPressMS );  // start long press timer
-            } else if ( KSt.secondDown == kINVALID ) {
+            } else if ( KSt.secondDown == KEY::INVALID ) {
                 KSt.secondDown   = k;
                 KSt.secondDownTS = ts;
-                if ( KSt.firstDown == kSTAR )
+                if ( KSt.firstDown == KEY::STAR )
                     osTimerStop( keyDownTimer );  // cancel Star__ timer, to allow StarX events
             } else
                 KSt.multipleDown = true;
         } else if ( !KSt.multipleDown ) {
             // ignore everything until all keys are up
             //****************** KEY UP TRANSITION
-            if (( k == kSTAR ) && KSt.starUsed ) {  // ignore Star up after StarX was sent
+            if (( k == KEY::STAR ) && KSt.starUsed ) {  // ignore Star up after StarX was sent
                 KSt.starUsed  = false;
-                KSt.firstDown = kINVALID;
-            } else if ( k == kTIMER ) {  // pseudo up for longPress
-                if ( KSt.firstDown == kINVALID )
+                KSt.firstDown = KEY::INVALID;
+            } else if ( k == KEY::TIMER ) {  // pseudo up for longPress
+                if ( KSt.firstDown == KEY::INVALID )
                     dbgLog( "bad timer state\n" );
                 else {
                     sendEvent( toLongEvt( KSt.firstDown ), ts - KSt.firstDownTS );      // add event to queue
-                    KSt.firstDown = kINVALID;    // so actual key-up will be ignored
+                    KSt.firstDown = KEY::INVALID;    // so actual key-up will be ignored
                 }
             } else if (( k == KSt.firstDown ) &&
-                       ( KSt.secondDown == kINVALID )) {   // only one key was down & it came up
+                       ( KSt.secondDown == KEY::INVALID )) {   // only one key was down & it came up
                 osTimerStop( keyDownTimer );  // cancel long press timer
                 dntime = ts - KSt.firstDownTS;
                 if ( dntime >= TB_Config->minShortPressMS ) // legal click
                     sendEvent( toShortEvt( KSt.firstDown ), dntime );  // so send TB Event
-                KSt.firstDown = kINVALID;   // reset to all keys up
-            } else if (( KSt.firstDown == kSTAR ) && ( k == KSt.secondDown )) {  // star-K & K came up
+                KSt.firstDown = KEY::INVALID;   // reset to all keys up
+            } else if (( KSt.firstDown == KEY::STAR ) && ( k == KSt.secondDown )) {  // star-K & K came up
                 dntime = ts - KSt.secondDownTS;
                 if ( dntime >= TB_Config->minShortPressMS ) // legal click
                     sendEvent( toStarEvt( KSt.secondDown ), dntime );  // so send TB star-Event
                 KSt.starUsed   = true;          // so star-up will be ignored
-                KSt.secondDown = kINVALID;    // back to just STAR down
+                KSt.secondDown = KEY::INVALID;    // back to just STAR down
             }
         }
         if ( KSt.downCnt == 0 ) {  // reset state
-            KSt.firstDown    = kINVALID;
-            KSt.secondDown   = kINVALID;
+            KSt.firstDown    = KEY::INVALID;
+            KSt.secondDown   = KEY::INVALID;
             KSt.multipleDown = false;
         }
         // dbgLog( "A %dDn 1K:%c 2K:%c mK:%c sU:%c dnT:%d \n", KSt.downCnt, keyNm[KSt.firstDown], keyNm[KSt.secondDown], KSt.multipleDown? 'T':'f', KSt.starUsed? 'T':'f', dntime );
@@ -434,12 +440,12 @@ void inputThread( void *arg ) {     // converts TB_Key msgs from keypad ISR's to
             sendEvent( FirmwareUpdate, 0 );
           }
 
-          if ( KSt.detectedUpKey != kINVALID ){   // keyUp transition on detectedUpKey
+          if ( KSt.detectedUpKey != KEY::INVALID ){   // keyUp transition on detectedUpKey
             int dntime = keydef[ KSt.detectedUpKey ].dntime;
             if ( dntime < TB_Config->minShortPressMS ){ // ignore (de-bounce) if down less than this
               dbgEvt( TB_keyBnc, KSt.detectedUpKey, dntime, 0, 0 );
             } else {
-              if ( KSt.starDown && KSt.detectedUpKey!=kSTAR ){  //  <STAR-x> xUp transition (ignore duration)
+              if ( KSt.starDown && KSt.detectedUpKey!=KEY::STAR ){  //  <STAR-x> xUp transition (ignore duration)
                 KSt.starAltUsed = true;     // prevent LONG_PRESS for Star used as Alt
                 dbgEvt( TB_keyStar, KSt.detectedUpKey, dntime, 0, 0 );
                 eTyp = toStarEvt( KSt.detectedUpKey );
@@ -459,7 +465,7 @@ void inputThread( void *arg ) {     // converts TB_Key msgs from keypad ISR's to
             }
           }
         }
-        KSt.detectedUpKey = kINVALID;
+        KSt.detectedUpKey = KEY::INVALID;
         handleInterrupt( true );  // re-call INT in case there were other pending keypad transitions
       } */
 }
@@ -479,12 +485,12 @@ void          oldinputThread( void *arg ){      // converts signals from keypad 
         sendEvent( FirmwareUpdate, 0 );
       }
       
-      if ( KSt.detectedUpKey != kINVALID ){   // keyUp transition on detectedUpKey
+      if ( KSt.detectedUpKey != KEY::INVALID ){   // keyUp transition on detectedUpKey
         int dntime = keydef[ KSt.detectedUpKey ].dntime;
         if ( dntime < TB_Config->minShortPressMS ){ // ignore (de-bounce) if down less than this 
           dbgEvt( TB_keyBnc, KSt.detectedUpKey, dntime, 0, 0 );
         } else {
-          if ( KSt.starDown && KSt.detectedUpKey!=kSTAR ){  //  <STAR-x> xUp transition (ignore duration)
+          if ( KSt.starDown && KSt.detectedUpKey!=KEY::STAR ){  //  <STAR-x> xUp transition (ignore duration)
             KSt.starAltUsed = true;     // prevent LONG_PRESS for Star used as Alt
             dbgEvt( TB_keyStar, KSt.detectedUpKey, dntime, 0, 0 );
             eTyp = toStarEvt( KSt.detectedUpKey );
@@ -504,7 +510,7 @@ void          oldinputThread( void *arg ){      // converts signals from keypad 
         }
       }
     }
-    KSt.detectedUpKey = kINVALID;
+    KSt.detectedUpKey = KEY::INVALID;
     handleInterrupt( true );  // re-call INT in case there were other pending keypad transitions
   }
 } */
@@ -593,7 +599,7 @@ void keyPadPowerUp( void ) {          // re-initialize keypad GPIOs
 
 void keyPadPowerDown( void ) {        // shut down keypad GPIOs
     for (int k = 0; k < count( keydef ); k++) {
-        if ( k != kMINUS && k != kLHAND ) {    // leave as WakeUp??
+        if ( k != KEY::MINUS && k != KEY::LHAND ) {    // leave as WakeUp??
             gUnconfig( keydef[k].id );
         }
     }

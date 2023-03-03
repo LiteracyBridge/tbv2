@@ -9,7 +9,7 @@
 
 #include "rl_fs_lib.h"
 
-extern ARM_DRIVER_SAI Driver_SAI0;      // from I2S_stm32F4xx.c
+extern "C" ARM_DRIVER_SAI Driver_SAI0;      // from I2S_stm32F4xx.c
 
 // constants defined in mediaplayer.c & referenced in audio.c
 extern const int CODEC_DATA_SEND_DONE;      // signal sent by SAI callback when buffer TX done

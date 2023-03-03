@@ -589,7 +589,7 @@ void showCdcRegs(bool always, bool nonReset) {  // display changes in codec regs
 
     typedef struct {
         uint8_t val;  // register idx in codec_vals[] if valNm==NULL
-        char *valNm;
+        const char *valNm;
     } ValDef;
     ValDef reg_vals[] = {  // define strings for register values
             // @formatter:off
@@ -783,7 +783,7 @@ void showCdcRegs(bool always, bool nonReset) {  // display changes in codec regs
             bool changed = nonReset ? (val != regDef.reset_val) : (val != regDef.prev_val);
 
             int valIdx = -1;
-            char *valnm = NULL;
+            const char *valnm = NULL;
             for (int j = 0; j < codecNVALS; j++)
                 if (reg_vals[j].valNm == NULL)
                     valIdx = reg_vals[j].val;
@@ -792,7 +792,7 @@ void showCdcRegs(bool always, bool nonReset) {  // display changes in codec regs
                     break;
                 }
 
-            char *rst = (val == regDef.reset_val) ? "*" : "";
+            const char *rst = (val == regDef.reset_val) ? "*" : "";
             if (changed) {
                 CDC_DBG_LOG_IF( (valnm == NULL), "R%d.%3d: %12s = 0x%02x %s (0x%02x)\n", regDef.pg, regDef.reg, regDef.name, val, rst,
                            regDef.prev_val);

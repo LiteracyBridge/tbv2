@@ -146,41 +146,41 @@ void initPowerMgr( void ) {           // initialize PowerMgr & start powerThread
 
 void initPwrSignals( void ) {         // configure power GPIO pins, & EXTI on NOPWR
     // power supply signals
-    gConfigOut( gADC_ENABLE );  // 1 to enable battery voltage levels
-    gSet( gADC_ENABLE, 0 );
-    gConfigOut( gSC_ENABLE );   // 1 to enable SuperCap
-    gSet( gSC_ENABLE, 0 );
+    GPIO::configureOutput( gADC_ENABLE );  // 1 to enable battery voltage levels
+    GPIO::setLogical( gADC_ENABLE, 0 );
+    GPIO::configureOutput( gSC_ENABLE );   // 1 to enable SuperCap
+    GPIO::setLogical( gSC_ENABLE, 0 );
 
-    gConfigADC( gADC_LI_ION );  // rechargable battery voltage level
-    gConfigADC( gADC_PRIMARY ); // disposable battery voltage level
-    gConfigADC( gADC_THERM );   // thermistor (R54) by LiIon battery
+    GPIO::configureADC( gADC_LI_ION );  // rechargable battery voltage level
+    GPIO::configureADC( gADC_PRIMARY ); // disposable battery voltage level
+    GPIO::configureADC( gADC_THERM );   // thermistor (R54) by LiIon battery
 
-    gConfigIn( gPWR_FAIL_N, false );  // PD0 -- input power fail signal, with pullup
+    GPIO::configureInput( gPWR_FAIL_N );  // PD0 -- input power fail signal, with pullup
 
-    gConfigIn( gBAT_PG_N, false );  // MCP73871 PG_    IN:  0 => power is good  (configured active high)
-    gConfigIn( gBAT_STAT1, false );  // MCP73871 STAT1  IN:  open collector with pullup
-    gConfigIn( gBAT_STAT2, false );  // MCP73871 STAT2  IN:  open collector with pullup
+    GPIO::configureInput( gBAT_PG_N );  // MCP73871 PG_    IN:  0 => power is good  (configured active high)
+    GPIO::configureInput( gBAT_STAT1 );  // MCP73871 STAT1  IN:  open collector with pullup
+    GPIO::configureInput( gBAT_STAT2 );  // MCP73871 STAT2  IN:  open collector with pullup
 
-    gConfigOut( gBAT_CE );    // OUT: 1 to enable charging      MCP73871 CE     (powermanager.c)
-    gSet( gBAT_CE, 1 );       // always enable?
-    gConfigOut( gBAT_TE_N );  // OUT: 0 to enable safety timer  MCP73871 TE_    (powermanager.c)
-    gSet( gBAT_TE_N, 0 );     // disable?
+    GPIO::configureOutput( gBAT_CE );    // OUT: 1 to enable charging      MCP73871 CE     (powermanager.c)
+    GPIO::setLogical( gBAT_CE, 1 );       // always enable?
+    GPIO::configureOutput( gBAT_TE_N );  // OUT: 0 to enable safety timer  MCP73871 TE_    (powermanager.c)
+    GPIO::setLogical( gBAT_TE_N, 0 );     // disable?
 
     // enable power & signals to EMMC & SDIO devices
     FileSysPower( true );       // power up eMMC & SD 3V supply
 
     // Configure audio power control
-    gConfigOut( gEN_5V );       // 1 to supply 5V to codec-- enable AP6714 regulator  -- powers AIC3100 SPKVDD
-    gConfigOut( gEN1V8 );       // 1 to supply 1.8 to codec-- enable TLV74118 regulator -- powers AIC3100 DVDD
-    gConfigOut( gBOOT1_PDN );   // 0 to reset codec -- RESET_N on AIC3100 (boot1_pdn on AK4637)
-    gSet( gEN_5V, 0 );          // initially codec SPKVDD unpowered PD4
-    gSet( gEN1V8, 0 );          // initially codec DVDD unpowered PD5
-    gSet( gBOOT1_PDN, 0 );      // initially codec in reset state  PB2
+    GPIO::configureOutput( gEN_5V );       // 1 to supply 5V to codec-- enable AP6714 regulator  -- powers AIC3100 SPKVDD
+    GPIO::configureOutput( gEN1V8 );       // 1 to supply 1.8 to codec-- enable TLV74118 regulator -- powers AIC3100 DVDD
+    GPIO::configureOutput( gBOOT1_PDN );   // 0 to reset codec -- RESET_N on AIC3100 (boot1_pdn on AK4637)
+    GPIO::setLogical( gEN_5V, 0 );          // initially codec SPKVDD unpowered PD4
+    GPIO::setLogical( gEN1V8, 0 );          // initially codec DVDD unpowered PD5
+    GPIO::setLogical( gBOOT1_PDN, 0 );      // initially codec in reset state  PB2
 
-    gConfigOut( gEN_IOVDD_N );  // 0 to supply 3V to AIC3100 IOVDD
-    gConfigOut( gEN_AVDD_N );   // 0 to supply 3V to AIC3100 AVDD & HPVDD
-    gSet( gEN_IOVDD_N, 1 );     // initially codec IOVDD unpowered  PE4
-    gSet( gEN_AVDD_N, 1 );      // initially codec AVDD & HPVDD unpowered PE5
+    GPIO::configureOutput( gEN_IOVDD_N );  // 0 to supply 3V to AIC3100 IOVDD
+    GPIO::configureOutput( gEN_AVDD_N );   // 0 to supply 3V to AIC3100 AVDD & HPVDD
+    GPIO::setLogical( gEN_IOVDD_N, 1 );     // initially codec IOVDD unpowered  PE4
+    GPIO::setLogical( gEN_AVDD_N, 1 );      // initially codec AVDD & HPVDD unpowered PE5
 
     tbDelay_ms( 5 ); // pwr start up: 3 );    // wait 3 msec to make sure everything is stable
 }
@@ -190,8 +190,8 @@ void initPwrSignals( void ) {         // configure power GPIO pins, & EXTI on NO
 void ResetGPIO( void ) {    // turn off all possible GPIO signals & device clocks
     GPIO_ID  actHi[] = { gBOOT1_PDN, gBAT_CE, gSC_ENABLE, gEN_5V, gEN1V8, g3V3_SW_EN, gADC_ENABLE, gGREEN, gRED, gEMMC_RSTN, gINVALID };
     GPIO_ID  actLo[] = { gBAT_TE_N, gEN_IOVDD_N, gEN_AVDD_N, gSPI4_NSS, gINVALID }; // PD13, PE4, PE5, PE11
-    for (int i       = 0; actHi[i] != gINVALID; i++) gSet( actHi[i], 0 );    // only works if configured as output (Mode1)
-    for (int i       = 0; actLo[i] != gINVALID; i++) gSet( actLo[i], 1 );    // only works if configured as output (Mode1)
+    for (int i       = 0; actHi[i] != gINVALID; i++) GPIO::setLogical( actHi[i], 0 );    // only works if configured as output (Mode1)
+    for (int i       = 0; actLo[i] != gINVALID; i++) GPIO::setLogical( actLo[i], 1 );    // only works if configured as output (Mode1)
 
     GPIO_ID  extGPIO[] = {  // reconfig all output GPIO's to reset state
             gI2S2ext_SD, gI2S2_SD, gI2S2_WS, gI2S2_CK,     // PB14,  PB15, PB12, PB13
@@ -211,13 +211,13 @@ void ResetGPIO( void ) {    // turn off all possible GPIO signals & device clock
             //    gSWDIO,       gSWCLK,     gSWO,                       // PA13,  PA14, PB3  -- JTAG DEBUGGER
             gINVALID };
     for (int i         = 0; extGPIO[i] != gINVALID; i++)
-        gConfigADC( extGPIO[i] );   // RESET GPIOs to analog (Mode 3, Pup 0)
+        GPIO::configureADC( extGPIO[i] );   // RESET GPIOs to analog (Mode 3, Pup 0)
 
     GPIO_ID  spiGPIO[] = {  // reconfig SPI GPIO's to input PU
             gSPI4_SCK, gSPI4_MISO, gSPI4_MOSI, gSPI4_NSS,    // PE12,  PE13, PE14, PE11
             gINVALID };
     for (int i         = 0; spiGPIO[i] != gINVALID; i++)
-        gConfigIn( spiGPIO[i], false );   // set to Input PU (Mode 0, Pup 1)
+        GPIO::configureInput( spiGPIO[i] );   // set to Input PU (Mode 0, Pup 1)
 
     RCC->CR &= ~RCC_CR_PLLI2SON_Msk;  // shut off PLLI2S
     FLASH->ACR         = 0;     // disable Data, Instruction, & Prefetch caches
@@ -262,16 +262,15 @@ void enterStopMode( void ) {                    // put STM32F4 into Stop mode
     cdc_PowerDown();          // turn off codec
 
     // disable power Fail interrupt
-    int pin = gpio_def[gPWR_FAIL_N].pin;
-    EXTI->IMR &= ~( 1 << pin );             // disable the interrupt
+    GPIO::disableEXTI(gPWR_FAIL_N);
 
     disableKeyInterrupts( static_cast<KEYS_MASK>(KM_HOME|KM_RHAND) );
 
     ResetGPIO();
 
     // Enable interrupt on the power good line, so we can turn on the charging indicator.
-    gConfigIn(gBAT_PG_N, false);
-    enableEXTI( gBAT_PG_N, false );
+    GPIO::configureInput(gBAT_PG_N);
+    GPIO::enableEXTI( gBAT_PG_N, false );
 
     extern uint16_t KeypadIMR;        // inputmanager.c -- keyboard IMR flags
 
@@ -359,13 +358,13 @@ void ADC_IRQHandler(void) {
 
 static void EnableADC( bool enable ) {       // power up & enable ADC interrupts
     if ( enable ) {
-        gSet( gADC_ENABLE, 1 );                 // PE15: power up the external analog sampling circuitry
+        GPIO::setLogical( gADC_ENABLE, 1 );                 // PE15: power up the external analog sampling circuitry
         NVIC_EnableIRQ( ADC_IRQn );             // ADC_IRQn = 18 = 0x12  ADC1,2,3   NVIC->ISER[ 0x12>>5 ] = (1 << (0x12 & 0x1F));  ISER[0]=0x00040000
         RCC->APB2ENR |= RCC_APB2ENR_ADC1EN;     // enable clock for ADC
         Adc->CR2 |= ADC_CR2_ADON;               // power up ADC
         tbDelay_ms( 1 );  // ADC pwr up
     } else {
-        gSet( gADC_ENABLE, 0 );
+        GPIO::setLogical( gADC_ENABLE, 0 );
         NVIC_DisableIRQ( ADC_IRQn );
         //BUG FIX 21-Apr-2021 == must reset ADON, *before* turning off ADC1 clock!
         Adc->CR2 &= ~ADC_CR2_ADON;                // power down ADC
@@ -602,7 +601,7 @@ void cdc_PowerUp( void );   // extern from ti_aic3100 -- for early init on pwr t
  * Return: true if the MCP73871 Li-Ion charge manager reports power good, false otherwise.
  */
 bool isPowerGood( void ) {
-    bool PwrGood_N = gGet( gBAT_PG_N );   // MCP73871 PG_:  0 => power is good         MCP73871 PG_    (powermanager.c)
+    bool PwrGood_N = GPIO::getLogical( gBAT_PG_N );   // MCP73871 PG_:  0 => power is good         MCP73871 PG_    (powermanager.c)
     return PwrGood_N == 0;
 }
 
@@ -613,9 +612,9 @@ bool isPowerGood( void ) {
  */
 enum PwrStat getPowerStatus( void ) {
     //  check MCP73871: gBAT_PG_N, gBAT_STAT1, gBAT_STAT2
-    bool PwrGood_N = gGet( gBAT_PG_N );   // MCP73871 PG_:  0 => power is good               MCP73871 PG_    (powermanager.c)
-    bool BatStat1  = gGet( gBAT_STAT1 );  // MCP73871 STAT1
-    bool BatStat2  = gGet( gBAT_STAT2 );  // MCP73871 STAT2
+    bool PwrGood_N = GPIO::getLogical( gBAT_PG_N );   // MCP73871 PG_:  0 => power is good               MCP73871 PG_    (powermanager.c)
+    bool BatStat1  = GPIO::getLogical( gBAT_STAT1 );  // MCP73871 STAT1
+    bool BatStat2  = GPIO::getLogical( gBAT_STAT2 );  // MCP73871 STAT2
 
     // MCP73871 battery charging -- BatStat1==STAT1  BatStat2==STAT2  BatPwrGood==PG
     // Table 5.1  Status outputs
@@ -648,7 +647,7 @@ bool isCharging( void ) {
  */
 void checkPower( bool verbose ) {       // check and report power status
     //  check gPWR_FAIL_N & MCP73871: gBAT_PG_N, gBAT_STAT1, gBAT_STAT2
-    bool PwrFail = gGet( gPWR_FAIL_N );  // PE2 -- input power fail signal
+    bool PwrFail = GPIO::getLogical( gPWR_FAIL_N );  // PE2 -- input power fail signal
     if ( PwrFail == 0 )
         powerDownTBook();
 
@@ -840,7 +839,7 @@ void showBattCharge() {     // generate ledFG to signal power state
 //    powerFail ISR
 extern "C" {
 void EXTI2_IRQHandler(void) {          // PWR_FAIL_N interrupt-- PE2==0 => power failure, shut down
-    if (gGet(gPWR_FAIL_N) == 0) {
+    if (GPIO::getLogical(gPWR_FAIL_N) == 0) {
         logEvt("PWRFAIL");
         showRTC();
         enterStopMode();

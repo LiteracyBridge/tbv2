@@ -1021,6 +1021,7 @@ void cdc_RecordEnable(bool enable) {
 #endif
 
 #if defined( AK4637 )
+    #error "This AK4673 code is unmaintained and is certainly incorrect. Retained for history/documentation."
     if ( enable ){
       // from AK4637 datasheet:
       //ENABLE
@@ -1130,6 +1131,7 @@ void cdc_SpeakerEnable(bool enable) {                           // enable/disabl
     }
 #endif
 #if defined( AK4343 )
+    #error "This AK4343 code is unmaintained and is certainly incorrect. Retained for history/documentation."
     if ( enable ){
         // power up speaker amp & codec by setting power bits with mute enabled, then disabling mute
         Codec_SetRegBits( AK_Signal_Select_1, AK_SS1_SPPSN, 0 );            // set power-save (mute) ON (==0)
@@ -1145,11 +1147,12 @@ void cdc_SpeakerEnable(bool enable) {                           // enable/disabl
     }
 #endif
 #if defined( AK4637 )
+    #error "This AK4673 code is unmaintained and is certainly incorrect. Retained for history/documentation."
     if ( enable ){
         // startup sequence re: AK4637 Lineout Uutput pg 91
         akR.R.SigSel1.SLPSN = 0;              // set power-save (mute) ON (==0)
         akUpd();                              // and UPDATE
-        gSet( gPA_EN, 1 );                    // enable power to speaker & headphones
+        GPIO::setLogical( gPA_EN, 1 );                    // enable power to speaker & headphones
                                               // 1) done by cdc_SetMasterFreq()
         akR.R.PwrMgmt1.LOSEL = 1;             // 2) LOSEL=1     MARC 7)
         akR.R.SigSel3.DACL = 1;                 // 3) DACL=1        MARC 8)
@@ -1175,7 +1178,7 @@ void cdc_SpeakerEnable(bool enable) {                           // enable/disabl
         akR.R.PwrMgmt1.PMPFIL = 0;            // 16) power down filter
         akR.R.PwrMgmt2.PMPLL = 0;             // disable PLL (shuts off Master Clock from codec)
         akUpd();                              // and UPDATE
-        gSet( gPA_EN, 0 );                    // disable power to speaker & headphones
+        GPIO::setLogical( gPA_EN, 0 );                    // disable power to speaker & headphones
 
     }
 #endif
@@ -1185,20 +1188,20 @@ void cdc_PowerUp(void) {
     if (codecHasPower) return;
     // AIC3100 power up sequence based on sections 7.3.1-4 of Datasheet: https://www.ti.com/lit/ds/symlink/tlv320aic3100.pdf
     //  delays as recommended by Marc on 12/31/20
-    gSet(gBOOT1_PDN, 0);      // put codec in reset state PB2
+    GPIO::setLogical(gBOOT1_PDN, 0);      // put codec in reset state PB2
 
-    gSet(gEN_5V, 1);          // power up EN_V5 for codec SPKVDD PD4
+    GPIO::setLogical(gEN_5V, 1);          // power up EN_V5 for codec SPKVDD PD4
     tbDelay_ms(200);          // AIC wait for voltage regulators  // Marc: 200ms
 
-    gSet(gEN_IOVDD_N, 0);     // power up codec IOVDD PE4
+    GPIO::setLogical(gEN_IOVDD_N, 0);     // power up codec IOVDD PE4
     tbDelay_ms(100);          // AIC wait for voltage regulators  // Marc: 100ms
-    gSet(gEN1V8, 1);          // power up EN1V8 for codec DVDD PD5 ("shortly" after IOVDD)
+    GPIO::setLogical(gEN1V8, 1);          // power up EN1V8 for codec DVDD PD5 ("shortly" after IOVDD)
     tbDelay_ms(10);           // AIC wait for voltage regulators
 
-    gSet(gEN_AVDD_N, 0);      // power up codec AVDD & HPVDD PE5 (at least 10ns after DVDD)
+    GPIO::setLogical(gEN_AVDD_N, 0);      // power up codec AVDD & HPVDD PE5 (at least 10ns after DVDD)
     tbDelay_ms(100);          // AIC wait for it to start up  // Marc: 100ms
 
-    gSet(gBOOT1_PDN, 1);      // set codec RESET_N inactive to Power on the codec PB2
+    GPIO::setLogical(gBOOT1_PDN, 1);      // set codec RESET_N inactive to Power on the codec PB2
     tbDelay_ms(10);           // AIC wait for it to start up
     codecHasPower = true;
     CDC_DBG_LOG("2 AIC_pwrup %d \n", tbTimeStamp());
@@ -1261,19 +1264,23 @@ void cdc_Init() {                                                // Init codec &
     CDC_DBG_LOG("2 AIC Regs  %d \n", tbTimeStamp());
 
 #if defined( AK4343 )
+    #error "This AK4343 code is unmaintained and is certainly incorrect. Retained for history/documentation."
     Codec_SetRegBits( AK_Signal_Select_1, AK_SS1_SPPSN, 0 );    // set power-save (mute) ON (==0)  (REDUNDANT, since defaults to 0)
 #endif
 #if defined( AK4637 )
+    #error "This AK4673 code is unmaintained and is certainly incorrect. Retained for history/documentation."
     akR.R.SigSel1.SLPSN     = 0;            // set power-save (mute) ON (==0)  (REDUNDANT, since defaults to 0)
     akUpd();
 #endif
 
 #if defined( AK4343 )
+    #error "This AK4343 code is unmaintained and is certainly incorrect. Retained for history/documentation."
     //  run in Slave mode with external clock
     Codec_WrReg( AK_Mode_Control_1, AK_I2S_STANDARD_PHILIPS );      // Set DIF0..1 to I2S standard
     Codec_WrReg( AK_Mode_Control_2, 0x00);                // MCKI input frequency = 256.Fs  (default)
 #endif
 #if defined( AK4637 )
+    #error "This AK4673 code is unmaintained and is certainly incorrect. Retained for history/documentation."
     // will run in PLL Master mode, set up by I2S_Configure
     akR.R.MdCtr3.DIF1_0     = 3;              // DIF1_0 = 3   ( audio format = Philips )
 #endif
@@ -1288,6 +1295,7 @@ void cdc_Init() {                                                // Init codec &
 #if defined( AIC3100 )
 #endif
 #if defined( AK4343 )
+    #error "This AK4343 code is unmaintained and is certainly incorrect. Retained for history/documentation."
     int8_t wtm = AK_TS_WTM1 | AK_TS_WTM0;       // Recovery Waiting = 3
     int8_t ztm = AK_TS_ZTM1 | AK_TS_ZTM0;       // Limiter/Recover Op Zero Crossing Timeout Period = 3
     Codec_WrReg( AK_Timer_Select, (ztm|wtm));
@@ -1300,6 +1308,7 @@ void cdc_Init() {                                                // Init codec &
     Codec_WrReg( AK_Rch_Input_Volume_Control, 0xC1 );
 #endif
 #if defined( AK4637 )
+    #error "This AK4673 code is unmaintained and is certainly incorrect. Retained for history/documentation."
     akR.R.AlcTimSel.IVTM    = 1;              // IVTM = 1 (default)
     akR.R.AlcTimSel.EQFC1_0 = 2;              // EQFC1_0 = 10 (def)
     akR.R.AlcTimSel.WTM1_0  = 3;              // WTM1_0 = 3
@@ -1379,12 +1388,13 @@ void cdc_PowerDown(void) {                                        // power down 
     I2Cdrv->Uninitialize();                // deconfigures SCL & SDA pins, evt handler
 
     // reset, then power down codec chip
-    gSet(gPA_EN, 0);        // PD3 amplifier off
-    gSet(gBOOT1_PDN, 0);    // PB2 OUT: set power_down ACTIVE to Power Down the codec
-    gSet(gEN_5V, 0);        // PD4 OUT: 1 to supply 5V to codec   AP6714 EN
-    gSet(gEN1V8, 0);        // PD5 OUT: 1 to supply 1.8 to codec  TLV74118 EN
-    gSet(gEN_IOVDD_N, 1);   // PE4 power down codec IOVDD PE4
-    gSet(gEN_AVDD_N, 1);    // PE5 power down codec AVDD & HPVDD PE5 (at least 10ns after DVDD)
+    // WTF: gPA_EN is never defined for any port/bit, so what the heck does this even do?
+    //GPIO::setLogical(gPA_EN, 0);        // PD3 amplifier off
+    GPIO::setLogical(gBOOT1_PDN, 0);    // PB2 OUT: set power_down ACTIVE to Power Down the codec
+    GPIO::setLogical(gEN_5V, 0);        // PD4 OUT: 1 to supply 5V to codec   AP6714 EN
+    GPIO::setLogical(gEN1V8, 0);        // PD5 OUT: 1 to supply 1.8 to codec  TLV74118 EN
+    GPIO::setLogical(gEN_IOVDD_N, 1);   // PE4 power down codec IOVDD PE4
+    GPIO::setLogical(gEN_AVDD_N, 1);    // PE5 power down codec AVDD & HPVDD PE5 (at least 10ns after DVDD)
 
     CDC_DBG_LOG("2 AIC3100 pwr down %d \n", tbTimeStamp());
     codecHasPower = false;
@@ -1447,7 +1457,7 @@ void cdc_SetVolume(uint8_t Volume) {
 #endif
 
 #if defined( AK4637 )
-#error "This AK46573 code is unmaintained and is certainly incorrect. Retained for history/documentation."
+#error "This AK4673 code is unmaintained and is certainly incorrect. Retained for history/documentation."
     const uint8_t cdcMUTEVOL = 0xCC, cdcMAXVOL = 0x18, cdcVOLRNG = cdcMUTEVOL-cdcMAXVOL;   // ak4637 digital volume range to use
      // Conversion of volume from user scale [0:10] to audio codec scale [cdcMUTEVOL..cdcMAXVOL]  (AK cc..18) (TI 81..c0)
      //   values >= 0xCC force mute on AK4637
@@ -1539,6 +1549,7 @@ void cdc_SetMasterFreq(
     CDC_DBG_LOG( "2 AIC_freq %d \n", tbTimeStamp() );
 #endif
 #if defined( AK4637 )
+    #error "This AK4673 code is unmaintained and is certainly incorrect. Retained for history/documentation."
     // set up AK4637 to run in MASTER mode, using PLL to generate audio clock at 'freq'
     // ref AK4637 Datasheet: pg 27-29
       akR.R.PwrMgmt2.PMPLL    = 0;  // disable PLL -- while changing settings

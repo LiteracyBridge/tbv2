@@ -20,173 +20,17 @@ GPIO_ID& operator++( GPIO_ID &k , int ) {
 
 extern bool BootVerboseLog;
 
-// GPIO utilities based on GPIO_ID enumeration & GPIO_Signal[] in main.h
-GPIO_Def_t gpio_def[MAX_GPIO];                           // array of signal definitions, indexed by GPIO_ID
-void gDef( GPIO_ID gpid, const char *signal ) {             // define gpio_signal[ ID ] from name e.g. "PC8"
-    // GPIO_ID  signal
-    //  "Pxdd_|cc" where:
-    //      x  = A,B,C,D,E,F,G,H -- GPIO port
-    //      dd = 0..15  -- GPIO pin #
-    //      _  = means 'active low', i.e, 0 if pressed
-    //      cc = 0..15 -- alternate function code
-    //  Thus: "PA4"     means GPIOA, pin 4, considered active when input is high
-    //        "PE12_"   means GPIOE, pin 12, considered active when input is low
-    //        "PA2|7"   means GPIOA, pin 2, considered active when input is high, alternate function 7
-    if ( gpio_def[gpid].id == gpid ) tbErr( "GPIO redefined" );
-
-    GPIO_TypeDef *port = NULL;    // address of GPIO port -- from STM32Fxxxx.h
-    IRQn_Type intnum = WWDG_IRQn;  // default 0
-    uint16_t  pin    = 0;
-    uint8_t   altFn  = 0;
-    int       siglen = strlen( signal );
-    int       active = 1;   // default to active high-- 1 when LOGICALLY active
-
-    if ( siglen > 0 ) {
-        switch (signal[1]) {
-            // @formatter:off
-            case 'A':  port = GPIOA; break; // 0x400200000
-            case 'B':  port = GPIOB; break; // 0x400200400
-            case 'C':  port = GPIOC; break; // 0x400200800
-            case 'D':  port = GPIOD; break; // 0x400200C00  ODR: 0x400200C14
-            case 'E':  port = GPIOE; break; // 0x400201000
-            case 'F':  port = GPIOF; break; // 0x400201400
-            case 'G':  port = GPIOG; break; // 0x400201800
-            // @formatter:on
-        }
-        pin        = atoi( &signal[2] );   // stops at non-digit
-        switch (pin) {
-            // @formatter:off
-            case 0:   intnum = EXTI0_IRQn;  break;
-            case 1:   intnum = EXTI1_IRQn;  break;
-            case 2:   intnum = EXTI2_IRQn;  break;
-            case 3:   intnum = EXTI3_IRQn;  break;
-            case 4:   intnum = EXTI4_IRQn;  break;
-            case 5:
-            case 6:
-            case 7:
-            case 8:
-            case 9:   intnum = EXTI9_5_IRQn; break;
-            case 10:
-            case 11:
-            case 12:
-            case 13:
-            case 14:
-            case 15:  intnum = EXTI15_10_IRQn; break;
-        // @formatter:on
-        }
-        if ( strchr( signal, '_' ) != NULL )  // contains a _ => active low
-            active = 0; // '_' for active low input
-        const char *af = strchr( signal, '|' );
-        if ( af != NULL ) // alternate function-- "|12" => AF=0xC
-            altFn = atoi( &af[1] );
-    }
-    gpio_def[gpid].id     = gpid;   // ID of this entry
-    gpio_def[gpid].port   = port;   // mem-mapped address of GPIO port
-    gpio_def[gpid].pin    = pin;    // pin within port
-    gpio_def[gpid].altFn  = (AFIO_REMAP) altFn; // alternate function index 0..15
-    gpio_def[gpid].intq   = intnum; // EXTI int num
-    gpio_def[gpid].signal = signal; // string name of GPIO pin
-    gpio_def[gpid].active = active; // signal when active (for keys, input state when pressed)
-}
-
-void GPIO_DefineSignals( const GPIO_Signal def[] ) {
-    for (int i = 0; def[i].id != gINVALID; i++) {
-        gDef( def[i].id, def[i].name );
-    }
-}
-
-
-void gUnconfig( GPIO_ID id ) {      // reset GPIO to default
-    GPIO_PinConfigure( gpio_def[ id ].port, gpio_def[ id ].pin, GPIO__MODE_INPUT, GPIO_OTYP_PUSHPULL, GPIO_SPD_LOW, GPIO_PUPD_NONE );
-    GPIO_AFConfigure ( gpio_def[ id ].port, gpio_def[ id ].pin, AF0 );   // reset to AF0
-}
-
-void gConfigI2S( GPIO_ID id ) {   // config gpio as high speed pushpull in/out
-    GPIO_PinConfigure( gpio_def[ id ].port, gpio_def[ id ].pin, GPIO__MODE_AF, GPIO_OTYP_PUSHPULL, GPIO_SPD_FAST, GPIO_PUPD_NONE );
-    GPIO_AFConfigure ( gpio_def[ id ].port, gpio_def[ id ].pin, gpio_def[ id ].altFn );   // set AF
-}
-
-void gConfigOut( GPIO_ID id ) {   // config gpio as low speed pushpull output -- power control, etc
-    AFIO_REMAP af = gpio_def[ id ].altFn;
-    GPIO__MODE md = af!=0? GPIO__MODE_AF : GPIO__MODE_OUT;
-    GPIO_PinConfigure( gpio_def[ id ].port, gpio_def[ id ].pin, md, GPIO_OTYP_PUSHPULL, GPIO_SPD_LOW, GPIO_PUPD_NONE );
-    GPIO_AFConfigure ( gpio_def[ id ].port, gpio_def[ id ].pin, af );   // set AF
-}
-
-void gConfigIn( GPIO_ID key, bool pulldown ) {    // configure GPIO as low speed input, either pulldown or pullup
-    GPIO_PinConfigure( gpio_def[ key ].port, gpio_def[ key ].pin, GPIO__MODE_INPUT, GPIO_OTYP_PUSHPULL, GPIO_SPD_LOW, pulldown? GPIO_PUPD_PDN : GPIO_PUPD_PUP );
-    GPIO_AFConfigure ( gpio_def[ key ].port, gpio_def[ key ].pin, AF0 );   //  AF 0
-}
-
-void gConfigKey( GPIO_ID key ) {    // configure GPIO as low speed pulldown input ( keys )
-    gConfigIn( key, true );   // pulldown
-    enableEXTI( key, true );
-}
-
-void enableEXTI( GPIO_ID key, bool asKey ) {   // configure EXTI for key or pwrFail
-    extern uint16_t KeypadIMR;    // from inputmanager.c
-
-    RCC->APB2ENR |= RCC_APB2ENR_SYSCFGEN_Msk;     // make sure enabled SysCfg for SYSCFG->EXTICR[]
-
-    // AFIO->EXTICR[0..3] -- set of 4bit fields for pin#0..15
-    int port     = (int) gpio_def[key].port;  // GPIOA .. GPIOE
-    int portCode = ( port - (int) GPIOA ) >> 10;   // GPIOA=0, .. GPIOH=7
-    int pin      = gpio_def[key].pin;
-    int iWd      = pin >> 2, iPos = ( pin & 0x3 ), fbit = iPos << 2;
-    int msk      = ( 0xF << fbit ), val = ( portCode << fbit );
-    SYSCFG->EXTICR[iWd] = ( SYSCFG->EXTICR[iWd] & ~msk ) | val;   // replace bits <fbit..fbit+3> with portCode
-
-    int pinBit = 1 << pin;      // bit mask for EXTI->IMR, RTSR, FTSR
-    if ( asKey ) {  // keys enable both rise & fall
-        EXTI->RTSR |= pinBit;       // Enable a rising trigger
-        EXTI->FTSR |= pinBit;       // Enable a falling trigger
-        //DONT ENABLE--   EXTI->IMR  |= pinBit;       // Configure the interrupt mask
-        KeypadIMR |= pinBit;
-    } else {  // PWR_FAIL_N --
-        EXTI->FTSR |= pinBit;       // PWR_FAIL_N -- enable falling trigger only
-        EXTI->IMR |= pinBit;       // enable the interrupt
-    }
-
-    NVIC_ClearPendingIRQ( gpio_def[key].intq );
-    NVIC_EnableIRQ( gpio_def[key].intq );   // enable interrupt on key
-}
-
-void gConfigADC( GPIO_ID id ) {   // configure GPIO as ANALOG input ( battery voltage levels )
-    GPIO_PinConfigure( gpio_def[ id ].port, gpio_def[ id ].pin, GPIO__MODE_ANALOG, GPIO_OTYP_PUSHPULL, GPIO_SPD_LOW, GPIO_PUPD_NONE );
-    GPIO_AFConfigure ( gpio_def[ id ].port, gpio_def[ id ].pin, gpio_def[ id ].altFn );   //  set AF
-}
-
-void gSet( GPIO_ID gpio, uint8_t on ) {               // set the LOGICAL state of a GPIO output pin
-    uint8_t act = gpio_def[gpio].active;
-    uint8_t lev = on ? act : 1 - act;    // on => pressed else 1-pressed
-    GPIO_PinWrite( gpio_def[gpio].port, gpio_def[gpio].pin, lev );
-}
-
-bool gGet( GPIO_ID gpio ) {                           // => LOGICAL state of a GPIO input, e.g. True if 'PA0_'==0 or 'PB3'==1
-    GPIO_TypeDef *port = gpio_def[gpio].port;
-    if ( port == NULL ) return false;   // undefined: always false
-    return GPIO_PinRead( port, gpio_def[gpio].pin ) == gpio_def[gpio].active;
-}
-
-bool gOutVal( GPIO_ID gpio ) {                        // => LOGICAL state of a GPIO OUTput, e.g. True if 'PA0_'.ODR==0 or 'PB3'.ODR==1
-    GPIO_TypeDef *port = gpio_def[gpio].port;
-    if ( port == NULL ) return false;   // undefined: always false
-    int pin = gpio_def[gpio].pin;
-    int actval = gpio_def[gpio].active;
-    return (( port->ODR >> pin ) & 1 ) == actval;
-}
-
 // flash -- debug on LED / KEYPAD **************************************
 void flashLED( const char *s ) {                      // 'GGRR__' in .1sec
     for (int i = 0; i < strlen( s ); i++) {
         switch (s[i]) {
-            case 'G': gSet( gGREEN, 1 ); gSet( gRED, 0 ); break;
-            case 'R': gSet( gGREEN, 0 ); gSet( gRED, 1 ); break;
-            default: gSet( gGREEN, 0 ); gSet( gRED, 0 ); break;
+            case 'G': GPIO::setLogical( gGREEN, 1 ); GPIO::setLogical( gRED, 0 ); break;
+            case 'R': GPIO::setLogical( gGREEN, 0 ); GPIO::setLogical( gRED, 1 ); break;
+            default: GPIO::setLogical( gGREEN, 0 ); GPIO::setLogical( gRED, 0 ); break;
         }
         tbDelay_ms( 100 );  // flashLED
     }
-    gSet( gGREEN, 0 ); gSet( gRED, 0 );
+    GPIO::setLogical( gGREEN, 0 ); GPIO::setLogical( gRED, 0 );
 }
 
 /*
@@ -207,7 +51,7 @@ void flashInit() {                                   // init keypad GPIOs for de
     LED_Init( gGREEN );
     LED_Init( gRED );
     for (GPIO_ID id = gHOME; id <= gTABLE; id++)
-        gConfigKey( id ); // low speed pulldown input
+        GPIO::configureKey( id ); // low speed pulldown input
 }
 
 //
@@ -225,39 +69,26 @@ FILE *tbFOpenInternal(const char *fname, const char *flags, const char *debugStr
 }
 
 FILE *tbFopen( const char *fname, const char *flags) {
-//    FileSysPower( true );
-//    dbgLog( "F tbFOpen( %s, %s )\n", fname, flags );
-//    return fopen( fname, flags );
     return tbFOpenInternal(fname, flags, "tbFopen");
 }
 
 FILE *tbOpenRead( const char *fname ) {                  // repower if necessary, & open file
-//    FileSysPower( true );
-//    dbgLog( "F tbOpenRd( %s )\n", nm );
-//    return fopen( nm, "r" );
     return tbFOpenInternal(fname, "r", "tbOpenRead");
 }
 
 FILE *tbOpenReadBinary( const char *fname ) {            // repower if necessary, & open file
-//    FileSysPower( true );
-//    dbgLog( "F tbOpenRdBin( %s )\n", nm );
-//    return fopen( nm, "rb" );
     return tbFOpenInternal(fname, "rb", "tbOpenReadBinary");
 }
 
 FILE *tbOpenWrite( const char *fname ) {                 // repower if necessary, & open file (delete if already exists)
     FileSysPower( true );
-//    dbgLog( "F tbOpenWr( %s )\n", nm );
+    // TODO: Why? fopen(fname, "w"_) should truncate.
     if ( fexists( fname ))
         fdelete( fname, NULL );
-//    return fopen( nm, "w" );
     return tbFOpenInternal(fname, "w", "tbOpenWrite");
 }
 
 FILE *tbOpenWriteBinary( const char *fname ) {           // repower if necessary, & open file
-//    FileSysPower( true );
-//    dbgLog( "F tbOpenWrBin( %s )\n", nm );
-//    return fopen( nm, "wb" );
     return tbFOpenInternal(fname, "wb", "tbOpenWriteBinary");
 }
 
@@ -312,10 +143,10 @@ void FileSysPower( bool enable ) {                    // power up/down eMMC & SD
         if ( FSysPowered ) return;
 
         dbgLog( "5 FSysPwr up \n" );
-        gConfigOut( g3V3_SW_EN );   // 1 to enable power to SDCard & eMMC
-        gConfigOut( gEMMC_RSTN );   // 0 to reset? eMMC
-        gSet( gEMMC_RSTN, 1 );      // enable at power up?
-        gSet( g3V3_SW_EN, 1 );      // enable at start up, for FileSys access
+        GPIO::configureOutput( g3V3_SW_EN );   // 1 to enable power to SDCard & eMMC
+        GPIO::configureOutput( gEMMC_RSTN );   // 0 to reset? eMMC
+        GPIO::setLogical( gEMMC_RSTN, 1 );      // enable at power up?
+        GPIO::setLogical( g3V3_SW_EN, 1 );      // enable at start up, for FileSys access
 
         tbDelay_ms( 100 );    // FileSys pwr up
         fsStatus st = fsMount( "M0:" );  // finit() & fmount()
@@ -329,8 +160,8 @@ void FileSysPower( bool enable ) {                    // power up/down eMMC & SD
         if ( st != fsOK )
             errLog( "funinit => %d", st );
 
-        gUnconfig( gEMMC_RSTN );    // set PE10 to analog
-        gSet( g3V3_SW_EN, 0 );      // shut off 3V supply to SDIO  PD6
+        GPIO::unConfigure( gEMMC_RSTN );    // set PE10 to analog
+        GPIO::setLogical( g3V3_SW_EN, 0 );      // shut off 3V supply to SDIO  PD6
         FSysPowered = false;
     }
 }

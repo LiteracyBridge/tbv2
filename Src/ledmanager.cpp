@@ -53,8 +53,8 @@ static ledSeq *         fgSeq   = &ledB;
 static ledSeq *         prepSeq = &ledC;
 
 void LED_Init( GPIO_ID led ) {    // configure GPIO for output PUSH_PULL slow
-    gConfigOut( led );
-    gSet( led, 0 );
+    GPIO::configureOutput( led );
+    GPIO::setLogical( led, 0 );
 }
 
 ledShade asShade( char c ) {            // R r G g O o Y y __ => ledShade
@@ -133,20 +133,20 @@ void ledSet( LEDcolor led ) {
 
     switch (led) {
         case LED_RED:
-            gSet( gRED, 1 );
-            gSet( gGREEN, 0 );
+            GPIO::setLogical( gRED, 1 );
+            GPIO::setLogical( gGREEN, 0 );
             break;
         case LED_GREEN:
-            gSet( gRED, 0 );
-            gSet( gGREEN, 1 );
+            GPIO::setLogical( gRED, 0 );
+            GPIO::setLogical( gGREEN, 1 );
             break;
         case LED_BOTH:
-            gSet( gRED, 1 );
-            gSet( gGREEN, 1 );
+            GPIO::setLogical( gRED, 1 );
+            GPIO::setLogical( gGREEN, 1 );
             break;
         case LED_OFF:
-            gSet( gRED, 0 );
-            gSet( gGREEN, 0 );
+            GPIO::setLogical( gRED, 0 );
+            GPIO::setLogical( gGREEN, 0 );
             break;
     }
 }
@@ -159,8 +159,8 @@ void handlePowerEvent( int powerEvent ) {
             LED_Init( gRED );
             break;
         case POWER_DOWN:
-            gUnconfig( gGREEN );
-            gUnconfig( gRED );
+            GPIO::unConfigure( gGREEN );
+            GPIO::unConfigure( gRED );
             //dbgLog("Led Power Down \n");
             break;
     }
@@ -284,9 +284,9 @@ void showProgress( const char *s, uint32_t stepMs ) {      // step through LED s
     nextProgressStep++;
 
     switch (clr) {
-        case 'G': gSet( gGREEN, 1 ); gSet( gRED, 0 ); break;
-        case 'R': gSet( gGREEN, 0 ); gSet( gRED, 1 ); break;
-        default: gSet( gGREEN, 0 ); gSet( gRED, 0 ); break;
+        case 'G': GPIO::setLogical( gGREEN, 1 ); GPIO::setLogical( gRED, 0 ); break;
+        case 'R': GPIO::setLogical( gGREEN, 0 ); GPIO::setLogical( gRED, 1 ); break;
+        default: GPIO::setLogical( gGREEN, 0 ); GPIO::setLogical( gRED, 0 ); break;
     }
 }
 

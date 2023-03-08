@@ -395,42 +395,6 @@ static int32_t I2S_Initialize(ARM_SAI_SignalEvent_t cb_event,
     i2s->info->cb_event = cb_event;
     reset_I2S_Info(i2s);
 
-
-    // RM0402  STM32F412xx Reference Manual  6.3.23
-    //  I2SCLK comes from PLLI2S
-    //  set to 48 MHz from HSE by setCpuClk()
-    /*
-    //  RCC_PLLI2SCFGR configuration register:
-    //    PLLI2S_R  2..7      ( << 28)
-    //    PLLI2S_Q  2..15     ( << 24)
-    //    PLLI2_SRC 0..1      0: same as PLL  1: CK_I2S_EXT ( << 22 )
-    //    PLLI2S_N  2..432    ( << 6 )
-    //    PLLI2S_M  2..63     ( << 0 )
-    //  VCO_in = SRC / M      // ( should be 2MHz as recommended by 6.3.23 )
-    //  VCO_clk = VCO_in * N  // = 192MHz
-    //  USB/SDIO clk = VCO_clk / Q
-    //  I2S_clk = VCO_clk / R
-
-    // I2S_clk = (HSE * PLLI2S_N / PLLI2S_M) / PLLI2S_R
-    int I2S_M = 4;    // 8HHz external HSE => 2MHz VCOin
-    int I2S_N = 96;   // => VCOclk = 192MHz
-    int I2S_R = 4;    // => I2S3 = 48MHz
-    int I2S_Q = 4;    // => USB/SDIO = 48MHz
-    // configure to: 48MHz as expected by I2S3_ClockEnable() = (8000000 * 96 / 4)/ 4 = 48000000
-    int cfg = 0;                                    // SRC=0 == input from same as PLL (HSE 8MHz crystal clock)
-    cfg |= (I2S_R << RCC_PLLI2SCFGR_PLLI2SR_Pos);
-    cfg |= (I2S_Q << RCC_PLLI2SCFGR_PLLI2SQ_Pos);
-    cfg |= (I2S_N << RCC_PLLI2SCFGR_PLLI2SN_Pos);
-    cfg |= (I2S_M << RCC_PLLI2SCFGR_PLLI2SM_Pos);
-    RCC->PLLI2SCFGR = cfg;
-
-    // set APB1 peripherals to use PLLI2S_clock -- i.e. I2S3 == SPI3
-    RCC->DCKCFGR |= ( 0 << RCC_DCKCFGR_I2S1SRC_Pos );   // set to default: SPI2 & SPI3 I2S clock <= PLLI2S
-
-    RCC->CR |= RCC_CR_PLLI2SON;         // enable the I2S_clk generator PLLI2S
-    //  I2S_clk = 192000000 / I2S_R;    // PLLI2S configuration -- default: 96MHz
-    */
-
     RCC->APB1RSTR |= RCC_APB1RSTR_SPI2RST;   // reset spi2  (i2s2 & i2s2_ext)
     RCC->APB1RSTR &= ~RCC_APB1RSTR_SPI2RST; // un-reset spi2
 
@@ -438,18 +402,13 @@ static int32_t I2S_Initialize(ARM_SAI_SignalEvent_t cb_event,
     RCC->APB1RSTR &= ~RCC_APB1RSTR_SPI3RST; // un-reset spi3
 
     // configure GPIOs using gpio_id's from tbook_rev2b.h -- also specifies AFn for STM32F412
-    gConfigI2S(
-            gI2S2_CK);     // TBookV2B { gI2S2_CK,     "PB13|5"  },  // AK4637 BICK == CK == SCK       (RTE_I2SDevice.h I2S0==SPI2 altFn=5)
-    gConfigI2S(
-            gI2S2_SD);     // TBookV2B { gI2S2_SD,     "PB15|5"  },  // AK4637 SDTI == MOSI            (RTE_I2SDevice.h I2S0==SPI2 altFn=5)
-    gConfigI2S(
-            gI2S2ext_SD);  // TBookV2B { gI2S2ext_SD,  "PB14|6"  },  // AK4637 SDTO                    (RTE_I2SDevice.h I2S0==SPI2 altFn=6)
-    gConfigI2S(
-            gI2S2_WS);     // TBookV2B { gI2S2_WS,     "PB12|5"  },  // AK4637 FCK  == NSS == WS       (RTE_I2SDevice.h I2S0==SPI2 altFn=5)
+    GPIO::configureI2S(gI2S2_CK);     // TBookV2B { gI2S2_CK,     "PB13|5"  },  // AK4637 BICK == CK == SCK       (RTE_I2SDevice.h I2S0==SPI2 altFn=5)
+    GPIO::configureI2S(gI2S2_SD);     // TBookV2B { gI2S2_SD,     "PB15|5"  },  // AK4637 SDTI == MOSI            (RTE_I2SDevice.h I2S0==SPI2 altFn=5)
+    GPIO::configureI2S(gI2S2ext_SD);  // TBookV2B { gI2S2ext_SD,  "PB14|6"  },  // AK4637 SDTO                    (RTE_I2SDevice.h I2S0==SPI2 altFn=6)
+    GPIO::configureI2S(gI2S2_WS);     // TBookV2B { gI2S2_WS,     "PB12|5"  },  // AK4637 FCK  == NSS == WS       (RTE_I2SDevice.h I2S0==SPI2 altFn=5)
 
     // Configure MCK Pin  (using I2S3_MCK on TBookRev2B)
-    gConfigI2S(
-            gI2S3_MCK); // TBookV2B { gI2S3_MCK,   "PC7|6"     },  // AK4637 MCLK                    (RTE_I2SDevice.h I2S3==SPI2 altFn=6)
+    GPIO::configureI2S(gI2S3_MCK); // TBookV2B { gI2S3_MCK,   "PC7|6"     },  // AK4637 MCLK                    (RTE_I2SDevice.h I2S3==SPI2 altFn=6)
 
     i2s->info->flags = I2S_FLAG_INITIALIZED;
 
@@ -459,11 +418,11 @@ static int32_t I2S_Initialize(ARM_SAI_SignalEvent_t cb_event,
 static int32_t I2S_Uninitialize(I2S_RESOURCES *i2s) {                                            // release I2S hardware resources
     I2S_PowerControl(ARM_POWER_OFF, i2s);   // shut down I2S & AK
 
-    gUnconfig(gI2S2_CK);    // Unconfigure SCK Pin
-    gUnconfig(gI2S2_WS);    // Unconfigure WS Pin
-    gUnconfig(gI2S2_SD);    // Unconfigure SD TX Pin
-    gUnconfig(gI2S2ext_SD); // Unconfigure extSD RX Pin
-    gUnconfig(gI2S2_MCK);   // Unconfigure MCK Pin
+    GPIO::unConfigure(gI2S2_CK);    // Unconfigure SCK Pin
+    GPIO::unConfigure(gI2S2_WS);    // Unconfigure WS Pin
+    GPIO::unConfigure(gI2S2_SD);    // Unconfigure SD TX Pin
+    GPIO::unConfigure(gI2S2ext_SD); // Unconfigure extSD RX Pin
+    GPIO::unConfigure(gI2S2_MCK);   // Unconfigure MCK Pin
 
     i2s->info->flags = 0U;
     return ARM_DRIVER_OK;

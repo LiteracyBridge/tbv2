@@ -14,7 +14,7 @@ GPIO_ID keyDown() {
     // gHOME, gCIRCLE, gPLUS,  gMINUS, gTREE, gLHAND, gRHAND, gPOT, gSTAR, gTABLE
     GPIO_ID      dnK     = gINVALID;
     for (int k       = gHOME; k <= gTABLE; k++) {
-        if ( gGet( static_cast<GPIO_ID>(k) ))
+        if ( GPIO::getLogical( static_cast<GPIO_ID>(k) ))
             dnK = static_cast<GPIO_ID>(k);
     }
     //                gORANGE, gBLUE, gRED,  gGREEN, gINVALID,  gHOME, gCIRCLE, gPLUS,  gMINUS, gTREE, gLHAND, gRHAND, gPOT,   gSTAR,  gTABLE
@@ -50,11 +50,11 @@ void debugTimingRegs( bool );
 void tglUSBmode() {
     if ( isMassStorageEnabled()) {
         disableMassStorage();
-        gSet( gGREEN, 0 );
-        gSet( gRED, 0 );
+        GPIO::setLogical( gGREEN, 0 );
+        GPIO::setLogical( gRED, 0 );
     } else if ( fsNDevs > 0 ) {  // HOME => if have a filesystem but no data -- try USB MSC
-        gSet( gGREEN, 1 );
-        gSet( gRED, 1 );
+        GPIO::setLogical( gGREEN, 1 );
+        GPIO::setLogical( gRED, 1 );
         for (int i = fsNDevs; fsDevs[i] != NULL; i++) fsDevs[i] = NULL;
         logEvt( "enterUSB" );
         logPowerDown();       // flush & shut down logs
@@ -72,8 +72,8 @@ void CheckRecording() {   // check for dbgLoop ongoing recording
             audRequestRecStop();
             dbgLog( " RecStop\n" );
             while (audGetState() != Ready)
-                gSet( gGREEN, 0 );
-            gSet( gRED, 0 );
+                GPIO::setLogical( gGREEN, 0 );
+            GPIO::setLogical( gRED, 0 );
             resetAudio();
         }
     }
@@ -87,7 +87,7 @@ void PlayRecCmd( GPIO_ID k ) {   // PlayRec mode subcommands --
         case gTREE:
             if ( audGetState() == Ready ) {
                 dbgLog( " Tr: play welcome\n" );
-                gSet( gGREEN, 1 ); gSet( gRED, 0 );
+                GPIO::setLogical( gGREEN, 1 ); GPIO::setLogical( gRED, 0 );
                 playWave( "M0:/system/audio/welcome.wav" );
                 showCdcRegs( false, true );    // regs during playback
             }
@@ -98,7 +98,7 @@ void PlayRecCmd( GPIO_ID k ) {   // PlayRec mode subcommands --
                 sprintf( fname, "M0:/REC_%d_%d.WAV", RecDBG, dbgIdx );
                 resetAudio();     // clean up anything in progress
                 dbgLog( " Cir: record 5sec to: %s  RecDbg=%d\n", fname, RecDBG );
-                gSet( gGREEN, 0 ); gSet( gRED, 1 );
+                GPIO::setLogical( gGREEN, 0 ); GPIO::setLogical( gRED, 1 );
                 ts_recStart = tbTimeStamp();
                 audStartRecording( fname, &tstStats );
                 showCdcRegs( false, true );     // regs during record
@@ -252,8 +252,8 @@ void debugLoop( bool autoUSB ) {     // called if boot-MINUS, no file system,  a
         // LED control--
         if ( audGetState() == Ready && !isMassStorageEnabled()) {    // blink LED while idle
             ledCntr++;
-            gSet( gGREEN, (( ledCntr >> 14 ) & 0x3 ) == 0 );
-            gSet( gRED, (( ledCntr >> 14 ) & 0x3 ) == 2 );    // flash: Red off Green off
+            GPIO::setLogical( gGREEN, (( ledCntr >> 14 ) & 0x3 ) == 0 );
+            GPIO::setLogical( gRED, (( ledCntr >> 14 ) & 0x3 ) == 2 );    // flash: Red off Green off
         }
     }
 }  // debugLoop

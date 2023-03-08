@@ -76,25 +76,21 @@ extern bool PowerChecksEnabled;       // set true for normal operation
 
 extern void initIDs(void);
 
-extern void GPIO_DefineSignals(const GPIO_Signal def[]);
+//extern void GPIO_DefineSignals(const GPIO_Signal def[]);
 
-extern void gSet(GPIO_ID gpio, uint8_t on);               // set the state of a GPIO output pin
-extern bool gOutVal(
-        GPIO_ID gpio);                        // => LOGICAL state of a GPIO OUTput, e.g. True if 'PA0_'.ODR==0 or 'PB3'.ODR==1
-extern bool gGet(
-        GPIO_ID gpio);                           // => LOGICAL state of a GPIO input pin (TRUE if PA3_==0 or PC2==1)
+//extern void gSet(GPIO_ID gpio, uint8_t on);               // set the state of a GPIO output pin
+//extern bool gOutVal(GPIO_ID gpio);                        // => LOGICAL state of a GPIO OUTput, e.g. True if 'PA0_'.ODR==0 or 'PB3'.ODR==1
+//extern bool gGet(GPIO_ID gpio);                           // => LOGICAL state of a GPIO input pin (TRUE if PA3_==0 or PC2==1)
 extern void flashInit(void);                              // init keypad GPIOs for debugging
 extern void flashLED(const char *s);                      // 'GGRR__' in .1sec
 extern void flashCode(int v);                             // e.g. 9 => "RR__GG__GG__RR______"
-extern void gUnconfig(GPIO_ID id);                        // revert GPIO to default configuration
-extern void gConfigOut(
-        GPIO_ID led);                      // configure GPIO for low speed pushpull output (LEDs, audio_PDN, pwr control)
-extern void gConfigI2S(GPIO_ID id);                       // configure GPIO for high speed pushpull in/out (I2S)
-extern void gConfigADC(GPIO_ID led);                      // configure GPIO as ANALOG input ( battery voltage levels )
-extern void gConfigIn(GPIO_ID key,
-                      bool pulldown);        // configure GPIO as low speed input, either pulldown or pullup (pwr fail, battery indicators)
-extern void gConfigKey(GPIO_ID key);                      // configure GPIO as low speed pulldown input ( keys )
-extern void enableEXTI(GPIO_ID key, bool asKey);          // configure EXTI for key or pwrFail
+//extern void gUnconfig(GPIO_ID id);                        // revert GPIO to default configuration
+//extern void gConfigOut(GPIO_ID led);                      // configure GPIO for low speed pushpull output (LEDs, audio_PDN, pwr control)
+//extern void gConfigI2S(GPIO_ID id);                       // configure GPIO for high speed pushpull in/out (I2S)
+//extern void gConfigADC(GPIO_ID led);                      // configure GPIO as ANALOG input ( battery voltage levels )
+//extern void gConfigIn(GPIO_ID key,bool pulldown);        // configure GPIO as low speed input, either pulldown or pullup (pwr fail, battery indicators)
+//extern void gConfigKey(GPIO_ID key);                      // configure GPIO as low speed pulldown input ( keys )
+//extern void enableEXTI(GPIO_ID key, bool asKey);          // configure EXTI for key or pwrFail
 
 //extern void       RebootToDFU( void );                            // reboot into SystemMemory -- Device Firmware Update bootloader
 extern uint32_t AHB_clock;                                      // freq in MHz of AHB == CPU == HCLK
@@ -180,18 +176,6 @@ extern bool enableMassStorage(const char *drv0, const char *drv1, const char *dr
 extern bool disableMassStorage(void);           // disable USB MSC & return FSys to TBook
 extern bool isMassStorageEnabled(void);         // => true if usb is providing FileSys as MSC
 
-typedef struct { // GPIO_Def_t -- define GPIO port/pins/interrupt # for a GPIO_ID
-    GPIO_ID id;     // GPIO_ID for this line -- from enumeration in main.h
-    GPIO_TypeDef *port;   // address of GPIO port -- from STM32Fxxxx.h
-    uint16_t pin;    // GPIO pin within port
-    AFIO_REMAP altFn;  // alternate function value
-    IRQn_Type intq;   // specifies INTQ num  -- from STM32Fxxxx.h
-    const char *signal; // string name of signal, e.g. PA0
-    int active; // gpio value when active: 'PA3_' => 0, 'PC12' => 1
-} GPIO_Def_t;
-
-#define MAX_GPIO 100
-extern GPIO_Def_t gpio_def[MAX_GPIO];
 
 extern void initPrintf(const char *hdr);
 
@@ -332,8 +316,6 @@ typedef struct {      // Dbg -- pointers for easy access to debug info
     osRtxThread_t *thread[6];    // ptrs to osRtxThread
     TBConfig_t *TBookConfig;  // TalkingBook configuration block
     TBH_arr *TBookLog;     // TalkingBook event log
-
-    //  DbgScr            Scr;          // dbgLog output
 
 } DbgInfo;
 extern DbgInfo Dbg;  // in main.c -- visible at start

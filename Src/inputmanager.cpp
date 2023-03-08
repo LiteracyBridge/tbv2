@@ -95,9 +95,11 @@ void enableInputs( bool fromThread ) {              // check for any unprocessed
     // AND new interrupt doesn't happen when re-enabled! 
     for (KEY k = KEY::HOME; k < KEY::INVALID; k++) {   // process key transitions
         //    int idr = keydef[k].port->IDR;    // port Input data register
-        bool kdn = gGet( keydef[(int)k].id );  // gets LOGICAL value of port/pin
+        bool kdn = GPIO::getLogical( keydef[(int)k].id );  // gets LOGICAL value of port/pin
         if ( kdn != keydef[(int)k].down ) {     // should == current state
-            int pendR = EXTI->PR, iw = keydef[(int)k].intq >> 5UL, irq = NVIC->ICPR[iw];
+            int pendR = EXTI->PR;
+            int iw = keydef[(int)k].intq >> 5UL;
+            int irq = NVIC->ICPR[iw];
             dbgEvt( TBkeyMismatch, (int)k, ( fromThread << 8 ) + kdn, pendR, irq );
             //if (irq != 0 || pendR!= 0)
             //  dbgLog( "! pR%04x ICPR[%d]%04x \n", pendR, iw, irq );
@@ -179,7 +181,7 @@ void handleInterrupt( bool fromThread ) {         // called for external interru
             NVIC_ClearPendingIRQ( keydef[k].intq ); // and the corresponding interrupt
         }
 
-        bool keydown = gGet( keydef[k].id );
+        bool keydown = GPIO::getLogical( keydef[k].id );
         KSt.keyState[k] = keydown ? keyNm[k] : '_';  //DEBUG
         if ( keydown ) downCnt++;
         if ( keydef[k].down != keydown ) {  // transition occurred
@@ -237,8 +239,8 @@ void EXTI4_IRQHandler(void) {
  * Configure interrupts on the STM32 line for a given membrane switch key.
  */
 void configInputKey( KEY k ) {    // set up GPIO & external interrupt
-    GPIO_PortClock( keydef[k].port, true );
-    gConfigKey( keydef[k].id ); // low speed pulldown input
+    GPIO::setPortClockEnabledState( keydef[k].port, true );
+    GPIO::configureKey( keydef[k].id ); // low speed pulldown input
     NVIC_ClearPendingIRQ( keydef[k].intq );
     NVIC_EnableIRQ( keydef[k].intq );   //
 
@@ -277,20 +279,20 @@ void initializeInterrupts() {     // configure each keypad GPIO pin to input, pu
     // using CMSIS GPIO
     // iterate over the membrane switch (keypad) keys
     for (k = KEY::HOME; k < KEY::INVALID; k++) {
-        GPIO_ID id = keydef[k].id;      // gpio_def idx for this key
-        keydef[k].port    = gpio_def[id].port;
-        keydef[k].pin     = gpio_def[id].pin;
-        keydef[k].intq    = gpio_def[id].intq;
+        GPIO_ID id = keydef[k].id;      // GPIO::gpio_def idx for this key
+        keydef[k].port    = GPIO::gpio_def[id].port;
+        keydef[k].pin     = GPIO::gpio_def[id].bit;
+        keydef[k].intq    = GPIO::gpio_def[id].intq;
         keydef[k].extiBit = 1 << keydef[k].pin;
-        keydef[k].signal  = gpio_def[id].signal;
-        keydef[k].pressed = gpio_def[id].active;
+        keydef[k].signal  = GPIO::gpio_def[id].signal;
+        keydef[k].pressed = GPIO::gpio_def[id].active;
 
         if ( keydef[k].port != NULL )  // NULL if no line configured for this key
             configInputKey( keydef[k].key );
     }
     // load initial state of keypad pins
     for (k           = KEY::HOME; k < KEY::INVALID; k++) {
-        keydef[k].down   = gGet( keydef[k].id );
+        keydef[k].down   = GPIO::getLogical( keydef[k].id );
         keydef[k].tstamp = tbTimeStamp();
     }
     KSt.firstDown    = KEY::INVALID;
@@ -593,17 +595,19 @@ void sendEvent( Event key, int32_t arg ) {  // log & send TB_Event to CSM
     }
 }
 
-void keyPadPowerUp( void ) {          // re-initialize keypad GPIOs
-    initializeInterrupts();
-}
-
-void keyPadPowerDown( void ) {        // shut down keypad GPIOs
-    for (int k = 0; k < count( keydef ); k++) {
-        if ( k != KEY::MINUS && k != KEY::LHAND ) {    // leave as WakeUp??
-            gUnconfig( keydef[k].id );
-        }
-    }
-}
+//// TODO: UNUSED
+//void keyPadPowerUp( void ) {          // re-initialize keypad GPIOs
+//    initializeInterrupts();
+//}
+//
+//// TODO: UNUSED
+//void keyPadPowerDown( void ) {        // shut down keypad GPIOs
+//    for (int k = 0; k < count( keydef ); k++) {
+//        if ( k != KEY::MINUS && k != KEY::LHAND ) {    // leave as WakeUp??
+//            GPIO::unConfigure( keydef[k].id );
+//        }
+//    }
+//}
 
 
 //end inputmanager.cpp

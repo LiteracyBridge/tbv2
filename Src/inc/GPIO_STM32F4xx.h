@@ -13,150 +13,70 @@
 
 #include <stdbool.h>
 #include "stm32f4xx.h"
+#include "gpio.h"
+
+typedef struct { // GPIO_Def_t -- define GPIO port/pins/interrupt # for a GPIO_ID
+    GPIO_TypeDef *port;   // address of GPIO port -- from STM32Fxxxx.h
+    uint16_t bit;    // GPIO bit within port
+    uint16_t altFn;  // alternate function value
+    IRQn_Type intq;   // specifies INTQ num  -- from STM32Fxxxx.h
+    const char *signal; // string name of signal, e.g. PA0
+    int active; // gpio value when active: 'PA3_' => 0, 'PC12' => 1
+} GPIO_Def_t;
+
+class GPIO {
+public: // TODO: make this private
+    static GPIO_Def_t gpio_def[NUM_GPIO_DEFINITIONS];
+
+public:
+    static void defineGPIOs(void);
+
+    static bool getLogical(GPIO_ID id) {
+        GPIO_TypeDef *port = gpio_def[id].port;
+        if ( port == NULL ) return false;   // TODO: is this necessary?
+        return GPIO::readPin( port, gpio_def[id].bit ) == gpio_def[id].active;
+    }
+    static void setLogical(GPIO_ID id, bool on) {
+        uint8_t activeLevel = gpio_def[id].active;
+        uint8_t newLevel = on ? activeLevel : 1 - activeLevel;    // on => pressed else 1-pressed
+        GPIO::writePin( gpio_def[id].port, gpio_def[id].bit, newLevel );
+    }
+
+public:
+    enum GPIO_PORT_MODE {PORT_MODE_INPUT, PORT_MODE_OUTPUT, PORT_MODE_AF, PORT_MODE_ANALOG};
+    enum GPIO_OUTPUT_TYPE {OT_PUSH_PULL, OT_OPEN_DRAIN};
+    enum GPIO_PORT_SPEED {SPEED_LOW, SPEED_MEDIUM, SPEED_FAST, SPEED_HIGH};
+    enum GPIO_PULLUP_PULLDOWN {PUPD_NONE, PUPD_PUP, PUPD_PDOWN};
+    enum GPIO_AF {AF_NONE=0, AF0=0, AF1, AF2, AF3, AF4, AF5, AF6, AF7, AF8, AF9, AF10, AF11, AF12, AF13, AF14, AF15};
+
+    static void setPortClockEnabledState(GPIO_TypeDef *GPIOx, bool enabled);
+    static bool getPortClockEnabledState(GPIO_TypeDef *GPIOx);
+    static bool configurePin(GPIO_TypeDef *GPIOx, uint32_t bit, GPIO_PORT_MODE mode, GPIO_OUTPUT_TYPE ot, GPIO_PORT_SPEED speed, GPIO_PULLUP_PULLDOWN pupd);
+    static void configureAF(GPIO_TypeDef *GPIOx, uint32_t bit, GPIO_AF af_type);
+
+    static void unConfigure(GPIO_ID id);
+    static void configureI2S(GPIO_ID id);
+    static void configureOutput(GPIO_ID id);
+    static void configureInput(GPIO_ID id);
+    static void configureKey(GPIO_ID id);
+    static void configureADC(GPIO_ID id);
 
 
-#if defined (__CC_ARM)
-  #define __FORCE_INLINE  static __forceinline
-#else
-  #define __FORCE_INLINE  __STATIC_INLINE
-#endif
-// JEB -- 
-//    stm32f412vx.h  defines GPIO_TypeDef configuration registers very different from stm32f10x.h
+    static void enableEXTI( GPIO_ID id, bool asKey );
+    static void disableEXTI( GPIO_ID id );
 
+private:
+    static void writePin(GPIO_TypeDef *GPIOx, uint32_t bit, bool val) {
+        // set BSRR bit 'bit' to set the value to 1; set bit 'bit + 16' to set the value to 0
+        GPIOx->BSRR = (1ul << (bit + (val?0:16) ) );
+    }
+    static bool readPin(GPIO_TypeDef *GPIOx, uint32_t bit) {
+        return GPIOx->IDR & (1u<<bit) ? true : false;
+    }
 
+private:
+    static void defineGPIO( GPIO_ID gpid, const char * name, GPIO_TypeDef *GPIOx, uint16_t bit, uint32_t flags );
 
-	
-/// GPIO Pin identifier
-typedef struct _GPIO_PIN_ID {
-  GPIO_TypeDef *port;				//JEB references to config fields of GPIO_TypeDef will be broken
-  uint8_t       num;
-} GPIO_PIN_ID;
-
-/// Port Mode            // JEB  May2022 -- add _ to avoid name conflicts added in stm32f4xx_hal_gpio.h 2.16.0
-typedef enum {
-  GPIO__MODE_INPUT     = 0x00,             // GPIO is input
-  GPIO__MODE_OUT       = 0x01,             // General purpose output
-  GPIO__MODE_AF        = 0x02,             // Alternate Function
-  GPIO__MODE_ANALOG    = 0x03              // Analog
-} GPIO__MODE;
-
-/// Port Output Type
-typedef enum {
-  GPIO_OTYP_PUSHPULL  = 0x0,              // GPIO is push/pull
-  GPIO_OTYP_OPENDRAIN	= 0x01	          // GPIO is Open Drain
-} GPIO_OTYPE;
-
-/// Port Speed
-typedef enum {
-  GPIO_SPD_LOW     		= 0x00,             // GPIO is low speed
-  GPIO_SPD_MED			  = 0x01,             // GPIO is medium speed
-  GPIO_SPD_FAST       = 0x02,             // GPIO is fast speed
-  GPIO_SPD_HIGH    		= 0x03              // GPIO is high speed
-} GPIO_SPEED;
-
-/// Port Pull-up/Pull-down
-typedef enum {
-  GPIO_PUPD_NONE     	= 0x00,             // GPIO has no pull-up or pull-down
-  GPIO_PUPD_PUP			  = 0x01,             // GPIO has pull-up
-  GPIO_PUPD_PDN       = 0x02,             // GPIO has pull-down
-  GPIO_PUPD_RES    		= 0x03              // reserved
-} GPIO_PUPD;
-
-/// Alternate function I/O remap
-typedef enum {
-	AF0 = 0x0,
-	AF1 = 0x1,
-	AF2 = 0x2,
- 	AF3 = 0x3,
-	AF4 = 0x4,
-	AF5 = 0x5,
-	AF6 = 0x6,
- 	AF7 = 0x7,
-	AF8 = 0x8,
-	AF9 = 0x9,
-	AF10 = 0xA,
- 	AF11 = 0xB,
-	AF12 = 0xC,
-	AF13 = 0xD,
-	AF14 = 0xE,
- 	AF15 = 0xF
-} AFIO_REMAP;
-
-
-/**
-  \fn          void GPIO_PortClock (GPIO_TypeDef *GPIOx, bool en)
-  \brief       Port Clock Control
-  \param[in]   GPIOx  Pointer to GPIO peripheral
-  \param[in]   enable Enable or disable clock
-*/
-extern void GPIO_PortClock (GPIO_TypeDef *GPIOx, bool enable);
-
-/**
-  \fn          bool GPIO_GetPortClockState (GPIO_TypeDef *GPIOx)
-  \brief       Get GPIO port clock state
-  \param[in]   GPIOx  Pointer to GPIO peripheral
-  \return      true  - enabled
-               false - disabled
-*/
-extern bool GPIO_GetPortClockState (GPIO_TypeDef *GPIOx);
-
-
-bool GPIO_PinConfigure(GPIO_TypeDef   *GPIOx,  uint32_t  num,		// configure pin 'num' of GPIOx
-                       GPIO__MODE mode,  GPIO_OTYPE otyp,  GPIO_SPEED spd,  GPIO_PUPD pupdn );  // to mode, output type, speed, and pullup/down
-
-/**
-  \fn          void GPIO_PinWrite (GPIO_TypeDef *GPIOx, uint32_t num, uint32_t val)
-  \brief       Write port pin
-  \param[in]   GPIOx  Pointer to GPIO peripheral
-  \param[in]   num    Port pin number
-  \param[in]   val    Port pin value (0 or 1)
-*/
-__FORCE_INLINE void GPIO_PinWrite (GPIO_TypeDef *GPIOx, uint32_t num, uint32_t val) {
-  if (val & 1) {
-    GPIOx->BSRR = (1UL << num);         // set
-  } else {
-    GPIOx->BSRR = (1UL << (num + 16));  // clr
-  }
-}
-
-/**
-  \fn          uint32_t GPIO_PinRead (GPIO_TypeDef *GPIOx, uint32_t num)
-  \brief       Read port pin
-  \param[in]   GPIOx  Pointer to GPIO peripheral
-  \param[in]   num    Port pin number
-  \return      pin value (0 or 1)
-*/
-__FORCE_INLINE uint32_t GPIO_PinRead (GPIO_TypeDef *GPIOx, uint32_t num) {
-  return ((GPIOx->IDR >> num) & 1);
-}
-
-/**
-  \fn          void GPIO_PortWrite (GPIO_TypeDef *GPIOx, uint16_t mask, uint16_t val)
-  \brief       Write port pins
-  \param[in]   GPIOx  Pointer to GPIO peripheral
-  \param[in]   mask   Selected pins
-  \param[in]   val    Pin values
-*/
-__FORCE_INLINE void GPIO_PortWrite (GPIO_TypeDef *GPIOx, uint16_t mask, uint16_t val) {
-  GPIOx->ODR = (GPIOx->ODR & ~mask) | val;
-}
-
-/**
-  \fn          uint16_t GPIO_PortRead (GPIO_TypeDef *GPIOx)
-  \brief       Read port pins
-  \param[in]   GPIOx  Pointer to GPIO peripheral
-  \return      port pin inputs
-*/
-__FORCE_INLINE uint16_t GPIO_PortRead (GPIO_TypeDef *GPIOx) {
-  return (GPIOx->IDR);
-}
-
-/**
-  \fn          void GPIO_AFConfigure (AFIO_REMAP af_type)
-  \brief       Configure alternate functions
-  \param[in]   af_type Alternate function remap type
-*/
-void GPIO_AFConfigure ( GPIO_TypeDef *GPIOx, uint32_t num, AFIO_REMAP af_type );
-
+};
 
 #endif /* __GPIO_STM32F4XX_H */

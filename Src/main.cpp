@@ -52,7 +52,7 @@ void setBootMode() { // use key to to select value for BootMode
     GPIO_ID key_gpios[] = { gHOME, gCIRCLE, gPLUS, gMINUS, gTREE, gLHAND, gRHAND, gPOT, gSTAR, gTABLE };
     flashInit();      // enable keyboard to decode boot type
     for (int i          = 0; i <= KEY::TABLE; i++) {
-        if ( gGet( key_gpios[i] )) keysDetectedAtBoot |= 1 << i;
+        if ( GPIO::getLogical( key_gpios[i] )) keysDetectedAtBoot |= 1 << i;
     }
     // Nothing other than Tree and/or Table. Whether either or both of Tree or Table are still
     // pressed after a Tree+Table boot is not deterministic.
@@ -76,16 +76,16 @@ void setBootMode() { // use key to to select value for BootMode
                          BootVerbosePower ? 'G' : '_' );
             showProgress( prog, 100 );    // select boot keys
 
-            if ( gGet( gPLUS )) BootToUSB          = true;        // boot directly to USB
-            if ( gGet( gMINUS )) BootResetLog      = true;     // reset Log (skip copy of last log)
-            if ( gGet( gLHAND )) BootFormatFileSys = true;  // reformat EMMC filesystem
+            if ( GPIO::getLogical( gPLUS )) BootToUSB          = true;        // boot directly to USB
+            if ( GPIO::getLogical( gMINUS )) BootResetLog      = true;     // reset Log (skip copy of last log)
+            if ( GPIO::getLogical( gLHAND )) BootFormatFileSys = true;  // reformat EMMC filesystem
 
             // debug switches
-            if ( gGet( gCIRCLE )) BootToQCtest    = true;
-            if ( gGet( gPOT )) BootVerboseLog     = true;
-            if ( gGet( gRHAND )) BootVerbosePower = true;
+            if ( GPIO::getLogical( gCIRCLE )) BootToQCtest    = true;
+            if ( GPIO::getLogical( gPOT )) BootVerboseLog     = true;
+            if ( GPIO::getLogical( gRHAND )) BootVerbosePower = true;
 
-            if ( gGet( gTABLE )) break;
+            if ( GPIO::getLogical( gTABLE )) break;
         }
         endProgress();
     } else if ( hwPlusBoot ) {
@@ -101,9 +101,7 @@ void setBootMode() { // use key to to select value for BootMode
 
 static osThreadAttr_t tb_attr;                                        // has to be static!
 int main( void ) {
-    // main.h defines gpioSignals[] for this platform configuration,  e.g.  { gRED, "PF8" } for STM3210E eval board RED LED
-    //  used by various initializers to call GPIOconfigure()
-    GPIO_DefineSignals( gpioSignals );   // create GPIO_Def_t entries { id, port, pin, intq, signm, pressed } for each GPIO signal in use
+    GPIO::defineGPIOs();   // create GPIO_Def_t entries { id, port, pin, intq, signm, pressed } for each GPIO signal in use
 
     setBootMode();
 
@@ -121,7 +119,7 @@ int main( void ) {
     if ( SystemCoreClock != CpuMhz * MHZ )
         __breakpoint( 0 );
 
-    //  gConfigI2S( gMCO2 );  // TBookV2B   { gMCO2,          "PC9|0"   },  // DEBUG: MCO2 for external SystemClock/4 on PC9
+    //  GPIO::configureI2S( gMCO2 );  // TBookV2B   { gMCO2,          "PC9|0"   },  // DEBUG: MCO2 for external SystemClock/4 on PC9
 
     initPrintf( TBV2_Version );
     printf("Keys at boot: %02x\n", keysDetectedAtBoot);

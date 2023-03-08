@@ -500,11 +500,6 @@
               <FilePath>.\Src\tbook.cpp</FilePath>
             </File>
             <File>
-              <FileName>tbook_rev2.cpp</FileName>
-              <FileType>8</FileType>
-              <FilePath>.\Src\tbook_rev2.cpp</FilePath>
-            </File>
-            <File>
               <FileName>tbutil.cpp</FileName>
               <FileType>8</FileType>
               <FilePath>.\Src\tbutil.cpp</FilePath>

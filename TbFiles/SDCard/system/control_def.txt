@@ -29,7 +29,7 @@
       minLongPressMS:   1000,
       shortIdleMS:      5000,
       longIdleMS:     180000,
-      powerCheckMS:   180000,
+      powerCheckMS:   10000,
       qcTestState:  stQcTest,
       initState:    stWakeup,
 #      bgPulse:        "_49G",                           # while awake

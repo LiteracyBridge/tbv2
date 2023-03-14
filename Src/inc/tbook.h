@@ -64,8 +64,7 @@ extern bool controlManagerReady;
 
 // global utilities
 // tbutil.c
-extern void EnableLedMngr(bool enable);  // DEBUG allow disabling LED manager for debugging
-#define count(x) sizeof(x)/sizeof(x[0])
+//#define count(x) sizeof(x)/sizeof(x[0])
 
 extern char CPU_ID[20], TB_ID[20];
 extern bool NO_OS_DEBUG;          // set in main.c, used in tbook.c
@@ -98,8 +97,6 @@ extern uint32_t APB2_clock;                                     // freq in MHz o
 extern uint32_t APB1_clock;                                     // freq in MHz of APB1 (slow) peripheral bus
 extern void setCpuClock(int mHz, int apbshift2,
                         int apbshift1);                         // config & enable PLL & PLLI2S, bus dividers, flash latency & switch HCLK to PLL at 'mHz' MHz
-extern void LED_Init(GPIO_ID led);                        // ledManager-- for debugging
-extern bool ledMgrActive;
 
 extern FILE *tbFopen(const char *fname, const char *flags); // repower i fnecessary & open file.
 extern FILE *tbOpenRead(const char *nm);                  // repower if necessary, & open file

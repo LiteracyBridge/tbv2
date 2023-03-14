@@ -6,7 +6,7 @@
 //Ver:   // TB CSM 2022-06-28: v23 re-commenting the defaults to avoid quoted strings in output
 static TBConfig_t  preTB_Config = { 
   4,  // default_volume 
-  180000,  // powerCheckMS 
+  10000,  // powerCheckMS
   5000,  // shortIdleMS 
   180000,  // longIdleMS 
   50,  // minShortPressMS 

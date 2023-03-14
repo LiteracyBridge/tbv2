@@ -39,17 +39,25 @@ void flashLED( const char *s ) {                      // 'GGRR__' in .1sec
  * 3 (0x0011) => R R G G
  */
 void flashCode( int v ) {                             // e.g. 9 => "RR__GG__GG__RR______"
-    EnableLedMngr( false );
+    LedManager::setEnabled( false );
     flashLED( "___" );
     for (int i = 0; i < 4; i++)
         flashLED((( v & ( 1 << i )) == 0 ) ? "GGGG___" : "RRRR___" );
     flashLED( "_____" );
-    EnableLedMngr( true );
+    LedManager::setEnabled( true );
 }
 
-void flashInit() {                                   // init keypad GPIOs for debugging
+void flashInit() { 
+    // init keypad GPIOs for debugging
+
+    /////////////////////////////////////////////////
+    // These really shouldn't be here... Why are they?
+    // ledManager-- for debugging
+    extern void LED_Init(GPIO_ID led);
     LED_Init( gGREEN );
     LED_Init( gRED );
+    /////////////////////////////////////////////////
+
     for (GPIO_ID id = gHOME; id <= gTABLE; id++)
         GPIO::configureKey( id ); // low speed pulldown input
 }
@@ -397,10 +405,6 @@ bool showRTC() {
 }
 
 
-void endProgress() {                                      // finish showing progress
-    EnableLedMngr( true );
-}
-
 void measureSystick() {
     const int NTS              = 6;
     int       msTS[NTS], minTS = 1000000, maxTS = 0, sumTS = 0;
@@ -600,7 +604,7 @@ void usrLog( const char *fmt, ... ) {
 }
 
 const char *DbgFlags     = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";  // flags 0..35
-char       DebugMask[40] = "!D8 ";  //  add 'X' to enable dbgLog() calls starting with 'X'
+char       DebugMask[40] = "!D89 ";  //  add 'X' to enable dbgLog() calls starting with 'X'
 /* DEFINED DEBUG FLAGS:
     //  '1' system clock
     //  '2' audio codec debugging

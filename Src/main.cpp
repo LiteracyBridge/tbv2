@@ -74,7 +74,7 @@ void setBootMode() { // use key to to select value for BootMode
             else if ( BootToQCtest || BootVerboseLog || BootVerbosePower )
                 sprintf( prog, "_%c_%c_%c__", BootToQCtest ? 'G' : '_', BootVerboseLog ? 'G' : '_',
                          BootVerbosePower ? 'G' : '_' );
-            showProgress( prog, 100 );    // select boot keys
+            LedManager::showProgress( prog, 100 );    // select boot keys
 
             if ( GPIO::getLogical( gPLUS )) BootToUSB          = true;        // boot directly to USB
             if ( GPIO::getLogical( gMINUS )) BootResetLog      = true;     // reset Log (skip copy of last log)
@@ -87,7 +87,7 @@ void setBootMode() { // use key to to select value for BootMode
 
             if ( GPIO::getLogical( gTABLE )) break;
         }
-        endProgress();
+        LedManager::endProgress();
     } else if ( hwPlusBoot ) {
         BootToUSB = true;
     }

@@ -554,7 +554,7 @@ void audRequestRecStop( void ) {                    // signal record loop to sto
         //dbgLog( "8 reqRecStp \n");
         pSt.state = pbRecStop;    // handled by SaiEvent on next buffer complete
     } else if ( pSt.state == pbRecPaused ) {
-        ledFg( NULL );
+        LedManager::ledFg( NULL );
         audRecordComplete();      // already paused-- just finish up
     }
 }
@@ -570,7 +570,7 @@ void audPauseResumeAudio( void ) {                  // signal playback to reques
             // pausing
             haltPlayback();   // shut down device & update timestamps
             pSt.state = pbPaused;
-            ledFg( TB_Config->fgPlayPaused ); // blink green: while paused
+            LedManager::ledFg( TB_Config->fgPlayPaused ); // blink green: while paused
             // subsequent call to audPauseResumeAudio() will start playing at pSt.msPlayed msec
             pct = audPlayPct();
             pSt.nPauses++;
@@ -603,7 +603,7 @@ void audPauseResumeAudio( void ) {                  // signal playback to reques
 
             dbgEvt( TB_recPause, 0, 0, 0, 0 );
             dbgLog( "8 pauseRec at %d ms \n", pSt.msRecorded );
-            ledFg( TB_Config->fgRecordPaused ); // blink red: while paused
+            LedManager::ledFg( TB_Config->fgRecordPaused ); // blink red: while paused
             // subsequent call to audPauseResumeAudio() will append new recording
             logEvtNINI( "recPause", "ms", pSt.msRecorded, "nS", pSt.nSaved );
             pSt.stats->RecPause++;
@@ -668,7 +668,7 @@ void audPlaybackComplete( void ) {                 // shut down after completed 
         pct = msTunePlayed * 100 / pSt.tuneMsec;
         logEvtNININI( "tuneDn", "ms", pSt.msPlayed, "pct", pct, "nS", pSt.tunePlayed );
     } else {
-        ledFg( NULL );        // Turn off foreground LED: no longer playing
+        LedManager::ledFg( NULL );        // Turn off foreground LED: no longer playing
         pct = 100; //pSt.msPlayed * 100 / pSt.msecLength;
         // complete, so msPlayed == msecLength
         dbgEvt( TB_audDone, pSt.msPlayed, pct, pSt.msPlayed, pSt.msecLength );
@@ -700,7 +700,7 @@ void audRecordComplete( void ) {                    // last buff recorded, finis
     }
 
     pSt.audF = NULL;
-    ledFg( NULL );
+    LedManager::ledFg( NULL );
     dbgLog( "8 RecComp %d errs \n", pSt.ErrCnt );
 
     dbgEvt( TB_audRecClose, pSt.nSaved, pSt.buffNum, minFreeBuffs, 0 );
@@ -754,7 +754,7 @@ void startPlayback( void ) {                    // power up codec, preload buffe
     pSt.state = pbFull;
 
     if ( !pSt.SqrWAVE ) {    // no LED for playTune -- let CSM decide
-        ledFg( TB_Config->fgPlaying );  // Turn ON green LED: audio file playing (except for tunes)
+        LedManager::ledFg( TB_Config->fgPlaying );  // Turn ON green LED: audio file playing (except for tunes)
     }
     pSt.state = pbPlaying;
     cdc_SetMute( false );   // unmute
@@ -849,7 +849,7 @@ void startRecord( ) {
     if ( pSt.tsRecord == 0 )
         pSt.tsRecord = pSt.tsResume;   // start of file recording
 
-    ledFg( TB_Config->fgRecording );  // Turn ON red LED: audio file recording
+    LedManager::ledFg( TB_Config->fgRecording );  // Turn ON red LED: audio file recording
     Driver_SAI0.Receive( pSt.audioQueue[1], kBufferWords );    // set up next buffer & start recording
     dbgEvt( TB_stRecord, (int) pSt.audioQueue[0], (int) pSt.audioQueue[1], 0, 0 );
 
@@ -870,7 +870,7 @@ void haltRecord( void ) {                           // ISR callable: stop audio 
     pSt.msRecorded += ( pSt.tsPause - pSt.tsResume );     // (tsResume == tsRecord, if never paused)
     dbgEvt( TB_audRecDn, pSt.msRecorded, 0, 0, 0 );
 
-    ledFg( TB_Config->fgSavingRec );        // Switch foreground LED to saving
+    LedManager::ledFg( TB_Config->fgSavingRec );        // Switch foreground LED to saving
 }
 
 void setMp3Pos(int newMs) {

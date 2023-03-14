@@ -157,7 +157,7 @@ void talking_book( void *tbAttr ) {    // talking book initialization & control 
 
     initLogger();
 
-    initLedManager();                 //  Setup GPIOs for LEDs
+    LedManager::initLedManager();                 //  Setup GPIOs for LEDs
 
     initInputManager();               //  Initialize keypad handler & thread
 
@@ -165,7 +165,7 @@ void talking_book( void *tbAttr ) {    // talking book initialization & control 
 //  fileOpInit();                    //  decode mp3's
 
     const char *startUp = "R3_3G3";
-    ledFg( startUp );
+    LedManager::ledFg( startUp );
 
     initControlManager();   // instantiate ControlManager & run on this thread-- doesn't return
 }

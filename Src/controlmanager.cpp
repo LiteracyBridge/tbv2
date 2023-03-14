@@ -267,7 +267,7 @@ void USBmode( bool start ) {            // start (or stop) USB storage mode
         enableMassStorage( "M0:", NULL, NULL, NULL );
     } else {
         disableMassStorage();      //TODO?  just reboot?
-        ledFg( "_" );
+        LedManager::ledFg( "_" );
         playSqrTune( "G/+" );
         logEvt( "exitUSB" );
         //      NVIC_SystemReset();     // soft reboot?
@@ -280,7 +280,7 @@ void assertValidState( int stateIndex ) {
         tbErr( "invalid state index" );
 }
 
-const char *ledStr( char *s ) {     // lookup TBConfig LED sequences
+const char *ledStr( const char *s ) {     // lookup TBConfig LED sequences
     // @formatter:off
     if ( strcasecmp( s, "bgPulse" )==0 )        return TB_Config->bgPulse;          // set by CSM (background while navigating)           default: _49G
     if ( strcasecmp( s, "fgPlaying" )==0 )      return TB_Config->fgPlaying;        // set by startPlayback()                             default: G!
@@ -334,10 +334,12 @@ static void doAction( Action act, char *arg, int iarg ) {  // execute one csmAct
     }
     switch (act) {
         case LED:
-            ledFg( arg );
+            arg = const_cast<char *>(ledStr(arg));
+            LedManager::ledFg( arg );
             break;
         case bgLED:
-            ledBg( arg );
+            arg = const_cast<char *>(ledStr(arg));
+            LedManager::ledBg( arg );
             break;
         case playSys:
             playSysAudio( arg );
@@ -630,7 +632,7 @@ void initControlManager( void ) {       // initialize control manager
     }
 
     if ( CSM != NULL ) {     // have a CSM definition
-        ledBg( TB_Config->bgPulse );    // reset background pulse according to TB_Config
+        LedManager::ledBg( TB_Config->bgPulse );    // reset background pulse according to TB_Config
         setVolume( TB_Config->default_volume );         // set initial volume
 
         iPkg = 0;

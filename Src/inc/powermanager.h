@@ -15,7 +15,7 @@ extern void   powerDownTBook( void  );          // shut down TBook -- MCU Stop m
 extern void   wakeup( void );
 extern void   setPowerCheckTimer( int timerMs );  // set delay in msec between power checks
 extern void   setupRTC( fsTime time );          // init RTC to time
-extern void   showBattCharge( void );           // generate ledFG to signal power state
+extern void   showBattCharge( void );           // generate LedManager::ledFg to signal power state
 extern bool   haveUSBpower( void );             // true if USB plugged in (PwrGood_N = 0)
 extern bool     isCharging(void);                   // True if Li-Ion currently charging.
 #endif  // POWER_MANAGER_H

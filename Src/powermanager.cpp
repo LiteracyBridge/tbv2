@@ -17,7 +17,7 @@ extern bool             firstBoot;            // true if 1st run after data load
 #define                 PM_NOPWR  1                     // id for osEvent signaling NOPWR interrupt
 #define                 PM_PWRCHK 2                     // id for osTimerEvent signaling periodic power check
 #define                 PM_ADCDONE  4                   // id for osEvent signaling period power check interrupt
-#define                 INITIAL_POWER_CHECK_DELAY 15000 // do initial power check after 15sec
+#define                 INITIAL_POWER_CHECK_DELAY 5000  // do initial power check after 5sec
 
 // TODO: It is possible for more than one of these to be true at the same time. Which one(s) win?
 enum PwrStat {
@@ -298,8 +298,8 @@ void enterStopMode( void ) {                    // put STM32F4 into Stop mode
 void powerDownTBook( void ) {                   // TBook orderly shut down -- copy NLog to disk
     logEvt( "PwrDown" );
     logPowerDown();        // flush & close logs, copy NorLog to eMMC
-    ledBg( NULL );
-    ledFg( NULL );
+    LedManager::ledBg( NULL );
+    LedManager::ledFg( NULL );
 
     tbDelay_ms( 5 ); // pwr start up: 3 );        // wait 3 msec to make sure everything is stable
     enterStopMode();
@@ -525,7 +525,7 @@ void setupRTC( fsTime time ) {        // init RTC & set based on fsTime
 //    periodic power checks --  osTimer calls powerCheckTimerCallback(), which signals powerThread() to call powerCheck()
 void setPowerCheckTimer( int timerMs ) { // set msec between powerChecks  osTimerStop( powerCheckTimer );
     osTimerStop( powerCheckTimer );       // OS fails to reset timer->load value if running!
-    if ( BootVerbosePower ) timerMs = 60000;  // once a minute
+    if ( BootVerbosePower ) timerMs = 10000;  // every 10 seconds
     osTimerStart( powerCheckTimer, timerMs );
 }
 
@@ -788,7 +788,14 @@ void checkPower( bool verbose ) {       // check and report power status
                 eventNm((enum CSM_EVENT) batteryDisplay ));
         pS.prevBatteryState = batteryDisplay;
         changed = true;
-        sendEvent((enum CSM_EVENT) batteryDisplay, batteryParameter );
+        // sendEvent((enum CSM_EVENT) batteryDisplay, batteryParameter );
+        if (!pS.haveUSB) {
+            LedManager::setChargeIndicator(NULL);
+        } else if (getPowerStatus() == CHARGING) {
+            LedManager::setChargeIndicator("_12r4R4r4!");
+        } else {
+            LedManager::setChargeIndicator("_12g4G4g4_12!");
+        }
     }
 
     if ( changed ) {       // display status if anything changed
@@ -829,7 +836,7 @@ void showBattCharge() {     // generate ledFG to signal power state
     LED += (int) latestChargeLevel();
 
     sprintf( fg, "_5%c5_5%c5_5%c5_5%c5_15", LED[0], LED[1], LED[2], LED[3] );
-    ledFg( fg );
+    LedManager::ledFg( fg );
     sprintf( fg, "_%c_%c_%c_%c_", LED[0], LED[1], LED[2], LED[3] );
     logEvtS( "BattLevel", fg );
 }

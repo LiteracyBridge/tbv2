@@ -424,7 +424,7 @@ void eraseNorFlash( bool retainCurrentLog ) {            // erase entire chip & 
     uint32_t stMS = tbTimeStamp();
     uint32_t cnt  = 0;
 
-    ledFg( fgNOR_Erasing );
+    LedManager::ledFg( fgNOR_Erasing );
     //  bool needToInit = true;
     int           eraseErrCnt = 0;
     for (uint32_t addr        = 0; addr < NLg.MAX_ADDR; addr += NLg.SECTORSZ) {
@@ -437,13 +437,13 @@ void eraseNorFlash( bool retainCurrentLog ) {            // erase entire chip & 
         }
         waitWhileBusy();  // non-blocking-- wait till done
 
-        showProgress( "RGR__", 200 );    // eraseNor
+        LedManager::showProgress( "RGR__", 200 );    // eraseNor
         cnt++;
     }
     if ( eraseErrCnt > 0 ) dbgLog( "! eraseNorFlash %d errors \n", eraseErrCnt );
     dbgLog( "! NLog erased %d sectors in %d msec\n", cnt, tbTimeStamp() - stMS );
-    endProgress();
-    ledFg( NULL );
+    LedManager::endProgress();
+    LedManager::ledFg( NULL );
 
     findCurrNLog( true );       // creates a new empty currentLog
     osMutexRelease( logLock );      // allow other threads to continue
@@ -586,7 +586,7 @@ void saveNorLog( const char *fpath ) {           // copy curr Nor log into file 
             }
         }
         stat       = fwrite( NLg.pg, 1, bytesToWrite, f );
-        showProgress( "RG___", 200 );   // saveNorLog
+        LedManager::showProgress( "RG___", 200 );   // saveNorLog
         if ( stat != bytesToWrite )
             fprintf( f, "\n saveNorLog fwrite => %d  totalBytesWritten=%d \n", stat, totalBytesWritten );
         if ( numInvalidPages > 20 ) {
@@ -602,7 +602,7 @@ void saveNorLog( const char *fpath ) {           // copy curr Nor log into file 
 //        }
     }
     tbFclose( f );   //fclose( f );  // tbTmpLog
-    endProgress();
+    LedManager::endProgress();
 
     if ( !isLogValid ) {  
         // bad log-- save to different filename, no matter what caller requested.

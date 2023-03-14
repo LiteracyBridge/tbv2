@@ -1,7 +1,7 @@
 // TB CSM 2022-06-28: v23 re-commenting the defaults to avoid quoted strings in output
 org.amplio.CSMcompile 9(2022-5-16) from C:\Users\bill\workspace\CSMcompile\..\tbv2\TbFiles\SDCard\system\control_def.txt of 2022-09-06 17:14:32
 4
-180000
+10000
 5000
 180000
 50

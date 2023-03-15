@@ -548,9 +548,9 @@ void CheckNLog( FILE *f ) {                      // reads & checks Nor Pg0, msgs
 void saveNorLog( const char *fpath ) {           // copy curr Nor log into file at path
     if ( NLg.pNor == NULL ) return;       // Nor not initialized
 
-    const char *tempLogPath       = "/log/tbTmpLog.txt";
-    const char *goodLogPathFormat = "/log/tbLog_%d.txt";
-    const char *badLogPathFormat  = "/log/badLog_%d.txt";
+    const char *tempLogPath       = TBP[pTB_TMP_LOG_TXT]; // "/log/tbTmpLog.txt";
+    const char *goodLogPathFormat = TBP[pTB_LOG_NN_TXT];  // "/log/tbLog_%d.txt";
+    const char *badLogPathFormat  = TBP[pBAD_LOG_NN_TXT]; // "/log/badLog_%d.txt";
 
     osMutexAcquire( logLock, 0 );     // acquire lock, if not already locked (e.g. filled up during append)
     dbgLog( "6 saveNorLog %s \n", fpath );

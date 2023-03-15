@@ -21,39 +21,11 @@ const int FILEOP_STACK_SIZE = 9000;   // opens in/out files, mp3 decode
 const int LED_STACK_SIZE    = 400;
 // RTX_Config.h  sets OS_TIMER_THREAD_STACK_SIZE = 512;  // used by timer callbacks:  powerCheckTimerCallback, checkKeyTimer, tbTimer
 
-const int pBOOTCNT         = 0;
-const int pCSM_DEF         = 1;
-const int pLOG_TXT         = 2;
-const int pSTATS_PATH      = 3;
-const int pRECORDINGS_PATH = 4;
-const int pLIST_OF_SUBJS   = 5;
-const int pPACKAGE_DIR     = 6;
-const int pPKG_VERS        = 7;
-const int pQC_PASS         = 8;
-const int pERASE_NOR       = 9;
-const int pSET_RTC         = 10;
-const int pLAST_RTC        = 11;
-const int pPKG_DAT         = 12;
-const int pAUDIO           = 13;    // DEBUG
-const int pLAST            = 12;
-
-const char *TBP[] = {            // as static array, so they can be switched to a different device if necessary
-        "M0:/system/bootcount.txt",             //    pBOOTCNT         = 0;
-        "M0:/system/csm_data.txt",              //    pCSM_DEF         = 1;
-        "M0:/log/tbLog.txt",                    //    pLOG_TXT         = 2;
-        "M0:/stats/",                           //    pSTATS_PATH      = 3;
-        "M0:/recordings/",                      //    pRECORDINGS_PATH = 4;
-        "M0:/package/list_of_subjects.txt",     //    pLIST_OF_SUBJS   = 5;
-        "M0:/package/",                         //    pPACKAGE_DIR     = 6;
-        "M0:/package/version.txt",              //    pPKG_VERS        = 7;
-        "M0:/system/QC_PASS.txt",               //    pQC_PASS         = 8;
-        "M0:/system/EraseNorLog.txt",           //    pERASE_NOR       = 9;
-        "M0:/system/SetRTC.txt",               //    pSET_RTC         =10;
-        "M0:/system/lastRTC.txt",              //    pLAST_RTC        =11;
-        "M0:/content/packages_data.txt",       //    pPKG_DAT         =12;
-        "M0:/audio.wav"                        //    pAUDIO = 13;        // DEBUG
+#define X(name,path) path,
+const char *TBP[] = {
+        FILENAME_LIST
 };
-
+#undef X
 
 //TBOOK error codes
 const int TB_SUCCESS          = 0;
@@ -144,7 +116,7 @@ void talking_book( void *tbAttr ) {    // talking book initialization & control 
         //    setDev( TBP[i], fsDevs[0] );
         //}
 
-        if ( BootToQCtest || !fexists( TBP[pQC_PASS] )) {
+        if ( BootToQCtest || !fexists( TBP[pQC_PASS_TXT] )) {
             RunQCTest = true;
         }
 

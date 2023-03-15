@@ -1,6 +1,7 @@
 #ifndef INPUT_MANAGER_H
 #define INPUT_MANAGER_H
 
+#include "csm.h"
 #include  "tbook.h"
 
 // TalkingBook keypad has 10 keys, each connected to a line of the keypad cable
@@ -64,7 +65,7 @@ typedef struct {  // TB_Key --  msg for key Q from ISR to InputThread
 } TB_Key;
 
 typedef struct {  // TB_Event --  event & downMS for event Q
-    Event    typ;
+    CSM_EVENT    typ;
     uint32_t arg;
 } TB_Event;
 
@@ -92,16 +93,16 @@ typedef struct {  // TB_Event --  event & downMS for event Q
 #define TB_isLong( evt ) ( evt.typ >= Home__ && evt.typ <= Table__ )
 #define TB_isStar( evt ) ( evt.typ >= starHome && evt.typ <= starTable )
 #define TB_isSystem( evt ) ( evt.typ >= AudioDone && evt.typ <= eUNDEF )
-#define toShortEvt( k ) ( (Event) ((int) k + Home ) )
-#define toLongEvt( k ) ( (Event) ((int) k + Home__ ) )
-#define toStarEvt( k ) ( (Event) ((int) k + starHome ) )
+#define toShortEvt( k ) ( (CSM_EVENT) ((int) k + Home ) )
+#define toLongEvt( k ) ( (CSM_EVENT) ((int) k + Home__ ) )
+#define toStarEvt( k ) ( (CSM_EVENT) ((int) k + starHome ) )
 
 
 extern void initInputManager( void );
 extern void disableKeyInterrupts( KEYS_MASK keysToRemainEnabled );
 extern void keyPadPowerDown( void );            // shut down keypad GPIOs
 extern void keyPadPowerUp( void );              // re-initialize keypad GPIOs
-extern void sendEvent( Event, int32_t );
+extern void sendEvent( CSM_EVENT, int32_t );
 
 extern osMessageQueueId_t osMsg_TBEvents;
 extern osMemoryPoolId_t   TBEvent_pool;   // memory pool for TBEvents

@@ -5,22 +5,22 @@
 #ifndef TBV2_GPIO_H
 #define TBV2_GPIO_H
 
-#include "gpio_list.h"
+#include "tb_enum_list.h"
 
 /*
  * GPIO definitions. The first #define lists all of the GPIOs that we care about along with their parameters.
  * The parameters are given in the form of #define invocations, like
- *      GPIO_DEFINITION( NAME, GPIOx,  bit#,   flags)
+ *      X( NAME, GPIOx,  bit#,   flags)
  */
 
 // Create the enumeration from the list.
-#define GPIO_DEFINITION(name, port, bit, flags) g ## name,
+#define X(name, port, bit, flags) g ## name,
 typedef enum GPIO_ID_t {
     GPIO_DEFINITION_LIST
     NUM_GPIO_DEFINITIONS,
     gINVALID
 } GPIO_ID;
-#undef GPIO_DEFINITION
+#undef X
 
 //typedef struct {  // GPIO_Signal -- define GPIO port/pins/interrupt #, signal name, & st when pressed for a GPIO_ID
 //    GPIO_ID id;      // GPIO_ID connected to this line

@@ -1,6 +1,7 @@
 // TBookV2  powermanager.c
 //   Apr 2018
 
+#include "csm.h"
 #include "tbook.h"
 #include "powermanager.h"
 
@@ -784,8 +785,8 @@ void checkPower( bool verbose ) {       // check and report power status
         printf( "Mass storage mode\n" );
         pS.prevBatteryState = BDS_INVALID; // We'll want to update the state when done here.
     } else if ( pS.prevBatteryState != batteryDisplay ) {
-        printf( "Battery state changed: %s -> %s\n", eventNm((enum CSM_EVENT) pS.prevBatteryState ),
-                eventNm((enum CSM_EVENT) batteryDisplay ));
+        printf( "Battery state changed: %s -> %s\n", CSM::eventName((enum CSM_EVENT) pS.prevBatteryState ),
+                CSM::eventName((enum CSM_EVENT) batteryDisplay ));
         pS.prevBatteryState = batteryDisplay;
         changed = true;
         // sendEvent((enum CSM_EVENT) batteryDisplay, batteryParameter );

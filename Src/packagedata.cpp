@@ -1,301 +1,283 @@
 // TBookV2  packageData.c
 //   Gene Ball  Sept2021
+#include <ctype.h>
 
+#include "encaudio.h"
+#include "linereader.h"
 #include "tbook.h"
+#include "csm.h"
 #include "packageData.h"
-/********************************************* Symbol Definitions coordinated with CSMcompile  ***********************/
-// MUST MATCH:  typedef Action in tknTable.h 
-// MUST MATCH:  CsmToken.java -- enum TknAction
-// @formatter:off
-const char *  ANms[] = { "aNull",
-    "LED",          "bgLED",        "playSys",
-    "playSubj",     "pausePlay",    "resumePlay",
-    "stopPlay",     "volAdj",       "spdAdj",
-    "posAdj",       "startRec",     "pauseRec",
-    "resumeRec",    "finishRec",    "playRec",
-    "saveRec",      "writeMsg",     "goPrevSt",
-    "saveSt",       "goSavedSt",    "subjAdj",
-    "msgAdj",       "setTimer",     "resetTimer",
-    "showCharge",   "startUSB",     "endUSB",
-    "powerDown",    "sysBoot",      "sysTest",
-    "playNxtPkg",   "changePkg",    "playTune",
-    "filesTest",
-    NULL
-};
-// @formatter:on
-const char *actionNm( Action a ) { return ANms[(int) a]; }
 
-// MUST MATCH:  typedef Event in tknTable.h  
-// MUST MATCH:  CsmToken.java -- enum TknEvent
-// @formatter:off
-const char *  ENms[] = {
-    "eNull",
-        "Home",     "Circle",     "Plus",     "Minus",     "Tree",     "Lhand",     "Rhand",     "Pot",     "Star",     "Table",     //=10
-        "Home__",   "Circle__",   "Plus__",   "Minus__",   "Tree__",   "Lhand__",   "Rhand__",   "Pot__",   "Star__",   "Table__",   //=20
-        "starHome", "starCircle", "starPlus", "starMinus", "starTree", "starLhand", "starRhand", "starPot", "starStar", "starTable", //=30
-        "AudioStart",             "AudioDone",             "ShortIdle",             "LongIdle",             "LowBattery",            //=35
-        "BattCharging",           "BattCharged",           "BattMin",               "BattMax",              "FirmwareUpdate",        //=40
-        "Timer",                  "ChargeFault",           "LithiumHot",            "MpuHot",               "FilesSuccess",          //=45
-        "FilesFail",              "anyKey",                "BattCharging75",        "BattNotCharging",      "eUNDEF", //=50
-    NULL    // end of list marker
-};
-// @formatter:on
-// MUST MATCH:  typedef Event in tknTable.h
-//char *  shENms[] = { "eN",
-//    "Ho", "Ci", "Pl", "Mi", "Tr", "Lh", "Rh", "po", "St", "ta",
-//    "H_", "C_", "P_", "M_", "T_", "L_", "R_", "p_", "S_", "t_",
-//    "sH", "sC", "sP", "sM", "sT", "sL", "sR", "sp", "sS", "st",
-//    "aS", "aD", "sI", "lI", "bL", "bc", "bC", "b0", "b1", "fU",
-//    "Ti", "cF", "LH", "MH", "fS", "fF", "aK", "eU",
-//    NULL
-//};
-const char *eventNm( Event e ) { return ENms[(int) e];; }
-//char *  shEvntNm( Event e ) { return shENms[ (int)e ];; }
-//
-//
 /***************************   read package_data.txt to get structure & audio files for loaded content  ***********************/
-Deployment_t *  Deployment = NULL;          // extern cnt & ptrs to info for each loaded content Package
-CSM_t *         CSM = NULL;                 // extern ptr to definition of CSM
-TBConfig_t *    TB_Config;                  // TBook configuration variables
 
-//
-// local shared variables
-char            line[202];                  // internal text line buffer shared by all packageData routines
-int             errCount;                   // # errors while parsing this file
-int             lineNum = 0;
-const char *    errType;                    // name of file type being loaded, for error messages
+extern const char * const preferredAudioExtensions[];
+extern const int numAudioExtensions;
 
-// local shared utilities
-void *loadErr( const char *msg ) {                    // report & count error in 'errType' file, when parsing 'msg'
-    errLog( "%s:L%d %s ", errType, lineNum, msg );
-    errCount++;
-    return NULL;
+Deployment *theDeployment = NULL;          // extern cnt & ptrs to info for each loaded content Package
+
+/**
+ * Gets the AudioFile object for the given message.
+ * @param iMsg Index of message for which AudioFile is needed.
+ * @return A pointer to the AudioFile.
+ */
+AudioFile *Subject::getMessage(int iMsg) {
+    if (iMsg < 0 || iMsg >= messages.size())
+        errLog("gMsg(%s.%d) bad idx", name, iMsg);
+    AudioFile *audioFile = messages[iMsg];
+    if (audioFile == NULL)
+        errLog("gMsg(%s.%d) bad msg file", name, iMsg);
+    return audioFile;
 }
 
-void appendIf( char *path, const char *suffix ) {  // append 'suffix' if not there
-    short len  = strlen( path );
-    short slen = strlen( suffix );
-    if ( len < slen || strcasecmp( &path[len - slen], suffix ) != 0 )
-        strcat( path, suffix );
+/**
+ * Constructs a dynamic playlist object.
+ * @param n The allocation size for the vector of messages.
+ * @param pathIx The index in the Package's list of paths of the path that contains / will contain
+ *      this playlist's message audio files.
+ * @param listFileName The name of the file that contains / will contain the messages that are
+ *      added to this playlist.
+ */
+DynamicSubject::DynamicSubject(int n, int pathIx, const char *listFileName) : Subject(n) {
+    this->pathIx = pathIx;
+    this->listFileName = listFileName;
 }
 
-char *allocStr( const char *s, const char *strType ) { // allocate & copy s
-    char *pStr = static_cast<char*>(tbAlloc( strlen( s ) + 1, strType ));
-    strcpy( pStr, s );
-    return pStr;
+/**
+ * Adds a message to the dynamic playlist. The message filename is also persisted in the dynamic
+ * playlist's list file.
+ * @param recordingFileName The name of the audio file to be added to the playlist.
+ */
+void DynamicSubject::addRecording(const char *recordingFileName) {
+    const char *fname = strrchr(recordingFileName, '/');
+    // Skip past last '/'. If none, use given file name.
+    fname = (fname == NULL) ? recordingFileName : fname + 1;
+    // Add the file to the playlist.
+    AudioFile *audioFile = new("uf") AudioFile(pathIx, allocStr(fname, "uf"));
+    messages.insert(messages.end(), audioFile);
+    // Persist the file in the playlist list file.
+    FILE *listFile = tbFopen(listFileName, "a");
+    fwrite(fname, 1, strlen(fname), listFile);
+    fwrite("\n", 1, strlen("\n"), listFile);
+    tbFclose(listFile);
 }
 
-void ldDepLn( FILE *inF, const char *typ ) {         // load next text line from deployment inF, trim comments & lead/trail whitespace, repeat if empty
-    if ( errCount > 0 ) {
-        line[0] = '\0';
-        return;
+/**
+ * Load the list of previously added messages. Called at startup after the rest of
+ * package_data has been loaded.
+ */
+void DynamicSubject::readListFile() {
+    LineReader lr = LineReader(listFileName, "uf list");
+    while (lr.readLine("uf") != NULL) {
+        AudioFile *audioFile = new("uf") AudioFile(pathIx, allocStr(lr.getLine(), "uf"));
+        messages.insert(messages.end(), audioFile);
     }
-
-    while (fscanf( inF, "%201[^\n]%*[\n]", line ) == 1) {
-        lineNum++;
-        if ( strlen( line ) > 200 ) loadErr( "Line too long" );
-        char *cret = strchr( line, '\r' );
-        if ( cret != NULL ) *cret = '\0';
-        char *hash = strchr( line, '#' );
-        if ( hash != NULL ) *hash = '\0';   // terminate line at first '#'
-        for (int i = 0; i < strlen( line ); i++)
-            if ( line[i] != ' ' && line[i] != '\t' ) {
-                if ( i > 0 ) strcpy( &line[0], &line[i] );   // skip leading whitespace
-
-                for (int j = strlen( line ) - 1; j > i; j--) {
-                    if ( line[j] == ' ' || line[j] == '\t' ) {
-                        line[j] = '\0';  // truncate trailing whitespace
-                    } else {
-                        break;   // last non-whitespace char
-                    }
-                }
-                return; // non-empty line -- so return
-            }
-    }
-    loadErr( typ );  // no str found (EOF)
 }
 
-char *ldDepStr( FILE *inF, const char *typ ) {         // allocate & return next string from inF (ignoring comments & whitespace)
-    ldDepLn( inF, typ );                // load next string into line[]
-    return allocStr( line, typ );       // allocate & return it
-}
-
-int ldDepInt( FILE *inF, const char *typ ) {         // read 'typ' string from inF, alloc & return ptr -- loadErr if fails
-    ldDepLn( inF, typ );    // line  gets next line (no comments, or lead/trail white space)  
-    int v;
-    if ( sscanf( line, "%d", &v ) == 1 )
-        return v;
-
-    loadErr( typ );
-    return 0;
-}
-
-//
-// public Deployment access routines
-int nSubjs( void ) {                                 // return # of subjects in current package ( currPkg )
-    if ( currPkg == NULL || currPkg->subjects == NULL )
-        errLog( "nSubjs -- bad pkg" );
-    return currPkg->subjects->nSubjs;
-}
-
-Subject_t *gSubj( int iSubj ) {                             // return iSubj subject from current package ( currPkg )
-    if ( currPkg == NULL || currPkg->subjects == NULL )
-        errLog( "cSubj[%d] -- bad pkg", iSubj );
-    if ( iSubj < 0 || iSubj >= currPkg->subjects->nSubjs )
-        errLog( "cSubj(%d) bad idx", iSubj );
-    Subject_t *subj = currPkg->subjects->subj[iSubj];
-    if ( subj == NULL )
-        errLog( "cSubj(%d) bad subj", iSubj );
+/**
+ * Returns a Subject, by index, from the Package.
+ * @param iSubj Index of the desired Subject.
+ * @return A pointer to the Subject.
+ */
+Subject *Package::getSubject(int iSubj) {
+    if (subjects == NULL)
+        errLog("cSubj[%d] -- bad pkg", iSubj);
+    if (iSubj < 0 || iSubj >= nSubjects)
+        errLog("cSubj(%d) bad idx", iSubj);
+    Subject *subj = subjects[iSubj];
+    if (subj == NULL)
+        errLog("cSubj(%d) bad subj", iSubj);
     return subj;
 }
 
-int nMsgs( Subject_t *subj ) {                      // return # of messages in subj
-    if ( subj == NULL || subj->messages == NULL )
-        errLog( "nMsgs -- bad subj" );
-    return subj->messages->nMsgs;
+const char *Package::getPath(int pathIx) {         // return content directory path for pathList[i]
+    if (pathIx < 0 || pathIxs == NULL || pathIx >= nPathIxs)
+        errLog("getPath bad args");
+    short dirIdx = pathIxs[pathIx];
+    if (dirIdx < 0 || dirIdx >= theDeployment->numPaths)
+        errLog("getPath bad dirIdx");
+    return theDeployment->audioPaths[dirIdx];
 }
 
-AudioFile_t *gMsg( Subject_t *subj, int iMsg ) {             // return audioFile [iMsg] from subject subj
-    if ( currPkg == NULL || currPkg->subjects == NULL )
-        errLog( "gMsg(%d) -- bad subj", iMsg );
-    if ( iMsg < 0 || iMsg >= subj->messages->nMsgs )
-        errLog( "gMsg(%s.%d) bad idx", subj->subjName, iMsg );
-    AudioFile_t *aud = subj->messages->msg[iMsg];
-    if ( aud == NULL )
-        errLog( "gMsg(%s.%d) bad msg file", subj->subjName, iMsg );
-    return aud;
-}
-
-int nPkgs( void ) {                                  // return # of packages in current deployment
-    if ( Deployment == NULL || Deployment->packages == NULL )
-        errLog( "nPkgs bad Deployment" );
-    return Deployment->packages->nPkgs;
-}
-
-Package_t *gPkg( int iPkg ) {                               // return iPkg'th package from current deployment
-    int nP = nPkgs();
-    if ( iPkg < 0 || iPkg >= nP )
-        errLog( "gPkg(%d) bad idx", iPkg );
-    return Deployment->packages->pkg[iPkg];
-}
-
-const char *pkgNm( void ) {                                  // return text name of current Package
-    return currPkg->packageName;
-}
-
-const char *subjNm( Subject_t *subj ) {                      // return text name of Subject
-    return subj->subjName;
-}
-
-char *getAudioPath( char *path, AudioFile_t *aud ) { // fill path[] with dir/filename & return it
-    AudioPaths_t *paths = Deployment->AudioPaths;
-    if ( path == NULL || paths == NULL || aud->pathIdx < 0 || aud->pathIdx >= paths->nPaths )
-        errLog( "buildAudioPath bad paths" );
-    strcpy( path, paths->audPath[aud->pathIdx] );   // content directory path (ends in '/')
-    strcat( path, aud->filename );                    // filename (with extension)
-    return path;
-}
-
-char *gPath( PathList_t *pathList, int idx ) {         // return content directory path for pathList[i]
-    if ( idx < 0 || pathList == NULL || idx >= pathList->PathLen )
-        errLog( "gPath bad args" );
-    int dirIdx = pathList->DirIdx[idx];
-    if ( dirIdx < 0 || dirIdx >= Deployment->AudioPaths->nPaths )
-        errLog( "gPath bad dirIdx" );
-    return Deployment->AudioPaths->audPath[dirIdx];
-}
-
-char *findAudioPath( char *path, PathList_t *srchpaths, char *nm ) { // fill path[] with first dir/nm.wav & return it
-    if ( path == NULL || srchpaths == NULL )
-        errLog( "findAudioPath bad srchpaths" );
-    char wavnm[50];
-    strcpy( wavnm, nm );
-    appendIf( wavnm, ".wav" );       // + .wav if not there
-
-    for (int i = 0; i < srchpaths->PathLen; i++) {
-        strcpy( path, gPath( srchpaths, i ));          // next content directory path in list
-        strcat( path, wavnm );
-        if ( fexists( path ))
-            return path;            // found on path => return it
+const char *Package::findAudioPath(char *pathBuf, const char *fn) { // fill path[] with first dir/nm.wav & return it
+    if (pathBuf == NULL || pathIxs == NULL)
+        errLog("findAudioPath bad srchpaths");
+    char fname[MAX_PATH];
+    strcpy(fname, fn);
+    // Drop any leading path.
+    char *pF;
+    if ((pF=strrchr(fname, '/')) != NULL || (pF=strrchr(fname, '\\')) != NULL) strcpy(fname, pF);
+    // Truncate any extension.
+    if ((pF=strrchr(fname, '.')) != NULL) *pF = '\0';
+    // Search by paths...
+    for (int ix = 0; ix < nPathIxs; ix++) {
+        const char *aPath = getPath(ix);
+        strcpy(pathBuf, aPath);          
+        strcat(pathBuf, fname);
+        pF = pathBuf + strlen(pathBuf);
+        // ...then by extension.
+        for (int j=0; j<numAudioExtensions; j++) {
+            strcpy(pF, preferredAudioExtensions[j]);
+            if (fexists(pathBuf))
+                return pathBuf;            
+        }
     }
     return NULL;
 }
+
+void Package::addRecording(const char *recordingFileName) {
+    if (ixUserFeedback >= 0) {
+        DynamicSubject *dynamicSubject = static_cast<DynamicSubject*>(getSubject(ixUserFeedback));
+        dynamicSubject->addRecording(recordingFileName);
+    }
+}
+
+
+Package *Deployment::getPackage(int ixPackage) {                               // return iPkg'th package from current deployment
+    int nP = numPackages();
+    if (ixPackage < 0 || ixPackage >= nPackages)
+        errLog("getPackage(%d) bad idx", ixPackage);
+    return packages[ixPackage];
+}
+
+/**
+ * Build a full path from a filename and index into array-of-paths.
+ * @param path The buffer to receive the full name.
+ * @param aud The AudioFile for which to build the path.
+ * @return the path. (Why?)
+ */
+const char *Deployment::getPathForAudioFile(char *pathBuffer, AudioFile *aud) { // fill path[] with dir/filename & return it
+    const char **paths = audioPaths;
+    if (pathBuffer == NULL || paths == NULL || aud->pathIdx < 0 || aud->pathIdx >= numPaths)
+        errLog("buildAudioPath bad paths");
+    strcpy(pathBuffer, paths[aud->pathIdx]);                // content directory path (ends in '/')
+    strcat(pathBuffer, aud->filename);                      // filename (with extension)
+    return pathBuffer;
+}
+//endregion
+
+class PackageDataReader : LineReader {
+public:
+    PackageDataReader(const char *fname);
+
+    bool readPackageData();
+
+    void readAudioPaths(Deployment &deployment);
+
+    AudioFile *readAudioFile(const char *tag);
+
+    Subject *readSubject();
+
+    void readPackageSearchPathList(Package &package);
+
+    Package *readPackage(int ixPackage);
+
+private:
+    bool userFeedbackPublic;
+    int ufPathIx;
+    const char *ufListFile;
+};
 
 //
 // private Deployment routines
-AudioPaths_t *loadAudioPaths( FILE *inF ) {                    // parse pkg_dat list of Content directories
-    if ( errCount > 0 ) return NULL;
-    int dirCnt = ldDepInt( inF, "pkg_dat dirCnt" );
-    AudioPaths_t *dirs = (AudioPaths_t *) tbAlloc( sizeof( int ) + dirCnt * sizeof( char * ), "AudioPaths" );
-
-    dirs->nPaths = dirCnt;
-    for (int i = 0; i < dirCnt; i++) {
-        dirs->audPath[i] = ldDepStr( inF, "audPath" );
+/**
+ * Read the count of "content paths" and the list of paths.
+ * Adds an entry for UF.
+ * @param deployment The Deployment into which to populate the path list.
+ */
+void PackageDataReader::readAudioPaths(Deployment &deployment) {
+    if (errCount > 0) return;
+    deployment.numPaths   = readInt("pkg_dat dirCnt");
+    // If user feedback is public, also allocate space for the path to recordings.
+    deployment.audioPaths = new("audioPaths") const char *[deployment.numPaths + (userFeedbackPublic ? 1 : 0)];
+    for (int i = 0; i < deployment.numPaths; i++) {
+        deployment.audioPaths[i] = readString("audPath");
     }
-    return dirs;
+    if (userFeedbackPublic) {
+        ufPathIx = deployment.numPaths++;
+        deployment.audioPaths[ufPathIx] = TBP[pRECORDINGS_PATH];
+    }
 }
 
-PathList_t *loadSearchPath( FILE *inF ) {                    // parse next pkg_dat line as list of ContentPath indices
-    if ( errCount > 0 ) return NULL;
+void PackageDataReader::readPackageSearchPathList(Package &package) {                    // parse next pkg_dat line as list of ContentPath indices
+    if (errCount > 0) return;
     int d[10];
-    ldDepLn( inF, "prompts_paths" );
-    int dcnt = sscanf( line, "%d;%d;%d;%d;%d;%d;%d;%d;%d;%d; \n",
-                       &d[0], &d[1], &d[2], &d[3], &d[4], &d[5], &d[6], &d[7], &d[8], &d[9] );
-    PathList_t *plist = static_cast<PathList_t*>(tbAlloc( sizeof( PathList_t ), "pathList" ));        // always allocate space for 10  (only 1 per package)
-    plist->PathLen = dcnt;
-    for (int i = 0; i < dcnt; i++) {
-        plist->DirIdx[i] = d[i];
+    readLine("prompts_paths");
+    package.nPathIxs = sscanf(line, "%d;%d;%d;%d;%d;%d;%d;%d;%d;%d; \n",
+                          &d[0], &d[1], &d[2], &d[3], &d[4], &d[5], &d[6], &d[7], &d[8], &d[9]);
+    package.pathIxs = new("pathList") short[package.nPathIxs];
+    for (int ix=0; ix<package.nPathIxs; ++ix) {
+        package.pathIxs[ix] = d[ix];
     }
-    return plist;
 }
 
-AudioFile_t *loadAudio( FILE *inF, const char *typ ) {        // load dirIdx & filename from pkg_dat line
-    if ( errCount > 0 ) return NULL;
-    AudioFile_t *audfile = static_cast<AudioFile_t*>(tbAlloc( sizeof( AudioFile_t ), "audFile" ));
-    ldDepLn( inF, typ );
+AudioFile *PackageDataReader::readAudioFile(const char *typ) {        // load dirIdx & filename from pkg_dat line
+    if (errCount > 0) return NULL;
+    AudioFile *audioFile = new("audioFile") AudioFile;
+    readLine(typ);
     char fname[100];
-    if ( sscanf( line, "%d %s ", &audfile->pathIdx, fname ) == 2 ) {
-        audfile->filename = allocStr( fname, "audFilename" );
-    } else loadErr( typ );
-    return audfile;
+    if (sscanf(line, "%d %s ", &audioFile->pathIdx, fname) == 2) {
+        audioFile->filename = allocStr(fname, "audFilename");
+    } else {
+        error(typ);
+    }
+    return audioFile;
 }
 
-Subject_t *loadSubject( FILE *inF ) {                       // parse content subject from pkg_dat
-    if ( errCount > 0 ) return NULL;
-    Subject_t *subj = static_cast<Subject_t*>(tbAlloc( sizeof( Subject_t ), "subject" ));
+/**
+ * Parse the description of one playlist.
+ * @return a pointer to the Playlist object
+ */
+Subject *PackageDataReader::readSubject() {                       // parse content subject from pkg_dat
+    if (errCount > 0) return NULL;
 
-    subj->subjName = ldDepStr( inF, "subjName" );
+    const char * name = readString("subjName");
 
-    subj->shortPrompt = loadAudio( inF, "subj_pr" );
-    subj->invitation  = loadAudio( inF, "subj_inv" );
+    AudioFile *prompt = readAudioFile("subj_pr");
+    AudioFile *invitation = readAudioFile("subj_inv");
 
-    int nMsgs = ldDepInt( inF, "nMsgs" );
+    Subject *subj;
+    int nMessages = readInt("nMsgs");
+    if (nMessages == 0) {
+        subj = new("subject") DynamicSubject(0, ufPathIx, "M0:/content/uf_list.txt");
+    } else {
+        subj = new("subject") Subject(nMessages);
+    }
+    subj->name = name;
+    subj->shortPrompt = prompt;
+    subj->invitation = invitation;
 
-    subj->messages        = (MsgList_t *) tbAlloc( sizeof( int ) + nMsgs * sizeof( void * ), "subjList" );
-    subj->stats           = static_cast<MsgStats*>(tbAlloc( sizeof( MsgStats ), "stats" ));
-    subj->messages->nMsgs = nMsgs;
-    for (int i = 0; i < nMsgs; i++) {
-        subj->messages->msg[i] = loadAudio( inF, "msg" );
+//    subj->messages = new("msgList") AudioFile *[subj->nMessages];
+    subj->stats    = static_cast<MsgStats *>(tbAlloc(sizeof(MsgStats), "stats"));
+    for (int i = 0; i < nMessages; i++) {
+        subj->messages[i] = readAudioFile("msg");
     }
     return subj;
 }
 
-Package_t *loadPackage( FILE *inF, int pkgIdx ) {           // parse one content package from pkg_dat
-    if ( errCount > 0 ) return NULL;
-    Package_t *pkg = (Package_t *) tbAlloc( sizeof( Package_t ), "package" );
+Package *PackageDataReader::readPackage(int pkgIdx) {
+    /*
+     *   package_name
+     *   prompt_path prompt_filename
+     *   playlist_prompt_path;playlist_prompt_path...
+     *     num_playlists
+     */
+    if (errCount > 0) return NULL;
+    Package *pkg = new("package") Package;
 
-    pkg->pkgIdx       = pkgIdx;
-    pkg->packageName  = ldDepStr( inF, "pkgName" );
-    pkg->pkg_prompt   = loadAudio( inF, "pkg_pr" );      // audio prompt for package
-    pkg->prompt_paths = loadSearchPath( inF );         // search path for prompts
+    pkg->pkgIdx     = pkgIdx;
+    pkg->name       = readString("pkgName");
+    pkg->pkg_prompt = readAudioFile("pkg_pr");      // audio prompt for package.
+    readPackageSearchPathList(*pkg);         // search path for prompts
 
-    int nSubjs = ldDepInt( inF, "nSubjs" );            // number of playlists (subjects) in package
-    pkg->subjects         = (SubjList_t *) tbAlloc( sizeof( int ) + nSubjs * sizeof( void * ), "subj_list" );
-    pkg->subjects->nSubjs = nSubjs;
-    for (int i = 0; i < nSubjs; i++) {
-        pkg->subjects->subj[i] = loadSubject( inF );
+    pkg->nSubjects = readInt("nSubjs");            // number of playlists (subjects) in package
+    pkg->subjects  = new("subj_list") Subject *[pkg->nSubjects+1];
+    for (int i = 0; i < pkg->nSubjects; i++) {
+        pkg->subjects[i] = readSubject();
+        if (userFeedbackPublic && pkg->subjects[i]->numMessages() == 0) {
+            pkg->ixUserFeedback = i;
+        }
     }
-    logEvtNSNI( "LdPkg", "nm", pkg->packageName, "nSubj", pkg->subjects->nSubjs );
+    logEvtNSNI("LdPkg", "nm", pkg->getName(), "nSubj", pkg->numSubjects());
     return pkg;
 }
 
@@ -303,216 +285,78 @@ Package_t *loadPackage( FILE *inF, int pkgIdx ) {           // parse one content
 const int PACKAGE_FORMAT_VERSION = 1;                 // format of Oct 2021
 //
 // public routine to load a full Deployment from  /content/packages_data.txt
-bool loadPackageData( void ) {                        // load structured TBook package contents
-    errType    = "Deployment";
-    errCount   = 0;
-    lineNum    = 0;
-    Deployment = (Deployment_t *) tbAlloc( sizeof( Deployment_t ), "Deployment" );
+bool PackageDataReader::readPackageData(void) {                        // load structured TBook package contents
+    theDeployment = new("deployment") Deployment;
 
-    FILE *inFile = tbOpenRead( TBP[pPKG_DAT] );
-    if ( inFile == NULL ) {
-        loadErr( "package_data.txt not found" );
+    if (inFile == NULL) {
+        error("package_data.txt not found");
     } else {
-        int fmtVer = ldDepInt( inFile, "fmt_ver" );
-        if ( fmtVer != PACKAGE_FORMAT_VERSION ) {
-            loadErr( "bad format_version" );
+        int fmtVer = readInt("fmt_ver");
+        if (fmtVer != PACKAGE_FORMAT_VERSION) {
+            error("bad format_version");
         } else {
-            ldDepLn( inFile, "version" );
-            Deployment->Version = allocStr( line, "deployVer" );
-            logEvtNS( "Deploymt", "Ver", Deployment->Version );
+            theDeployment->name = readString("deployName");
+            logEvtNS("Deployment", "Name", theDeployment->name);
 
-            Deployment->AudioPaths = loadAudioPaths( inFile );
+            readAudioPaths(*theDeployment);
 
-            int nPkgs = ldDepInt( inFile, "nPkgs" );
-            Deployment->packages        = (PackageList_t *) tbAlloc( sizeof( int ) + nPkgs * sizeof( void * ),
-                                                                     "deployment" );
-            Deployment->packages->nPkgs = nPkgs;
-            for (int i = 0; i < nPkgs; i++) {
-                Deployment->packages->pkg[i] = loadPackage( inFile, i );
+            theDeployment->nPackages = readInt("nPkgs");
+            theDeployment->packages  = new("deplPkgs") Package*[theDeployment->nPackages];
+            for (int i = 0; i < theDeployment->nPackages; i++) {
+                theDeployment->packages[i] = readPackage(i);
             }
         }
     }
 
-    if ( inFile != NULL ) {
-        tbFclose( inFile );
+    if (errCount > 0) {
+        errLog("packages_data: %d parse errors", errCount);
+        return false;
     } else {
-        if ( errCount == 0 ) {
-            errLog( "null file but errCount is 0", errCount );
-            errCount = 1;
+        closeInFile();
+        if (userFeedbackPublic) {
+            for (int i=0; i<theDeployment->numPackages(); ++i) {
+                Package *package = theDeployment->getPackage(i);
+                int ixUf = package->ixUserFeedback;
+                if (ixUf >= 0) {
+                    DynamicSubject *dynamicSubject = static_cast<DynamicSubject*>(package->getSubject(ixUf));
+                    dynamicSubject->readListFile();
+                }
+            }
+        } else {
+            // Search for and delete any lingering .wav recordings.
+            char fname[MAX_PATH];
+            strcpy(fname, TBP[pRECORDINGS_PATH]);
+            strcat(fname, "*.wav");
+            // Make a copy of the containing directory, for the fdelete() call.
+            char fname2[MAX_PATH];
+            strcpy(fname2, TBP[pRECORDINGS_PATH]);
+            char * pFn = fname2 + strlen(fname2);
+
+            fsFileInfo fInfo;
+            fInfo.fileID = 0;
+
+            FileSysPower(true);
+            while (ffind(fname, &fInfo) == fsOK) {
+                strcpy(pFn, fInfo.name);
+                uint32_t status = fdelete(fname2, NULL);
+                printf("Delete status %d: %s\n", status, fname2);
+            }
+
         }
-    }
-    if ( errCount > 0 ) {
-        errLog( "packages_data: %d parse errors", errCount );
-        return false;
     }
     return true;
 }
 
-//
-// private ControlStateMachine loading routines
-TBConfig_t *loadTbConfig( FILE *inF ) {                      // load & return CSM configuration variables
-    if ( errCount > 0 ) return NULL;
-    TBConfig_t *cfg = (TBConfig_t *) tbAlloc( sizeof( TBConfig_t ), "TBConfig" );
-
-    cfg->default_volume  = (short) ldDepInt( inF, "def_vol" );
-    cfg->powerCheckMS    = ldDepInt( inF, "powerChk" );
-    cfg->shortIdleMS     = ldDepInt( inF, "shortIdle" );
-    cfg->longIdleMS      = ldDepInt( inF, "longIdle" );
-    cfg->minShortPressMS = ldDepInt( inF, "shortPr" );
-    cfg->minLongPressMS  = ldDepInt( inF, "longPr" );
-    cfg->qcTestState     = ldDepInt( inF, "qcState" );
-    cfg->initState       = ldDepInt( inF, "initState" );
-
-    cfg->systemAudio    = ldDepStr( inF, "sysAud" );
-    cfg->bgPulse        = ldDepStr( inF, "bgPulse" );
-    cfg->fgPlaying      = ldDepStr( inF, "fgPlaying" );
-    cfg->fgPlayPaused   = ldDepStr( inF, "fgPlayPaused" );
-    cfg->fgRecording    = ldDepStr( inF, "fgRecording" );
-    cfg->fgRecordPaused = ldDepStr( inF, "fgRecordPaused" );
-    cfg->fgSavingRec    = ldDepStr( inF, "fgSavingRec" );
-    cfg->fgSaveRec      = ldDepStr( inF, "fgSaveRec" );
-    cfg->fgCancelRec    = ldDepStr( inF, "fgCancelRec" );
-    cfg->fgUSB_MSC      = ldDepStr( inF, "fgUSB_MSC" );
-    cfg->fgTB_Error     = ldDepStr( inF, "fgTB_Error" );
-    cfg->fgNoUSBcable   = ldDepStr( inF, "fgNoUSBcable" );
-    cfg->fgUSBconnect   = ldDepStr( inF, "fgUSBconnect" );
-    cfg->fgPowerDown    = ldDepStr( inF, "fgPowerDown" );
-    return cfg;
+PackageDataReader::PackageDataReader(const char *fname) : LineReader(fname, "Deployment") {
+    userFeedbackPublic = !encUfAudioEnabled;
 }
 
-AudioList_t *loadSysAudio( FILE *inF ) {                      // load & return list of all PlaySys names used in CSM
-    if ( errCount > 0 ) return NULL;
-    int cnt = ldDepInt( inF, "nSysAudio" );
-    AudioList_t *lst = (AudioList_t *) tbAlloc( sizeof( int ) + cnt * sizeof( char * ), "SysAudio" );
-
-    lst->nSysA = cnt;
-    for (int i = 0; i < cnt; i++) {
-        lst->sysA[i] = ldDepStr( inF, "sysAud" );
-    }
-    return lst;
-}
-
-csmAction_t *loadAction( FILE *inF ) {                        // load & return enum Action & string arg
-    if ( errCount > 0 ) return NULL;
-    ldDepLn( inF, "action" );
-
-    csmAction_t *a = (csmAction_t *) tbAlloc( sizeof( csmAction_t ), "csmAct" );
-    for (int    i  = 0; ANms[i] != NULL; i++) {
-        if ( strcasecmp( line, ANms[i] ) == 0 ) {
-            a->act = (Action) i;
-            a->arg = (char *) ldDepStr( inF, "act_arg" );
-            return a;
-        }
-    }
-    strcat( line, " unrec Action" );
-    loadErr( line );
-    return NULL;
-}
-
-CState_t *loadCState( FILE *inF, int idx ) {               // load & return definition of one CSM state
-    if ( errCount > 0 ) return NULL;
-    CState_t *st = static_cast<CState_t*>(tbAlloc( sizeof( CState_t ), "CState" ));
-
-    st->idx = (short) ldDepInt( inF, "st.Idx" );
-    if ( st->idx != idx )
-        errLog( "CSM sync st %d!=%d", idx, st->idx );
-    st->nm          = ldDepStr( inF, "st.nm" );
-    st->nNxtStates  = (short) ldDepInt( inF, "st.nNxt" );
-    st->evtNxtState = (short *) tbAlloc( st->nNxtStates * sizeof( short ), "evtNxtSt" );
-    for (int i  = 0; i < st->nNxtStates; i++) {
-        if ( fscanf( inF, "%hd,", &st->evtNxtState[i] ) != 1 ) {
-            loadErr( "load evtNxtSt" );
-            return NULL;
-        }
-    }
-    int      nA = (short) ldDepInt( inF, "st.nActs" );
-    st->Actions        = (ActionList_t *) tbAlloc( sizeof( int ) + nA * sizeof( csmAction_t * ), "st.Actions" );
-    st->Actions->nActs = nA;
-    for (int i = 0; i < nA; i++)
-        st->Actions->Act[i] = loadAction( inF );
-    return st;
+bool readPackageData(void) {
+    // load structured TBook package contents
+    PackageDataReader pdr = PackageDataReader(TBP[pPACKAGES_DATA_TXT]);
+    return pdr.readPackageData();
 }
 
 
-//
-// public routines to load & access the CSM from /system/control_def.txt
-// TODO: Document the format here.
-bool loadControlDef( void ) {                         // load structured Control State Machine
-    errType  = "CSM";
-    errCount = 0;
-    lineNum  = 0;
-    CSM      = (CSM_t *) tbAlloc( sizeof( CSM_t ), "CSM" );
 
-    FILE *inFile = tbOpenRead( TBP[pCSM_DEF] );
-    if ( inFile == NULL ) {
-        errLog( "csm_data.txt not found" );
-        return false;
-    }
-    ldDepLn( inFile, "version" );
-    CSM->Version = allocStr( line, "csmVer" );
-    logEvtNS( "TB_CSM", "ver", CSM->Version );        // log CSM version comment
-
-    ldDepLn( inFile, "csmCompVer" );     // allow whitespace in CsmCompileVersion
-    // throw CsmCompileVersion away 
-
-    TB_Config = CSM->TBConfig = (TBConfig_t *) loadTbConfig( inFile );
-
-    CSM->SysAudio = (AudioList_t *) loadSysAudio( inFile );
-
-    int nS = ldDepInt( inFile, "nStates" );
-    CSM->CsmDef      = (CSList_t *) tbAlloc( sizeof( int ) + nS * sizeof( void * ), "CsmDef" );
-    CSM->CsmDef->nCS = nS;
-    for (int i = 0; i < nS; i++) {
-        CSM->CsmDef->CS[i] = loadCState( inFile, i );
-    }
-
-    if ( inFile != NULL ) tbFclose( inFile );
-    if ( errCount > 0 ) {
-        errLog( "csm_data: %d parse errors", errCount );
-        return false;
-    }
-    return true;
-}
-
-int nSysAud( void ) {                                // return # of SysAudio names used by CSM
-    if ( CSM == NULL || CSM->SysAudio == NULL ) {
-        errLog( "bad SysAudio" );
-        return 0;
-    }
-    return CSM->SysAudio->nSysA;
-}
-
-const char *gSysAud( int idx ) {                             // return SysAudio[ idx ]
-    if ( idx < 0 || idx >= nSysAud())
-        errLog( "gSysAud(%d) bad idx", idx );
-    return CSM->SysAudio->sysA[idx];
-}
-
-CState_t *gCSt( int idx ) {                                // return ptr to CState[ idx ]
-    if ( idx < 0 || idx >= CSM->CsmDef->nCS )
-        errLog( "gCst(%d) bad idx", idx );
-    return CSM->CsmDef->CS[idx];
-}
-
-const char *gStNm( CState_t *st ) {                          // return name of CSt
-    if ( st == NULL ) {
-        errLog( "bad CState" );
-        return "bad";
-    }
-    return st->nm;
-}
-
-int nActs( CState_t *st ) {                          // # of actions for CState
-    if ( st == NULL || st->Actions == NULL ) {
-        errLog( "CSt bad Actions" );
-        return 0;
-    }
-    return st->Actions->nActs;
-}
-
-csmAction_t *gAct( CState_t *st, int idx ) {                 // return Action[idx] of CState
-    if ( idx < 0 || idx >= nActs( st ))
-        errLog( "gCst(%d) bad idx", idx );
-    return st->Actions->Act[idx];
-}
 // packageData.c 

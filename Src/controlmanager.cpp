@@ -19,7 +19,7 @@ bool                controlManagerReady = false;
 
 
 int                 iPkg = 0;     // current package index
-Package_t *         currPkg = NULL; // TBook content package in use
+Package *         currPkg = NULL; // TBook content package in use
 
 TBook_t             TBook;
 
@@ -35,102 +35,118 @@ static void clearIdle() {       // clear timers started by AudioDone to generate
     osTimerStop( timers[1] );
 }
 
-static void adjSubj( int adj ) {               // adjust current Subj # in TBook
+/**
+ * Find the next playlist, in the given direction, that has content.
+ * @param direction Negative for "previous", otherwise "next".
+ */
+static void changeSubject( int direction ) {
+    direction              = direction < 0 ? -1 : 1; // normalize
     // "subject" means playlist.
-    short newSubjectIx   = TBook.iSubj + adj;
-    short numSubjects = nSubjs();
-    if ( newSubjectIx < 0 )
-        newSubjectIx = numSubjects - 1;
-    if ( newSubjectIx >= numSubjects )
-        newSubjectIx = 0;
+    // Find the next playlist (in the desired direction) that has content.
+    short newSubjectIx = TBook.iSubj;
+    short numSubjects  = currPkg->numSubjects();
+    do {
+        newSubjectIx += direction;
+        if (newSubjectIx < 0)
+          newSubjectIx = numSubjects - 1;
+        if (newSubjectIx >= numSubjects)
+            newSubjectIx = 0;
+    } while (currPkg->getSubject( newSubjectIx )->numMessages() == 0);
     logEvtNI( "chngSubj", "iSubj", newSubjectIx );
     TBook.iSubj = newSubjectIx;
     TBook.iMsg  = -1; // "next" will yield 0, "prev" -> -2 -> numMessages-1
     resetAudio();
 }
 
-
-static void adjMsg( int adj ) {                // adjust current Msg # in TBook
+/**
+ * Find the next message, in the given direction, in the current playlist.
+ * @param direction Negative for "previous", otherwise "next".
+ */
+static void changeMessage( int direction ) {                // adjust current Msg # in TBook
     // If no subject is selected, do nothing.
-    if ( TBook.iSubj < 0 || TBook.iSubj >= nSubjs())
+    if (TBook.iSubj < 0 || TBook.iSubj >= currPkg->numSubjects()) {
         return;
-    // adj must be +1 or -1
-    short newMessageIx = TBook.iMsg + adj;
-    Subject_t *subj = gSubj( TBook.iSubj );
-    short numMessages = nMsgs( subj );
-    if ( numMessages == 1 )
-        numMessages = 0;
-    if ( newMessageIx < 0 )
-        newMessageIx   = numMessages - 1;
-    if ( newMessageIx >= numMessages )
-        newMessageIx   = 0;
+    }
+    direction = direction < 0 ? -1 : 1; // normalize
+    short newMessageIx = TBook.iMsg + direction;
+    Subject *subj = currPkg->getSubject( TBook.iSubj );
+    short numMessages = subj->numMessages();
+    if (numMessages == 0) {
+        return;
+    }
+    if (newMessageIx < 0) {
+        newMessageIx = numMessages - 1;
+    }
+    if (newMessageIx >= numMessages) {
+        newMessageIx = 0;
+    }
     logEvtNI( "chgMsg", "iMsg", newMessageIx );
     TBook.iMsg = newMessageIx;
     resetAudio();
 }
 
 
-void playSubjAudio( char *arg ) {       // play current Subject: arg must be 'nm', 'pr', or 'msg'
+void playSubjectAudio( char *arg ) {       // play current Subject: arg must be 'nm', 'pr', or 'msg'
     // If no subject is selected, do nothing.
-    if ( TBook.iSubj < 0 || TBook.iSubj >= nSubjs())
+    if ( TBook.iSubj < 0 || TBook.iSubj >= currPkg->numSubjects())
         return;
-    Subject_t *subj = gSubj( TBook.iSubj );
+    Subject *subj = currPkg->getSubject( TBook.iSubj );
     char path[MAX_PATH];
-    AudioFile_t *aud = NULL;
+    AudioFile *audioFile = NULL;
     MsgStats        *stats = NULL;
     PlaybackType_t playbackType;
     resetAudio();
     if ( strcasecmp( arg, "nm" ) == 0 ) {
         // Playlist name
-        aud     = subj->shortPrompt;
+        audioFile     = subj->shortPrompt;
         playbackType = kTypeSubject;
-        logEvtFmt("PlayNm", "iS:%d, nm:%s, fn:%s", TBook.iSubj, subj->subjName, aud->filename);
+        logEvtFmt("PlayNm", "iS:%d, nm:%s, fn:%s", TBook.iSubj, subj->getName(), audioFile->filename);
     } else if ( strcasecmp( arg, "pr" ) == 0 ) {
         // Playlist invitation / call to action
-        aud     = subj->invitation;
+        audioFile     = subj->invitation;
         playbackType = kPlayTypeInvitation;
-        logEvtFmt("PlayInv", "iS:%d, nm:%s, fn:%s", TBook.iSubj, subj->subjName, aud->filename);
+        logEvtFmt("PlayInv", "iS:%d, nm:%s, fn:%s", TBook.iSubj, subj->getName(), audioFile->filename);
     } else if ( strcasecmp( arg, "msg" ) == 0 ) {
         // Program content message
-        aud     = gMsg( subj, TBook.iMsg );
+        audioFile     = subj->getMessage(TBook.iMsg );
         playbackType = kPlayTypeMessage;
-        logEvtFmt( "PlayMsg", "iS:%d, iM:%d, fn:%s", TBook.iSubj, TBook.iMsg, aud->filename );
-        stats = loadStats( subj->subjName, TBook.iSubj, TBook.iMsg ); // load stats for message
+        logEvtFmt( "PlayMsg", "iS:%d, iM:%d, fn:%s", TBook.iSubj, TBook.iMsg, audioFile->filename );
+        stats = loadStats( subj->getName(), TBook.iSubj, TBook.iMsg ); // load stats for message
     }
-    getAudioPath( path, aud );
+    theDeployment->getPathForAudioFile( path, audioFile );
     clearIdle();
     playAudio( path, stats, playbackType );
 }
 
 
-void playNxtPackage() {                    // play name of next available Package
+void playNextPackage() {                    // play name of next available Package
     iPkg++;
-    if ( iPkg >= nPkgs()) iPkg = 0;
+    if ( iPkg >= theDeployment->numPackages()) iPkg = 0;
 
-    Package_t *pkg = gPkg( iPkg );
-    logEvtFmt("PlayPkg", "Pkg: %s, iPkg: %d", pkg->packageName, iPkg);
+    Package *pkg = theDeployment->getPackage( iPkg );
+    logEvtFmt("PlayPkg", "Pkg: %s, iPkg: %d", pkg->getName(), iPkg);
     char path[MAX_PATH];
-    getAudioPath( path, pkg->pkg_prompt );
+    theDeployment->getPathForAudioFile( path, pkg->pkg_prompt );
     clearIdle();
     playAudio( path, NULL, kPlayTypePackagePrompt );
 }
 
-void playSqrTune( const char *notes ) {       // play seq of notes as sqrwaves
+void playSquareTune( const char *notes ) {       // play seq of notes as sqrwaves
     clearIdle();
     playNotes( notes );   // mediaPlayer op -- switch threads
 }
 
-void showPkg() {                   // debug print Package iPkg
+void showPackage() {                   // debug print Package iPkg
     char path[MAX_PATH];
-    printf( "iPkg=%d nm=%s nSubjs=%d \n", currPkg->pkgIdx, currPkg->packageName, nSubjs());
-    for (int i = 0; i < nSubjs(); i++) {
-        Subject_t *sb = gSubj( i );
-        getAudioPath( path, sb->shortPrompt );
-        printf( " S%d %s nMsgs=%d prompt=%s\n", i, subjNm( sb ), nMsgs( sb ), path );
-        getAudioPath( path, sb->invitation );
+    printf( "iPkg=%d nm=%s nSubjs=%d \n", currPkg->pkgIdx, currPkg->getName(), currPkg->numSubjects());
+    for (int i = 0; i < currPkg->numSubjects(); i++) {
+        Subject *sb = currPkg->getSubject( i );
+        theDeployment->getPathForAudioFile( path, sb->shortPrompt );
+        printf( " S%d %s nMsgs=%d prompt=%s\n", i, sb->getName() ,sb->numMessages( ), path );
+        theDeployment->getPathForAudioFile( path, sb->invitation );
         printf( "  invite=%s \n", path );
-        for (int j = 0; j < nMsgs( sb ); j++) {
-            getAudioPath( path, gMsg( sb, j ));
+        for (int j = 0; j < sb->numMessages(); j++) {
+            theDeployment->getPathForAudioFile( path, sb->getMessage(j ));
             printf( "   M%d %s \n", j, path );
         }
     }
@@ -138,32 +154,37 @@ void showPkg() {                   // debug print Package iPkg
 
 
 void changePackage() {                      // switch to last played package name
-    if ( Deployment == NULL || Deployment->packages == NULL )
+    if ( theDeployment == NULL || theDeployment->packages == NULL )
         errLog( "changePackage() bad Deployment" );
-    if ( iPkg < 0 || iPkg >= Deployment->packages->nPkgs )
+    if ( iPkg < 0 || iPkg >= theDeployment->numPackages() )
         errLog( "changePackage() bad iPkg=%d", iPkg );
-    currPkg = Deployment->packages->pkg[iPkg];
+    currPkg = theDeployment->getPackage(iPkg);
 
     TBook.iSubj = -1; // makes "next subject" go to the first subject.
     TBook.iMsg  = 0;
-    logEvtNS( "ChgPkg", "Pkg", pkgNm());
-    //showPkg();
+    logEvtNS( "ChgPkg", "Pkg", currPkg->getName());
+    //showPackage();
 }
 
 
 void playSysAudio( char *arg ) {        // play system file 'arg'
     resetAudio();
-    char path[MAX_PATH];
+    char pathBuf[MAX_PATH];
 
-    for (int i = 0; i < nSysAud(); i++)
-        if ( strcmp( gSysAud( i ), arg ) == 0 ) {
-            findAudioPath( path, currPkg->prompt_paths, arg );  // find path based on current Package promptPaths
-            clearIdle();
-            logEvtFmt("PlaySys", "Sys: %s, fn: %s", arg, path);
-            playAudio( path, NULL, kPlayTypeSystemPrompt );
-            return;
-        }
-    tbErr( "playSys %s not found", arg );
+    currPkg->findAudioPath( pathBuf, arg );  // find path based on current Package promptPaths
+    clearIdle();
+    logEvtFmt("PlaySys", "Sys: %s, fn: %s", arg, pathBuf);
+    playAudio( pathBuf, NULL, kPlayTypeSystemPrompt );
+
+//    for (int i = 0; i < csm->numSystemAudio(); i++)
+//        if ( strcmp( csm->getSystemAudio( i ), arg ) == 0 ) {
+//            currPkg->findAudioPath( pathBuf, arg );  // find path based on current Package promptPaths
+//            clearIdle();
+//            logEvtFmt("PlaySys", "Sys: %s, fn: %s", arg, pathBuf);
+//            playAudio( pathBuf, NULL, kPlayTypeSystemPrompt );
+//            return;
+//        }
+//    tbErr( "playSys %s not found", arg );
 }
 
 
@@ -174,11 +195,11 @@ void startRecAudio( char *arg ) {           // record user message into temporar
         return;
     }
     char path[MAX_PATH];
-    Subject_t *subj = gSubj( TBook.iSubj );
+    Subject *subj = currPkg->getSubject( TBook.iSubj );
     int mCnt = makeAuxFileName( path, AUX_FILE_RECORDING );
-    logEvtFmt( "Record", "Subj: %s, ipkg: %d, ipl: %d, im: %d, uniq: %d", subj->subjName, iPkg, TBook.iSubj, TBook.iMsg,
+    logEvtFmt( "Record", "Subj: %s, ipkg: %d, ipl: %d, im: %d, uniq: %d", subj->getName(), iPkg, TBook.iSubj, TBook.iMsg,
                mCnt );
-    MsgStats *stats = loadStats( subj->subjName, TBook.iSubj, TBook.iMsg ); // load stats for message
+    MsgStats *stats = loadStats( subj->getName(), TBook.iSubj, TBook.iMsg ); // load stats for message
     clearIdle();
     recordAudio( path, stats );
 }
@@ -204,7 +225,7 @@ void saveRecAudio( char *arg ) {              // encrypt user message .wav => .k
  * @param txt The text to be written.
  */
 void saveWriteMsg( char *txt ) {        // save 'txt' in Msg file
-    const char *subjName = TBook.iSubj >= 0 ? gSubj( TBook.iSubj )->subjName : "-no-subject-";
+    const char *subjName = TBook.iSubj >= 0 ? currPkg->getSubject( TBook.iSubj )->getName() : "-no-subject-";
     char path[MAX_PATH];
     int  mCnt      = makeAuxFileName( path, AUX_FILE_MESSAGE );
     FILE *outFP = tbOpenWrite( path );
@@ -255,7 +276,7 @@ void USBmode( bool start ) {            // start (or stop) USB storage mode
     uint32_t msec;
     clearIdle();
     if ( start ) {
-        playSqrTune( "G/+G/+" );
+        playSquareTune( "G/+G/+" );
         getRTC( &rtcTm, &msec );  // current RTC
         showRTC();          // put current RTC into log
         saveLastTime( rtcTm );
@@ -266,17 +287,23 @@ void USBmode( bool start ) {            // start (or stop) USB storage mode
         setDbgFlag( 'F', false );
         enableMassStorage( "M0:", NULL, NULL, NULL );
     } else {
-        disableMassStorage();      //TODO?  just reboot?
+        disableMassStorage();
         LedManager::ledFg( "_" );
-        playSqrTune( "G/+" );
+        playSquareTune( "G/+" );
         logEvt( "exitUSB" );
-        //      NVIC_SystemReset();     // soft reboot?
-        logPowerUp( false );
+        /*
+         * For a very long time (until 21-March-2023) we did the "logPowerUp(false)". Some change around that
+         * time caused the TB to crash when returning from USBMode, but ONLY AFTER CREATING SetRTC.txt. No SetRTC.txt,
+         * no crash. Or, create SetRTC.txt and then reboot; no crash. So, we reboot here. Whatever the bug is,
+         * it still lies dormant.
+         */
+        NVIC_SystemReset();     // soft reboot?
+//        logPowerUp( false );
     }
 }
 
 void assertValidState( int stateIndex ) {
-    if ( stateIndex < 0 || stateIndex >= CSM->CsmDef->nCS ) //nCSMstates )
+    if ( stateIndex < 0 || stateIndex >= csm->numStates() ) //nCSMstates )
         tbErr( "invalid state index" );
 }
 
@@ -307,14 +334,14 @@ void setCurrState( short iSt ) {        // set iCurrSt & iPrevSt (& DBG strings)
     TBook.prevStateName = TBook.currStateName;          //DEBUG -- update prevSt string
 
     TBook.iCurrSt = iSt;            // now 'in' (executing) state nSt
-    TBook.cSt     = gCSt( TBook.iCurrSt );      // state definition for current state
+    TBook.cSt     = csm->getCState( TBook.iCurrSt );      // state definition for current state
 
-    TBook.currStateName = gStNm( TBook.cSt );   //DEBUG -- update currSt string
+    TBook.currStateName = TBook.cSt->getName( );   //DEBUG -- update currSt string
 }
 
-static void doAction( Action act, char *arg, int iarg ) {  // execute one csmAction
+static void doAction( CSM_ACTION act, char *arg, int iarg ) {  // execute one csmAction
     dbgEvt( TB_csmDoAct, act, arg[0], arg[1], iarg );
-    if ( BootVerboseLog ) logEvtNSNS( "Action", "nm", actionNm( act ), "arg", arg ); //DEBUG
+    if ( BootVerboseLog ) logEvtNSNS( "Action", "nm", CSM::actionName( act ), "arg", arg ); //DEBUG
     if ( isMassStorageEnabled()) {    // if USB MassStorage running: ignore actions referencing files
         switch (act) {
             case playSys:
@@ -345,7 +372,7 @@ static void doAction( Action act, char *arg, int iarg ) {  // execute one csmAct
             playSysAudio( arg );
             break;
         case playSubj:
-            playSubjAudio( arg );
+            playSubjectAudio( arg );
             break;
         case startRec:
             startRecAudio( arg );
@@ -397,10 +424,10 @@ static void doAction( Action act, char *arg, int iarg ) {  // execute one csmAct
             USBmode( false );
             break;
         case subjAdj:
-            adjSubj( iarg );
+            changeSubject( iarg );
             break;
         case msgAdj:
-            adjMsg( iarg );
+            changeMessage( iarg );
             break;
         case goPrevSt:
             setCurrState( TBook.iPrevSt );    // return to prevSt without transition
@@ -435,16 +462,16 @@ static void doAction( Action act, char *arg, int iarg ) {  // execute one csmAct
             powerDownTBook();
             break;
         case sysTest:
-            playSqrTune( "CDEF_**C*D*E*F*_**C*D*E*F*_***C**G**FDEH**G**" );
+            playSquareTune( "CDEF_**C*D*E*F*_**C*D*E*F*_***C**G**FDEH**G**" );
             break;
         case playNxtPkg:
-            playNxtPackage();
+            playNextPackage();
             break;
         case changePkg:
             changePackage();
             break;
         case playTune:
-            playSqrTune( arg );
+            playSquareTune( arg );
             break;
         case sysBoot:
             NVIC_SystemReset();     // soft reboot
@@ -469,14 +496,14 @@ static void changeCSMstate( short nSt, short lastEvtTyp ) {
     for (int e = eNull; e < eUNDEF; e++) {         //DBG: fill in dynamic parts of transition table for current state
         short iState = TBook.cSt->evtNxtState[e];//DBG:
         TBook.evtNxtSt[e].nxtSt   = iState;
-        TBook.evtNxtSt[e].nstStNm = gStNm( gCSt( iState ));
+        TBook.evtNxtSt[e].nstStNm = csm->getCState( iState )->getName();
     }
     /*END DEBUG*/
 
-    int        nA = nActs( TBook.cSt );
+    int        nA = TBook.cSt->numActions();
     for (short i  = 0; i < nA; i++) {         // For each action defined on the state...
-        csmAction_t *action = gAct( TBook.cSt, i );
-        Action act = action->act;  // unpack action, and arg
+        csmAction *action = TBook.cSt->getAction( i );
+        CSM_ACTION act = action->act;  // unpack action, and arg
         const char *arg = action->arg;
         if ( arg == NULL ) arg = "";                // make sure its a string for digit test
         // Parse the argument if it looks like it might be numeric.
@@ -537,7 +564,7 @@ void executeCSM( void ) {               // execute TBook control state machine
         if ( status != osOK )
             tbErr( " EvtQGet error" );
         TBook.lastEvent     = evt->typ;  // has to be copied, used after 'evt' is freed
-        TBook.lastEventName = eventNm( TBook.lastEvent );
+        TBook.lastEventName = CSM::eventName( TBook.lastEvent );
 
         //    logEvtNSNI( "csmEvent", "typ", TBook.lastEventName, "dnMS", evt->arg );
         switch (evt->typ) {
@@ -573,7 +600,7 @@ void executeCSM( void ) {               // execute TBook control state machine
         short nSt = TBook.cSt->evtNxtState[TBook.lastEvent];
         assertValidState( nSt );
         if ( nSt != TBook.iCurrSt ) // state is changing (unless goPrevSt or goSavedSt undoes it)
-            logEvtNSNS( "csmEvt", "evt", TBook.lastEventName, "nSt", gCSt( nSt )->nm );
+            logEvtNSNS( "csmEvt", "evt", TBook.lastEventName, "nSt", csm->getCState( nSt )->nm );
 
         osMemoryPoolFree( TBEvent_pool, evt );
         changeCSMstate( nSt, TBook.lastEvent ); // only changes if different
@@ -591,10 +618,10 @@ static void eventTest() {                    // report Events until DFU (pot tab
         if ( status != osOK )
             tbErr( " EvtQGet error" );
 
-        TBook.lastEventName = eventNm( evt->typ );
-        dbgLog( " %s \n", eventNm( evt->typ ));
+        TBook.lastEventName = CSM::eventName( evt->typ );
+        dbgLog( " %s \n", CSM::eventName( evt->typ ));
         dbgEvt( TB_csmEvt, evt->typ, tbTimeStamp(), 0, 0 );
-        logEvtNS( "evtTest", "nm", eventNm( evt->typ ));
+        logEvtNS( "evtTest", "nm", CSM::eventName( evt->typ ));
 
         if ( evt->typ == Tree )
             osTimerStart( timers[0], TB_Config->shortIdleMS );
@@ -622,7 +649,7 @@ void initControlManager( void ) {       // initialize control manager
     bool onlyQcLoaded = false;
     if ( !loadControlDef()) {   // load csm_data.txt if it's there
         preloadCSM();           // or use the preloaded version for QcTest
-        logEvtNS( "TB_CSM", "Ver", CSM->Version );        // log CSM version comment
+        logEvtNS( "TB_CSM", "Ver", csm->Version );        // log CSM version comment
         onlyQcLoaded = true;
     }
 
@@ -631,15 +658,15 @@ void initControlManager( void ) {       // initialize control manager
         return;
     }
 
-    if ( CSM != NULL ) {     // have a CSM definition
+    if ( csm != NULL ) {     // have a CSM definition
         LedManager::ledBg( TB_Config->bgPulse );    // reset background pulse according to TB_Config
         setVolume( TB_Config->default_volume );         // set initial volume
 
         iPkg = 0;
         if ( RunQCTest ) {
-            Deployment = NULL;
+            theDeployment = NULL;
         } else {      // don't load package for qcTest
-            if ( !loadPackageData() || onlyQcLoaded || BootToUSB ) {
+            if ( !readPackageData() || onlyQcLoaded || BootToUSB ) {
                 USBmode( true );    // go to USB unless successfully loaded CSM & packages_data
                 return;         // don't do anything else after starting USBmode
             }
@@ -659,8 +686,8 @@ void initControlManager( void ) {       // initialize control manager
                 tbErr( "timer not alloc'd" );
         }
         for (int e        = eNull; e < eUNDEF; e++) {  //DBG fill in static parts of debug transition table
-            TBook.evtNxtSt[e].evt   = static_cast<Event>(e);
-            TBook.evtNxtSt[e].evtNm = eventNm( static_cast<Event>(e) );
+            TBook.evtNxtSt[e].evt   = static_cast<CSM_EVENT>(e);
+            TBook.evtNxtSt[e].evtNm = CSM::eventName( static_cast<CSM_EVENT>(e) );
         }
         TBook.prevStateName = "<start>";
         executeCSM();

@@ -223,10 +223,10 @@ void GPIO::defineGPIO( GPIO_ID gpid, const char * name, GPIO_TypeDef *port, uint
 
 void GPIO::defineGPIOs(void) {
 #define GDEF_NONE 0
-#define GPIO_DEFINITION(NAME, GPIOX, BIT, flags) \
+#define X(NAME, GPIOX, BIT, flags) \
     GPIO::defineGPIO(g##NAME, #NAME, GPIOX, BIT, flags);
     GPIO_DEFINITION_LIST
-#undef GPIO_DEFINITION
+#undef X
 
 }
 

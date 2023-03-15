@@ -581,7 +581,7 @@ int RecDBG;   // used by dbgLoop
 int RegsCallCnt = 0;      // to detect 1st call
 void showCdcRegs(bool always, bool nonReset) {  // display changes in codec regs
 #if defined(DEBUG_CODEC)
-    if (!always && !dbgEnab('2')) return;
+    if (!always && !dbgEnabled('2')) return;
     if (!codecIsReady) {
         CDC_DBG_LOG("! showRegs: not powered up! \n");
         return;
@@ -775,7 +775,7 @@ void showCdcRegs(bool always, bool nonReset) {  // display changes in codec regs
     for (int ridx = 0; ridx < codecNREGS; ridx++) {
         AIC_REG regDef = codec_regs[ridx];
         if (regDef.reg != 0) {
-            if ((regDef.pg > 1) && !dbgEnab('8')) break;   // higher pages only if debug '8'
+            if ((regDef.pg > 1) && !dbgEnabled('8')) break;   // higher pages only if debug '8'
 
             if (RegsCallCnt == 0) // 1st time, set prev_val to reset_val
                 codec_regs[ridx].prev_val = regDef.reset_val;

@@ -191,7 +191,7 @@ void shBuff( char *str, const uint8_t *buf ) {
 }
 
 void dbgRdSect( uint32_t sect, const uint8_t *buf, uint32_t cnt, uint32_t res ) {
-    if ( !dbgEnab( 'F' )) return;
+    if ( !dbgEnabled( 'F' )) return;
     if ( sect > MINSECT && cnt < 8 ) {
         char data[20];
         shBuff( data, buf );
@@ -202,7 +202,7 @@ void dbgRdSect( uint32_t sect, const uint8_t *buf, uint32_t cnt, uint32_t res ) 
 }
 
 void dbgWrSect( uint32_t sect, const uint8_t *buf, uint32_t cnt ) {
-    if ( !dbgEnab( 'F' )) return;
+    if ( !dbgEnabled( 'F' )) return;
     if ( sect > MINSECT && cnt < 8 ) {
         char data[20];
         shBuff( data, buf );
@@ -492,7 +492,7 @@ static int tbAllocTotal = 0;                               // track total heap a
 static int tbAllocCnt   = 0;                                 // track total # of heap allocations
 
 void checkMem() {
-    if ( !dbgEnab( 'E' )) return;
+    if ( !dbgEnabled( 'E' )) return;
     if ( !__heapvalid((__heapprt) fprintf, stdout, 0 )) {
         dbgLog( "! heap error\n" );
         __heapvalid((__heapprt) fprintf, stdout, true );
@@ -501,7 +501,7 @@ void checkMem() {
 }
 
 void showMem( void ) {
-    if ( !dbgEnab( 'E' )) return;
+    if ( !dbgEnabled( 'E' )) return;
     for (int i = 0; i < 6; i++) {
         osRtxThread_t *t = Dbg.thread[i];
         if ( t != NULL ) {
@@ -536,6 +536,27 @@ void *tbAlloc( int nbytes, const char *msg ) {         // malloc() & check for e
     }
     return mem;
 }
+
+void* operator new  ( std::size_t count, const char * tag ) {
+    return tbAlloc(count, tag);
+}
+void* operator new[]  ( std::size_t count, const char * tag ) {
+    return tbAlloc(count, tag);
+}
+void operator delete  ( void* ptr ) noexcept {
+    free(ptr);
+}
+void operator delete[] (void* ptr) noexcept {
+    free(ptr);
+}
+
+char *allocStr(const char *s, const char *tag) {
+    size_t len = strlen(s) + 1;
+    char *result = new(tag) char[len];
+    strcpy(result, s);
+    return result;
+}
+
 
 // extern "C" for the mad library.
 extern "C" {
@@ -604,7 +625,7 @@ void usrLog( const char *fmt, ... ) {
 }
 
 const char *DbgFlags     = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";  // flags 0..35
-char       DebugMask[40] = "!D89 ";  //  add 'X' to enable dbgLog() calls starting with 'X'
+char       DebugMask[40] = "!D8E ";  //  add 'X' to enable dbgLog() calls starting with 'X'
 /* DEFINED DEBUG FLAGS:
     //  '1' system clock
     //  '2' audio codec debugging
@@ -622,18 +643,18 @@ char       DebugMask[40] = "!D89 ";  //  add 'X' to enable dbgLog() calls starti
     //  'E' memory allocation
     //  'F' file ops
 */
-bool dbgEnab( char ch ) {   // => true, if 'ch' is in DebugMask
+bool dbgEnabled( char ch ) {   // => true, if 'ch' is in DebugMask
     return strchr( DebugMask, ch ) != NULL;
 }
 
 void setDbgFlag( char ch, bool enab ) {
     if ( enab ) {
-        if ( dbgEnab( ch )) return; //already on
+        if ( dbgEnabled( ch )) return; //already on
         int ln = strlen( DebugMask );
         DebugMask[ln + 1] = 0;
         DebugMask[ln]     = ch;
     } else {
-        if ( !dbgEnab( ch )) return; //already off
+        if ( !dbgEnabled( ch )) return; //already off
         char *p = strchr( DebugMask, ch );
         *p = ' ';
     }
@@ -641,14 +662,14 @@ void setDbgFlag( char ch, bool enab ) {
 
 void tglDebugFlag( int idx ) {   // toggle debug flag: "0123456789ABCDEFGHIJK"[idx]
     char ch = DbgFlags[idx];
-    setDbgFlag( ch, !dbgEnab( ch ));
+    setDbgFlag( ch, !dbgEnabled( ch ));
     dbgLog( "! Tgl %d=%c DbgFlags='%s' \n", idx, ch, DebugMask );
 }
 
 void dbgLog( const char *fmt, ... ) {
     va_list arg_ptr;
     va_start( arg_ptr, fmt );
-    bool show = dbgEnab( fmt[0] );  // messages can be prefixed with a digit-- then only show if that bit of DebugMask = 1
+    bool show = dbgEnabled( fmt[0] );  // messages can be prefixed with a digit-- then only show if that bit of DebugMask = 1
     if ( show ) {
         vprintf( fmt, arg_ptr );
         va_end( arg_ptr );

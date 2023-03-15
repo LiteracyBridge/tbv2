@@ -13,6 +13,7 @@
 extern TBook_t TBook;
 
 const char * const preferredAudioExtensions[] = {".mp3", ".wav"};
+int numAudioExtensions = sizeof(preferredAudioExtensions)/sizeof(preferredAudioExtensions[0]);
 
 const int WaveHdrBytes          = 44;           // length of .WAV file header
 const int SAMPLE_RATE_MIN       = 8000;
@@ -716,8 +717,53 @@ void audRecordComplete( void ) {                    // last buff recorded, finis
     pSt.state = pbIdle;
 }
 
+/**
+ * Deletes unwanted artifacts from a recording. If a private message is being kept, that means
+ * delete the .wav file. If any message is not being kept, that means delete all extensions of
+ * the base name.
+ * @param pPattern The extension pattern to delete, eg, ".wav" or ".*".
+ */
+void clearRecordingArtifacts(const char *pPattern) {
+    // Replace any existing extension with the given pattern.
+    char fname[MAX_PATH];
+    strcpy(fname, pSt.recordFilename);
+    char *pFn = strrchr(fname, '.');
+    if (pFn == NULL) pFn = fname + strlen(fname);
+    strcpy(pFn, pPattern);
+    // Make a copy of the containing directory, for the fdelete() call.
+    char fname2[MAX_PATH];
+    strcpy(fname2, pSt.recordFilename);
+    pFn = strrchr(fname2, '/');
+    pFn = (pFn == NULL) ? fname2 : pFn + 1;
+
+    fsFileInfo fInfo;
+    fInfo.fileID = 0;
+
+    FileSysPower(true);
+    while (ffind(fname, &fInfo) == fsOK) {
+        strcpy(pFn, fInfo.name);
+        uint32_t status = fdelete(fname2, NULL);
+        printf("Delete status %d: %s\n", status, fname2);
+    }
+}
+
+/**
+ * To be called when the disposition of a recorded UF is know. Keep the appropriate file(s), or delete them.
+ * @param keep True if the UF is being kept, false otherwise.
+ */
 void audFinalizeRecord( bool keep) {
-    // TODO: delete files here.
+    if (keep) {
+        if (pSt.privateFeedback) {
+            // Keeping private UF; delete the unencrypted file.
+            clearRecordingArtifacts(".wav");
+        } else {
+            // Keeping public UF; add to the UF list.
+            currPkg->addRecording(pSt.recordFilename);
+        }
+    } else {
+        // Not keeping, delete the recording, the key, the encrypted bits, and any auxillary files.
+        clearRecordingArtifacts(".*");
+    }
 }
 
 //

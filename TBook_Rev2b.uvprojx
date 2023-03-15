@@ -58,7 +58,7 @@
           <ListingPath>.\Listings\</ListingPath>
           <HexFormatSelection>1</HexFormatSelection>
           <Merge32K>0</Merge32K>
-          <CreateBatchFile>0</CreateBatchFile>
+          <CreateBatchFile>1</CreateBatchFile>
           <BeforeCompile>
             <RunUserProg1>0</RunUserProg1>
             <RunUserProg2>0</RunUserProg2>
@@ -405,6 +405,11 @@
               <FilePath>.\Src\controlmanager.cpp</FilePath>
             </File>
             <File>
+              <FileName>csm.cpp</FileName>
+              <FileType>8</FileType>
+              <FilePath>.\Src\csm.cpp</FilePath>
+            </File>
+            <File>
               <FileName>dbgloop.cpp</FileName>
               <FileType>8</FileType>
               <FilePath>.\Src\dbgloop.cpp</FilePath>
@@ -448,6 +453,11 @@
               <FileName>ledmanager.cpp</FileName>
               <FileType>8</FileType>
               <FilePath>.\Src\ledmanager.cpp</FilePath>
+            </File>
+            <File>
+              <FileName>linereader.cpp</FileName>
+              <FileType>8</FileType>
+              <FilePath>.\Src\linereader.cpp</FilePath>
             </File>
             <File>
               <FileName>logger.cpp</FileName>

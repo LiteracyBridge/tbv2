@@ -54,7 +54,7 @@ extern void fileOpInit( void ) {                // init fileOps & spawn thread t
     }
 
     // There should be no reason we need to supply the mq memory, but without this, for some unknowable
-    // reason, opening a FILE with one already open causes a osRtxErrorClibMutex error.
+    // reason, opening a FILE with one already open causes an osRtxErrorClibMutex error.
     osMessageQueueAttr_t messageQueueAttr;
     messageQueueAttr.name="encryptq";
     messageQueueAttr.mq_mem = encryptCb.mq_mem;

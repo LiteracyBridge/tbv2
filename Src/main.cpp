@@ -59,13 +59,13 @@ void setBootMode() { // use key to to select value for BootMode
     //    bool hwCleanBoot = (keysDetectedAtBoot & ~(1<<KEY::TREE|1<<KEY::TABLE)) == 0;
     // Tree and/or Table + nothing else but Plus, etc.
     bool     hwPlusBoot = ( keysDetectedAtBoot & ~( 1 << KEY::TREE | 1 << KEY::TABLE )) == 1 << KEY::PLUS;
-    bool     hwStarBoot = ( keysDetectedAtBoot & ~( 1 << KEY::TREE | 1 << KEY::TABLE )) == 1 << KEY::STAR;
+    bool     hwCircleBoot = ( keysDetectedAtBoot & ~( 1 << KEY::TREE | 1 << KEY::TABLE )) == 1 << KEY::CIRCLE;
 #if DEBUG
     bool     hwMinusBoot = ( keysDetectedAtBoot & ~( 1 << KEY::TREE | 1 << KEY::TABLE )) == 1 << KEY::MINUS;
 #endif
     char prog[20] = "R_G_";
 
-    if ( hwStarBoot ) {
+    if ( hwCircleBoot ) {
 
         while (true) {
             if ( BootToUSB || BootResetLog || BootFormatFileSys )

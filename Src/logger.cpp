@@ -23,14 +23,14 @@ static short            lastRef[ MAX_STATS_CACHED ];
 static short            touched[ MAX_STATS_CACHED ];
 static MsgStats         sStats[ MAX_STATS_CACHED ];
 const int               STAT_SIZ = sizeof( MsgStats );
-const char *            deviceIdFile = "/system/device_ID.txt";
-const char *            firmwareIdFile = "/system/firmware_ID.txt";
-const char *            norEraseFile = "M0:/system/EraseNorLog.txt";      // flag file to force full erase of NOR flash
-const char *            rtcSetFile = "M0:/system/SetRTC.txt";             // flag file to force setting RTC to last modification time of SetRTC.txt
-const char *            rtcDontSetFile = "dontSetRTC.txt";                // renamed version of SetRTC.txt
-const char *            rtcDontSetPath = "M0:/system/dontSetRTC.txt";           // full path for fexists
-const char *            lastRtcFile = "M0:/system/lastRTC.txt";           // written at powerdown-- modification date used to reset clock
-const char *            logFilePatt = "M0:/log/tbLog_%d.txt";     // file name of previous log on first boot
+//const char *            TBP[pDEVICE_ID_TXT] = "/system/device_ID.txt";
+//const char *            TBP[pFIRMWARE_ID_TXT] = "/system/firmware_ID.txt";
+//const char *            TBP[pERASE_NOR_LOG_TXT] = "M0:/system/EraseNorLog.txt";      // flag file to force full erase of NOR flash
+//const char *            TBP[pSET_RTC_TXT] = "M0:/system/SetRTC.txt";             // flag file to force setting RTC to last modification time of SetRTC.txt
+//const char *            TBP[pDONT_SET_RTC_FNAME] = "dontSetRTC.txt";                // renamed version of SetRTC.txt
+//const char *            TBP[pDONT_SET_RTC_TXT = "M0:/system/dontSetRTC.txt";           // full path for fexists
+//const char *            TBP[pLAST_RTC_TXT = "M0:/system/lastRTC.txt";           // written at powerdown-- modification date used to reset clock
+//const char *            TBP[pTB_LOG_NN_TXT = "M0:/log/tbLog_%d.txt";     // file name of previous log on first boot
 
 const int               MAX_EVT_LEN1 = 32, MAX_EVT_LEN2 = 64;
 
@@ -190,9 +190,9 @@ void saveLastTime( fsTime rtc ) {
         dbgLog( "! save invalid date\n" );
         return;
     }
-    if ( !fexists( lastRtcFile ))
-        writeLine( "---", lastRtcFile );  // make sure it's there
-    ftime_set( lastRtcFile, &rtc, &rtc, &rtc );  // set create,access,write times to RTC    
+    if ( !fexists( TBP[pLAST_RTC_TXT] ))
+        writeLine( "---", TBP[pLAST_RTC_TXT] );  // make sure it's there
+    ftime_set( TBP[pLAST_RTC_TXT], &rtc, &rtc, &rtc );  // set create,access,write times to RTC
 }
 
 void dateStr( char *s, fsTime dttm ) {
@@ -240,7 +240,7 @@ void logPowerUp( bool reboot ) {                      // re-init logger after re
     //if ( !openLog(false) ) return;
 
     // "M0:/system/bootcount.txt"
-    char *boot = loadLine( line, TBP[pBOOTCNT], &bootDt );
+    char *boot = loadLine( line, TBP[pBOOTCOUNT_TXT], &bootDt );
     int bootcnt = 1;    // if file not there-- first boot
     if ( boot != NULL ) sscanf( boot, " %d", &bootcnt );
     FirstSysBoot = ( bootcnt == 1 );
@@ -257,11 +257,11 @@ void logPowerUp( bool reboot ) {                      // re-init logger after re
         StartNewLog = true;
 
     if ( StartNewLog ) {    // switch to new log index
-        bool eraseNor = fexists( norEraseFile );
+        bool eraseNor = fexists( TBP[pERASE_NOR_LOG_TXT] );
         if ( eraseNor )  // if M0:/system/EraseNorLog.txt exists-- erase
             eraseNorFlash( false );     // CLEAR nor & create a new log
         else {     // First Boot starts a new log (unless already done by erase)
-            //  sprintf(line, logFilePatt, NLogIdx() );    //TODO: not needed
+            //  sprintf(line, TBP[pTB_LOG_NN_TXT, NLogIdx() );    //TODO: not needed
             startNextLog();
         }
     }
@@ -281,7 +281,7 @@ void logPowerUp( bool reboot ) {                      // re-init logger after re
 
             fsTime jan22 = { 0, 0, 0, 1, 1, 2022 };  // hr min sec, day, mon, year = 2022-01-01 00:00:00 
 
-            if ( !getFileTime( lastRtcFile, &rtcDt ))   // timestamp of lastRTC.txt (from last proper shutdown)
+            if ( !getFileTime( TBP[pLAST_RTC_TXT], &rtcDt ))   // timestamp of lastRTC.txt (from last proper shutdown)
                 rtcDt.year = 0; //if invalid  
 
             int    major, minor;
@@ -324,18 +324,18 @@ void logPowerUp( bool reboot ) {                      // re-init logger after re
             showRTC();
         }
 
-        char *oldFW = loadLine( line, firmwareIdFile, &bootDt );
+        char *oldFW = loadLine( line, TBP[pFIRMWARE_ID_TXT], &bootDt );
         bool haveNewFW = strcmp( oldFW, TBV2_Version ) != 0;
         if ( haveNewFW )
             logEvtNS( "TB_V2", "Old_Firmware", oldFW );
         logEvtNS( "TB_V2", "Firmware", TBV2_Version );
 
-        writeLine((char *) TBV2_Version, firmwareIdFile );
+        writeLine((char *) TBV2_Version, TBP[pFIRMWARE_ID_TXT] );
         //  logEvtFmt( "BUILT", "on: %s, at: %s", __DATE__, __TIME__);  // date & time LOGGER.C last compiled -- link date?
         logEvtNS( "CPU", "Id", CPU_ID );
         logEvtNS( "TB_ID", "Id", TB_ID );
-        if ( !fexists( deviceIdFile ))
-            writeLine( TB_ID, deviceIdFile );
+        if ( !fexists( TBP[pDEVICE_ID_TXT] ))
+            writeLine( TB_ID, TBP[pDEVICE_ID_TXT] );
         logEvtNI( "CPU_CLK", "MHz", SystemCoreClock / 1000000 );
         logEvtNINI( "BUS_CLK", "APB2", APB2_clock, "APB1", APB1_clock );
     } else
@@ -348,8 +348,8 @@ void logPowerUp( bool reboot ) {                      // re-init logger after re
 
     // IF a file SetRTC.txt exists, use it's timestamp to set the RTC. The timestamp will likely be at least
     // several seconds in the past, but should be "good enough".`
-    if ( fexists( rtcSetFile )) {
-        bool haveTime = getFileTime( rtcSetFile, &rtcDt );
+    if ( fexists( TBP[pSET_RTC_TXT] )) {
+        bool haveTime = getFileTime( TBP[pSET_RTC_TXT], &rtcDt );
         if ( haveTime && rtcDt.year >= 2022 ) {  // got a valid date/time
             dateStr( dt, rtcDt );
             logEvtNS( "setRTC", "DtTm", dt );
@@ -357,11 +357,11 @@ void logPowerUp( bool reboot ) {                      // re-init logger after re
             showRTC();
             gotRtc        = true;
             // rename setRTC.txt to dontSetRTC.txt -- leave it as a comment for how this works
-            if ( fexists( rtcDontSetPath ))
-                fdelete( rtcDontSetPath, NULL );
-            uint32_t stat = frename( rtcSetFile, rtcDontSetFile );
+            if ( fexists( TBP[pDONT_SET_RTC_TXT] ))
+                fdelete( TBP[pDONT_SET_RTC_TXT], NULL );
+            uint32_t stat = frename( TBP[pSET_RTC_TXT], TBP[pDONT_SET_RTC_FNAME] );
             if ( stat != fsOK ) {
-                errLog( "frename %s to %s => %d \n", rtcSetFile, rtcDontSetFile, stat );
+                errLog( "frename %s to %s => %d \n", TBP[pSET_RTC_TXT], TBP[pDONT_SET_RTC_FNAME], stat );
             }
             saveLastTime( rtcDt );
         }
@@ -370,7 +370,7 @@ void logPowerUp( bool reboot ) {                      // re-init logger after re
     //boot complete!  count it
     bootcnt++;
     sprintf( line, " %d", bootcnt );
-    writeLine( line, TBP[pBOOTCNT] );
+    writeLine( line, TBP[pBOOTCOUNT_TXT] );
 }
 
 void logPowerDown( void ) {                             // save & shut down logger for USB or sleeping
@@ -381,8 +381,8 @@ void logPowerDown( void ) {                             // save & shut down logg
     showRTC();          // put current RTC into log
     getRTC( &rtcTm, &msec );  // current RTC
     saveLastTime( rtcTm );
-    //  if ( !fexists( lastRtcFile )) writeLine( "---", lastRtcFile );  // make sure it's there
-    //  ftime_set( lastRtcFile, &rtcTm, &rtcTm, &rtcTm );  // set create,access,write times to RTC
+    //  if ( !fexists( TBP[pLAST_RTC_TXT )) writeLine( "---", TBP[pLAST_RTC_TXT );  // make sure it's there
+    //  ftime_set( TBP[pLAST_RTC_TXT, &rtcTm, &rtcTm, &rtcTm );  // set create,access,write times to RTC
 
     //  saveNorLog( "" );   // auto log name
 
@@ -473,15 +473,15 @@ void saveAuxProperties( char *baseFilename ) {
         strncpy( pSep, ".properties", sizeof( fnBuf ) - ( pSep - fnBuf ) - 1 );
         fnBuf[sizeof( fnBuf ) - 1] = '\0';
         FILE *outFP                = tbOpenWrite( fnBuf );
-        fprintf( outFP, "PACKAGE_NAME:%s\n", currPkg->packageName );
+        fprintf( outFP, "PACKAGE_NAME:%s\n", currPkg->getName() );
         fprintf( outFP, "PACKAGE_NUM:%d\n", currPkg->pkgIdx );
         if ( TBook.iSubj >= 0 ) {
-            fprintf( outFP, "PLAYLIST_NAME:%s\n", currPkg->subjects->subj[TBook.iSubj]->subjName );
+            fprintf( outFP, "PLAYLIST_NAME:%s\n", currPkg->subjects[TBook.iSubj]->getName() );
             fprintf( outFP, "PLAYLIST_NUM:%d\n", TBook.iSubj );
             if ( TBook.iMsg >= 0 ) {
                 // TODO: simplify !!
                 fprintf( outFP, "MESSAGE_NAME:%s\n",
-                         currPkg->subjects->subj[TBook.iSubj]->messages->msg[TBook.iMsg]->filename );
+                         currPkg->subjects[TBook.iSubj]->messages[TBook.iMsg]->filename );
                 fprintf( outFP, "MESSAGE_NUM:%d\n", TBook.iMsg );
             }
         }

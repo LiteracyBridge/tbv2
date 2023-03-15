@@ -7,6 +7,7 @@
 #include "main.h"     // define hardware configuration & optional software switches
 
 #include <ctype.h>
+#include <new>
 #include <stdint.h>
 #include <stdbool.h>
 #include <string.h>
@@ -41,14 +42,10 @@
 #define GPIOF               ((GPIO_TypeDef *) GPIOF_BASE)
 #define GPIOG               ((GPIO_TypeDef *) GPIOG_BASE)
 
-#include "tb_enum.h"      // GrpID, Event, Action
 #include "logger.h"                // logEvt...
 #include "ledmanager.h"       // ledFg, ledBg
 #include "powermanager.h"      // registerPowerEventHandler
 #include "inputmanager.h"            // sendEvent
-
-//extern void __breakpoint( int );
-//extern void abort( void );
 
 // global state
 extern bool BootToUSB;
@@ -75,21 +72,9 @@ extern bool PowerChecksEnabled;       // set true for normal operation
 
 extern void initIDs(void);
 
-//extern void GPIO_DefineSignals(const GPIO_Signal def[]);
-
-//extern void gSet(GPIO_ID gpio, uint8_t on);               // set the state of a GPIO output pin
-//extern bool gOutVal(GPIO_ID gpio);                        // => LOGICAL state of a GPIO OUTput, e.g. True if 'PA0_'.ODR==0 or 'PB3'.ODR==1
-//extern bool gGet(GPIO_ID gpio);                           // => LOGICAL state of a GPIO input pin (TRUE if PA3_==0 or PC2==1)
 extern void flashInit(void);                              // init keypad GPIOs for debugging
 extern void flashLED(const char *s);                      // 'GGRR__' in .1sec
 extern void flashCode(int v);                             // e.g. 9 => "RR__GG__GG__RR______"
-//extern void gUnconfig(GPIO_ID id);                        // revert GPIO to default configuration
-//extern void gConfigOut(GPIO_ID led);                      // configure GPIO for low speed pushpull output (LEDs, audio_PDN, pwr control)
-//extern void gConfigI2S(GPIO_ID id);                       // configure GPIO for high speed pushpull in/out (I2S)
-//extern void gConfigADC(GPIO_ID led);                      // configure GPIO as ANALOG input ( battery voltage levels )
-//extern void gConfigIn(GPIO_ID key,bool pulldown);        // configure GPIO as low speed input, either pulldown or pullup (pwr fail, battery indicators)
-//extern void gConfigKey(GPIO_ID key);                      // configure GPIO as low speed pulldown input ( keys )
-//extern void enableEXTI(GPIO_ID key, bool asKey);          // configure EXTI for key or pwrFail
 
 //extern void       RebootToDFU( void );                            // reboot into SystemMemory -- Device Firmware Update bootloader
 extern uint32_t AHB_clock;                                      // freq in MHz of AHB == CPU == HCLK
@@ -141,7 +126,7 @@ extern void dbgEvtS(int id, const char *d);
 
 extern void usrLog(const char *fmt, ...);
 
-extern bool dbgEnab(char ch);   // check if debugging for 'ch' is enabled
+extern bool dbgEnabled(char ch);   // check if debugging for 'ch' is enabled
 extern void dbgLog(const char *fmt, ...);
 
 extern void errLog(const char *fmt, ...);
@@ -206,21 +191,6 @@ extern const int LED_STACK_SIZE;
 
 // SD card path definitions  
 extern const char *TBP[];      // indexed by 0.. pLAST
-extern const int pBOOTCNT;
-extern const int pCSM_DEF;
-extern const int pLOG_TXT;
-extern const int pSTATS_PATH;
-extern const int pRECORDINGS_PATH;
-extern const int pLIST_OF_SUBJS;
-extern const int pPACKAGE_DIR;
-extern const int pPKG_VERS;
-extern const int pQC_PASS;
-extern const int pERASE_NOR;
-extern const int pSET_RTC;
-extern const int pLAST_RTC;
-extern const int pPKG_DAT;
-extern const int pAUDIO;   // DEBUG
-extern const int pLAST;
 
 //TBOOK error codes
 extern const int TB_SUCCESS;
@@ -316,6 +286,15 @@ typedef struct {      // Dbg -- pointers for easy access to debug info
 
 } DbgInfo;
 extern DbgInfo Dbg;  // in main.c -- visible at start
+
+// C++ support
+extern void* operator new  ( std::size_t count, const char * tag );
+extern void* operator new[]  ( std::size_t count, const char * tag );
+extern void operator delete  ( void* ptr ) noexcept;
+extern void operator delete[] (void* ptr) noexcept;
+extern char *allocStr(const char *s, const char *tag);
+
+
 
 #endif /* __TBOOK_H__ */
 

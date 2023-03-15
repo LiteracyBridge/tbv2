@@ -1,6 +1,7 @@
 // TBookV2  inputmanager.c
 //   Apr 2018
 
+#include "csm.h"
 #include "tbook.h"
 #include "main.h"
 #include "inputmanager.h"
@@ -408,7 +409,7 @@ void initInputManager( void ) {       // initializes keypad & starts thread
     dbgLog( "4 InputMgr OK \n" );
 }
 
-void sendEvent( Event key, int32_t arg ) {  // log & send TB_Event to CSM
+void sendEvent( CSM_EVENT key, int32_t arg ) {  // log & send TB_Event to CSM
     if ( key == eNull || key == anyKey || key == eUNDEF || (int) key < 0 || (int) key > (int) eUNDEF )
         tbErr( "bad event" );
     if ( TBEvent_pool == NULL ) return; //DEBUG
@@ -417,7 +418,7 @@ void sendEvent( Event key, int32_t arg ) {  // log & send TB_Event to CSM
         return;
     }
     dbgEvt( TB_keyEvt, key, arg, 0, 0 );
-    dbgLog( "A Evt: %s %d \n", eventNm( key ), arg );
+    dbgLog( "A Evt: %s %d \n", CSM::eventName( key ), arg );
 
     TB_Event *evt = (TB_Event *) osMemoryPoolAlloc( TBEvent_pool, osWaitForever );
     evt->typ = key;

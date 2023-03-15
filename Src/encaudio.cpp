@@ -29,6 +29,7 @@ static const int AES_BLOCK_SIZE = 16;
 
 bool encUfAudioEnabled = false;
 
+// TODO: combine EncryptCb and EncryptState.
 struct EncryptCb encryptCb;
 struct EncryptCb *pEncryptCb = &encryptCb;
 
@@ -41,6 +42,7 @@ typedef struct EncryptState {
     mbedtls_ctr_drbg_context drbg_context;
     mbedtls_entropy_context entropy_context;
     char keyFileName[MAX_PATH];
+    char encFileName[MAX_PATH];
 } EncryptState_t;
 EncryptState_t encryptState;
 
@@ -155,6 +157,10 @@ void encUfAudioInit() {
 
 #define STATIC_ENCRYPT_BUFFER 0
 
+/**
+ * Called from the FileOps thread to encrypt a file. Buffers of data are inserted by the MediaPlayer thread
+ * into a queue, and read here, then encrypted and written to a file.
+ */
 void encUfAudioLoop() {
     osMutexAcquire(fileOpMutex, osWaitForever);
 #if STATIC_ENCTYPE_BUFFER
@@ -162,21 +168,22 @@ void encUfAudioLoop() {
 #else
     uint8_t *encrypted = static_cast<uint8_t *>(tbAlloc(2048, "der"));
 #endif
-    char basename[MAX_PATH];
-    strcpy( basename, pEncryptCb->fname );   // copy *.wav path
-    char *pdot = strrchr( basename, '.' );
+    strcpy( encryptState.encFileName, pEncryptCb->fname );   // copy *.wav path
+    char *pdot = strrchr( encryptState.encFileName, '.' );
     *pdot = 0;
 
-    logEvtFmt( "startEnc", "%s", basename );
+    logEvtFmt( "startEnc", "%s", encryptState.encFileName );
 
-    startEncrypt( basename);       // write basenm.key & initialize AES encryption
-    strcat( basename, ".enc" );
-    FILE *fEncrypted = tbOpenWriteBinary( basename );
+    startEncrypt( encryptState.encFileName);       // write basenm.key & initialize AES encryption
+    strcat( encryptState.encFileName, ".enc" );
+    FILE *fEncrypted = tbOpenWriteBinary( encryptState.encFileName );
 
     int nWritten = 0;
     uint32_t waitFlags = kAnyEncryptRequest;
     while (1) {
+        // Wait for any event.
         uint32_t eventFlags = osEventFlagsWait(fileOpRequestEventId, waitFlags, osFlagsWaitAny, osWaitForever);
+        // Process any buffers in the encryption queue.
         Buffer_t *pBuffer;
         while (osMessageQueueGet(pEncryptCb->encryptQueueId, &pBuffer, 0, 0) == osOK) {
             encryptBlock((const uint8_t *)pBuffer, encrypted, 2048);
@@ -184,6 +191,7 @@ void encUfAudioLoop() {
             releaseBuffer(pBuffer);
             nWritten++;
         }
+        // If we have a finish request, finish. This event is sent from encUfAudioFinalize.
         if (eventFlags & kEncryptFinishRequest) {
             endEncrypt(pEncryptCb->fileSize);
             tbFclose(fEncrypted);
@@ -193,6 +201,7 @@ void encUfAudioLoop() {
 #if !STATIC_ENCRYPT_BUFFER
     free(encrypted);
 #endif
+    // Let MediaPlayer know that encryption is finished.
     osEventFlagsSet(fileOpResultEventId, kEncryptResult);
     osMutexRelease(fileOpMutex);
 }
@@ -299,5 +308,4 @@ void encUfAudioFinalize(size_t fileLen) {
     osEventFlagsSet(fileOpRequestEventId, kEncryptFinishRequest);
     osEventFlagsWait(fileOpResultEventId, kEncryptResult, osFlagsWaitAny, osWaitForever);
 }
-
 

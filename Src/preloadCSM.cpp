@@ -5,30 +5,30 @@
 #include "packageData.h" 
 #include "csm.h"
 //Ver:   // TB CSM 2022-06-28: v23 re-commenting the defaults to avoid quoted strings in output
-static TBConfig_t  preTB_Config = { 
-  4,  // default_volume 
-  10000,  // powerCheckMS 
-  5000,  // shortIdleMS 
-  180000,  // longIdleMS 
-  50,  // minShortPressMS 
-  1000,  // minLongPressMS 
-  0, // qcTestState 
-  1, // initState 
-  "system/audio",  // systemAudio 
-  "_49G",  // bgPulse 
-  "G!",  // fgPlaying 
-  "G2_3!",  // fgPlayPaused 
-  "R!",  // fgRecording 
-  "R2_3!",  // fgRecordPaused 
-  "O!",  // fgSavingRec 
-  "G3_3G3",  // fgSaveRec 
-  "R3_3R3",  // fgCancelRec 
-  "O5o5!",  // fgUSB_MSC 
-  "R8_2R8_2R8_20!",  // fgTB_Error 
-  "_3R3_3R3_3R3_5!",  // fgNoUSBcable 
-  "G5g5!",  // fgUSBconnect 
-  "G_3G_3G_9G_3G_9G_3",  // fgPowerDown 
-};  // preTB_Config
+//static TBConfig_t  preTB_Config = {
+//  4,  // default_volume
+//  10000,  // powerCheckMS
+//  5000,  // shortIdleMS
+//  180000,  // longIdleMS
+//  50,  // minShortPressMS
+//  1000,  // minLongPressMS
+//  0, // qcTestState
+//  1, // initState
+//  "system/audio",  // systemAudio
+//  "_49G",  // bgPulse
+//  "G!",  // fgPlaying
+//  "G2_3!",  // fgPlayPaused
+//  "R!",  // fgRecording
+//  "R2_3!",  // fgRecordPaused
+//  "O!",  // fgSavingRec
+//  "G3_3G3",  // fgSaveRec
+//  "R3_3R3",  // fgCancelRec
+//  "O5o5!",  // fgUSB_MSC
+//  "R8_2R8_2R8_20!",  // fgTB_Error
+//  "_3R3_3R3_3R3_5!",  // fgNoUSBcable
+//  "G5g5!",  // fgUSBconnect
+//  "G_3G_3G_9G_3G_9G_3",  // fgPowerDown
+//};  // preTB_Config
  
 static AudioList preSysAudio[] = { 
 9,  // # PlaySys prompts used by CSM 
@@ -591,7 +591,7 @@ static CSM preCSM = {
  
 void     preloadCSM( void ){
     csm = &preCSM;
-    TB_Config = &preTB_Config;
+//    TB_Config = &preTB_Config;
 }  // preloadCSM()
  
 // preloadCSM.cpp 

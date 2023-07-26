@@ -6,7 +6,7 @@
 #include "csm.h"
 
 CSM      *csm = NULL;                 // extern ptr to definition of CSM
-TBConfig_t *TB_Config;                  // TBook configuration variables
+//TBConfig_t *TB_Config;                  // TBook configuration variables
 
 #define X(v) #v ,
 const char *CSM::eventNames[] = {
@@ -23,7 +23,7 @@ class CSMReader : LineReader {
 public:
     CSMReader(const char *filename) : LineReader(filename, "CSM") {}
 
-    TBConfig_t *loadTbConfig();
+    void loadTbConfig(void);
     AudioList *loadSysAudio();
     csmAction *loadAction();
     CState *loadCState(int idx);
@@ -32,35 +32,33 @@ public:
 };
 
 
-TBConfig_t * CSMReader::loadTbConfig() {                      // load & return CSM configuration variables
-    if (errCount > 0) return NULL;
-    TBConfig_t *cfg = new("TBConfig") TBConfig_t;
+void CSMReader::loadTbConfig() {                      // load & return CSM configuration variables
+    if (errCount > 0) return;
     //(TBConfig_t *) tbAlloc(sizeof(TBConfig_t), "TBConfig");
 
-    cfg->default_volume  = (short) readInt("def_vol");
-    cfg->powerCheckMS    = readInt("powerChk");
-    cfg->shortIdleMS     = readInt("shortIdle");
-    cfg->longIdleMS      = readInt("longIdle");
-    cfg->minShortPressMS = readInt("shortPr");
-    cfg->minLongPressMS  = readInt("longPr");
-    cfg->qcTestState     = readInt("qcState");
-    cfg->initState       = readInt("initState");
+    readInt("def_vol");
+    readInt("powerChk");
+    readInt("shortIdle");
+    readInt("longIdle");
+    readInt("shortPr");
+    readInt("longPr");
+    readInt("qcState");
+    readInt("initState");
 
-    cfg->systemAudio    = readString("sysAud");        // obsolete config item.
-    cfg->bgPulse        = readString("bgPulse");
-    cfg->fgPlaying      = readString("fgPlaying");
-    cfg->fgPlayPaused   = readString("fgPlayPaused");
-    cfg->fgRecording    = readString("fgRecording");
-    cfg->fgRecordPaused = readString("fgRecordPaused");
-    cfg->fgSavingRec    = readString("fgSavingRec");
-    cfg->fgSaveRec      = readString("fgSaveRec");
-    cfg->fgCancelRec    = readString("fgCancelRec");
-    cfg->fgUSB_MSC      = readString("fgUSB_MSC");
-    cfg->fgTB_Error     = readString("fgTB_Error");
-    cfg->fgNoUSBcable   = readString("fgNoUSBcable");
-    cfg->fgUSBconnect   = readString("fgUSBconnect");
-    cfg->fgPowerDown    = readString("fgPowerDown");
-    return cfg;
+    readString("sysAud");        // obsolete config item.
+    readString("bgPulse");
+    readString("fgPlaying");
+    readString("fgPlayPaused");
+    readString("fgRecording");
+    readString("fgRecordPaused");
+    readString("fgSavingRec");
+    readString("fgSaveRec");
+    readString("fgCancelRec");
+    readString("fgUSB_MSC");
+    readString("fgTB_Error");
+    readString("fgNoUSBcable");
+    readString("fgUSBconnect");
+    readString("fgPowerDown");
 }
 
 AudioList * CSMReader::loadSysAudio() {                      // load & return list of all PlaySys names used in CSM
@@ -132,7 +130,7 @@ bool CSMReader::loadControlDef(void) {
 
     readLine("csmCompVer"); // discard CsmCompileVersion
 
-    TB_Config = loadTbConfig();
+    loadTbConfig();
 
     loadSysAudio(); // TODO: verify that all of the system audio files can be found.
 

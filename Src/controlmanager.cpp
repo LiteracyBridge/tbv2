@@ -646,6 +646,8 @@ void initControlManager( void ) {       // initialize control manager
     if ( mFileOpSignal == NULL )
         tbErr( "mFileOpSignal alloc failed" );
 
+    TBConfig::initConfig();
+
     bool onlyQcLoaded = false;
     if ( !loadControlDef()) {   // load csm_data.txt if it's there
         preloadCSM();           // or use the preloaded version for QcTest

@@ -505,6 +505,11 @@
               <FilePath>.\Src\preloadCSM.cpp</FilePath>
             </File>
             <File>
+              <FileName>tbconfig.cpp</FileName>
+              <FileType>8</FileType>
+              <FilePath>.\Src\tbconfig.cpp</FilePath>
+            </File>
+            <File>
               <FileName>tbook.cpp</FileName>
               <FileType>8</FileType>
               <FilePath>.\Src\tbook.cpp</FilePath>

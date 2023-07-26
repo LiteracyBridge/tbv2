@@ -366,7 +366,7 @@ void initInputManager( void ) {       // initializes keypad & starts thread
     Dbg.KeyTest      = &KTest;
     Dbg.KeyPadStatus = &KSt;
     Dbg.KeyPadDef    = &keydef;
-    Dbg.TBookConfig  = TB_Config;
+    Dbg.pTBConfig  = &tbConfig;
     //  resetKeypadTest();
 
     osFlag_InpThr = osEventFlagsNew( NULL );  // os flag ID -- used so ISR can wakeup inputThread

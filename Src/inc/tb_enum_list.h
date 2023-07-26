@@ -219,6 +219,7 @@
         X(DEVICE_ID_TXT,        "M0:/system/device_ID.txt")             \
         X(FIRMWARE_ID_TXT,      "M0:/system/firmware_ID.txt")           \
         X(AUDIO_WAV,            "M0:/audio.wav")                        \
+        X(CONFIG_TXT,           "M0:/system/config.txt")                \
 //endregion
 
 

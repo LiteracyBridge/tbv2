@@ -24,6 +24,8 @@
 #include "rtx_os.h"
 #include "rl_fs.h"
 
+#include "tbconfig.h"
+
 #ifdef __packed
 #undef __packed
 #endif
@@ -202,33 +204,33 @@ extern const int MEDIA_ALREADY_IN_USE;
 #define MAX_PATH  80
 
 
-typedef struct TBConfig {       // TBConfig
-    short default_volume;
-    int powerCheckMS;         // used by powermanager.c
-    int shortIdleMS;
-    int longIdleMS;
-    int minShortPressMS;      // used by inputmanager.c
-    int minLongPressMS;       // used by inputmanager.c
-    int qcTestState;          // first state if running QC acceptance test
-    int initState;
+//typedef struct {       // TBConfig
+//    short default_volume;
+//    int powerCheckMS;         // used by powermanager.c
+//    int shortIdleMS;
+//    int longIdleMS;
+//    int minShortPressMS;      // used by inputmanager.c
+//    int minLongPressMS;       // used by inputmanager.c
+//    int qcTestState;          // first state if running QC acceptance test
+//    int initState;
+//
+//    const char *systemAudio;          // path to system audio files
+//    const char *bgPulse;              // LED sequences used in Firmware
+//    const char *fgPlaying;
+//    const char *fgPlayPaused;
+//    const char *fgRecording;
+//    const char *fgRecordPaused;
+//    const char *fgSavingRec;
+//    const char *fgSaveRec;
+//    const char *fgCancelRec;
+//    const char *fgUSB_MSC;
+//    const char *fgTB_Error;
+//    const char *fgNoUSBcable;
+//    const char *fgUSBconnect;
+//    const char *fgPowerDown;
+//} TBConfig_t;
 
-    const char *systemAudio;          // path to system audio files
-    const char *bgPulse;              // LED sequences used in Firmware
-    const char *fgPlaying;
-    const char *fgPlayPaused;
-    const char *fgRecording;
-    const char *fgRecordPaused;
-    const char *fgSavingRec;
-    const char *fgSaveRec;
-    const char *fgCancelRec;
-    const char *fgUSB_MSC;
-    const char *fgTB_Error;
-    const char *fgNoUSBcable;
-    const char *fgUSBconnect;
-    const char *fgPowerDown;
-} TBConfig_t;
-
-extern TBConfig_t *TB_Config;    // global TBook configuration
+//extern TBConfig_t *TB_Config;    // global TBook configuration
 
 // for tbUtil.c
 #define dbgLns          80
@@ -281,7 +283,7 @@ typedef struct {      // Dbg -- pointers for easy access to debug info
     char keypad[11];   // keypad keys as string
 
     osRtxThread_t *thread[6];    // ptrs to osRtxThread
-    TBConfig_t *TBookConfig;  // TalkingBook configuration block
+    TBConfig *pTBConfig;  // TalkingBook configuration block
     TBH_arr *TBookLog;     // TalkingBook event log
 
 } DbgInfo;

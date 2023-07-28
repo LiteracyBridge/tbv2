@@ -625,7 +625,7 @@ void usrLog( const char *fmt, ... ) {
 }
 
 const char *DbgFlags     = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";  // flags 0..35
-char       DebugMask[40] = "!D8E ";  //  add 'X' to enable dbgLog() calls starting with 'X'
+char       DebugMask[40] = "!C4 ";  //  add 'X' to enable dbgLog() calls starting with 'X'
 /* DEFINED DEBUG FLAGS:
     //  '1' system clock
     //  '2' audio codec debugging
@@ -993,6 +993,7 @@ uint32_t osRtxErrorNotify( uint32_t code, void *object_id ) { // osRtx error cal
 
     switch (code) {
         case osRtxErrorStackUnderflow:
+            printf("Stack Underflow on thread %p\n", osRtxObjID);
             tbErr( "osErr StackUnderflow" );// Stack overflow detected for thread (thread_id=object_id)
             break;
         case osRtxErrorISRQueueOverflow:

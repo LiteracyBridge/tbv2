@@ -193,9 +193,7 @@ void debugLoop( bool autoUSB ) {     // called if boot-MINUS, no file system,  a
     else dbgLog( " no TBook on %s \n", fsDevs[0] );
     // Depending how we got here, the CSM data may not have been loaded.
     // We don't need the CSM, but we do need some of the configuration items.
-    if ( TB_Config == NULL ) {
-        preloadCSM();
-    }
+    TBConfig::initConfig();
 
     int ledCntr = 0; //, LEDpauseCnt = 0;
     //  bool inTestSequence = false;

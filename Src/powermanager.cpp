@@ -39,16 +39,16 @@ const uint16_t    RECHARGEABLE_CUTOFF_LEVELS[] = { 3630, 3700, 3800, 3900 };
 enum BATTERY_CHARGE_LEVEL latestChargeLevel( void );
 
 // The CSM events corresponding to the battery state that we expose to the CSM.
-typedef enum BATTERY_DISPLAY_STATE {
-    BDS_CHARGING     = BattCharging,        // Charging, < ~75%
-    BDS_CHARGING_75  = BattCharging75,      // Charging, > 75%, < 90%
-    BDS_CHARGING_90  = BattMax,             // Charging, > 90% (constant voltage, perhaps?)
-    BDS_CHARGED      = BattCharged,         // Charged, no longer charging, but connected to power
-    BDS_NOT_CHARGING = BattNotCharging,     // Not charging, not connected to power
-    BDS_LOW          = LowBattery,          // Not charging, battern low (< 20% -ish). Charge / replace require soon
-    BDS_MINIMUM      = BattMin,             // Not enough power to run.
-    BDS_INVALID      = 999                  // Not a valid state.
-} BATTERY_DISPLAY_STATE_T;
+typedef enum BATTERY_STATE {
+    BATTERY_STATE_CHARGING     = BattCharging,        // Charging, < ~75%
+    BATTERY_STATE_CHARGING_75  = BattCharging75,      // Charging, > 75%, < 90%
+    BATTERY_STATE_CHARGING_90  = BattMax,             // Charging, > 90% (constant voltage, perhaps?)
+    BATTERY_STATE_CHARGED      = BattCharged,         // Charged, no longer charging, but connected to power
+    BATTERY_STATE_NOT_CHARGING = BattNotCharging,     // Not charging, not connected to power
+    BATTERY_STATE_LOW          = LowBattery,          // Not charging, battern low (< 20% -ish). Charge / replace require soon
+    BATTERY_STATE_MINIMUM      = BattMin,             // Not enough power to run.
+    BATTERY_STATE_INVALID      = 999                  // Not a valid state.
+} BATTERY_STATE_T;
 
 // TODO: Why would this ever be false?
 bool                    PowerChecksEnabled = true;
@@ -81,7 +81,7 @@ typedef struct {
     uint32_t                MpuTempMV;          // ADC_CHANNEL_TEMPSENSOR in ADC_IN18
     uint32_t                LiThermMV;          // LiIon thermister
 
-    BATTERY_DISPLAY_STATE_T prevBatteryState;   // Battery state exposed via CSM
+    BATTERY_STATE_T prevBatteryState;   // Battery state exposed via CSM
     enum PwrStat            prvStat;            // previous saved by startPowerCheck()
     bool                    haveUSB;            // USB pwrGood signal
     bool                    hadVBat;            // previous was > BkupPRESENT: saved by startPowerCheck()
@@ -92,7 +92,7 @@ typedef struct {
 static PwrState     pS;                     // state of powermanager
 extern int          mAudioVolume;           // current audio volume
 
-static void powerThreadProc( void *arg );   // forward
+static void powerThreadFunc( void *arg );   // forward
 static void initPwrSignals( void );         // forward
 
 static int currentPowerCheckIntervalMS;
@@ -110,14 +110,14 @@ extern bool BootVerboseLog;
  * - powerCheckTimer            os timer structure for the power check timer. Created and initialized in initPowerMgr.
  * - currentPowerCheckIntervalMS The steady-state power check interval. From config file or over-ridden by RIGHT-boot.
  * - INITIAL_POWER_CHECK_DELAY  Delay before the first power check. Lets the system settle a bit.
- * - TB_Config->powerCheckMS    Power check interval from the config file. Can be overridden to 60sec with RIGHT-boot.
+ * - tbConfig.powerCheckMS    Power check interval from the config file. Can be overridden to 60sec with RIGHT-boot.
  *                              Note that the power manager is initialized long before the config file is read.
  */
 void powerCheckTimerCallback( void *arg );                          // forward for timer callback function
 
 // ========================================================
-//   POWER initialization  -- create osTimer to call powerCheck, start powerThreadProc()
-void initPowerMgr( void ) {           // initialize PowerMgr & start powerThreadProc  pwrEvents = osEventFlagsNew(NULL);
+//   POWER initialization  -- create osTimer to call powerCheck, start powerThreadFunc()
+void initPowerMgr( void ) {           // initialize PowerMgr & start powerThreadFunc  pwrEvents = osEventFlagsNew(NULL);
     pwrEvents = osEventFlagsNew( NULL );
     if ( pwrEvents == NULL )
         tbErr( "pwrEvents not alloc'd" );
@@ -135,14 +135,13 @@ void initPowerMgr( void ) {           // initialize PowerMgr & start powerThread
 
     pm_thread_attr.name       = "PM Thread";
     pm_thread_attr.stack_size = POWER_STACK_SIZE;
-    Dbg.thread[1] = (osRtxThread_t *) osThreadNew( powerThreadProc, 0, &pm_thread_attr ); //&pm_thread_attr );
+    Dbg.thread[1] = (osRtxThread_t *) osThreadNew( powerThreadFunc, 0, &pm_thread_attr ); //&pm_thread_attr );
+    dbgLog("4 powerThread: %x\n", Dbg.thread[1]);
     if ( Dbg.thread[1] == NULL )
-        tbErr( "powerThreadProc not created" );
+        tbErr( "powerThread not created" );
 
     currentPowerCheckIntervalMS = INITIAL_POWER_CHECK_DELAY;
     osTimerStart( powerCheckTimer, currentPowerCheckIntervalMS );
-
-    dbgLog( "4 PowerMgr OK \n" );
 }
 
 void initPwrSignals( void ) {         // configure power GPIO pins, & EXTI on NOPWR
@@ -533,8 +532,8 @@ void setPowerCheckTimer( int timerMs ) { // set msec between powerChecks  osTime
 void powerCheckTimerCallback( void *arg ) {   // timer to signal periodic power status check
     if ( PowerChecksEnabled )
         osEventFlagsSet( pwrEvents, PM_PWRCHK );            // wakeup powerThread for power status check
-    if ( currentPowerCheckIntervalMS != TB_Config->powerCheckMS ) {    // update delay (after initial check)
-        currentPowerCheckIntervalMS = TB_Config->powerCheckMS;
+    if ( currentPowerCheckIntervalMS != tbConfig.powerCheckMS ) {    // update delay (after initial check)
+        currentPowerCheckIntervalMS = tbConfig.powerCheckMS;
         setPowerCheckTimer( currentPowerCheckIntervalMS );
     }
 }
@@ -720,28 +719,28 @@ void checkPower( bool verbose ) {       // check and report power status
     }
 
     // Assume Li-Ion present, not charging, not low.
-    enum BATTERY_DISPLAY_STATE batteryDisplay   = BDS_NOT_CHARGING;
+    enum BATTERY_STATE batteryState   = BATTERY_STATE_NOT_CHARGING;
     uint32_t                   batteryParameter = pS.LiMV;
 
     if ( pS.haveUSB ) {    // charger status is only meaningful if we haveUSB power
         switch (pstat) {
             case CHARGED:           // CHARGING complete
-                if ( pS.prevBatteryState != BDS_CHARGED ) {
+                if ( pS.prevBatteryState != BATTERY_STATE_CHARGED ) {
                     logEvtNI( "Charged", "mV", pS.LiMV );
                 }
-                batteryDisplay = BDS_CHARGED;
+                batteryState = BATTERY_STATE_CHARGED;
                 break;
             case CHARGING:          // started charging
-                if ( pS.prevBatteryState != BDS_CHARGING_90 && pS.prevBatteryState != BDS_CHARGING_75 &&
-                     pS.prevBatteryState != BDS_CHARGING ) {
+                if ( pS.prevBatteryState != BATTERY_STATE_CHARGING_90 && pS.prevBatteryState != BATTERY_STATE_CHARGING_75 &&
+                     pS.prevBatteryState != BATTERY_STATE_CHARGING ) {
                     logEvtNI( "Charging", "mV", pS.LiMV );
                 }
                 if ( pS.LiMV > LiMAX ) {
-                    batteryDisplay = BDS_CHARGING_90;
+                    batteryState = BATTERY_STATE_CHARGING_90;
                 } else if ( latestChargeLevel() >= BL_HIGH ) {
-                    batteryDisplay = BDS_CHARGING_75;
+                    batteryState = BATTERY_STATE_CHARGING_75;
                 } else {
-                    batteryDisplay = BDS_CHARGING;
+                    batteryState = BATTERY_STATE_CHARGING;
                 }
                 if ( pS.LiThermMV > HiLiTemp ) {   // lithium thermistor is only active while charging
                     logEvtNI( "LiTemp", "mV", pS.LiThermMV );
@@ -764,18 +763,18 @@ void checkPower( bool verbose ) {       // check and report power status
         if ( pS.LiMV > LiPRESENT ) {   // have Lith battery, but no USB power
             if ( pS.LiMV < LiMIN ) { // level that forces power down
                 logEvt( "LiBattOut" );
-                batteryDisplay = BDS_MINIMUM;
+                batteryState = BATTERY_STATE_MINIMUM;
                 changed        = true;
             } else if ( pS.LiMV < LiLOW ) {
                 logEvtNI( "LiBattLow", "mV", pS.LiMV );
-                batteryDisplay = BDS_LOW;
+                batteryState = BATTERY_STATE_LOW;
                 changed        = true;
             }
         }
         if ( pS.PrimaryMV > ReplPRESENT && pS.PrimaryMV < ReplLOW ) {
             logEvtNI( "ReplBattLow", "mV", pS.PrimaryMV );
             // Still working on replaceables, even if Li-Ion is dead.
-            batteryDisplay   = BDS_LOW;
+            batteryState   = BATTERY_STATE_LOW;
             batteryParameter = pS.PrimaryMV;
             changed          = true;
         }
@@ -783,13 +782,13 @@ void checkPower( bool verbose ) {       // check and report power status
     // If USB mass storage mode is enabled, charge events are not relevant. Presumably we are charging if connected.
     if ( isMassStorageEnabled()) {
         printf( "Mass storage mode\n" );
-        pS.prevBatteryState = BDS_INVALID; // We'll want to update the state when done here.
-    } else if ( pS.prevBatteryState != batteryDisplay ) {
+        pS.prevBatteryState = BATTERY_STATE_INVALID; // We'll want to update the state when done here.
+    } else if ( pS.prevBatteryState != batteryState ) {
         printf( "Battery state changed: %s -> %s\n", CSM::eventName((enum CSM_EVENT) pS.prevBatteryState ),
-                CSM::eventName((enum CSM_EVENT) batteryDisplay ));
-        pS.prevBatteryState = batteryDisplay;
+                CSM::eventName((enum CSM_EVENT) batteryState ));
+        pS.prevBatteryState = batteryState;
         changed = true;
-        // sendEvent((enum CSM_EVENT) batteryDisplay, batteryParameter );
+        // sendEvent((enum CSM_EVENT) batteryState, batteryParameter );
         if (!pS.haveUSB) {
             LedManager::setChargeIndicator(NULL);
         } else if (getPowerStatus() == CHARGING) {
@@ -857,8 +856,8 @@ void EXTI2_IRQHandler(void) {          // PWR_FAIL_N interrupt-- PE2==0 => power
 
 // ========================================================
 //    POWER thread -- handle signals from  powerCheckTimer & powerFail ISR's
-static void powerThreadProc( void *arg ) {   // powerThread -- catches PM_NOPWR from EXTI: NOPWR interrupt
-    dbgLog( "4 pwrThr: 0x%x 0x%x \n", &arg, &arg + POWER_STACK_SIZE );
+static void powerThreadFunc( void *arg ) {   // powerThread -- catches PM_NOPWR from EXTI: NOPWR interrupt
+    dbgLog( "4 powerThread: 0x%x 0x%x \n", &arg, &arg - POWER_STACK_SIZE );
     cdc_PowerUp();    // start codec powering up -- this thread won't suffer from the delay
 
     while (true) {

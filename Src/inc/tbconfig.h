@@ -35,9 +35,10 @@ public:
     TBConfig(void);
     void setValue(const char *line);
     void setValue(const char *key, const char *value);
+
+    const char *ledStr(const char *name);
 };
 
 extern TBConfig tbConfig;
-extern TBConfig *TB_Config;
 
 #endif //TBV2_TBCONFIG_H

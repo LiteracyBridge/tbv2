@@ -48,7 +48,7 @@ volatile char                   mRecordFilePath[MAX_PATH];
 static volatile MsgStats        *mRecordStats;
 static volatile MsgStats        *sysStats;           // subst buffer for system files
 
-static void mediaThread( void *arg );           // forward
+static void mediaThreadFunc( void *arg );           // forward
 
 void initMediaPlayer( void ) {            // init mediaPlayer & spawn thread to handle  playback & record requests
     mMediaEventId = osEventFlagsNew( NULL );          // osEvent channel for communication with mediaThread
@@ -62,7 +62,8 @@ void initMediaPlayer( void ) {            // init mediaPlayer & spawn thread to 
 
     thread_attr.name       = "Media";
     thread_attr.stack_size = MEDIA_STACK_SIZE;
-    Dbg.thread[2] = (osRtxThread_t *) osThreadNew( mediaThread, NULL, &thread_attr );
+    Dbg.thread[2] = (osRtxThread_t *) osThreadNew( mediaThreadFunc, NULL, &thread_attr );
+    dbgLog("4 mediaThread: %x\n", Dbg.thread[2]);
     if ( Dbg.thread[2] == NULL )
         tbErr( "mediaThread spawn failed" );
 
@@ -142,13 +143,13 @@ void playRecording() { // play back just recorded audio
  */
 void saveRecording() { // encrypt recorded audio & delete original
     if ( mRecordFilePath[0] == 0 ) return;
-    LedManager::ledFg( TB_Config->fgSaveRec );
+    LedManager::ledFg( tbConfig.fgSaveRec );
     osEventFlagsSet( mMediaEventId, MEDIA_SAVE_RECORD );
 }
 
 void cancelRecording() { // delete recorded message
     if ( mRecordFilePath[0] == 0 ) return;
-    LedManager::ledFg( TB_Config->fgCancelRec );
+    LedManager::ledFg( tbConfig.fgCancelRec );
     osEventFlagsSet( mMediaEventId, MEDIA_DEL_RECORD );
 }
 
@@ -216,8 +217,8 @@ int playCnt = 0;  // DEBUG**********************************
 //    CODEC_DATA_RECEIVE_DONE    => buffer filled, call audSaveBuffs outside ISR
 //    CODEC_RECORD_DONE     => finish recording & save file
 ***************/
-static void mediaThread( void *arg ) {           // communicates with audio codec for playback & recording
-    dbgLog( "4 mediaThr: 0x%x 0x%x \n", &arg, &arg + MEDIA_STACK_SIZE );
+static void mediaThreadFunc( void *arg ) {           // communicates with audio codec for playback & recording
+    dbgLog( "4 mediaThread: 0x%x 0x%x \n", &arg, &arg - MEDIA_STACK_SIZE );
     bool      setVolumePending = false;
 
     while (true) {

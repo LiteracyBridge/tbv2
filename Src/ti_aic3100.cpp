@@ -1286,7 +1286,7 @@ void cdc_Init() {                                                // Init codec &
 #endif
 
     if (LastVolume == 0) { // first time-- set to default_volume
-        LastVolume = TB_Config->default_volume;
+        LastVolume = tbConfig.default_volume;
         if (LastVolume == 0) LastVolume = DEFAULT_VOLUME_SETTING;
     }
     cdc_SetVolume(LastVolume);            // set to LastVolume used

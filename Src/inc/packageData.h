@@ -48,7 +48,7 @@ public:
     friend class PackageDataReader;
     friend class Package;
 
-    Subject(int n) : messages(n) {};
+    Subject(int n) : messages(n), script(NULL) {};
 
     short numMessages() { return messages.size(); };
 
@@ -62,6 +62,7 @@ public:
     AudioFile  *invitation;         // dir+name of subject's audio invitation
     MsgStats   *stats;
     std::vector<AudioFile*> messages;
+    const char * script;
 };
 
 /**
@@ -89,7 +90,9 @@ public:
 
     Package() : ixUserFeedback(-1) {};
 
+    const char *findFileOnPath(char *pathBuf, const char *fn, const char * const paths[], int nPaths, const char * const exts[], int nExts);
     const char *findAudioPath(char *pathBuf, const char *fn);
+    const char *findScriptPath(char *pathBuf, const char *fn);
 
     const char *getName() { return name; };
 
@@ -107,8 +110,8 @@ public:
     const char *name;                // text identifier for log messages
     AudioFile  *pkg_prompt;          // audio prompt for package
     int        ixUserFeedback;
-    int        nPathIxs;
-    short      *pathIxs;             // search path for prompts
+    int        nPathIxs;             // Count of indices of audioPaths to search for prompts.
+    short      *pathIxs;             // Which (indices of) audioPaths to search for prompts
     int        nSubjects;
     Subject    **subjects;           // description of each subject
 };
@@ -129,12 +132,13 @@ public:
     const char **audioPaths;        // list of all directories containing audio files for this Deployment
     int        nPackages;
     Package    **packages;          // cnt & ptrs to descriptions of packages
+
+    static Deployment *instance;
 };
 
 
 
 // Deployment data from  packages_data.txt
-extern Deployment *theDeployment;     // cnt & ptrs to info for each loaded content Package
 extern int iPkg;           // index of currPkg in Deployment
 extern Package *currPkg;        // TBook content package in use
 

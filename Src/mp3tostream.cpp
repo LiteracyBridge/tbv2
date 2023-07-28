@@ -51,7 +51,7 @@ void hexDump(const char * pTitle, const void * pRaw, int len) {
     while (pData < pEnd) {
         char *pBuf = buf;
         // Address
-        pBuf += sprintf(buf, "%08x  ", pData);
+        pBuf += sprintf(buf, "%p  ", pData);
         // Skip zeros.
         const uint32_t *pz = (const uint32_t *)pData;
         if (pz[0] == 0 && pz[1] == 0 && pz[2] == 0 && pz[3] == 0) {

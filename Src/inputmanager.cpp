@@ -291,9 +291,9 @@ void initializeInterrupts() {     // configure each keypad GPIO pin to input, pu
 
 
 //
-// inputThread-- thread to process key transitions & timeouts => TBook Event messages
-void inputThread( void *arg ) {     // converts TB_Key msgs from keypad ISR's to TB Event msgs to controlManager queue
-    dbgLog( "4 inThr: 0x%x 0x%x \n", &arg, &arg + INPUT_STACK_SIZE );
+// inputThreadFunc-- thread to process key transitions & timeouts => TBook Event messages
+void inputThreadFunc( void *arg ) {     // converts TB_Key msgs from keypad ISR's to TB Event msgs to controlManager queue
+    dbgLog( "4 inputThread: 0x%x 0x%x \n", &arg, &arg - INPUT_STACK_SIZE );
     TB_Key *transition;
     while (true) {
         transition        = NULL;
@@ -314,7 +314,7 @@ void inputThread( void *arg ) {     // converts TB_Key msgs from keypad ISR's to
             if ( KSt.firstDown == KEY::INVALID ) {
                 KSt.firstDown   = k;
                 KSt.firstDownTS = ts;
-                osTimerStart( keyDownTimer, TB_Config->minLongPressMS );  // start long press timer
+                osTimerStart( keyDownTimer, tbConfig.minLongPressMS );  // start long press timer
             } else if ( KSt.secondDown == KEY::INVALID ) {
                 KSt.secondDown   = k;
                 KSt.secondDownTS = ts;
@@ -339,12 +339,12 @@ void inputThread( void *arg ) {     // converts TB_Key msgs from keypad ISR's to
                        ( KSt.secondDown == KEY::INVALID )) {   // only one key was down & it came up
                 osTimerStop( keyDownTimer );  // cancel long press timer
                 dntime = ts - KSt.firstDownTS;
-                if ( dntime >= TB_Config->minShortPressMS ) // legal click
+                if ( dntime >= tbConfig.minShortPressMS ) // legal click
                     sendEvent( toShortEvt( KSt.firstDown ), dntime );  // so send TB Event
                 KSt.firstDown = KEY::INVALID;   // reset to all keys up
             } else if (( KSt.firstDown == KEY::STAR ) && ( k == KSt.secondDown )) {  // star-K & K came up
                 dntime = ts - KSt.secondDownTS;
-                if ( dntime >= TB_Config->minShortPressMS ) // legal click
+                if ( dntime >= tbConfig.minShortPressMS ) // legal click
                     sendEvent( toStarEvt( KSt.secondDown ), dntime );  // so send TB star-Event
                 KSt.starUsed   = true;          // so star-up will be ignored
                 KSt.secondDown = KEY::INVALID;    // back to just STAR down
@@ -393,7 +393,8 @@ void initInputManager( void ) {       // initializes keypad & starts thread
 
     thread_attr.name       = "input_thread";
     thread_attr.stack_size = INPUT_STACK_SIZE;
-    Dbg.thread[4] = (osRtxThread_t *) osThreadNew( inputThread, NULL, &thread_attr );
+    Dbg.thread[4] = (osRtxThread_t *) osThreadNew( inputThreadFunc, NULL, &thread_attr );
+    dbgLog("4 inputThread: %x\n", Dbg.thread[4]);
     if ( Dbg.thread[4] == NULL )
         tbErr( "inputThread spawn failed" );
 
@@ -414,7 +415,7 @@ void sendEvent( CSM_EVENT key, int32_t arg ) {  // log & send TB_Event to CSM
         tbErr( "bad event" );
     if ( TBEvent_pool == NULL ) return; //DEBUG
     if ( !controlManagerReady ) {
-        dbgLog( "enqueue event, csm not ready" );
+        dbgLog( "enqueue event, controlManagerReady not ready" );
         return;
     }
     dbgEvt( TB_keyEvt, key, arg, 0, 0 );

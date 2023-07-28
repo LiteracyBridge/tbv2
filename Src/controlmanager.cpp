@@ -10,13 +10,16 @@
 
 #include "packageData.h"
 
+#include "csm.h"
+
+ControlManager controlManager = ControlManager();
+
 // TBook configuration variables
 //extern TBConfig_t           TB_Config;      // defined in tbook_csm.c
 
 // TBook Control State Machine
 //extern int                  nCSMstates;     // defined in tbook_csm.c
 bool                controlManagerReady = false;
-
 
 int                 iPkg = 0;     // current package index
 Package *         currPkg = NULL; // TBook content package in use
@@ -27,66 +30,112 @@ osTimerId_t         timers[3];  // ShortIdle, LongIdle, Timer
 void setCSMcurrState( short iSt );  // set TBook.iCurrSt & dependent fields
 extern bool         BootVerboseLog;
 
-osEventFlagsId_t    mFileOpSignal;     // osEvent shared with FileOps -- to signal MP3 decode done
+//osEventFlagsId_t    mFileOpSignal;     // osEvent shared with FileOps -- to signal MP3 decode done
 
 // ------------  CSM Action execution
-static void clearIdle() {       // clear timers started by AudioDone to generate shortIdle & longIdle
+void ControlManager::clearIdle() {       // clear timers started by AudioDone to generate shortIdle & longIdle
     osTimerStop( timers[0] );
     osTimerStop( timers[1] );
+}
+
+void ControlManager::assertValidState( int stateIndex ) {
+    if ( stateIndex < 0 || stateIndex >= csm->numCStates() ) //nCSMstates )
+        tbErr( "invalid state index" );
 }
 
 /**
  * Find the next playlist, in the given direction, that has content.
  * @param direction Negative for "previous", otherwise "next".
  */
-static void changeSubject( int direction ) {
-    direction              = direction < 0 ? -1 : 1; // normalize
-    // "subject" means playlist.
-    // Find the next playlist (in the desired direction) that has content.
+void ControlManager::changeSubject( const char *change ) {
+    while (isspace(*change)) ++change;
     short newSubjectIx = TBook.iSubj;
     short numSubjects  = currPkg->numSubjects();
-    do {
-        newSubjectIx += direction;
-        if (newSubjectIx < 0)
-          newSubjectIx = numSubjects - 1;
-        if (newSubjectIx >= numSubjects)
-            newSubjectIx = 0;
-    } while (currPkg->getSubject( newSubjectIx )->numMessages() == 0);
-    logEvtNI( "chngSubj", "iSubj", newSubjectIx );
-    TBook.iSubj = newSubjectIx;
-    TBook.iMsg  = -1; // "next" will yield 0, "prev" -> -2 -> numMessages-1
-    resetAudio();
+    // Delta?
+    if (*change == '+' || *change == '-') {
+        // Yes, delta. Move by one in indicated direction, wrapping as appropriate.
+        int delta = (*change == '-') ? -1 : 1; // normalize
+        // "subject" === "playlist".
+        // Find the next playlist (in the desired iChange) that has content.
+        do {
+            newSubjectIx += delta;
+            if (newSubjectIx < 0)
+              newSubjectIx = numSubjects - 1;
+            if (newSubjectIx >= numSubjects)
+                newSubjectIx = 0;
+        } while (newSubjectIx != TBook.iSubj && currPkg->getSubject( newSubjectIx )->numMessages() == 0);
+    } else {
+        // Absolute. Valid?
+        int newIx = atoi(change);
+        if (newIx >= 0 && newIx < numSubjects && (currPkg->getSubject( newIx )->numMessages() > 0))
+            newSubjectIx = newIx;
+    }
+    if (newSubjectIx != TBook.iSubj) {
+        logEvtNI( "chngSubj", "iSubj", newSubjectIx );
+        TBook.iSubj = newSubjectIx;
+        TBook.iMsg  = -1; // "next" will yield 0, "prev" -> -2 -> numMessages-1
+        resetAudio();
+    }
 }
 
 /**
  * Find the next message, in the given direction, in the current playlist.
  * @param direction Negative for "previous", otherwise "next".
  */
-static void changeMessage( int direction ) {                // adjust current Msg # in TBook
+void ControlManager::changeMessage(const char *change ) {
     // If no subject is selected, do nothing.
     if (TBook.iSubj < 0 || TBook.iSubj >= currPkg->numSubjects()) {
         return;
     }
-    direction = direction < 0 ? -1 : 1; // normalize
-    short newMessageIx = TBook.iMsg + direction;
+    // If no messages in subject (how did we get here?), do nothing.
     Subject *subj = currPkg->getSubject( TBook.iSubj );
     short numMessages = subj->numMessages();
     if (numMessages == 0) {
         return;
     }
-    if (newMessageIx < 0) {
-        newMessageIx = numMessages - 1;
+    while (isspace(*change)) ++change;
+    short newMessageIx = TBook.iMsg;
+    if (*change == '+' || *change == '-') {
+        (*change=='-') ? --newMessageIx : ++newMessageIx;
+        if (newMessageIx < 0) {
+            newMessageIx = numMessages - 1;
+        }
+        if (newMessageIx >= numMessages) {
+            newMessageIx = 0;
+        }
+    } else {
+        int newIx = atoi(change);
+        if (newIx >= 0 && newIx < numMessages)
+            newMessageIx = newIx;
     }
-    if (newMessageIx >= numMessages) {
-        newMessageIx = 0;
+    if (newMessageIx != TBook.iMsg) {
+        logEvtNI("chgMsg", "iMsg", newMessageIx);
+        TBook.iMsg = newMessageIx;
+        resetAudio();
     }
-    logEvtNI( "chgMsg", "iMsg", newMessageIx );
-    TBook.iMsg = newMessageIx;
-    resetAudio();
 }
 
+void ControlManager::playSysAudio(const char *arg ) {        // play system file 'arg'
+    resetAudio();
+    char pathBuf[MAX_PATH];
 
-void playSubjectAudio( char *arg ) {       // play current Subject: arg must be 'nm', 'pr', or 'msg'
+    currPkg->findAudioPath( pathBuf, arg );  // find path based on current Package promptPaths
+    clearIdle();
+    logEvtFmt("PlaySys", "Sys: %s, fn: %s", arg, pathBuf);
+    playAudio( pathBuf, NULL, kPlayTypeSystemPrompt );
+
+//    for (int i = 0; i < csm->numSystemAudio(); i++)
+//        if ( strcmp( csm->getSystemAudio( i ), arg ) == 0 ) {
+//            currPkg->findAudioPath( pathBuf, arg );  // find path based on current Package promptPaths
+//            clearIdle();
+//            logEvtFmt("PlaySys", "Sys: %s, fn: %s", arg, pathBuf);
+//            playAudio( pathBuf, NULL, kPlayTypeSystemPrompt );
+//            return;
+//        }
+//    tbErr( "playSys %s not found", arg );
+}
+
+void ControlManager::playSubjectAudio(const char *arg ) {       // play current Subject: arg must be 'nm', 'pr', or 'msg'
     // If no subject is selected, do nothing.
     if ( TBook.iSubj < 0 || TBook.iSubj >= currPkg->numSubjects())
         return;
@@ -113,82 +162,17 @@ void playSubjectAudio( char *arg ) {       // play current Subject: arg must be 
         logEvtFmt( "PlayMsg", "iS:%d, iM:%d, fn:%s", TBook.iSubj, TBook.iMsg, audioFile->filename );
         stats = loadStats( subj->getName(), TBook.iSubj, TBook.iMsg ); // load stats for message
     }
-    theDeployment->getPathForAudioFile( path, audioFile );
+    Deployment::instance->getPathForAudioFile( path, audioFile );
     clearIdle();
     playAudio( path, stats, playbackType );
 }
 
-
-void playNextPackage() {                    // play name of next available Package
-    iPkg++;
-    if ( iPkg >= theDeployment->numPackages()) iPkg = 0;
-
-    Package *pkg = theDeployment->getPackage( iPkg );
-    logEvtFmt("PlayPkg", "Pkg: %s, iPkg: %d", pkg->getName(), iPkg);
-    char path[MAX_PATH];
-    theDeployment->getPathForAudioFile( path, pkg->pkg_prompt );
-    clearIdle();
-    playAudio( path, NULL, kPlayTypePackagePrompt );
-}
-
-void playSquareTune( const char *notes ) {       // play seq of notes as sqrwaves
+void ControlManager::playSquareTune( const char *notes ) {       // play seq of notes as sqrwaves
     clearIdle();
     playNotes( notes );   // mediaPlayer op -- switch threads
 }
 
-void showPackage() {                   // debug print Package iPkg
-    char path[MAX_PATH];
-    printf( "iPkg=%d nm=%s nSubjs=%d \n", currPkg->pkgIdx, currPkg->getName(), currPkg->numSubjects());
-    for (int i = 0; i < currPkg->numSubjects(); i++) {
-        Subject *sb = currPkg->getSubject( i );
-        theDeployment->getPathForAudioFile( path, sb->shortPrompt );
-        printf( " S%d %s nMsgs=%d prompt=%s\n", i, sb->getName() ,sb->numMessages( ), path );
-        theDeployment->getPathForAudioFile( path, sb->invitation );
-        printf( "  invite=%s \n", path );
-        for (int j = 0; j < sb->numMessages(); j++) {
-            theDeployment->getPathForAudioFile( path, sb->getMessage(j ));
-            printf( "   M%d %s \n", j, path );
-        }
-    }
-}
-
-
-void changePackage() {                      // switch to last played package name
-    if ( theDeployment == NULL || theDeployment->packages == NULL )
-        errLog( "changePackage() bad Deployment" );
-    if ( iPkg < 0 || iPkg >= theDeployment->numPackages() )
-        errLog( "changePackage() bad iPkg=%d", iPkg );
-    currPkg = theDeployment->getPackage(iPkg);
-
-    TBook.iSubj = -1; // makes "next subject" go to the first subject.
-    TBook.iMsg  = 0;
-    logEvtNS( "ChgPkg", "Pkg", currPkg->getName());
-    //showPackage();
-}
-
-
-void playSysAudio( char *arg ) {        // play system file 'arg'
-    resetAudio();
-    char pathBuf[MAX_PATH];
-
-    currPkg->findAudioPath( pathBuf, arg );  // find path based on current Package promptPaths
-    clearIdle();
-    logEvtFmt("PlaySys", "Sys: %s, fn: %s", arg, pathBuf);
-    playAudio( pathBuf, NULL, kPlayTypeSystemPrompt );
-
-//    for (int i = 0; i < csm->numSystemAudio(); i++)
-//        if ( strcmp( csm->getSystemAudio( i ), arg ) == 0 ) {
-//            currPkg->findAudioPath( pathBuf, arg );  // find path based on current Package promptPaths
-//            clearIdle();
-//            logEvtFmt("PlaySys", "Sys: %s, fn: %s", arg, pathBuf);
-//            playAudio( pathBuf, NULL, kPlayTypeSystemPrompt );
-//            return;
-//        }
-//    tbErr( "playSys %s not found", arg );
-}
-
-
-void startRecAudio( char *arg ) {           // record user message into temporary .wav file
+void ControlManager::startRecAudio(const char *arg ) {           // record user message into temporary .wav file
     resetAudio();
     if ( RunQCTest ) {
         recordAudio( "/system/qcAudio.wav", NULL );
@@ -204,14 +188,12 @@ void startRecAudio( char *arg ) {           // record user message into temporar
     recordAudio( path, stats );
 }
 
-
-void playRecAudio() {                             // play back recorded temp .wav
+void ControlManager::playRecAudio() {                             // play back recorded temp .wav
     clearIdle();
     playRecording();
 }
 
-
-void saveRecAudio( char *arg ) {              // encrypt user message .wav => .key & .dat
+void ControlManager::saveRecAudio(const char *arg ) {              // encrypt user message .wav => .key & .dat
     if ( strcasecmp( arg, "sv" ) == 0 ) {
         saveRecording();
     } else if ( strcasecmp( arg, "del" ) == 0 ) {
@@ -224,7 +206,7 @@ void saveRecAudio( char *arg ) {              // encrypt user message .wav => .k
  * playlist and message.
  * @param txt The text to be written.
  */
-void saveWriteMsg( char *txt ) {        // save 'txt' in Msg file
+void ControlManager::saveWriteMsg(const char *txt ) {        // save 'txt' in Msg file
     const char *subjName = TBook.iSubj >= 0 ? currPkg->getSubject( TBook.iSubj )->getName() : "-no-subject-";
     char path[MAX_PATH];
     int  mCnt      = makeAuxFileName( path, AUX_FILE_MESSAGE );
@@ -238,27 +220,7 @@ void saveWriteMsg( char *txt ) {        // save 'txt' in Msg file
                TBook.iMsg, mCnt, txt );
 }
 
-void QCfilesTest(
-        char *arg ) {          // write & re-read system/qc_test.txt -- gen Event FilesSuccess if identical, or FilesFail if not
-    const char *testNm = "/system/QC_Test.txt";
-    char   qcmsg[50], qcres[50];
-    fsTime ftime;
-    strcpy( qcres, "------------------" );
-    strcpy( qcmsg, "QC filesTest" );
-
-    writeLine( qcmsg, testNm );
-    loadLine( qcres, testNm, &ftime );  // and read it back
-    fdelete( testNm, NULL );
-
-    char *nl = strchr( qcres, '\n' );
-    if ( nl != NULL ) *nl = 0;    // truncate newline
-    if ( strcmp( qcmsg, qcres ) == 0 )
-        sendEvent( FilesSuccess, 0 );
-    else
-        sendEvent( FilesFail, 0 );
-}
-
-void svQCresult( char *arg ) {           // save 'arg' to system/QC_PASS.txt if starts with "QC_OK", or as QC_FAIL.txt
+void ControlManager::svQCresult(const char *arg ) {           // save 'arg' to system/QC_PASS.txt if starts with "QC_OK", or as QC_FAIL.txt
     const char *passNm = "/system/QC_PASS.txt";
     const char *failNm = "/system/QC_FAIL.txt";
     checkMem();
@@ -271,7 +233,81 @@ void svQCresult( char *arg ) {           // save 'arg' to system/QC_PASS.txt if 
         writeLine( arg, "/system/QC_FAIL.txt" );
 }
 
-void USBmode( bool start ) {            // start (or stop) USB storage mode
+void ControlManager::showPackage() {                   // debug print Package iPkg
+    char path[MAX_PATH];
+    printf( "iPkg=%d nm=%s nSubjs=%d \n", currPkg->pkgIdx, currPkg->getName(), currPkg->numSubjects());
+    for (int i = 0; i < currPkg->numSubjects(); i++) {
+        Subject *sb = currPkg->getSubject( i );
+        Deployment::instance->getPathForAudioFile( path, sb->shortPrompt );
+        printf( " S%d %s nMsgs=%d prompt=%s\n", i, sb->getName() ,sb->numMessages( ), path );
+        Deployment::instance->getPathForAudioFile( path, sb->invitation );
+        printf( "  invite=%s \n", path );
+        for (int j = 0; j < sb->numMessages(); j++) {
+            Deployment::instance->getPathForAudioFile( path, sb->getMessage(j ));
+            printf( "   M%d %s \n", j, path );
+        }
+    }
+}
+
+void ControlManager::playNextPackage() {                    // play name of next available Package
+    iPkg++;
+    if ( iPkg >= Deployment::instance->numPackages()) iPkg = 0;
+
+    Package *pkg = Deployment::instance->getPackage( iPkg );
+    logEvtFmt("PlayPkg", "Pkg: %s, iPkg: %d", pkg->getName(), iPkg);
+    char path[MAX_PATH];
+    Deployment::instance->getPathForAudioFile( path, pkg->pkg_prompt );
+    clearIdle();
+    playAudio( path, NULL, kPlayTypePackagePrompt );
+}
+
+void ControlManager::changePackage() {                      // switch to last played package name
+    if ( Deployment::instance == NULL || Deployment::instance->packages == NULL )
+        errLog( "changePackage() bad Deployment" );
+    if ( iPkg < 0 || iPkg >= Deployment::instance->numPackages() )
+        errLog( "changePackage() bad iPkg=%d", iPkg );
+    currPkg = Deployment::instance->getPackage(iPkg);
+
+    TBook.iSubj = -1; // makes "next subject" go to the first subject.
+    TBook.iMsg  = 0;
+    logEvtNS( "ChgPkg", "Pkg", currPkg->getName());
+    //showPackage();
+}
+
+bool ControlManager::callScript(const char *scriptName) {
+    // Look for script in "csms".
+    CSM *nextCsm = NULL;
+    for (int i=0; i<csms.size(); ++i) {
+        std::pair<const char *, CSM *> p = csms[i];
+        if (strcmp(p.first ,scriptName) == 0) {
+            nextCsm = p.second;
+            break;
+        }
+    }
+    // If script not already loaded, load it.
+    if (nextCsm == NULL) {
+        static char fname[MAX_PATH];
+        currPkg->findScriptPath(fname, scriptName);
+        if (!*fname) return false; // not found
+        nextCsm = CSM::loadFromFile(fname);
+        if (!nextCsm) return false;
+        csms.emplace_back(std::pair<const char*, CSM *>(scriptName, nextCsm));
+    }
+    // Push existing CSM onto save stack.
+    csmStack.push_back(csm);
+    // Start new CSM.
+    csm = nextCsm;
+    return true;
+}
+
+void ControlManager::exitScript(CSM_EVENT exitEventId) {
+    if (csmStack.size() < 1) return; // nothing to exit to
+    csm = csmStack.back();
+    csmStack.pop_back();
+    csm->handleEvent(exitEventId);
+}
+
+void ControlManager::USBmode( bool start ) {            // start (or stop) USB storage mode
     fsTime   rtcTm;
     uint32_t msec;
     clearIdle();
@@ -302,48 +338,17 @@ void USBmode( bool start ) {            // start (or stop) USB storage mode
     }
 }
 
-void assertValidState( int stateIndex ) {
-    if ( stateIndex < 0 || stateIndex >= csm->numStates() ) //nCSMstates )
-        tbErr( "invalid state index" );
-}
-
-const char *ledStr( const char *s ) {     // lookup TBConfig LED sequences
-    // @formatter:off
-    if ( strcasecmp( s, "bgPulse" )==0 )        return TB_Config->bgPulse;          // set by CSM (background while navigating)           default: _49G
-    if ( strcasecmp( s, "fgPlaying" )==0 )      return TB_Config->fgPlaying;        // set by startPlayback()                             default: G!
-    if ( strcasecmp( s, "fgPlayPaused" )==0 )   return TB_Config->fgPlayPaused;     // set by audPauseResumeAudio() when playback paused  default: G2_3!
-    if ( strcasecmp( s, "fgRecording" )==0 )    return TB_Config->fgRecording;      // set by startRecord() while recording user feedback default: R!
-    if ( strcasecmp( s, "fgRecordPaused" )==0 ) return TB_Config->fgRecordPaused;   // set by audPauseResumeAudio() when recording paused default: R2_3!
-    if ( strcasecmp( s, "fgSavingRec" )==0 )    return TB_Config->fgSavingRec;      // set by haltRecord while saving recording           default: O!
-    if ( strcasecmp( s, "fgSaveRec" )==0 )      return TB_Config->fgSaveRec;        // set by saveRecording() while encrypting recording  default: G3_3G3
-    if ( strcasecmp( s, "fgCancelRec" )==0 )    return TB_Config->fgCancelRec;      // set by media.cancelRecording()                     default: R3_3R3
-    if ( strcasecmp( s, "fgUSB_MSC" )==0 )      return TB_Config->fgUSB_MSC;        // set by USBD_MSC0_Init() when USB host connects     default: O5o5!
-    if ( strcasecmp( s, "fgUSBconnect" )==0 )   return TB_Config->fgUSBconnect;     // set by enableMassStorage() when starting USB       default: G5g5!
-    if ( strcasecmp( s, "fgTB_Error" )==0 )     return TB_Config->fgTB_Error;       // set by TBErr() to signal software error            default: R8_2R8_2R8_20!
-    if ( strcasecmp( s, "fgNoUSBcable" )==0 )   return TB_Config->fgNoUSBcable;     // set by enableMassStorage() if noUSBpower           default: _3R3_3R3_3R3_5!
-    if ( strcasecmp( s, "fgPowerDown" )==0 )    return TB_Config->fgPowerDown;      // set??  powerDownTBook() G_3G_3G_9G_3G_9G_3
-    // @formatter:on
-    return s;
-}
-
-void setCurrState( short iSt ) {        // set iCurrSt & iPrevSt (& DBG strings)
-    if ( iSt == TBook.iCurrSt )
-        return;
-    assertValidState( iSt );
-    TBook.iPrevSt       = TBook.iCurrSt;
-    TBook.prevStateName = TBook.currStateName;          //DEBUG -- update prevSt string
-
-    TBook.iCurrSt = iSt;            // now 'in' (executing) state nSt
-    TBook.cSt     = csm->getCState( TBook.iCurrSt );      // state definition for current state
-
-    TBook.currStateName = TBook.cSt->getName( );   //DEBUG -- update currSt string
-}
-
-static void doAction( CSM_ACTION act, char *arg, int iarg ) {  // execute one csmAction
-    dbgEvt( TB_csmDoAct, act, arg[0], arg[1], iarg );
-    if ( BootVerboseLog ) logEvtNSNS( "Action", "nm", CSM::actionName( act ), "arg", arg ); //DEBUG
+ControlManager::ACTION_DISPOSITION ControlManager::doAction( CSM_ACTION action, const char *arg, int iarg ) {
+    void * sp;
+    static void *sp_prev = 0;
+    sp = &sp;
+    ACTION_DISPOSITION result = CONTINUE_ACTIONS;
+    dbgEvt( TB_csmDoAct, action, arg[0], arg[1], iarg );
+    dbgLog("C doAction %s(%s), sp:%p, prev:%p\n", CSM::actionName(action), arg, sp, sp_prev);
+    sp_prev = sp;
+    if ( BootVerboseLog ) logEvtNSNS( "Action", "nm", CSM::actionName( action ), "arg", arg ); //DEBUG
     if ( isMassStorageEnabled()) {    // if USB MassStorage running: ignore actions referencing files
-        switch (act) {
+        switch (action) {
             case playSys:
             case playSubj:
             case startRec:
@@ -354,19 +359,17 @@ static void doAction( CSM_ACTION act, char *arg, int iarg ) {  // execute one cs
             case finishRec:
             case writeMsg:
             case stopPlay:
-                return;
+                return result;
 
             default: break;
         }
     }
-    switch (act) {
+    switch (action) {
         case LED:
-            arg = const_cast<char *>(ledStr(arg));
-            LedManager::ledFg( arg );
+            LedManager::ledFg( tbConfig.ledStr(arg) );
             break;
         case bgLED:
-            arg = const_cast<char *>(ledStr(arg));
-            LedManager::ledBg( arg );
+            LedManager::ledBg( tbConfig.ledStr(arg) );
             break;
         case playSys:
             playSysAudio( arg );
@@ -385,15 +388,12 @@ static void doAction( CSM_ACTION act, char *arg, int iarg ) {  // execute one cs
             break;
         case playRec:
             playRecAudio();
-            //      logEvt( "playRec" );
             break;
         case saveRec:
             saveRecAudio( arg );
-            //      logEvtS( "saveRec", arg );
             break;
         case finishRec:
             stopRecording();
-            //      logEvt( "stopRec" );
             break;
         case writeMsg:
             if ( RunQCTest )
@@ -424,30 +424,24 @@ static void doAction( CSM_ACTION act, char *arg, int iarg ) {  // execute one cs
             USBmode( false );
             break;
         case subjAdj:
-            changeSubject( iarg );
+            changeSubject( arg );
             break;
         case msgAdj:
-            changeMessage( iarg );
+            changeMessage( arg );
             break;
         case goPrevSt:
-            setCurrState( TBook.iPrevSt );    // return to prevSt without transition
-            // remembers this state as 'prevState' -- does that matter?
+            csm->goPrevState();
+            result = BREAK_ACTIONS;
             break;
         case saveSt:      // remember state that preceded this one (for possible future return)
             if ( iarg > 4 ) iarg = 4;
-            assertValidState( TBook.iPrevSt );
-            TBook.iSavedSt[iarg] = TBook.iPrevSt;
-            dbgLog( "C svSt[%d] = %s(%d) \n", iarg, TBook.prevStateName, TBook.iPrevSt );
+            dbgLog( "C svSt[%d] = %s(%d) \n", iarg, csm->prevStateName, csm->prevStateIx );
+            csm->saveState(iarg);
             break;
         case goSavedSt:
             if ( iarg > 4 ) iarg = 4;
-            assertValidState( TBook.iSavedSt[iarg] );
-            setCurrState( TBook.iSavedSt[iarg] );   // return to savedSt without transition (updates prevSt)
-            //      TBook.iNextSt = TBook.iSavedSt[ iarg ];
-            // BE: I'm not sure this is right, but it has the side effect of ending the while loop in changeCSMstate.
-            // In general, when we return to a saved state, I don't think we want to execute the entrance
-            // actions for that state.
-            //      TBook.iCurrSt = TBook.iNextSt;
+            csm->goSavedState(iarg);
+            result = BREAK_ACTIONS;
             break;
         case setTimer:
             osTimerStart( timers[2], iarg );
@@ -459,6 +453,7 @@ static void doAction( CSM_ACTION act, char *arg, int iarg ) {  // execute one cs
             showBattCharge();
             break;
         case powerDown:
+            result = BREAK_ACTIONS;
             powerDownTBook();
             break;
         case sysTest:
@@ -474,48 +469,125 @@ static void doAction( CSM_ACTION act, char *arg, int iarg ) {  // execute one cs
             playSquareTune( arg );
             break;
         case sysBoot:
+            result = BREAK_ACTIONS;
             NVIC_SystemReset();     // soft reboot
             break;
+        case callIf:
+            // If no subject is selected, do nothing.
+            if (TBook.iSubj >= 0 && TBook.iSubj < currPkg->numSubjects()) {
+                Subject *subj = currPkg->getSubject(TBook.iSubj);
+                if (subj->script) {
+                    result = BREAK_ACTIONS;
+                    if (callScript(subj->script)) {
+                        CSM::print(csm);
+                        csm->start();
+                    }
+                }
+            };
+            break;
+        case exitCsm:
+            {
+            result = BREAK_ACTIONS;
+            CSM_EVENT eventId = lastEventId;
+            if (arg && *arg) {
+                eventId = CSM::eventFromName(arg);
+            }
+            exitScript(eventId);
+            }
+            break;
+        case enterSt:
+            {
+            result = BREAK_ACTIONS;
+            int newIx = csm->stateIxForName(arg);
+            csm->enterState(newIx);
+            break;
+            }
         default: break;
     }
+    return result;
 }
 
-// ------------- interpret TBook CSM 
-static void changeCSMstate( short nSt, short lastEvtTyp ) {
-    dbgEvt( TB_csmChSt, nSt, 0, 0, 0 );
-    if ( nSt == TBook.iCurrSt ) {  // no-op transition -- (default for events that weren't defined in control.def)
-        //dbgLog( "C %s(%d): %s => %s \n", TBook.cSt->nm, TBook.iCurrSt, eventNm( (Event)lastEvtTyp), gCSt(nSt)->nm );
-        //logEvtNSNS( "Noop_evt", "state",TBook.cSt->nm, "evt", eventNm( (Event)lastEvtTyp) ); //DEBUG
-        return;
-    }
-
-    setCurrState( nSt );
-    // now 'in' (executing) state nSt
-
-    /*DEBUG*/  // Update status strings inside TBook -- solely for visibility in the debugger
-    for (int e = eNull; e < eUNDEF; e++) {         //DBG: fill in dynamic parts of transition table for current state
-        short iState = TBook.cSt->evtNxtState[e];//DBG:
-        TBook.evtNxtSt[e].nxtSt   = iState;
-        TBook.evtNxtSt[e].nstStNm = csm->getCState( iState )->getName();
-    }
-    /*END DEBUG*/
-
-    int        nA = TBook.cSt->numActions();
-    for (short i  = 0; i < nA; i++) {         // For each action defined on the state...
-        csmAction *action = TBook.cSt->getAction( i );
-        CSM_ACTION act = action->act;  // unpack action, and arg
-        const char *arg = action->arg;
-        if ( arg == NULL ) arg = "";                // make sure its a string for digit test
-        // Parse the argument if it looks like it might be numeric.
-        int iarg = arg[0] == '-' || isdigit( arg[0] ) ? atoi( arg ) : 0;
-
-        doAction( act, const_cast<char*>(arg), iarg );   // And invoke the action.
-        // NB: actions goPrevSt & goSavedSt change TBook.iCurrSt
+void ControlManager::updateTimersForEvent(CSM_EVENT eventId) {
+    switch (eventId) {
+        case AudioDone:
+            if ( audioIdle )
+                logEvtNS( "error", "msg", "AudioDone without AudioStart" );
+            else {
+                audioIdle = true;
+                osTimerStart( timers[0], tbConfig.shortIdleMS );
+                osTimerStart( timers[1], tbConfig.longIdleMS );
+            }
+            break;
+        case ShortIdle:     // events that don't reset idle timers
+        case LowBattery:
+        case BattCharging:
+        case BattCharged:
+        case BattMin: // ?? this one
+        case BattMax:
+        case ChargeFault: // ?? this one
+        case LithiumHot: // ?? this one
+        case FilesSuccess:
+        case FilesFail:
+        case BattCharging75:
+        case BattNotCharging:
+            break;
+        case AudioStart:
+            audioIdle = false;
+            break;
+        default:
+            clearIdle();
+            break;
     }
 }
 
-static void tbTimer( void *eNum ) {
-    switch ((int) eNum) {
+void ControlManager::executeCSM( void ) {               // execute TBook control state machine
+    TB_Event   *event;
+    osStatus_t status;
+    controlManagerReady = true;
+
+    TBook.iSubj  = -1; // makes "next subject" go to the first subject.
+    TBook.iMsg   = 0;
+
+    // set initialState & do actions
+    csm->start();
+    audioIdle = true;
+    while (true) {
+        event    = NULL;
+        status = osMessageQueueGet( osMsg_TBEvents, &event, NULL, osWaitForever );  // wait for next TB_Event
+        if ( status != osOK )
+            tbErr( " EvtQGet error" );
+        lastEventId = event->typ;
+        updateTimersForEvent(lastEventId);
+        osMemoryPoolFree( TBEvent_pool, event );
+        csm->handleEvent(lastEventId);
+    }
+}
+
+void ControlManager::QCfilesTest(const char *arg ) {          // write & re-read system/qc_test.txt -- gen Event FilesSuccess if identical, or FilesFail if not
+    const char *testNm = "/system/QC_Test.txt";
+    char   qcmsg[50], qcres[50];
+    fsTime ftime;
+    strcpy( qcres, "------------------" );
+    strcpy( qcmsg, "QC filesTest" );
+
+    writeLine( qcmsg, testNm );
+    loadLine( qcres, testNm, &ftime );  // and read it back
+    fdelete( testNm, NULL );
+
+    char *nl = strchr( qcres, '\n' );
+    if ( nl != NULL ) *nl = 0;    // truncate newline
+    if ( strcmp( qcmsg, qcres ) == 0 )
+        sendEvent( FilesSuccess, 0 );
+    else
+        sendEvent( FilesFail, 0 );
+}
+
+/**
+ * Timer callback. This is a static member function.
+ * @param timerIx The parameter passed to osTimerNew, the timer index.
+ */
+void ControlManager::tbTimerFunc( void *timerIx ) {
+    switch ((int) timerIx) {
         case 0:
             sendEvent( ShortIdle, 0 );
             break;
@@ -527,7 +599,7 @@ static void tbTimer( void *eNum ) {
             // sleep immediately when charging is complete.
             // Long idle is for going to sleep. Don't sleep while charging, so we can continue to report status.
             if ( isCharging()) {
-                osTimerStart( timers[1], TB_Config->longIdleMS );
+                osTimerStart( controlManager.timers[1], tbConfig.longIdleMS );
             } else {
                 sendEvent( LongIdle, 0 );
             }
@@ -538,167 +610,56 @@ static void tbTimer( void *eNum ) {
     }
 }
 
-
-void executeCSM( void ) {               // execute TBook control state machine
-    TB_Event   *evt;
-    osStatus_t status;
-    controlManagerReady = true;
-
-    TBook.volume = TB_Config->default_volume;
-    TBook.iSubj  = -1; // makes "next subject" go to the first subject.
-    TBook.iMsg   = 0;
-
-    // set initialState & do actions
-    TBook.iCurrSt       = -1;   // so initState (which has been assigned to 0) will be different
-    TBook.currStateName = "<start>";
-
-    if ( RunQCTest )
-        changeCSMstate( TB_Config->qcTestState, 0 );
-    else
-        changeCSMstate( TB_Config->initState, 0 );
-
-    bool audioIdle = true;
-    while (true) {
-        evt    = NULL;
-        status = osMessageQueueGet( osMsg_TBEvents, &evt, NULL, osWaitForever );  // wait for next TB_Event
-        if ( status != osOK )
-            tbErr( " EvtQGet error" );
-        TBook.lastEvent     = evt->typ;  // has to be copied, used after 'evt' is freed
-        TBook.lastEventName = CSM::eventName( TBook.lastEvent );
-
-        //    logEvtNSNI( "csmEvent", "typ", TBook.lastEventName, "dnMS", evt->arg );
-        switch (evt->typ) {
-            case AudioDone:
-                if ( audioIdle )
-                    logEvtNS( "error", "msg", "AudioDone without AudioStart" );
-                else {
-                    audioIdle = true;
-                    osTimerStart( timers[0], TB_Config->shortIdleMS );
-                    osTimerStart( timers[1], TB_Config->longIdleMS );
-                }
-                break;
-            case ShortIdle:     // events that don't reset idle timers
-            case LowBattery:
-            case BattCharging:
-            case BattCharged:
-            case BattMin: // ?? this one
-            case BattMax:
-            case ChargeFault: // ?? this one
-            case LithiumHot: // ?? this one
-            case FilesSuccess:
-            case FilesFail:
-            case BattCharging75:
-            case BattNotCharging:
-                break;
-            case AudioStart:
-                audioIdle = false;
-                break;
-            default:
-                clearIdle();
-                break;
-        }
-        short nSt = TBook.cSt->evtNxtState[TBook.lastEvent];
-        assertValidState( nSt );
-        if ( nSt != TBook.iCurrSt ) // state is changing (unless goPrevSt or goSavedSt undoes it)
-            logEvtNSNS( "csmEvt", "evt", TBook.lastEventName, "nSt", csm->getCState( nSt )->nm );
-
-        osMemoryPoolFree( TBEvent_pool, evt );
-        changeCSMstate( nSt, TBook.lastEvent ); // only changes if different
+void ControlManager::init() {
+    for (int timerIx = 0; timerIx < 3; timerIx++) {
+        timers[timerIx] = osTimerNew(tbTimerFunc, osTimerOnce, (void *) timerIx, NULL);
+        if (timers[timerIx] == NULL)
+            tbErr("timer not alloc'd");
     }
+
+    csm = loadControlDef2();
+
 }
 
-
-static void eventTest() {                    // report Events until DFU (pot table)
-    TB_Event   *evt;
-    osStatus_t status;
-
-    dbgLog( "EvtTst starPlus\n" );
-    while (true) {
-        status = osMessageQueueGet( osMsg_TBEvents, &evt, NULL, osWaitForever );  // wait for next TB_Event
-        if ( status != osOK )
-            tbErr( " EvtQGet error" );
-
-        TBook.lastEventName = CSM::eventName( evt->typ );
-        dbgLog( " %s \n", CSM::eventName( evt->typ ));
-        dbgEvt( TB_csmEvt, evt->typ, tbTimeStamp(), 0, 0 );
-        logEvtNS( "evtTest", "nm", CSM::eventName( evt->typ ));
-
-        if ( evt->typ == Tree )
-            osTimerStart( timers[0], TB_Config->shortIdleMS );
-        if ( evt->typ == Pot )
-            osTimerStart( timers[1], TB_Config->longIdleMS );
-        if ( evt->typ == Table )
-            osTimerStart( timers[2], 20000 ); // 20 sec
-
-        if ( evt->typ == starPlus ) return;
-    }
+void USBmode(bool start) {
+    controlManager.USBmode(start);
 }
-
-extern bool BootToUSB;
-extern uint32_t Mp3FilesToConvert;
 
 void initControlManager( void ) {       // initialize control manager
     EventRecorderEnable( evrEA, TB_no, TBsai_no );  // TB, TBaud, TBsai
     EventRecorderDisable( evrAOD, EvtFsCore_No, EvtFsMcSPI_No );  //FileSys library
     EventRecorderDisable( evrAOD, EvtUsbdCore_No, EvtUsbdEnd_No );  //USB library
 
-    mFileOpSignal = osEventFlagsNew( NULL );      // osEvent channel for signal when .WAV's are ready
-    if ( mFileOpSignal == NULL )
-        tbErr( "mFileOpSignal alloc failed" );
-
     TBConfig::initConfig();
-
-    bool onlyQcLoaded = false;
-    if ( !loadControlDef()) {   // load csm_data.txt if it's there
-        preloadCSM();           // or use the preloaded version for QcTest
-        logEvtNS( "TB_CSM", "Ver", csm->Version );        // log CSM version comment
-        onlyQcLoaded = true;
-    }
+    controlManager.init();
 
     if (BootToUSB) {
         USBmode(true);
         return;
     }
 
-    if ( csm != NULL ) {     // have a CSM definition
-        LedManager::ledBg( TB_Config->bgPulse );    // reset background pulse according to TB_Config
-        setVolume( TB_Config->default_volume );         // set initial volume
-
-        iPkg = 0;
-        if ( RunQCTest ) {
-            theDeployment = NULL;
-        } else {      // don't load package for qcTest
-            if ( !readPackageData() || onlyQcLoaded || BootToUSB ) {
-                USBmode( true );    // go to USB unless successfully loaded CSM & packages_data
-                return;         // don't do anything else after starting USBmode
-            }
-        }
-
-        TBook.iSubj = -1; // makes "next subject" go to the first subject.
-        TBook.iMsg  = 1;
-
-        // don't init power timer-- it is set to do 1st check at 15sec, then resets from TB_Config
-        //setPowerCheckTimer( TB_Config->powerCheckMS );
-        if ( RunQCTest )
-            PowerChecksEnabled = false;     // disable powerChecks during QC
-
-        for (int   it       = 0; it < 3; it++) {
-            timers[it] = osTimerNew( tbTimer, osTimerOnce, (void *) it, NULL );
-            if ( timers[it] == NULL )
-                tbErr( "timer not alloc'd" );
-        }
-        for (int e        = eNull; e < eUNDEF; e++) {  //DBG fill in static parts of debug transition table
-            TBook.evtNxtSt[e].evt   = static_cast<CSM_EVENT>(e);
-            TBook.evtNxtSt[e].evtNm = CSM::eventName( static_cast<CSM_EVENT>(e) );
-        }
-        TBook.prevStateName = "<start>";
-        executeCSM();
-
-    } else if ( FileSysOK ) {   // FS but no CSM, go into USB mode
-        logEvt( "NoFS USBmode" );
-        USBmode( true );
-    } else {  // no FileSystem
-        eventTest();
+    // don't init power timer-- it is set to do 1st check at 15sec, then resets from TB_Config
+    //setPowerCheckTimer( tbConfig.powerCheckMS );
+    if (RunQCTest) {
+        // disable powerChecks during QC
+        PowerChecksEnabled = false;
     }
+
+    LedManager::ledBg(tbConfig.bgPulse);    // reset background pulse according to TB_Config
+    setVolume(tbConfig.default_volume);         // set initial volume
+
+    iPkg = 0;
+    // Don't try load package for qcTest. If not qcTest and can't load packages, go to USB mode.
+    if (!RunQCTest && !readPackageData()) {
+        USBmode(true);    // go to USB unless successfully loaded CSM & packages_data
+        return;         // don't do anything else after starting USBmode
+    }
+
+    TBook.iSubj = -1; // makes "next subject" go to the first subject.
+    TBook.iMsg  = 1;
+
+    controlManager.executeCSM();
+
+
 }
 // contentmanager.cpp 

@@ -98,8 +98,8 @@ void setBootMode() { // use key to to select value for BootMode
 #endif
 }
 
-
 static osThreadAttr_t tb_attr;                                        // has to be static!
+
 int main( void ) {
     GPIO::defineGPIOs();   // create GPIO_Def_t entries { id, port, pin, intq, signm, pressed } for each GPIO signal in use
 
@@ -130,6 +130,7 @@ int main( void ) {
     tb_attr.name       = (const char *) "talking_book";
     tb_attr.stack_size = TBOOK_STACK_SIZE;
     Dbg.thread[0] = (osRtxThread_t *) osThreadNew( talking_book, NULL, &tb_attr );    // Create application main thread
+    dbgLog("4 tbookThread: %x\n", Dbg.thread[0]);
 
     osKernelStart();                      // Start thread execution
     for (;;) {}

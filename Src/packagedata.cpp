@@ -13,7 +13,7 @@
 extern const char * const preferredAudioExtensions[];
 extern const int numAudioExtensions;
 
-Deployment *theDeployment = NULL;          // extern cnt & ptrs to info for each loaded content Package
+Deployment *Deployment::instance = NULL;          // extern cnt & ptrs to info for each loaded content Package
 
 /**
  * Gets the AudioFile object for the given message.
@@ -93,14 +93,12 @@ const char *Package::getPath(int pathIx) {         // return content directory p
     if (pathIx < 0 || pathIxs == NULL || pathIx >= nPathIxs)
         errLog("getPath bad args");
     short dirIdx = pathIxs[pathIx];
-    if (dirIdx < 0 || dirIdx >= theDeployment->numPaths)
+    if (dirIdx < 0 || dirIdx >= Deployment::instance->numPaths)
         errLog("getPath bad dirIdx");
-    return theDeployment->audioPaths[dirIdx];
+    return Deployment::instance->audioPaths[dirIdx];
 }
 
-const char *Package::findAudioPath(char *pathBuf, const char *fn) { // fill path[] with first dir/nm.wav & return it
-    if (pathBuf == NULL || pathIxs == NULL)
-        errLog("findAudioPath bad srchpaths");
+const char *Package::findFileOnPath(char *pathBuf, const char *fn, const char * const paths[], int nPaths, const char * const exts[], int nExts) { // fill path[] with first dir/nm.wav & return it
     char fname[MAX_PATH];
     strcpy(fname, fn);
     // Drop any leading path.
@@ -109,19 +107,43 @@ const char *Package::findAudioPath(char *pathBuf, const char *fn) { // fill path
     // Truncate any extension.
     if ((pF=strrchr(fname, '.')) != NULL) *pF = '\0';
     // Search by paths...
-    for (int ix = 0; ix < nPathIxs; ix++) {
-        const char *aPath = getPath(ix);
-        strcpy(pathBuf, aPath);          
+    for (int iPath = 0; iPath < nPaths; ++iPath) {
+        const char *aPath = paths[iPath];
+        strcpy(pathBuf, aPath);
         strcat(pathBuf, fname);
         pF = pathBuf + strlen(pathBuf);
         // ...then by extension.
-        for (int j=0; j<numAudioExtensions; j++) {
-            strcpy(pF, preferredAudioExtensions[j]);
+        for (int j=0; j<nExts; j++) {
+            strcpy(pF, exts[j]);
             if (fexists(pathBuf))
-                return pathBuf;            
+                return pathBuf;
         }
     }
     return NULL;
+}
+
+// fill path[] with first dir/nm.wav & return it
+const char *Package::findAudioPath(char *pathBuf, const char *fn) {
+    if (pathBuf == NULL || pathIxs == NULL)
+        errLog("findAudioPath bad srchpaths");
+    const char *paths[nPathIxs];
+    // Build paths array for search
+    for (int ix = 0; ix < nPathIxs; ix++) {
+        paths[ix] = getPath(ix);
+    }
+    return findFileOnPath(pathBuf, fn, paths, nPathIxs, preferredAudioExtensions, numAudioExtensions);
+}
+
+const char *Package::findScriptPath(char *pathBuf, const char *fn) {
+    if (pathBuf == NULL || pathIxs == NULL)
+        errLog("findScriptPath bad srchpaths");
+    const char *paths[nPathIxs];
+    static const char * const exts[] = {".csm"};
+    // Build paths array for search
+    for (int ix = 0; ix < nPathIxs; ix++) {
+        paths[ix] = getPath(ix);
+    }
+    return findFileOnPath(pathBuf, fn, paths, nPathIxs, exts, 1);
 }
 
 void Package::addRecording(const char *recordingFileName) {
@@ -133,8 +155,7 @@ void Package::addRecording(const char *recordingFileName) {
 
 
 Package *Deployment::getPackage(int ixPackage) {                               // return iPkg'th package from current deployment
-    int nP = numPackages();
-    if (ixPackage < 0 || ixPackage >= nPackages)
+    if (ixPackage < 0 || ixPackage >= numPackages())
         errLog("getPackage(%d) bad idx", ixPackage);
     return packages[ixPackage];
 }
@@ -165,6 +186,8 @@ public:
 
     AudioFile *readAudioFile(const char *tag);
 
+    void resetSubjectOptions();
+    void parseSubjectOptions();
     Subject *readSubject();
 
     void readPackageSearchPathList(Package &package);
@@ -172,6 +195,8 @@ public:
     Package *readPackage(int ixPackage);
 
 private:
+    char subjectScript[MAX_PATH];  // Optional script file for a given subject.
+
     bool userFeedbackPublic;
     int ufPathIx;
     const char *ufListFile;
@@ -223,6 +248,19 @@ AudioFile *PackageDataReader::readAudioFile(const char *typ) {        // load di
     return audioFile;
 }
 
+void PackageDataReader::resetSubjectOptions() {
+    *subjectScript = '\0';
+}
+
+void PackageDataReader::parseSubjectOptions() {
+    char name[50];
+    char value[200];
+    int nParts = sscanf(line, "%[^:]:%s", name, value);
+    if (nParts == 2 && strcmp(name, "script") == 0) {
+        strcpy(subjectScript, value);
+    }
+}
+
 /**
  * Parse the description of one playlist.
  * @return a pointer to the Playlist object
@@ -230,13 +268,21 @@ AudioFile *PackageDataReader::readAudioFile(const char *typ) {        // load di
 Subject *PackageDataReader::readSubject() {                       // parse content subject from pkg_dat
     if (errCount > 0) return NULL;
 
+    resetSubjectOptions();
     const char * name = readString("subjName");
 
     AudioFile *prompt = readAudioFile("subj_pr");
     AudioFile *invitation = readAudioFile("subj_inv");
 
+    // Optional values, like "script:foo.csm"
+    const char *line = readLine("opts");
+    while (line && !isdigit(*line)) {
+        parseSubjectOptions();
+        line = readLine("opts");
+    }
+    int nMessages = atoi(line);
+
     Subject *subj;
-    int nMessages = readInt("nMsgs");
     if (nMessages == 0) {
         subj = new("subject") DynamicSubject(0, ufPathIx, "M0:/content/uf_list.txt");
     } else {
@@ -245,6 +291,9 @@ Subject *PackageDataReader::readSubject() {                       // parse conte
     subj->name = name;
     subj->shortPrompt = prompt;
     subj->invitation = invitation;
+    if (*subjectScript) {
+        subj->script = allocStr(subjectScript, "script");
+    }
 
 //    subj->messages = new("msgList") AudioFile *[subj->nMessages];
     subj->stats    = static_cast<MsgStats *>(tbAlloc(sizeof(MsgStats), "stats"));
@@ -286,7 +335,7 @@ const int PACKAGE_FORMAT_VERSION = 1;                 // format of Oct 2021
 //
 // public routine to load a full Deployment from  /content/packages_data.txt
 bool PackageDataReader::readPackageData(void) {                        // load structured TBook package contents
-    theDeployment = new("deployment") Deployment;
+    Deployment::instance = new("deployment") Deployment;
 
     if (inFile == NULL) {
         error("package_data.txt not found");
@@ -295,15 +344,15 @@ bool PackageDataReader::readPackageData(void) {                        // load s
         if (fmtVer != PACKAGE_FORMAT_VERSION) {
             error("bad format_version");
         } else {
-            theDeployment->name = readString("deployName");
-            logEvtNS("Deployment", "Name", theDeployment->name);
+            Deployment::instance->name = readString("deployName");
+            logEvtNS("Deployment", "Name", Deployment::instance->name);
 
-            readAudioPaths(*theDeployment);
+            readAudioPaths(*Deployment::instance);
 
-            theDeployment->nPackages = readInt("nPkgs");
-            theDeployment->packages  = new("deplPkgs") Package*[theDeployment->nPackages];
-            for (int i = 0; i < theDeployment->nPackages; i++) {
-                theDeployment->packages[i] = readPackage(i);
+            Deployment::instance->nPackages = readInt("nPkgs");
+            Deployment::instance->packages  = new("deplPkgs") Package*[Deployment::instance->numPackages()];
+            for (int i = 0; i < Deployment::instance->numPackages(); i++) {
+                Deployment::instance->packages[i] = readPackage(i);
             }
         }
     }
@@ -314,8 +363,8 @@ bool PackageDataReader::readPackageData(void) {                        // load s
     } else {
         closeInFile();
         if (userFeedbackPublic) {
-            for (int i=0; i<theDeployment->numPackages(); ++i) {
-                Package *package = theDeployment->getPackage(i);
+            for (int i=0; i<Deployment::instance->numPackages(); ++i) {
+                Package *package = Deployment::instance->getPackage(i);
                 int ixUf = package->ixUserFeedback;
                 if (ixUf >= 0) {
                     DynamicSubject *dynamicSubject = static_cast<DynamicSubject*>(package->getSubject(ixUf));

@@ -226,7 +226,7 @@ bool LedManager::isEnabled = false;
 
 void LedManager::ledManagerThreadFunc( void *arg ) {
     int32_t delay = osWaitForever;
-    dbgLog( "4 inThr: 0x%x 0x%x \n", &arg, &arg + LED_STACK_SIZE );
+    dbgLog( "4 ledThread: 0x%x 0x%x \n", &arg, &arg - LED_STACK_SIZE );
     while (true) {
         uint32_t event = osEventFlagsWait(ledRequestFlags, LED_EVENT::ANY, osFlagsWaitAny, delay);
         if (event == osFlagsErrorTimeout || event == osFlagsErrorResource) {
@@ -397,6 +397,7 @@ void LedManager::initLedManager() {       // initialize & spawn LED thread
         };
     threadAttr.stack_size = LED_STACK_SIZE;
     Dbg.thread[3] = (osRtxThread_t *) osThreadNew( ledManagerThreadFunc, NULL, &threadAttr );
+    dbgLog("4 ledThread: %x\n", Dbg.thread[3]);
     if ( Dbg.thread[3] == NULL )
         tbErr( "ledThread spawn failed" );
 

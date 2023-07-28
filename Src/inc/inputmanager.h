@@ -50,14 +50,6 @@ typedef struct { // KeyPadKey -- assignments to GPIO pins, in inputManager.cpp
 typedef KeyPadKey_t KeyPadKey_arr[10];   // so Dbg knows array size
 extern KeyPadKey_t  keydef[10];
 
-/*typedef struct {  // KeyState --  to keep track of the state of a keypad GPIO line-- SET/RESET and time of last change
-  KEY         key;
-  bool        down;     // true if key is depressed
-  uint32_t    tstamp;   // tstamp of down transition
-  uint32_t    dntime;   // num tbTicks it was down
-} KeyState;
-*/
-
 typedef struct {  // TB_Key --  msg for key Q from ISR to InputThread
     KEY      k;         // keyboard key that changed (or KEY::TIMER)
     bool     down;      // down transition
@@ -68,17 +60,6 @@ typedef struct {  // TB_Event --  event & downMS for event Q
     CSM_EVENT    typ;
     uint32_t arg;
 } TB_Event;
-
-// define TBV2_REV2B for board redesigned in Jan-2020 
-#define TBV2_REV2B
-
-//typedef enum {  // Event -- TBook event types
-//      eNull=0, 
-//      Home,     Circle,   Plus,     Minus,    Tree,     Lhand,    Rhand,    Pot,   Star,    Table,
-//      Home__,   Circle__,   Plus__,   Minus__,  Tree__,   Lhand__,  Rhand__,  Pot__,   Star__,  Table__,
-//      starHome, starCircle, starPlus,   starMinus,  starTree,   starLhand,  starRhand,  starPot, starStar,  starTable,
-//      AudioDone,  AudioStart, ShortIdle,  LongIdle, LowBattery, BattCharging, BattCharged,  FirmwareUpdate, Timer, anyKey, eUNDEF
-//} Event;
 
 // Thesse don't compile with compiler6 -O0 (no optimization)
 //inline bool TB_isShort( TB_Event evt ) { return evt.typ >= Home && evt.typ <= Table; }

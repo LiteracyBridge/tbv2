@@ -72,6 +72,7 @@ extern bool BootDebugLoop;
 //
 //  TBook main thread
 void talking_book( void *tbAttr ) {    // talking book initialization & control manager thread
+    dbgLog( "4 tbookThread: 0x%x 0x%x \n", &tbAttr, &tbAttr - TBOOK_STACK_SIZE );
 
     EventRecorderInitialize( EventRecordNone, 1 );  // start EventRecorder
     EventRecorderEnable( evrE, EvtFsCore_No, EvtFsMcSPI_No );    //FileSys library

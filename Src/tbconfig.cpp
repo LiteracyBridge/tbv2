@@ -10,7 +10,6 @@
 #include "tbconfig.h"
 
 TBConfig tbConfig = TBConfig();
-TBConfig *TB_Config = &tbConfig;
 
 /**
  * TBConfig with default values.
@@ -85,6 +84,35 @@ void TBConfig::setValue(const char *line) {
     value[sizeof(value)-1] = '\0';
     setValue(key, value);
 }
+
+/**
+ * Look up LED sequences
+ * @param seq the name of the sequence, or the sequence itself.
+ * @return the named sequence, if known, the given 'seq' if it looks like a sequence, bgPulse if not.
+ */
+const char *TBConfig::ledStr( const char *seq ) {
+    // @formatter:off
+    if ( strcasecmp( seq, "bgPulse" )==0 )        return bgPulse;          // set by CSM (background while navigating)           default: _49G
+    if ( strcasecmp( seq, "fgPlaying" )==0 )      return fgPlaying;        // set by startPlayback()                             default: G!
+    if ( strcasecmp( seq, "fgPlayPaused" )==0 )   return fgPlayPaused;     // set by audPauseResumeAudio() when playback paused  default: G2_3!
+    if ( strcasecmp( seq, "fgRecording" )==0 )    return fgRecording;      // set by startRecord() while recording user feedback default: R!
+    if ( strcasecmp( seq, "fgRecordPaused" )==0 ) return fgRecordPaused;   // set by audPauseResumeAudio() when recording paused default: R2_3!
+    if ( strcasecmp( seq, "fgSavingRec" )==0 )    return fgSavingRec;      // set by haltRecord while saving recording           default: O!
+    if ( strcasecmp( seq, "fgSaveRec" )==0 )      return fgSaveRec;        // set by saveRecording() while encrypting recording  default: G3_3G3
+    if ( strcasecmp( seq, "fgCancelRec" )==0 )    return fgCancelRec;      // set by media.cancelRecording()                     default: R3_3R3
+    if ( strcasecmp( seq, "fgUSB_MSC" )==0 )      return fgUSB_MSC;        // set by USBD_MSC0_Init() when USB host connects     default: O5o5!
+    if ( strcasecmp( seq, "fgUSBconnect" )==0 )   return fgUSBconnect;     // set by enableMassStorage() when starting USB       default: G5g5!
+    if ( strcasecmp( seq, "fgTB_Error" )==0 )     return fgTB_Error;       // set by TBErr() to signal software error            default: R8_2R8_2R8_20!
+    if ( strcasecmp( seq, "fgNoUSBcable" )==0 )   return fgNoUSBcable;     // set by enableMassStorage() if noUSBpower           default: _3R3_3R3_3R3_5!
+    if ( strcasecmp( seq, "fgPowerDown" )==0 )    return fgPowerDown;      // set??  powerDownTBook() G_3G_3G_9G_3G_9G_3
+    // @formatter:on
+    // Does it look like a sequence? If so, return that.
+    if (strchr("rRgGoO_", *seq)) {
+        return seq;
+    }
+    return bgPulse;
+}
+
 
 void TBConfig::initConfig(void) {
     LineReader lr = LineReader(TBP[pCONFIG_TXT], "config");

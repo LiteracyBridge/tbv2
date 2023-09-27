@@ -68,12 +68,28 @@ static bool FSysPowered     = false;
 bool        FSysPowerAlways = false;
 bool        SleepWhenIdle   = true;
 
+const int NUM_FILE_TRACE = 5;
+struct {
+    FILE * f;
+    char n[MAX_PATH];
+} openFiles[NUM_FILE_TRACE];
+
 int numFilesOpen = 0;
 FILE *tbFOpenInternal(const char *fname, const char *flags, const char *debugStr) {
-    ++numFilesOpen;
     FileSysPower( true );
     dbgLog( "F %s( %s, %s )\n", debugStr, fname, flags );
-    return fopen( fname, flags );   
+    FILE *f = fopen( fname, flags );
+    if (f != NULL) {
+        ++numFilesOpen;
+        for (int i = 0; i < NUM_FILE_TRACE; i++) {
+            if (openFiles[i].f == NULL) {
+                openFiles[i].f = f;
+                strcpy(openFiles[i].n, fname);
+                break;
+            }
+        }
+    }
+    return f;
 }
 
 FILE *tbFopen( const char *fname, const char *flags) {
@@ -101,10 +117,25 @@ FILE *tbOpenWriteBinary( const char *fname ) {           // repower if necessary
 }
 
 void tbFclose( FILE *f ) {                        // close file errLog if error
-    if ( f == NULL ) tbErr( "closing NULL file" );
+    if (f == NULL) {
+        tbErr("closing NULL file");
+    }
     int st = fclose( f );
-    if ( st != fsOK ) errLog( "fclose => %d", st );
+    if (st != fsOK) {
+        errLog("fclose => %d", st);
+    }
     --numFilesOpen;
+    bool found = false;
+    for (int i=0; i<NUM_FILE_TRACE && !found; i++) {
+        if (openFiles[i].f == f) {
+            openFiles[i].f = NULL;
+            memset(openFiles[i].n, 0, sizeof(openFiles[0].n));
+            found = true;
+        }
+    }
+    if (!found) {
+        printf("tbFclose: File %p not found in list of open files (double close?)\n", f);
+    }
 }
 
 void tbFrename( const char *src, const char *dst ) {  // rename path to path

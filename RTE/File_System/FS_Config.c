@@ -15,7 +15,7 @@
 //   <o>Number of open files <1-16>
 //   <i>Define number of files that can be opened at the same time.
 //   <i>Default: 4
-#define FAT_MAX_OPEN_FILES      4
+#define FAT_MAX_OPEN_FILES      5
 
 // </h>
 
@@ -25,7 +25,7 @@
 //   <o>Number of open files <1-16>
 //   <i>Define number of files that can be opened at the same time.
 //   <i>Default: 4
-#define EFS_MAX_OPEN_FILES      4
+#define EFS_MAX_OPEN_FILES      5
 
 // </h>
 

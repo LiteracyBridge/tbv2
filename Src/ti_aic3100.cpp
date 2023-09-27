@@ -1432,11 +1432,22 @@ void cdc_SetVolume(uint8_t Volume) {
     // enough. If that proves otherwise, use a lookup table:
     //static int8_t AIC3100_VOLUME[] = {-57, -45, -34, -22, -11, 0, 11, 22};
     //int8_t cdcFmtVolume = AIC3100_VOLUME[v];
+    // A bug in the implementation gave values that were really: -57, -48, -38, -28, -18, -8, 2, 12
+    // And it was decided that 12 was too high.
+    // Restoring the original values in the low range, and lowering the values in the high range might
+    // yield this table:
+#define USE_TABLE 1
+#if USE_TABLE
+    static int8_t AIC3100_VOLUME[] = {-57, -45, -34, -22, -14, -7, 0, 7};
+    v = max(0, min(v-MIN_VOLUME_SETTING, 7));
+    int8_t cdcFmtVolume = AIC3100_VOLUME[v];
+#else
     const int8_t minUseful = -57;
     const int8_t maxUseful = 22;
     const uint8_t usefulRange = maxUseful - minUseful;
     int8_t cdcFmtVolume = minUseful + (usefulRange * (v-MIN_VOLUME_SETTING)) / MAX_VOLUME_SETTING;
-
+#endif
+    printf("Setting volume to %d\n", cdcFmtVolume);
     // Uncomment and adjust for volume level testing.
     //static uint8_t testVol = 0x19;      // DEBUG
     //if (Volume==99) //DEBUG

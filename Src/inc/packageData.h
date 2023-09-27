@@ -62,7 +62,8 @@ public:
     AudioFile  *invitation;         // dir+name of subject's audio invitation
     MsgStats   *stats;
     std::vector<AudioFile*> messages;
-    const char * script;
+    const char *script;
+    bool       nonNavigable;        // If true, don't enter with left or right hands. (subAdj(x) only)
 };
 
 /**

@@ -42,7 +42,7 @@ char BootKey;
 bool     BootToUSB          = false;
 bool     BootDebugLoop      = false;
 bool     BootVerboseLog     = false;
-bool     BootToQCtest       = false;
+bool     bootToQcTest       = false;
 bool     BootVerbosePower   = false;
 bool     BootResetLog       = false;
 bool     BootFormatFileSys  = false;
@@ -71,8 +71,8 @@ void setBootMode() { // use key to to select value for BootMode
             if ( BootToUSB || BootResetLog || BootFormatFileSys )
                 sprintf( prog, "_%c_%c_%c__", BootToUSB ? 'R' : '_', BootResetLog ? 'R' : '_',
                          BootFormatFileSys ? 'R' : '_' );
-            else if ( BootToQCtest || BootVerboseLog || BootVerbosePower )
-                sprintf( prog, "_%c_%c_%c__", BootToQCtest ? 'G' : '_', BootVerboseLog ? 'G' : '_',
+            else if ( bootToQcTest || BootVerboseLog || BootVerbosePower )
+                sprintf( prog, "_%c_%c_%c__", bootToQcTest ? 'G' : '_', BootVerboseLog ? 'G' : '_',
                          BootVerbosePower ? 'G' : '_' );
             LedManager::showProgress( prog, 100 );    // select boot keys
 
@@ -81,7 +81,7 @@ void setBootMode() { // use key to to select value for BootMode
             if ( GPIO::getLogical( gLHAND )) BootFormatFileSys = true;  // reformat EMMC filesystem
 
             // debug switches
-            if ( GPIO::getLogical( gCIRCLE )) BootToQCtest    = true;
+            if ( GPIO::getLogical( gCIRCLE )) bootToQcTest    = true;
             if ( GPIO::getLogical( gPOT )) BootVerboseLog     = true;
             if ( GPIO::getLogical( gRHAND )) BootVerbosePower = true;
 

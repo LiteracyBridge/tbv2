@@ -25,7 +25,8 @@ const char *LineReader::readLine(const char *tag) {
         return NULL;
     }
 
-    while (fscanf(inFile, "%201[^\n]%*[\n]", line) == 1) {
+    int fResult;
+    while ((fResult=fscanf(inFile, "%201[^\n]%*[\n]", line)) == 1) {
         lineNum++;
         if (strlen(line) > 200)
             return static_cast<const char *>(error("Line too long"));

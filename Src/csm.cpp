@@ -21,6 +21,11 @@ const char *CSM::actionNames[] = {
 };
 #undef X
 
+/**
+ * Look up an event by name. Used to allow scripts to refer to events by name in "exitScript(event)"
+ * @param eventName to look up.
+ * @return the event id.
+ */
 CSM_EVENT CSM::eventFromName(const char * eventName) {
     for (int ix = 0; ix<static_cast<int>(NUM_CSM_EVENTS); ++ix) {
         if (strcmp(eventName, eventNames[ix]) == 0)
@@ -29,18 +34,33 @@ CSM_EVENT CSM::eventFromName(const char * eventName) {
     return eNull;
 }
 
+/**
+ * Start executing the CSM. Enters the first state, state 0, in the CSM.
+ */
 void CSM::start(void) {
     dbgLog("C CSM start\n");
     enterState(0);
 }
 
+/**
+ * Enter the given state, and perform its entry actions.
+ * @param newStateIx index of the state to enter.
+ */
 void CSM::enterState(int newStateIx) {
+    if (newStateIx < 0 || newStateIx >= numCStates()) {
+        // TODO: Is this the best action? Reset to state 0? tbErr()?
+        return;
+    }
     CState newState = cState(newStateIx);
-    dbgLog("C CSM transition %s => %s\n", this->stateName, newState.name());
+    dbgLog("C CSM transition %s => %s\n", newState.name(), formatState(this, newStateIx));
     setCurrentState(newStateIx);
     newState.performActions();
 }
 
+/**
+ * Enter the named state, if it exists, and perform its entry actions.
+ * @param newStateName name of the state to enter.
+ */
 void CSM::enterState(const char *newStateName) {
     for (int iState=0; iState < numCStates(); ++iState) {
         if (strcmp(newStateName, cState(iState).name()) == 0) {
@@ -48,15 +68,6 @@ void CSM::enterState(const char *newStateName) {
             return;
         }
     }
-}
-
-int CSM::stateIxForName(const char *stateName) {
-    for (int iState=0; iState < numCStates(); ++iState) {
-        if (strcmp(stateName, cState(iState).name()) == 0) {
-            return iState;
-        }
-    }
-    return -1;
 }
 
 void CSM::setCurrentState(int stateIx) {
@@ -76,6 +87,11 @@ const char *CSM::getPrevStateName() {
     return this->prevStateName;
 }
 
+/**
+ * Returns the given CGroup.
+ * @param n Index of desired group.
+ * @return the CGroup for the group.
+ */
 const CGroup CSM::cGroup(int n) const {
     // Index, in csmData as array of uint16_t, of offset, within csmData, of the CGroup definition.
     uint16_t offsetIx = 2 + numCStates() + n;
@@ -97,11 +113,11 @@ void CSM::handleEvent(CSM_EVENT event) {
     if (nextStateIx >= 0) {
         CState nextState = cState(nextStateIx);
         dbgLog("C CSM event %s (%d): %s -> %s\n", CSM::eventName(event), event, state.name(), nextState.name());
-        logEvtNSNS( "csmEvt", "evt", CSM::eventName(event), "nSt", nextState.name() );
+        logEvtNSNS("csmEvt", "evt", CSM::eventName(event), "nSt", nextState.name());
         enterState(nextStateIx);
-    } else
+    } else {
         dbgLog("C CSM event %s (%d) ignored in state %s\n", CSM::eventName(event), event, state.name());
-
+    }
 }
 
 /**
@@ -110,7 +126,6 @@ void CSM::handleEvent(CSM_EVENT event) {
  * is considered to be entering the state.
  */
 void CState::performActions(void) {
-    dbgLog("C CSM State %s performing %d actions.\n", name(), numActions());
     for (uint8_t ix=0; ix<numActions(); ++ix) {
         CSM_ACTION actionId = static_cast<CSM_ACTION>(this->actionId(ix));
         const char * actionArg = this->actionArg(ix);
@@ -127,10 +142,10 @@ void CState::performActions(void) {
  * @return The next state (index), or -1 if no transition for this->event.
  */
 int CState::nextState(CSM_EVENT eventId) const {
-    dbgLog("C Searching %s for handler for %s\n", name(), CSM::eventName(eventId));
-    if (strcmp(name(), "s1q1") == 0) {
-        printf("s1q1\n");
-    }
+//    dbgLog("C Searching %s for handler for %s\n", name(), CSM::eventName(eventId));
+//    if (strcmp(name(), "s1q1") == 0) {
+//        printf("s1q1\n");
+//    }
     // Look for a transition matching eventId.
     for (uint8_t ix=0; ix<numTransitions(); ++ix) {
         CSM_EVENT transitionEventId = transitionEvent(ix);
@@ -142,7 +157,7 @@ int CState::nextState(CSM_EVENT eventId) const {
             // found CGroup; look for transition
             int transitionTargetId = transitionTarget(ix);
             CGroup cGroup = pCsm->cGroup(transitionTargetId);
-            dbgLog("C Looking in group %s\n", cGroup.name());
+//            dbgLog("C Looking in group %s\n", cGroup.name());
             int groupState = cGroup.nextState(eventId);
             if (groupState >= 0) {
                 // Found it in CGroup
@@ -154,6 +169,11 @@ int CState::nextState(CSM_EVENT eventId) const {
     return -1;
 }
 
+/**
+ * Attempts to load a CSM from a file.
+ * @param fname The path to the file to be loaded.
+ * @return A pointer to the newly loaded CSM, or NULL if the file can't be found or read.
+ */
 CSM *CSM::loadFromFile(const char *fname) {
     FILE *f = tbOpenReadBinary(fname);
     if (!f) { return NULL; }
@@ -162,7 +182,10 @@ CSM *CSM::loadFromFile(const char *fname) {
     long l = ftell(f);
     fseek(f, 0, SEEK_SET);
     const void *fbuf = malloc(l);
-    if (!fbuf) { return NULL; }
+    if (!fbuf) {
+        tbFclose(f);
+        return NULL;
+    }
     fread(const_cast<void *>(fbuf), 1, l, f);
     tbFclose(f);
     dbgLog("C %s is %ld bytes.\n", fname, l);
@@ -170,80 +193,111 @@ CSM *CSM::loadFromFile(const char *fname) {
     return new("CSM") CSM(fbuf);
 }
 
+char CSM::printBuf[400];
+int CSM::stateNamesLen = -1;
+int CSM::eventNamesLen = -1;
+/**
+ * Debug formatting of a given CSM state.
+ * @param csm The CSM containing the state.
+ * @param stateIx The index (ID) of the state.
+ * @return a pointer to a global buffer containing the formatted state.
+ */
+char *CSM::formatState(CSM *csm, int stateIx) {
+    char *pOut = printBuf;
+    if (stateIx < 0 || stateIx > 255) {
+        printf("formatState: Unexpected stateIx: %d\n", stateIx);
+    }
+    CState state = csm->cState(stateIx);
+    pOut += sprintf(pOut, "     %-*s:  { ", stateNamesLen, state.name());
+    if (state.numActions() > 0) {
+        pOut += sprintf(pOut, " Actions: [ ");
+        for (int iAction = 0; iAction < state.numActions(); ++iAction) {
+            if (iAction > 0) {
+                pOut += sprintf(pOut, " , ");
+            }
+            pOut += sprintf(pOut, " %s(%s)", CSM::actionName(state.actionId(iAction)), state.actionArg(iAction));
+        }
+        pOut += sprintf(pOut, " ], ");
+    }
+    int firstGroupIx = state.firstGroupIx();
+    if (firstGroupIx < state.numTransitions()) {
+        pOut += sprintf(pOut, "  CGroups: [");
+        for (int groupIx=state.numTransitions()-1; groupIx>=firstGroupIx; --groupIx) {
+            if (groupIx != state.numTransitions() - 1) {
+                pOut += sprintf(pOut, " , ");
+            }
+            int target = state.transitionTarget(groupIx);
+            CGroup group = csm->cGroup(target);
+            pOut += sprintf(pOut, " %s", group.name());
+        }
+        pOut += sprintf(pOut, " ], ");
+    }
+    for (int eventIx=0; eventIx<firstGroupIx; ++eventIx) {
+        CSM_EVENT event = state.transitionEvent(eventIx);
+        int target = state.transitionTarget(eventIx);
+        CState nextState = csm->cState(target);
+        pOut += sprintf(pOut, " %s: %s, ", CSM::eventName(event), nextState.name());
+    }
+    pOut += sprintf(pOut, " },\n");
+    return printBuf;
+}
+
+/**
+ * Print a CSM definition. For debugging.
+ * @param csm The CSM to be printed.
+ */
 void CSM::print(CSM *csm) {
-    dbgLog("C %d groups, %d states.\n", csm->numCGroups(), csm->numCStates());
-    dbgLog("C { CGroups: {\n");
+    if (!dbgEnabled('C')) { return; }
+    printf("%d groups, %d states.\n", csm->numCGroups(), csm->numCStates());
+    printf("{ CGroups: {\n");
     size_t groupNamesLen = 0;
     for (int iGroup=0; iGroup < csm->numCGroups(); ++iGroup) {
         CGroup group = csm->cGroup(iGroup);
         groupNamesLen = max(groupNamesLen, strlen(group.name()));
     }
-    size_t stateNamesLen = 0;
-    for (int iState=0; iState < csm->numCStates(); ++iState) {
-        CState state = csm->cState(iState);
-        stateNamesLen = max(stateNamesLen, strlen(state.name()));
+    if (stateNamesLen < 0) {
+        for (int iState = 0; iState < csm->numCStates(); ++iState) {
+            CState state  = csm->cState(iState);
+            stateNamesLen = max(stateNamesLen, strlen(state.name()));
+        }
     }
-    size_t eventNamesLen = 0;
-    for (int iEvent=0; iEvent < NUM_CSM_EVENTS; ++iEvent) {
-        eventNamesLen = max(eventNamesLen, strlen(CSM::eventName(static_cast<CSM_EVENT>(iEvent))));
+    if (eventNamesLen < 0) {
+        for (int iEvent = 0; iEvent < NUM_CSM_EVENTS; ++iEvent) {
+            eventNamesLen = max(eventNamesLen, strlen(CSM::eventName(static_cast<CSM_EVENT>(iEvent))));
+        }
     }
     tbDelay_ms(10);
     for (int iGroup=0; iGroup < csm->numCGroups(); ++iGroup) {
         CGroup group = csm->cGroup(iGroup);
-        dbgLog("C %-*s: { ", groupNamesLen, group.name());
+        printf("%-*s: { ", groupNamesLen, group.name());
         for (int eventIx=0; eventIx < group.numTransitions(); ++eventIx) {
-            if (eventIx > 0) dbgLog("C ,\n%*s", groupNamesLen + 4, "");
+            if (eventIx > 0) printf(",\n%*s", groupNamesLen + 4, "");
             CSM_EVENT event = group.transitionEvent(eventIx);
             int target = group.transitionTarget(eventIx);
             CState nextState = csm->cState(target);
-            dbgLog("C %-*s: %s", eventNamesLen, CSM::eventName(event), nextState.name());
+            printf("%-*s: %s", eventNamesLen, CSM::eventName(event), nextState.name());
         }
-        dbgLog("C  },\n");
+        printf(" },\n");
         tbDelay_ms(1);
     }
     tbDelay_ms(10);
-    dbgLog("C },\n  CStates: {\n");
+    printf("},\n  CStates: {\n");
     for (int i = 0; i < csm->numCStates(); ++i) {
-        CState state = csm->cState(i);
-        dbgLog("C     %-*s:  { ", stateNamesLen, state.name());
-        if (state.numActions() > 0) {
-            dbgLog("C Actions: [ ");
-            for (int iAction = 0; iAction < state.numActions(); ++iAction) {
-                if (iAction > 0) {
-                    dbgLog("C , ");
-                }
-                dbgLog("C %s(%s)", CSM::actionName(state.actionId(iAction)), state.actionArg(iAction));
-            }
-            dbgLog("C ], ");
-        }
-        int firstGroupIx = state.firstGroupIx();
-        if (firstGroupIx < state.numTransitions()) {
-            dbgLog("C  CGroups: [");
-            for (int groupIx=state.numTransitions()-1; groupIx>=firstGroupIx; --groupIx) {
-                if (groupIx != state.numTransitions() - 1) {
-                    dbgLog("C , ");
-                }
-                int target = state.transitionTarget(groupIx);
-                CGroup group = csm->cGroup(target);
-                dbgLog("C %s", group.name());
-            }
-            dbgLog("C ], ");
-        }
-        for (int eventIx=0; eventIx<firstGroupIx; ++eventIx) {
-            CSM_EVENT event = state.transitionEvent(eventIx);
-            int target = state.transitionTarget(eventIx);
-            CState nextState = csm->cState(target);
-            dbgLog("C %s: %s, ", CSM::eventName(event), nextState.name());
-        }
-        dbgLog("C },\n");
+        printf("%s", formatState(csm, i));
         tbDelay_ms(2);
     }
-    dbgLog("C },\n");
+    printf("},\n");
 }
 
-CSM *loadControlDef2(void) {
+/**
+ * Loads the control_def.csm to be used in this run. If the "QC Test" option is set, or if there is no
+ * "QC_PASS.txt" file in the /system directory, load the built-in QC definition. Otherwise, if there is
+ * a "control_def.csm" file in the /system directory, load it. Otherwise use the built-in control_def.csm.
+ * @return a pointer to the CSM definition.
+ */
+CSM *loadControlDef(void) {
     CSM *csm;
-    if (RunQCTest) {
+    if (runQcTest) {
         csm = new("CSMQC") CSM(qc_def_csm);
     } else if (!(csm=CSM::loadFromFile(TBP[pCONTROL_DEF]))) {
         csm = new("CSMDEF") CSM(control_def_csm);

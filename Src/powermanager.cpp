@@ -40,13 +40,13 @@ enum BATTERY_CHARGE_LEVEL latestChargeLevel( void );
 
 // The CSM events corresponding to the battery state that we expose to the CSM.
 typedef enum BATTERY_STATE {
-    BATTERY_STATE_CHARGING     = BattCharging,        // Charging, < ~75%
-    BATTERY_STATE_CHARGING_75  = BattCharging75,      // Charging, > 75%, < 90%
-    BATTERY_STATE_CHARGING_90  = BattMax,             // Charging, > 90% (constant voltage, perhaps?)
-    BATTERY_STATE_CHARGED      = BattCharged,         // Charged, no longer charging, but connected to power
-    BATTERY_STATE_NOT_CHARGING = BattNotCharging,     // Not charging, not connected to power
     BATTERY_STATE_LOW          = LowBattery,          // Not charging, battern low (< 20% -ish). Charge / replace require soon
+    BATTERY_STATE_CHARGING     = BattCharging,        // Charging, < ~75%
+    BATTERY_STATE_CHARGED      = BattCharged,         // Charged, no longer charging, but connected to power
     BATTERY_STATE_MINIMUM      = BattMin,             // Not enough power to run.
+    BATTERY_STATE_CHARGING_90  = BattMax,             // Charging, > 90% (constant voltage, perhaps?)
+    BATTERY_STATE_CHARGING_75  = 800,                 // Charging, > 75%, < 90%
+    BATTERY_STATE_NOT_CHARGING = 801,                 // Not charging, not connected to power
     BATTERY_STATE_INVALID      = 999                  // Not a valid state.
 } BATTERY_STATE_T;
 

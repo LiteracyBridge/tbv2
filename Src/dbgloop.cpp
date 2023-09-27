@@ -79,7 +79,7 @@ void CheckRecording() {   // check for dbgLoop ongoing recording
     }
 }
 
-void PlayRecCmd( GPIO_ID k ) {   // PlayRec mode subcommands --
+void PlayRecCmd( GPIO_ID k ) {   // PlayRecording mode subcommands --
     MsgStats tstStats;
     char     fname[40];
 

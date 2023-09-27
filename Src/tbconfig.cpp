@@ -98,7 +98,7 @@ const char *TBConfig::ledStr( const char *seq ) {
     if ( strcasecmp( seq, "fgRecording" )==0 )    return fgRecording;      // set by startRecord() while recording user feedback default: R!
     if ( strcasecmp( seq, "fgRecordPaused" )==0 ) return fgRecordPaused;   // set by audPauseResumeAudio() when recording paused default: R2_3!
     if ( strcasecmp( seq, "fgSavingRec" )==0 )    return fgSavingRec;      // set by haltRecord while saving recording           default: O!
-    if ( strcasecmp( seq, "fgSaveRec" )==0 )      return fgSaveRec;        // set by saveRecording() while encrypting recording  default: G3_3G3
+    if ( strcasecmp( seq, "fgSaveRec" )==0 )      return fgSaveRec;        // set by saveRecordingMP() while encrypting recording  default: G3_3G3
     if ( strcasecmp( seq, "fgCancelRec" )==0 )    return fgCancelRec;      // set by media.cancelRecording()                     default: R3_3R3
     if ( strcasecmp( seq, "fgUSB_MSC" )==0 )      return fgUSB_MSC;        // set by USBD_MSC0_Init() when USB host connects     default: O5o5!
     if ( strcasecmp( seq, "fgUSBconnect" )==0 )   return fgUSBconnect;     // set by enableMassStorage() when starting USB       default: G5g5!

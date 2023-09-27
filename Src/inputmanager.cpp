@@ -410,23 +410,23 @@ void initInputManager( void ) {       // initializes keypad & starts thread
     dbgLog( "4 InputMgr OK \n" );
 }
 
-void sendEvent( CSM_EVENT key, int32_t arg ) {  // log & send TB_Event to CSM
-    if ( key == eNull || key == anyKey || key == eUNDEF || (int) key < 0 || (int) key > (int) eUNDEF )
+void sendEvent( CSM_EVENT eventId, int32_t arg ) {  // log & send TB_Event to CSM
+    if ( eventId == eNull || eventId == anyKey || eventId == eUNDEF || (int) eventId < 0 || (int) eventId > (int) eUNDEF )
         tbErr( "bad event" );
     if ( TBEvent_pool == NULL ) return; //DEBUG
     if ( !controlManagerReady ) {
         dbgLog( "enqueue event, controlManagerReady not ready" );
         return;
     }
-    dbgEvt( TB_keyEvt, key, arg, 0, 0 );
-    dbgLog( "A Evt: %s %d \n", CSM::eventName( key ), arg );
+    dbgEvt( TB_keyEvt, eventId, arg, 0, 0 );
+    dbgLog( "A Event: %s %d \n", CSM::eventName( eventId ), arg );
 
-    TB_Event *evt = (TB_Event *) osMemoryPoolAlloc( TBEvent_pool, osWaitForever );
-    evt->typ = key;
-    evt->arg = arg;
+    TB_Event *event = (TB_Event *) osMemoryPoolAlloc( TBEvent_pool, osWaitForever );
+    event->eventId = eventId;
+    event->arg = arg;
     osStatus_t result;
     // send with Priority 0, no wait
-    if (( result = osMessageQueuePut( osMsg_TBEvents, &evt, 0, 0 )) != osOK ) {
+    if (( result = osMessageQueuePut( osMsg_TBEvents, &event, 0, 0 )) != osOK ) {
         printf( "failed to enQ tbEvent: %d \n", result );
         tbErr( "failed to enQ tbEvent" );
     }

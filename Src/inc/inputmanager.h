@@ -57,26 +57,26 @@ typedef struct {  // TB_Key --  msg for key Q from ISR to InputThread
 } TB_Key;
 
 typedef struct {  // TB_Event --  event & downMS for event Q
-    CSM_EVENT    typ;
+    CSM_EVENT    eventId;
     uint32_t arg;
 } TB_Event;
 
-// Thesse don't compile with compiler6 -O0 (no optimization)
-//inline bool TB_isShort( TB_Event evt ) { return evt.typ >= Home && evt.typ <= Table; }
-//inline bool TB_isLong( TB_Event evt ) { return evt.typ >= Home__ && evt.typ <= Table__; }
-//inline bool TB_isStar( TB_Event evt ) { return evt.typ >= starHome && evt.typ <= starTable; }
-//inline bool TB_isSystem( TB_Event evt ) { return evt.typ >= AudioDone && evt.typ <= eUNDEF; }
-//inline Event toShortEvt( KEY k ) { return (Event) ((int) k + Home ); }
-//inline Event toLongEvt( KEY k ) { return (Event) ((int) k + Home__ ); }
-//inline Event toStarEvt( KEY k ) { return (Event) ((int) k + starHome ); }
+// At one time, these didn't compile with compiler6 -O0 (no optimization); macros below are workaround.
+inline bool TB_isShort( TB_Event evt ) { return evt.eventId >= Home && evt.eventId <= Table; }
+inline bool TB_isLong( TB_Event evt ) { return evt.eventId >= Home__ && evt.eventId <= Table__; }
+inline bool TB_isStar( TB_Event evt ) { return evt.eventId >= starHome && evt.eventId <= starTable; }
+inline bool TB_isSystem( TB_Event evt ) { return evt.eventId >= AudioDone && evt.eventId <= eUNDEF; }
+inline CSM_EVENT toShortEvt( KEY k ) { return (CSM_EVENT) ((int) k + Home ); }
+inline CSM_EVENT toLongEvt( KEY k ) { return (CSM_EVENT) ((int) k + Home__ ); }
+inline CSM_EVENT toStarEvt( KEY k ) { return (CSM_EVENT) ((int) k + starHome ); }
 
-#define TB_isShort( evt ) ( evt.typ >= Home && evt.typ <= Table )
-#define TB_isLong( evt ) ( evt.typ >= Home__ && evt.typ <= Table__ )
-#define TB_isStar( evt ) ( evt.typ >= starHome && evt.typ <= starTable )
-#define TB_isSystem( evt ) ( evt.typ >= AudioDone && evt.typ <= eUNDEF )
-#define toShortEvt( k ) ( (CSM_EVENT) ((int) k + Home ) )
-#define toLongEvt( k ) ( (CSM_EVENT) ((int) k + Home__ ) )
-#define toStarEvt( k ) ( (CSM_EVENT) ((int) k + starHome ) )
+//#define TB_isShort( evt ) ( evt.eventId >= Home && evt.eventId <= Table )
+//#define TB_isLong( evt ) ( evt.eventId >= Home__ && evt.eventId <= Table__ )
+//#define TB_isStar( evt ) ( evt.eventId >= starHome && evt.eventId <= starTable )
+//#define TB_isSystem( evt ) ( evt.eventId >= AudioDone && evt.eventId <= eUNDEF )
+//#define toShortEvt( k ) ( (CSM_EVENT) ((int) k + Home ) )
+//#define toLongEvt( k ) ( (CSM_EVENT) ((int) k + Home__ ) )
+//#define toStarEvt( k ) ( (CSM_EVENT) ((int) k + starHome ) )
 
 
 extern void initInputManager( void );

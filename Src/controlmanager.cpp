@@ -9,6 +9,7 @@
 #include "fileOps.h"
 
 #include "packageData.h"
+#include "random.h"
 
 #include "csm.h"
 
@@ -26,11 +27,20 @@ Package *         currPkg = NULL; // TBook content package in use
 
 TBook_t             TBook;
 
-osTimerId_t         timers[3];  // ShortIdle, LongIdle, Timer
+//osTimerId_t         timers[3];  // ShortIdle, LongIdle, Timer
 void setCSMcurrState( short iSt );  // set TBook.iCurrSt & dependent fields
 extern bool         BootVerboseLog;
 
+FILE * respFile = NULL;
+
+
+
 //osEventFlagsId_t    mFileOpSignal;     // osEvent shared with FileOps -- to signal MP3 decode done
+
+ControlManager::ControlManager() {
+    audioPlayCounter = 0;
+}
+
 
 // ------------  CSM Action execution
 void ControlManager::clearIdle() {       // clear timers started by AudioDone to generate shortIdle & longIdle
@@ -57,13 +67,15 @@ void ControlManager::changeSubject( const char *change ) {
         int delta = (*change == '-') ? -1 : 1; // normalize
         // "subject" === "playlist".
         // Find the next playlist (in the desired iChange) that has content.
+        Subject* newSubject;
         do {
             newSubjectIx += delta;
             if (newSubjectIx < 0)
               newSubjectIx = numSubjects - 1;
             if (newSubjectIx >= numSubjects)
                 newSubjectIx = 0;
-        } while (newSubjectIx != TBook.iSubj && currPkg->getSubject( newSubjectIx )->numMessages() == 0);
+            newSubject = currPkg->getSubject( newSubjectIx );
+        } while (newSubjectIx != TBook.iSubj && newSubject->numMessages() == 0 || newSubject->nonNavigable);
     } else {
         // Absolute. Valid?
         int newIx = atoi(change);
@@ -74,6 +86,7 @@ void ControlManager::changeSubject( const char *change ) {
         logEvtNI( "chngSubj", "iSubj", newSubjectIx );
         TBook.iSubj = newSubjectIx;
         TBook.iMsg  = -1; // "next" will yield 0, "prev" -> -2 -> numMessages-1
+        ++audioPlayCounter;
         resetAudio();
     }
 }
@@ -111,18 +124,22 @@ void ControlManager::changeMessage(const char *change ) {
     if (newMessageIx != TBook.iMsg) {
         logEvtNI("chgMsg", "iMsg", newMessageIx);
         TBook.iMsg = newMessageIx;
+        ++audioPlayCounter;
         resetAudio();
     }
 }
 
 void ControlManager::playSysAudio(const char *arg ) {        // play system file 'arg'
+    ++audioPlayCounter;
     resetAudio();
     char pathBuf[MAX_PATH];
 
     currPkg->findAudioPath( pathBuf, arg );  // find path based on current Package promptPaths
+    ++audioPlayCounter;
+    resetAudio();
     clearIdle();
     logEvtFmt("PlaySys", "Sys: %s, fn: %s", arg, pathBuf);
-    playAudio( pathBuf, NULL, kPlayTypeSystemPrompt );
+    playAudio( pathBuf, NULL, kPlayTypeSystemPrompt, ++audioPlayCounter );
 
 //    for (int i = 0; i < csm->numSystemAudio(); i++)
 //        if ( strcmp( csm->getSystemAudio( i ), arg ) == 0 ) {
@@ -135,7 +152,7 @@ void ControlManager::playSysAudio(const char *arg ) {        // play system file
 //    tbErr( "playSys %s not found", arg );
 }
 
-void ControlManager::playSubjectAudio(const char *arg ) {       // play current Subject: arg must be 'nm', 'pr', or 'msg'
+void ControlManager::playSubject(const char *arg ) {       // play current Subject: arg must be 'nm', 'pr', or 'msg'
     // If no subject is selected, do nothing.
     if ( TBook.iSubj < 0 || TBook.iSubj >= currPkg->numSubjects())
         return;
@@ -144,6 +161,7 @@ void ControlManager::playSubjectAudio(const char *arg ) {       // play current 
     AudioFile *audioFile = NULL;
     MsgStats        *stats = NULL;
     PlaybackType_t playbackType;
+    ++audioPlayCounter;
     resetAudio();
     if ( strcasecmp( arg, "nm" ) == 0 ) {
         // Playlist name
@@ -163,39 +181,57 @@ void ControlManager::playSubjectAudio(const char *arg ) {       // play current 
         stats = loadStats( subj->getName(), TBook.iSubj, TBook.iMsg ); // load stats for message
     }
     Deployment::instance->getPathForAudioFile( path, audioFile );
+    ++audioPlayCounter;
+    resetAudio();
     clearIdle();
-    playAudio( path, stats, playbackType );
+    playAudio( path, stats, playbackType, ++audioPlayCounter );
 }
 
 void ControlManager::playSquareTune( const char *notes ) {       // play seq of notes as sqrwaves
+    ++audioPlayCounter;
+    resetAudio();
     clearIdle();
-    playNotes( notes );   // mediaPlayer op -- switch threads
+    playNotes( notes, audioPlayCounter );   // mediaPlayer op -- switch threads
 }
 
 void ControlManager::startRecAudio(const char *arg ) {           // record user message into temporary .wav file
+    ++audioPlayCounter;
     resetAudio();
-    if ( RunQCTest ) {
+    if ( runQcTest ) {
         recordAudio( "/system/qcAudio.wav", NULL );
         return;
     }
-    char path[MAX_PATH];
+    if (arg && *arg) {
+        sprintf( recordingFilename, "%s%s_%s%s", TBP[pRECORDINGS_PATH], auxFilePrefixes[AUX_FILE_RECORDING],
+                 arg, auxFileExtensions[AUX_FILE_RECORDING] );
+    } else {
+        sprintf( recordingFilename, "%s%s_pkg%d_pl%d_msg%d%s", TBP[pRECORDINGS_PATH], auxFilePrefixes[AUX_FILE_RECORDING],
+                 iPkg, TBook.iSubj, TBook.iMsg, auxFileExtensions[AUX_FILE_RECORDING] );
+    }
+    int uniquifier = uniquifyFilename(recordingFilename, sizeof(recordingFilename));
     Subject *subj = currPkg->getSubject( TBook.iSubj );
-    int mCnt = makeAuxFileName( path, AUX_FILE_RECORDING );
-    logEvtFmt( "Record", "Subj: %s, ipkg: %d, ipl: %d, im: %d, uniq: %d", subj->getName(), iPkg, TBook.iSubj, TBook.iMsg,
-               mCnt );
+    if (arg && *arg) {
+        logEvtFmt( "Record", "Subj: %s, ipkg: %d, ipl: %d, im: %d, uniq: %d, name: %s", subj->getName(), iPkg, TBook.iSubj, TBook.iMsg,
+                   uniquifier, arg );
+    } else {
+        logEvtFmt( "Record", "Subj: %s, ipkg: %d, ipl: %d, im: %d, uniq: %d", subj->getName(), iPkg, TBook.iSubj, TBook.iMsg,
+                   uniquifier );
+    }
+
     MsgStats *stats = loadStats( subj->getName(), TBook.iSubj, TBook.iMsg ); // load stats for message
     clearIdle();
-    recordAudio( path, stats );
+    // Stashes the path & stats, and sets a flag to tell media thread to start recording.
+    recordAudio( recordingFilename, stats );
 }
 
 void ControlManager::playRecAudio() {                             // play back recorded temp .wav
     clearIdle();
-    playRecording();
+    playRecordingMP(++audioPlayCounter);
 }
 
 void ControlManager::saveRecAudio(const char *arg ) {              // encrypt user message .wav => .key & .dat
     if ( strcasecmp( arg, "sv" ) == 0 ) {
-        saveRecording();
+        saveRecordingMP();
     } else if ( strcasecmp( arg, "del" ) == 0 ) {
         cancelRecording();
     }
@@ -206,19 +242,43 @@ void ControlManager::saveRecAudio(const char *arg ) {              // encrypt us
  * playlist and message.
  * @param txt The text to be written.
  */
-void ControlManager::saveWriteMsg(const char *txt ) {        // save 'txt' in Msg file
-    const char *subjName = TBook.iSubj >= 0 ? currPkg->getSubject( TBook.iSubj )->getName() : "-no-subject-";
-    char path[MAX_PATH];
-    int  mCnt      = makeAuxFileName( path, AUX_FILE_MESSAGE );
-    FILE *outFP = tbOpenWrite( path );
-    int nch = fprintf( outFP, "%s\n", txt );
-    tbFclose( outFP );  //int err = fclose( outFP );
-    saveAuxProperties( path );
+void ControlManager::writeMsg(const char *arg ) {        // save 'txt' in Msg file
+    if (runQcTest) {
+        // saves 'arg' to system/QC_PASS.txt if it starts with "QC_OK", or as QC_FAIL.txt otherwise
+        svQCresult(arg);
+    } else {
+        if (isSurveyActive()) {
+            respFile = tbFopen(getSurveyFilename(), "a");
+            fprintf(respFile, "%s\n", arg);
+            tbFclose(respFile);
+            respFile = NULL;
+        } else {
+            const char *subjName = TBook.iSubj >= 0 ? currPkg->getSubject( TBook.iSubj )->getName() : "-no-subject-";
+            char path[MAX_PATH];
+            int  mCnt      = makeAuxFileName( path, AUX_FILE_MESSAGE );
+            FILE *outFP = tbOpenWrite( path );
+            int nch = fprintf( outFP, "%s\n", arg );
+            tbFclose( outFP );  //int err = fclose( outFP );
+            saveAuxProperties( path );
 
-    dbgEvt( TB_wrMsgFile, nch, 0, 0, 0 );
-    logEvtFmt( "writeMsg", "Subj: %s, ipkg: %d, ipl: %d, im: %d, uniq: %d, msg: %s", subjName, iPkg, TBook.iSubj,
-               TBook.iMsg, mCnt, txt );
+            dbgEvt( TB_wrMsgFile, nch, 0, 0, 0 );
+            logEvtFmt( "writeMsg", "Subj: %s, ipkg: %d, ipl: %d, im: %d, uniq: %d, msg: %s", subjName, iPkg, TBook.iSubj,
+                       TBook.iMsg, mCnt, arg );
+        }
+    }
 }
+
+void ControlManager::writeRecId(const char *arg) {
+    if (isSurveyActive()) { // makes no sense otherwise...
+        respFile = tbFopen(getSurveyFilename(), "a");
+        const char *pFname = strrchr(recordingFilename, '/'); // Skip drive & directory
+        if (pFname) { ++pFname; }   // skip trailing '/' itself
+        fprintf(respFile, "%s=%s\n", arg, pFname?pFname:recordingFilename);
+        tbFclose(respFile);
+        respFile = NULL;
+    }
+}
+
 
 void ControlManager::svQCresult(const char *arg ) {           // save 'arg' to system/QC_PASS.txt if starts with "QC_OK", or as QC_FAIL.txt
     const char *passNm = "/system/QC_PASS.txt";
@@ -257,8 +317,10 @@ void ControlManager::playNextPackage() {                    // play name of next
     logEvtFmt("PlayPkg", "Pkg: %s, iPkg: %d", pkg->getName(), iPkg);
     char path[MAX_PATH];
     Deployment::instance->getPathForAudioFile( path, pkg->pkg_prompt );
+    ++audioPlayCounter;
+    resetAudio();
     clearIdle();
-    playAudio( path, NULL, kPlayTypePackagePrompt );
+    playAudio( path, NULL, kPlayTypePackagePrompt, ++audioPlayCounter );
 }
 
 void ControlManager::changePackage() {                      // switch to last played package name
@@ -273,6 +335,50 @@ void ControlManager::changePackage() {                      // switch to last pl
     logEvtNS( "ChgPkg", "Pkg", currPkg->getName());
     //showPackage();
 }
+
+void ControlManager::beginSurvey(const char *arg) {
+    if (arg && *arg) {
+        // Save and uniquify filename
+        strcpy(surveyFilename, TBP[pRECORDINGS_PATH]);  // M0:/recordings
+        strncat(surveyFilename, arg, sizeof(surveyFilename) - strlen(surveyFilename) - 1);
+        strncat(surveyFilename, ".survey", sizeof(surveyFilename) - strlen(surveyFilename) - 1);
+        surveyFilename[sizeof(surveyFilename) - 1] = '\0';
+        uniquifyFilename(surveyFilename, sizeof(surveyFilename));
+
+        // Survey common information.
+        respFile = tbFopen(getSurveyFilename(), "w");
+        fprintf(respFile, "# response '%s' as '%s'\n", arg, getSurveyFilename());
+        random.getRandomUUID(surveyUUID);
+        fprintf(respFile, "survey_uuid=%s\n", random.formatUUID(surveyUUID));
+
+        fsTime   timedate;
+        uint32_t mSec;
+        if (getRTC(&timedate, &mSec)) {
+            // Date and time in ISO 8601 format.
+            fprintf(respFile, "timestamp=%04d-%02d-%02d %02d:%02d:%02d.%03d\n",
+                    timedate.year, timedate.mon, timedate.day,
+                    timedate.hr, timedate.min, timedate.sec, mSec);
+        }
+        tbFclose(respFile);
+        respFile = NULL;
+
+        // This shouldn't be necessary. The .survey file has everything
+        // saveAuxProperties(surveyFilename);
+    } else {
+        *surveyFilename = '\0';
+        memset(surveyUUID, 0, sizeof(surveyUUID));
+    }
+}
+
+void ControlManager::endSurvey(const char *arg) {
+    *surveyFilename = '\0';
+    memset(surveyUUID, 0, sizeof(surveyUUID));
+}
+
+uint8_t* ControlManager::getSurveyUUID() {
+    return surveyUUID;
+}
+
 
 bool ControlManager::callScript(const char *scriptName) {
     // Look for script in "csms".
@@ -296,12 +402,16 @@ bool ControlManager::callScript(const char *scriptName) {
     // Push existing CSM onto save stack.
     csmStack.push_back(csm);
     // Start new CSM.
+    ++audioPlayCounter;
+    resetAudio();
     csm = nextCsm;
     return true;
 }
 
 void ControlManager::exitScript(CSM_EVENT exitEventId) {
     if (csmStack.size() < 1) return; // nothing to exit to
+    ++audioPlayCounter;
+    resetAudio();
     csm = csmStack.back();
     csmStack.pop_back();
     csm->handleEvent(exitEventId);
@@ -339,153 +449,179 @@ void ControlManager::USBmode( bool start ) {            // start (or stop) USB s
 }
 
 ControlManager::ACTION_DISPOSITION ControlManager::doAction( CSM_ACTION action, const char *arg, int iarg ) {
-    void * sp;
-    static void *sp_prev = 0;
-    sp = &sp;
     ACTION_DISPOSITION result = CONTINUE_ACTIONS;
     dbgEvt( TB_csmDoAct, action, arg[0], arg[1], iarg );
-    dbgLog("C doAction %s(%s), sp:%p, prev:%p\n", CSM::actionName(action), arg, sp, sp_prev);
-    sp_prev = sp;
+    dbgLog("C doAction %s(%s)\n", CSM::actionName(action), arg);
     if ( BootVerboseLog ) logEvtNSNS( "Action", "nm", CSM::actionName( action ), "arg", arg ); //DEBUG
     if ( isMassStorageEnabled()) {    // if USB MassStorage running: ignore actions referencing files
         switch (action) {
-            case playSys:
-            case playSubj:
-            case startRec:
-            case pausePlay:   // pause/play all share
-            case resumePlay:
-            case pauseRec:
-            case resumeRec:
-            case finishRec:
-            case writeMsg:
-            case stopPlay:
+            case CSM_ACTION::playSys:
+            case CSM_ACTION::playSubject:
+            case CSM_ACTION::startRecording:
+            case CSM_ACTION::pausePlay:
+            case CSM_ACTION::resumePlay:
+            case CSM_ACTION::pauseRecording:
+            case CSM_ACTION::resumeRecording:
+            case CSM_ACTION::finishRecording:
+            case CSM_ACTION::writeMsg:
+            case CSM_ACTION::stopPlay:
+            case CSM_ACTION::beginSurvey:
+            case CSM_ACTION::endSurvey:
                 return result;
 
             default: break;
         }
     }
+    
     switch (action) {
-        case LED:
-            LedManager::ledFg( tbConfig.ledStr(arg) );
+        case CSM_ACTION::LED:
+            LedManager::ledFg(tbConfig.ledStr(arg));
             break;
-        case bgLED:
-            LedManager::ledBg( tbConfig.ledStr(arg) );
+        case CSM_ACTION::bgLED:
+            LedManager::ledBg(tbConfig.ledStr(arg));
             break;
-        case playSys:
-            playSysAudio( arg );
+        case CSM_ACTION::playSys:
+            playSysAudio(arg);
             break;
-        case playSubj:
-            playSubjectAudio( arg );
+        case CSM_ACTION::playSubject:
+            playSubject(arg);
             break;
-        case startRec:
-            startRecAudio( arg );
+        case CSM_ACTION::startRecording:
+            startRecAudio(arg);
             break;
         case pausePlay:   // pause/play all share
-        case resumePlay:
-        case pauseRec:
-        case resumeRec:
+        case CSM_ACTION::resumePlay:
+        case CSM_ACTION::pauseRecording:
+        case CSM_ACTION::resumeRecording:
             pauseResume();
             break;
-        case playRec:
+        case CSM_ACTION::playRecording:
             playRecAudio();
             break;
-        case saveRec:
-            saveRecAudio( arg );
+        case CSM_ACTION::saveRecording:
+            saveRecAudio(arg);
             break;
-        case finishRec:
+        case CSM_ACTION::finishRecording:
             stopRecording();
             break;
-        case writeMsg:
-            if ( RunQCTest )
-                svQCresult( arg );    // saves 'arg' to system/QC_PASS.txt if it starts with "QC_OK", or as QC_FAIL.txt otherwise
-            else
-                saveWriteMsg( arg );
+        case CSM_ACTION::writeMsg:
+            writeMsg(arg);
             break;
-        case filesTest:
-            QCfilesTest( arg );   // generates event FilesSuccess or FilesFail
+//            if (runQcTest) {
+//                // saves 'arg' to system/QC_PASS.txt if it starts with "QC_OK", or as QC_FAIL.txt otherwise
+//                svQCresult(arg);
+//            } else {
+//                if (isSurveyActive()) {
+//                    respFile = tbFopen(getSurveyFilename(), "a");
+//                    fprintf(respFile, "%s\n", arg);
+//                    tbFclose(respFile);
+//                    respFile = NULL;
+//                } else {
+//                    saveWriteMsg(arg);
+//                }
+//            }
+        case CSM_ACTION::writeRecId:
+            writeRecId(arg);
             break;
-        case stopPlay:
+//            if (isSurveyActive()) { // makes no sense otherwise...
+//                respFile = tbFopen(getSurveyFilename(), "a");
+//                fprintf(respFile, "%s=%s\n", arg, recordingFilename);
+//                tbFclose(respFile);
+//                respFile = NULL;
+//            }
+        case CSM_ACTION::filesTest:
+            qcFilesTest(arg);   // generates event FilesSuccess or FilesFail
+            break;
+        case CSM_ACTION::stopPlay:
             stopPlayback();
             //      logEvt( "stopPlay" );
             break;
-        case volAdj:
-            adjVolume( iarg );
+        case CSM_ACTION::volAdj:
+            adjVolume(iarg);
             break;
-        case spdAdj:
-            adjSpeed( iarg );
+        case CSM_ACTION::spdAdj:
+            adjSpeed(iarg);
             break;
-        case posAdj:
-            adjPlayPosition( iarg );
+        case CSM_ACTION::posAdj:
+            adjPlayPosition(iarg);
             break;
-        case startUSB:
-            USBmode( true );
+        case CSM_ACTION::startUSB:
+            USBmode(true);
             break;
-        case endUSB:
-            USBmode( false );
+        case CSM_ACTION::endUSB:
+            USBmode(false);
             break;
-        case subjAdj:
-            changeSubject( arg );
+        case CSM_ACTION::subjAdj:
+            changeSubject(arg);
             break;
-        case msgAdj:
-            changeMessage( arg );
+        case CSM_ACTION::msgAdj:
+            changeMessage(arg);
             break;
-        case goPrevSt:
+        case CSM_ACTION::resumePrevState:
             csm->goPrevState();
             result = BREAK_ACTIONS;
             break;
-        case saveSt:      // remember state that preceded this one (for possible future return)
-            if ( iarg > 4 ) iarg = 4;
-            dbgLog( "C svSt[%d] = %s(%d) \n", iarg, csm->prevStateName, csm->prevStateIx );
+        case CSM_ACTION::saveState:      // remember state that preceded this one (for possible future return)
+            if (iarg > 4) iarg = 4;
+            dbgLog("C saveState[%d] = %s(%d) \n", iarg, csm->prevStateName, csm->prevStateIx);
             csm->saveState(iarg);
             break;
-        case goSavedSt:
-            if ( iarg > 4 ) iarg = 4;
-            csm->goSavedState(iarg);
+        case CSM_ACTION::resumeSavedState:
+            if (iarg > 4) iarg = 4;
+            csm->resumeSavedState(iarg);
             result = BREAK_ACTIONS;
             break;
-        case setTimer:
-            osTimerStart( timers[2], iarg );
+        case CSM_ACTION::setTimer:
+            osTimerStart(timers[2], iarg);
             break;
-        case resetTimer:
-            osTimerStop( timers[2] );
+        case CSM_ACTION::resetTimer:
+            osTimerStop(timers[2]);
             break;
-        case showCharge:
+        case CSM_ACTION::showCharge:
             showBattCharge();
             break;
-        case powerDown:
+        case CSM_ACTION::powerDown:
             result = BREAK_ACTIONS;
             powerDownTBook();
             break;
-        case sysTest:
-            playSquareTune( "CDEF_**C*D*E*F*_**C*D*E*F*_***C**G**FDEH**G**" );
+        case CSM_ACTION::sysTest:
+            playSquareTune("CDEF_**C*D*E*F*_**C*D*E*F*_***C**G**FDEH**G**");
             break;
-        case playNxtPkg:
+        case CSM_ACTION::playNxtPkg:
             playNextPackage();
             break;
-        case changePkg:
+        case CSM_ACTION::changePkg:
             changePackage();
             break;
-        case playTune:
-            playSquareTune( arg );
+        case CSM_ACTION::playTune:
+            playSquareTune(arg);
             break;
-        case sysBoot:
+        case CSM_ACTION::sysBoot:
             result = BREAK_ACTIONS;
             NVIC_SystemReset();     // soft reboot
             break;
-        case callIf:
-            // If no subject is selected, do nothing.
-            if (TBook.iSubj >= 0 && TBook.iSubj < currPkg->numSubjects()) {
-                Subject *subj = currPkg->getSubject(TBook.iSubj);
-                if (subj->script) {
+        case CSM_ACTION::callScript: {
+                const char *script = NULL;
+                if (arg && *arg) {
+                    script = arg;
+                } else if (TBook.iSubj >= 0 && TBook.iSubj < currPkg->numSubjects()) {
+                    // If no subject is selected, do nothing.
+                    Subject *subj = currPkg->getSubject(TBook.iSubj);
+                    script = subj->script;
+                };
+                if (script) {
                     result = BREAK_ACTIONS;
-                    if (callScript(subj->script)) {
-                        CSM::print(csm);
+                    if (callScript(script)) {
+                        // uncomment to debug loaded scripts
+                        // if (dbgEnabled('C')) {
+                        //     CSM::print(csm);
+                        // }
                         csm->start();
                     }
                 }
-            };
+            }
             break;
-        case exitCsm:
+        case CSM_ACTION::exitScript:
             {
             result = BREAK_ACTIONS;
             CSM_EVENT eventId = lastEventId;
@@ -495,13 +631,17 @@ ControlManager::ACTION_DISPOSITION ControlManager::doAction( CSM_ACTION action, 
             exitScript(eventId);
             }
             break;
-        case enterSt:
+        case CSM_ACTION::enterState:
             {
+            ++audioPlayCounter;
+            resetAudio();
             result = BREAK_ACTIONS;
-            int newIx = csm->stateIxForName(arg);
-            csm->enterState(newIx);
+            csm->enterState(arg);
             break;
             }
+        case CSM_ACTION::beginSurvey:
+            beginSurvey(arg);
+            break;
         default: break;
     }
     return result;
@@ -509,7 +649,7 @@ ControlManager::ACTION_DISPOSITION ControlManager::doAction( CSM_ACTION action, 
 
 void ControlManager::updateTimersForEvent(CSM_EVENT eventId) {
     switch (eventId) {
-        case AudioDone:
+        case CSM_EVENT::AudioDone:
             if ( audioIdle )
                 logEvtNS( "error", "msg", "AudioDone without AudioStart" );
             else {
@@ -518,20 +658,18 @@ void ControlManager::updateTimersForEvent(CSM_EVENT eventId) {
                 osTimerStart( timers[1], tbConfig.longIdleMS );
             }
             break;
-        case ShortIdle:     // events that don't reset idle timers
-        case LowBattery:
-        case BattCharging:
-        case BattCharged:
-        case BattMin: // ?? this one
-        case BattMax:
-        case ChargeFault: // ?? this one
-        case LithiumHot: // ?? this one
-        case FilesSuccess:
-        case FilesFail:
-        case BattCharging75:
-        case BattNotCharging:
+        case CSM_EVENT::ShortIdle:     // events that don't reset idle timers
+        case CSM_EVENT::LowBattery:
+        case CSM_EVENT::BattCharging:
+        case CSM_EVENT::BattCharged:
+        case CSM_EVENT::BattMin: // ?? this one
+        case CSM_EVENT::BattMax:
+        case CSM_EVENT::ChargeFault: // ?? this one
+        case CSM_EVENT::LithiumHot: // ?? this one
+        case CSM_EVENT::FilesSuccess:
+        case CSM_EVENT::FilesFail:
             break;
-        case AudioStart:
+        case CSM_EVENT::AudioStart:
             audioIdle = false;
             break;
         default:
@@ -556,14 +694,19 @@ void ControlManager::executeCSM( void ) {               // execute TBook control
         status = osMessageQueueGet( osMsg_TBEvents, &event, NULL, osWaitForever );  // wait for next TB_Event
         if ( status != osOK )
             tbErr( " EvtQGet error" );
-        lastEventId = event->typ;
+        lastEventId = event->eventId;
+        lastEventArg = event->arg;
         updateTimersForEvent(lastEventId);
         osMemoryPoolFree( TBEvent_pool, event );
+        // Ignore stale CSM_EVENT::AudioDone events (only handle from current play operation)
+        if (lastEventId == CSM_EVENT::AudioDone && lastEventArg != audioPlayCounter) {
+            continue;
+        }
         csm->handleEvent(lastEventId);
     }
 }
 
-void ControlManager::QCfilesTest(const char *arg ) {          // write & re-read system/qc_test.txt -- gen Event FilesSuccess if identical, or FilesFail if not
+void ControlManager::qcFilesTest(const char *arg ) {          // write & re-read system/qc_test.txt -- gen Event FilesSuccess if identical, or FilesFail if not
     const char *testNm = "/system/QC_Test.txt";
     char   qcmsg[50], qcres[50];
     fsTime ftime;
@@ -617,7 +760,7 @@ void ControlManager::init() {
             tbErr("timer not alloc'd");
     }
 
-    csm = loadControlDef2();
+    csm = loadControlDef();
 
 }
 
@@ -640,7 +783,7 @@ void initControlManager( void ) {       // initialize control manager
 
     // don't init power timer-- it is set to do 1st check at 15sec, then resets from TB_Config
     //setPowerCheckTimer( tbConfig.powerCheckMS );
-    if (RunQCTest) {
+    if (runQcTest) {
         // disable powerChecks during QC
         PowerChecksEnabled = false;
     }
@@ -650,7 +793,7 @@ void initControlManager( void ) {       // initialize control manager
 
     iPkg = 0;
     // Don't try load package for qcTest. If not qcTest and can't load packages, go to USB mode.
-    if (!RunQCTest && !readPackageData()) {
+    if (!runQcTest && !readPackageData()) {
         USBmode(true);    // go to USB unless successfully loaded CSM & packages_data
         return;         // don't do anything else after starting USBmode
     }

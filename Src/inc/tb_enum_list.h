@@ -67,8 +67,8 @@
     X(MpuHot)         \
     X(FilesSuccess)   \
     X(FilesFail)      \
-    X(BattCharging75) \
-    X(BattNotCharging)\
+    X(OK)             \
+    X(CANCEL)         \
     X(anyKey)         \
     X(eUNDEF)         \
 //endregion
@@ -80,23 +80,24 @@
     X(LED)              \
     X(bgLED)            \
     X(playSys)          \
-    X(playSubj)         \
+    X(playSubject)      \
+    X(playMessage)      \
     X(pausePlay)        \
     X(resumePlay)       \
     X(stopPlay)         \
     X(volAdj)           \
     X(spdAdj)           \
     X(posAdj)           \
-    X(startRec)         \
-    X(pauseRec)         \
-    X(resumeRec)        \
-    X(finishRec)        \
-    X(playRec)          \
-    X(saveRec)          \
+    X(startRecording)   \
+    X(pauseRecording)   \
+    X(resumeRecording)  \
+    X(finishRecording)  \
+    X(playRecording)    \
+    X(saveRecording)    \
     X(writeMsg)         \
-    X(goPrevSt)         \
-    X(saveSt)           \
-    X(goSavedSt)        \
+    X(resumePrevState)  \
+    X(saveState)        \
+    X(resumeSavedState) \
     X(subjAdj)          \
     X(msgAdj)           \
     X(setTimer)         \
@@ -111,9 +112,12 @@
     X(changePkg)        \
     X(playTune)         \
     X(filesTest)        \
-    X(callIf)           \
-    X(exitCsm)          \
-    X(enterSt)          \
+    X(callScript)       \
+    X(exitScript)       \
+    X(enterState)       \
+    X(beginSurvey)      \
+    X(endSurvey)        \
+    X(writeRecId)       \
 //endregion
 
 #define GDEF_AF_0 0

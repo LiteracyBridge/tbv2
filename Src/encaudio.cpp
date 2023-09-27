@@ -19,6 +19,7 @@
 
 #include "encAudio.h"
 #include "fileOps.h"
+#include "random.h"
 #include "tbook.h"
 
 static const int AES_KEY_BITS = 256;
@@ -39,8 +40,6 @@ typedef struct EncryptState {
     mbedtls_aes_context aes_context;
     uint8_t iv[16];
     mbedtls_pk_context pk_context;
-    mbedtls_ctr_drbg_context drbg_context;
-    mbedtls_entropy_context entropy_context;
     char keyFileName[MAX_PATH];
     char encFileName[MAX_PATH];
 } EncryptState_t;
@@ -56,81 +55,15 @@ void TlsErr(const char *msg, int cd) {
     tbErr("tlsErr: %s => %s", msg, ebuf);
 }
 
-//region getRandom
-#if defined( STM32F412Vx )
-#include "stm32f412vx.h"
-
-int getRandom( void *pRNG, unsigned char *pBuffer, size_t buffer_len );
-void initRandom( const char *pers ) {   // reset RNG before encrypt or decrypt
-    mbedtls_ctr_drbg_init( &encryptState.drbg_context );
-    int ret = mbedtls_ctr_drbg_seed( &encryptState.drbg_context, getRandom, &encryptState.entropy_context, (const unsigned char *) pers, strlen( pers ));
-    if ( ret != 0 ) TlsErr( "drbg_seed", ret );
-}
-
-/**
- * Gets random bytes. The prototype is defined by mbed, so we hae the pRNG parameter, even though we don't need
- * it here.
- * @param pRNG  Unused
- * @param pBuffer The buffer to receive the random bytes.
- * @param buffer_len sizeof(buffer)
- * @return 0 on success, -1 on error.
- */
-int getRandom( void *pRNG, unsigned char *pBuffer, size_t buffer_len ) {         // fill pBuffer with true random data from STM32F412 RNG dev
-    int cnt = 0;
-
-    RCC->AHB2ENR |= RCC_AHB2ENR_RNGEN;      // enable RNG peripheral clock
-    // RNG->CR |= RNG_CR_IE;  // polling, no interrupts
-    RNG->CR |= RNG_CR_RNGEN;    // enable RNG
-
-    if ( RNG->SR & ( RNG_SR_SECS | RNG_SR_CECS )) { // if SR.SEIS or CEIS -- seed or clock error
-        __breakpoint( 0 );
-        return -1;
-    }
-
-    uint32_t *pWords = (uint32_t *) pBuffer;
-    size_t   numWords    = buffer_len / 4;
-    size_t   extraBytes = buffer_len - numWords * 4;
-    for (int i       = 0; i <= numWords; i++) {
-        // spin 'till ready
-        while (( RNG->SR & RNG_SR_DRDY ) == 0) 
-            cnt++;
-
-        uint32_t random = RNG->DR; // next 4 bytes of random bits
-        if ( i < numWords ) {
-            pWords[i] = random;
-        } else if ( extraBytes > 0 ) {
-            for (int j = 0; j < extraBytes; j++)
-                pBuffer[i * 4 + j] = ( random >> j * 8 ) & 0xFF;
-        }
-    }
-    return 0;
-}
-
-#else
-
-void initRandom(char *pers) {   // reset RNG before encrypt or decrypt
-    mbedtls_entropy_init(&encryptState.entropy_context);
-    mbedtls_ctr_drbg_init(&encryptState.drbg_context);
-    int ret = mbedtls_ctr_drbg_seed(&encryptState.drbg_context, mbedtls_entropy_func, &encryptState.entropy_context,
-                                    (const unsigned char *) pers, strlen(pers));
-    if (ret != 0) TlsErr("drbg_seed", ret);
-}
-
-int getRandom(void *pRNG, unsigned char *pBuffer, size_t buffer_len) {         // fill pBuffer with true random data from STM32F412 RNG dev
-    int ret = mbedtls_ctr_drbg_random(&encryptState.drbg_context, pBuffer, buffer_len);
-    if (ret != 0) TlsErr("drbg_rand", ret);
-    return 0;
-}
-
-#endif
-//endregion
-
+// non-public export from Random.
+extern int getRandom( void *pRNG, unsigned char *pBuffer, size_t buffer_len );
 
 void encUfAudioInit() {
     if (encryptState.initialized) {
         return;
     }
     encryptState.initialized = true;
+    random.initialize();
     int derSize = fsize(DER_FILE_NAME);
     if (derSize > 0) {
         FILE *derFile = tbFopen(DER_FILE_NAME, "rb");
@@ -141,8 +74,7 @@ void encUfAudioInit() {
         int result = fread(derBytes, 1, derSize, derFile);
         tbFclose(derFile);
         if (result == derSize) {
-            // We have a public key, so initialize the RNG and the PK encryption system.
-            initRandom("TBook entropy generation seed for STM32F412");
+            // We have a public key, so initialize the PK encryption system.
             mbedtls_pk_init(&encryptState.pk_context);
             result = mbedtls_pk_parse_public_key(&encryptState.pk_context, derBytes, derSize);
             encUfAudioEnabled = encryptState.enabled = (result == 0);
@@ -216,9 +148,9 @@ void startEncrypt(char *fname) {
 
     // Allocate the key and iv for this encryption session, and initialize mbed_aes
     uint8_t session_key[AES_KEY_LENGTH];
-    int result = getRandom(NULL, session_key, AES_KEY_LENGTH);
+    int result = random.getRandomBytes(session_key, AES_KEY_LENGTH);
     if (result != 0) TlsErr("RNG gen", result);
-    result = getRandom(NULL, encryptState.iv, sizeof(encryptState.iv));
+    result = random.getRandomBytes(encryptState.iv, sizeof(encryptState.iv));
     if (result != 0) TlsErr("RNG gen", result);
     mbedtls_aes_init(&encryptState.aes_context);
     result = mbedtls_aes_setkey_enc(&encryptState.aes_context, session_key, AES_KEY_BITS);

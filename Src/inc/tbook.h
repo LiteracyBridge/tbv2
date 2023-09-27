@@ -53,7 +53,7 @@
 extern bool BootToUSB;
 extern bool BootDebugLoop;
 extern bool BootVerboseLog;
-extern bool BootToQCtest;
+extern bool bootToQcTest;
 extern bool BootVerbosePower;
 extern bool BootResetLog;
 extern bool BootFormatFileSys;
@@ -68,7 +68,7 @@ extern bool controlManagerReady;
 extern char CPU_ID[20], TB_ID[20];
 extern bool NO_OS_DEBUG;          // set in main.c, used in tbook.c
 extern bool FirstSysBoot;         // defined in logger
-extern bool RunQCTest;            // defined in tbook.c -- if no /system/QC_PASS.txt  or Circle boot
+extern bool runQcTest;            // defined in tbook.c -- if no /system/QC_PASS.txt  or Circle boot
 extern char BootKey;                        // set in main.c, used in tbook.c
 extern bool PowerChecksEnabled;       // set true for normal operation
 

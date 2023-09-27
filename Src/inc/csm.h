@@ -70,7 +70,7 @@ struct CSM_Event_t {
  *  List of NT transitions.
  */
 struct CSM_State_t {
-    uint16_t nameOffst;
+    uint16_t nameOffset;
     uint8_t  numTransitions;
     uint8_t  numActions;
     CSM_Action_T *action(int ix) const {
@@ -104,15 +104,15 @@ public:
 
     static CSM *loadFromFile(const char *fname);
     static void print(CSM *csm);
+    static char *formatState(CSM *csm, int stateIx);
 
     void start(void);
     void enterState(int newStateIx);
     void enterState(const char * newStateName);
-    int stateIxForName(const char *stateName);
     void handleEvent(CSM_EVENT event);
 
     void saveState(int slot) { savedStateIx[slot] = prevStateIx; }
-    void goSavedState(int slot) { setCurrentState(savedStateIx[slot]); }
+    void resumeSavedState(int slot) { setCurrentState(savedStateIx[slot]); }
     void goPrevState() { setCurrentState(prevStateIx); }
 
     int getCurrentState() { return this->stateIx; }
@@ -161,6 +161,9 @@ public:
     const char *prevStateName;
 
 private:
+    static char printBuf[400];
+    static int stateNamesLen;
+    static int eventNamesLen;
     static const char *eventNames[];
     static const char *actionNames[];
 };
@@ -169,14 +172,16 @@ class CState {
 protected:
     const CSM *pCsm;           // The CSM within which this state is defined.
     const CSM_State_t *pState;  // Pointer to the definition of this CState.
+    const char *pName;
 
 public:
     CState(const CSM *pCsm, const char *pStateData) : pCsm(pCsm),
                                                         pState(reinterpret_cast<const CSM_State_t *const>(pStateData)) {
+        pName = pCsm->str(pState->nameOffset);
     }
 
     const char *name() const {
-        uint16_t offset = pState->nameOffst;
+        uint16_t offset = pState->nameOffset;
         return pCsm->str(offset);
     }
 
@@ -221,6 +226,6 @@ public:
     }
 };
 
-CSM *loadControlDef2(void);
+CSM *loadControlDef(void);
 
 #endif //TBV2_CSM_H

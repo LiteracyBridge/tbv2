@@ -32,7 +32,7 @@ const int WAV_DATA_SIZE         = RECORD_SAMPLE_RATE * 2 * RECORD_SEC;    // 30s
 
 const int WAV_FILE_SIZE         = WAV_DATA_SIZE + sizeof(WavFileHeader_t);
             
-extern volatile char                   mRecordFilePath[MAX_PATH];
+extern char                   mRecordFilePath[MAX_PATH];
 
 const WavFileHeader_t newWavHeader =  {
     0x46464952,             //  riffId = 'RIFF'
@@ -70,7 +70,8 @@ static struct {       // PlaybackFile_t     -- audio state block
     uint32_t                tsRecord;       // timestamp at recording start
 
     playback_state_t        state;          // current (overly detailed) playback state
-    PlaybackType_t          playbackTyp;
+    PlaybackType_t          playbackType;
+    int32_t                 playCounter;
     int32_t                 playSubj;
     int32_t                 playMsg;
     uint32_t                nPauses;
@@ -200,7 +201,7 @@ void audInitState( void ) {
     }
 
     pSt.audioFormat     = kAudioNone;
-    pSt.playbackTyp = kPlayTypeNone;
+    pSt.playbackType = kPlayTypeNone;
     pSt.playSubj    = -1;
     pSt.playMsg     = -1;
     pSt.nPauses     = 0;
@@ -357,12 +358,13 @@ const char * findAudioFileByExtension(  char *fnameBuffer ) {
     return NULL;
 }
 
-void audPlayAudio( const char *audioFileName, MsgStats *stats, PlaybackType_t typ ) { // start playing from file
+void audPlayAudio( const char *audioFileName, MsgStats *stats, PlaybackType_t pbType, int32_t playCounter ) { // start playing from file
     audInitState();
     pSt.stats = stats;
     stats->Start++;
-    pSt.playbackTyp = typ;        // current type of file being played
-    if ( typ == kPlayTypeMessage ) {
+    pSt.playbackType = pbType;        // current type of file being played
+    pSt.playCounter = playCounter;
+    if ( pbType == kPlayTypeMessage ) {
         pSt.playSubj = TBook.iSubj;
         pSt.playMsg  = TBook.iMsg;
     }
@@ -395,17 +397,18 @@ void audPlayAudio( const char *audioFileName, MsgStats *stats, PlaybackType_t ty
     }
 }
 
-void audPlayTone( int i, int freq, int nEighths ) {   // play 'i'th note: 'freq' sqr wave tone for 'nEighths' 128 msec buffers
+void audPlayTone( int i, int freq, int nEighths, int32_t playCounter ) {   // play 'i'th note: 'freq' sqr wave tone for 'nEighths' 128 msec buffers
     if ( i == 0 ) {    // first note of tune
         pSt.tuneSamples = 0;    // total samples in tune
         pSt.tuneMsec    = 0;       // length of tune in msec
         pSt.tunePlayed  = 0;     // total samples played
+        pSt.playCounter = playCounter;
     } else
         pSt.tunePlayed += pSt.nSamples;  // completed previous note
 
     audInitState();
     audSquareWav( nEighths, freq ); // set up to play tone: pSt.SQRwave==true
-    pSt.playbackTyp = kPlayTypeTone;
+    pSt.playbackType = kPlayTypeTone;
     pSt.audioFormat     = kAudioTone;
     pSt.nSamples    = pSt.sqrSamples;
     pSt.msecLength  = pSt.nSamples * 1000 / pSt.samplesPerSec;
@@ -421,7 +424,7 @@ void audPlayTone( int i, int freq, int nEighths ) {   // play 'i'th note: 'freq'
 }
 
 void logPlayMsg( void ) {
-    if ( pSt.playbackTyp != kPlayTypeMessage ) return;
+    if ( pSt.playbackType != kPlayTypeMessage ) return;
 
     logEvtFmt( "MsgDone", "S:%d, M:%d, L_ms:%d, P_ms:%d, nPaus:%d, Fwd_ms:%d, Bk_ms:%d", pSt.playSubj, pSt.playMsg,
                pSt.msecLength, pSt.msPlayed, pSt.nPauses, pSt.msFwd, pSt.msBack );
@@ -451,7 +454,7 @@ void audStopAudio( void ) {                         // abort any leftover operat
         logEvtNI( "CutRec", "state", pSt.state );
         if ( pSt.state == pbRecording || pSt.state == pbRecStop ) {
             dbgLog( "8 audStop Rec %x\n", pSt.audF );
-            haltRecord();   // shut down dev, update timestamps
+            haltRecord();   // shut down device, update timestamps
             audRecordComplete();  // close file, report errors
         }
         freeBuffs();
@@ -460,7 +463,7 @@ void audStopAudio( void ) {                         // abort any leftover operat
     }
 
     if ( st == Playing ) {
-        PlaybackType_t playtyp = pSt.playbackTyp;   // remember across reset
+        PlaybackType_t playtyp = pSt.playbackType;   // remember across reset
 
         if ( pSt.state == pbPlaying ) {
             haltPlayback();            // stop device & update timestamps
@@ -603,7 +606,7 @@ void audPauseResumeAudio( void ) {                  // signal playback to reques
             audSaveBuffs();     // write all filled writeQueue[], file left open
 
             dbgEvt( TB_recPause, 0, 0, 0, 0 );
-            dbgLog( "8 pauseRec at %d ms \n", pSt.msRecorded );
+            dbgLog( "8 pauseRecording at %d ms \n", pSt.msRecorded );
             LedManager::ledFg( tbConfig.fgRecordPaused ); // blink red: while paused
             // subsequent call to audPauseResumeAudio() will append new recording
             logEvtNINI( "recPause", "ms", pSt.msRecorded, "nS", pSt.nSaved );
@@ -614,7 +617,7 @@ void audPauseResumeAudio( void ) {                  // signal playback to reques
             // resuming == continue recording
             dbgEvt( TB_recResume, pSt.msRecorded, 0, 0, 0 );
             logEvt( "recResume" );
-            dbgLog( "8 resumeRec at %d ms \n", pSt.msRecorded );
+            dbgLog( "8 resumeRecording at %d ms \n", pSt.msRecorded );
             pSt.stats->RecResume++;
             Driver_SAI0.PowerControl( ARM_POWER_FULL );   // power audio back up
             ctrl = ARM_SAI_CONFIGURE_RX |
@@ -674,7 +677,7 @@ void audPlaybackComplete( void ) {                 // shut down after completed 
         // complete, so msPlayed == msecLength
         dbgEvt( TB_audDone, pSt.msPlayed, pct, pSt.msPlayed, pSt.msecLength );
         if ( BootVerboseLog ) logEvtNININI( "playDn", "ms", pSt.msPlayed, "pct", pct, "nS", pSt.nPlayed );
-        if ( pSt.playbackTyp == kPlayTypeMessage )
+        if ( pSt.playbackType == kPlayTypeMessage )
             LOG_AUDIO_PLAY_DONE( pSt.msecLength, pSt.msPlayed, 100 * pSt.msPlayed / pSt.msecLength );
         logPlayMsg();
 
@@ -682,7 +685,7 @@ void audPlaybackComplete( void ) {                 // shut down after completed 
         if ( BootVerboseLog ) logEvtNI( "Play_Tim", "dif_ms", pSt.msecLength - pSt.msPlayed );
         pSt.stats->Finish++;
     }
-    sendEvent( AudioDone, pct );        // end of file playback-- generate CSM event
+    sendEvent( AudioDone, pSt.playCounter );        // end of file playback-- generate CSM event
 }
 
 
@@ -1100,7 +1103,7 @@ extern bool playWave( const char *fname ) {          // play WAV file, true if s
     pSt.msecLength     = pSt.nSamples / ( pSt.samplesPerSec / 1000 );   // nSamples*1000 can overflow for large messages
     pSt.dataStartPos   = dataStartPosition;    // remember start of wav data, for setWavPos()
     pSt.state          = pbGotHdr;
-    if ( pSt.playbackTyp == kPlayTypeMessage )   // details only for content messages
+    if ( pSt.playbackType == kPlayTypeMessage )   // details only for content messages
         LOG_AUDIO_PLAY_WAVE( fname, pSt.msecLength, fLen, pSt.samplesPerSec, pSt.monoMode );
 
     startPlayback();       // power up codec, preload buffers from current file pos, & start I2S transfers

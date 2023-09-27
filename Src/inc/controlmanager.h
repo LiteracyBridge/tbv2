@@ -23,7 +23,7 @@ extern TBook_t TBook;
 
 class ControlManager {
 public:
-    ControlManager() : csmStack(2), csms(2) {}
+    ControlManager();
     void init(void);
     void USBmode(bool start);
     enum ACTION_DISPOSITION {CONTINUE_ACTIONS, BREAK_ACTIONS};
@@ -38,14 +38,15 @@ private:
     void changeMessage(const char *change);
 
     void playSysAudio(const char *arg);
-    void playSubjectAudio(const char *arg);
+    void playSubject(const char *arg);
     void playSquareTune(const char *notes);
 
     void startRecAudio(const char *arg);
     void playRecAudio(void);
     void saveRecAudio(const char *arg);
 
-    void saveWriteMsg(const char *txt);
+    void writeMsg(const char *txt);
+    void writeRecId(const char *arg);
     void svQCresult(const char *arg );
 
     void showPackage(void);
@@ -55,12 +56,32 @@ private:
     bool callScript(const char *scriptName);
     void exitScript(CSM_EVENT exitEventId);
 
-    void QCfilesTest(const char *arg );
+    void qcFilesTest(const char *arg );
+
+    void beginSurvey(const char *arg);
+    void endSurvey(const char *arg);
+
+public:
+    const char *getSurveyFilename() { return surveyFilename; }
+    bool isSurveyActive() { return surveyFilename[0] != '\0'; }
+    uint8_t *getSurveyUUID();
 
 private:
-    CSM_EVENT lastEventId;
-    bool audioIdle;
-    osTimerId_t timers[3];
+    CSM_EVENT       lastEventId;
+    int32_t         lastEventArg;
+    bool            audioIdle;
+    osTimerId_t     timers[3];
+
+    // A locally unique id of a given track of tone playback. Used to correlate PlaySys, PlaySubj, PlayTune, etc
+    // with the eventual AudioDone event.
+    uint32_t audioPlayCounter;
+
+    // If not blank, file name for Survey. "writeMsg", "writeRecId", and "saveRecording" write to the survey file.
+    char surveyFilename[MAX_PATH];
+    uint8_t surveyUUID[16];
+
+    // Uniquified filename of current or recent recording.
+    char recordingFilename[MAX_PATH];
 
     // CSM Script management
     CSM *csm;

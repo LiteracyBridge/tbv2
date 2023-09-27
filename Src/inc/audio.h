@@ -88,9 +88,9 @@ extern int32_t audPlayPct( void );                      // => current playback p
 extern void audAdjPlayPos( int32_t adj );               // shift current playback position +/- by 'adj' seconds
 extern void audAdjPlaySpeed( int16_t adj );             // change playback speed by 'adj' * 10%
 extern void audPlayAudio( const char *audioFileName, MsgStats *stats,
-                          PlaybackType_t typ );        // start playing from file typ=sys/pkg/msg/nm/pr/rec
+                          PlaybackType_t pbType, int32_t playCounter );        // start playing from file eventId=sys/pkg/msg/nm/pr/rec
 extern void audPlayTone( int i, int freq,
-                         int nEighths );                // play 'i'th note: 'freq' sqr wave tone for 'nEighths' 128 msec buffers
+                         int nEighths, int32_t playCounter );                // play 'i'th note: 'freq' sqr wave tone for 'nEighths' 128 msec buffers
 extern void audStopAudio( void );                       // signal playback loop to stop
 extern bool audStartRecording( const char *recordFilename, MsgStats *stats );  // start recording into file
 extern void audFinalizeRecord( bool keep);

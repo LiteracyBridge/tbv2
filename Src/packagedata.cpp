@@ -196,6 +196,7 @@ public:
 
 private:
     char subjectScript[MAX_PATH];  // Optional script file for a given subject.
+    bool noNav;
 
     bool userFeedbackPublic;
     int ufPathIx;
@@ -235,21 +236,22 @@ void PackageDataReader::readPackageSearchPathList(Package &package) {           
     }
 }
 
-AudioFile *PackageDataReader::readAudioFile(const char *typ) {        // load dirIdx & filename from pkg_dat line
+AudioFile *PackageDataReader::readAudioFile(const char *tag) {        // load dirIdx & filename from pkg_dat line
     if (errCount > 0) return NULL;
     AudioFile *audioFile = new("audioFile") AudioFile;
-    readLine(typ);
+    readLine(tag);
     char fname[100];
     if (sscanf(line, "%d %s ", &audioFile->pathIdx, fname) == 2) {
         audioFile->filename = allocStr(fname, "audFilename");
     } else {
-        error(typ);
+        error(tag);
     }
     return audioFile;
 }
 
 void PackageDataReader::resetSubjectOptions() {
     *subjectScript = '\0';
+    noNav = false;
 }
 
 void PackageDataReader::parseSubjectOptions() {
@@ -258,6 +260,8 @@ void PackageDataReader::parseSubjectOptions() {
     int nParts = sscanf(line, "%[^:]:%s", name, value);
     if (nParts == 2 && strcmp(name, "script") == 0) {
         strcpy(subjectScript, value);
+    } else if (nParts == 1 && strcasecmp(name, "NoNav") == 0) {
+        noNav = true;
     }
 }
 
@@ -294,6 +298,7 @@ Subject *PackageDataReader::readSubject() {                       // parse conte
     if (*subjectScript) {
         subj->script = allocStr(subjectScript, "script");
     }
+    subj->nonNavigable = noNav;
 
 //    subj->messages = new("msgList") AudioFile *[subj->nMessages];
     subj->stats    = static_cast<MsgStats *>(tbAlloc(sizeof(MsgStats), "stats"));

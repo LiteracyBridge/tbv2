@@ -138,7 +138,7 @@ extern void tbShw(const char *s, char **p1, char **p2);
 
 extern void _Error_Handler(char *, int);
 
-extern int BootMode;   // defined in main.c -- set by booting with a key:  none=0 STAR=1 LHAND=2 MINUS=3  PLUS=4  RHAND=5 CIRCLE=6 HOME=7
+extern int BootMode;   // defined in main.c -- set by booting with a key:  none=0 STAR=1 LHAND=2 MINUS=3  PLUS=4  RHAND=5 CIRCLE=6 HOUSE=7
 extern char BootKey;        // char for BootMode tests:  'S'tar, 'L'hand, 'M'inus, 'P'lus, 'R'hand, 'C'ircle, 'H'ome
 extern void debugLoop(bool autoUSB);      // dbgLoop.c: called if boot-MINUS, no file system,  autoUSB => usbMode
 
@@ -255,8 +255,8 @@ typedef struct {
     bool starUsed;         // true if STAR used as shift-- Star up is ignored
     /*
       KEY           detectedUpKey;    // shared variable between ISR and thread
-      bool          DFUkeysDown;      // TRUE if special DFU keypair down: TABLE + POT
-      bool          keytestKeysDown;  // TRUE if special keytest pair down: HOME + POT
+      bool          DFUkeysDown;      // TRUE if special DFU keypair down: TABLE + BOWL
+      bool          keytestKeysDown;  // TRUE if special keytest pair down: HOUSE + BOWL
       bool          starDown;         // flags to prevent STAR keypress on key-up after STAR-key alt sequence
       bool          starAltUsed;
       KEY           DownKey;          // key currently down

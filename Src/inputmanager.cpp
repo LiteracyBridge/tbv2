@@ -43,8 +43,8 @@ const char *keyTestSuccess = "G8R_3 G8R_3 G8R_3";  // 3 long green then red puls
 
 
 /*  External interrupts used by the TBook keypad, and corresponding Interrupt Mask Bits
-exti0     PA0   gHOME     0001
-exti1     PC1   gPOT      0002
+exti0     PA0   gHOUSE     0001
+exti1     PC1   gBOWL      0002
 exti2   
 exti3     PE3   gTABLE -- 0008
 exti4     PA4   gPLUS     0010
@@ -64,17 +64,17 @@ EXTI_IMR                  87BB
 
 KeyPadKey_t keydef[10] = {
     // @formatter: off
-    // keypad GPIO in order: kHOME, kCIRCLE, KEY::PLUS, KEY::MINUS, KEY::TREE, KEY::LHAND, KEY::POT, KEY::RHAND, KEY::STAR, KEY::TABLE
+    // keypad GPIO in order: kHOUSE, kCIRCLE, KEY::PLUS, KEY::MINUS, KEY::TREE, KEY::LHAND, KEY::BOWL, KEY::RHAND, KEY::STAR, KEY::TABLE
     // static placeholders, filled in by initializeInterrupts
     //  GPIO_ID    key,    port,    pin,         intq       extiBit   signal    pressed  down   tstamp dntime
-    { gHOME,   KEY::HOME,   NULL, 0, WWDG_IRQn, 0, "", 0, false, 0, 0 },
+    { gHOUSE,  KEY::HOUSE,  NULL, 0, WWDG_IRQn, 0, "", 0, false, 0, 0 },
     { gCIRCLE, KEY::CIRCLE, NULL, 0, WWDG_IRQn, 0, "", 0, false, 0, 0 },
     { gPLUS,   KEY::PLUS,   NULL, 0, WWDG_IRQn, 0, "", 0, false, 0, 0 },
     { gMINUS,  KEY::MINUS,  NULL, 0, WWDG_IRQn, 0, "", 0, false, 0, 0 },
     { gTREE,   KEY::TREE,   NULL, 0, WWDG_IRQn, 0, "", 0, false, 0, 0 },
     { gLHAND,  KEY::LHAND,  NULL, 0, WWDG_IRQn, 0, "", 0, false, 0, 0 },
     { gRHAND,  KEY::RHAND,  NULL, 0, WWDG_IRQn, 0, "", 0, false, 0, 0 },
-    { gPOT,    KEY::POT,    NULL, 0, WWDG_IRQn, 0, "", 0, false, 0, 0 },
+    { gBOWL,   KEY::BOWL,   NULL, 0, WWDG_IRQn, 0, "", 0, false, 0, 0 },
     { gSTAR,   KEY::STAR,   NULL, 0, WWDG_IRQn, 0, "", 0, false, 0, 0 },
     { gTABLE,  KEY::TABLE,  NULL, 0, WWDG_IRQn, 0, "", 0, false, 0, 0 }
     // @formatter: on
@@ -94,7 +94,7 @@ void enableInputs( bool fromThread ) {              // check for any unprocessed
     //BUG CHECK-- sometimes this is called when the keydef[].down state doesn't match the IDR state
     // which can happen if a transitions occurs while interrupts are disabled -- seems more common than one would expect
     // AND new interrupt doesn't happen when re-enabled! 
-    for (KEY k = KEY::HOME; k < KEY::INVALID; k++) {   // process key transitions
+    for (KEY k = KEY::HOUSE; k < KEY::INVALID; k++) {   // process key transitions
         //    int idr = keydef[k].port->IDR;    // port Input data register
         bool kdn = GPIO::getLogical( keydef[(int)k].id );  // gets LOGICAL value of port/pin
         if ( kdn != keydef[(int)k].down ) {     // should == current state
@@ -125,7 +125,7 @@ void enableInputs( bool fromThread ) {              // check for any unprocessed
  */
 void disableKeyInterrupts( KEYS_MASK keysToRemainEnabled ) {
     // iterate over the membrane switch (keypad) keys
-    for (KEY k = KEY::HOME; k < KEY::INVALID; k++) {
+    for (KEY k = KEY::HOUSE; k < KEY::INVALID; k++) {
         if ((( 1 << k ) & keysToRemainEnabled ) == 0 ) {
             int pin    = keydef[k].pin;
             int pinBit = 1 << pin;      // bit mask for EXTI->IMR, RTSR, FTSR
@@ -176,7 +176,7 @@ void handleInterrupt( bool fromThread ) {         // called for external interru
     dbgEvt( TB_keyIRQ, KSt.msecSince, fromThread, 0, 0 );
 
     int downCnt = 0;
-    for (k      = KEY::HOME; k < KEY::INVALID; k++) {   // process key transitions
+    for (k      = KEY::HOUSE; k < KEY::INVALID; k++) {   // process key transitions
         if (( EXTI->PR & keydef[k].extiBit ) != 0 ) {  // pending bit for this key set?
             EXTI->PR = keydef[k].extiBit;           // clear pending bit
             NVIC_ClearPendingIRQ( keydef[k].intq ); // and the corresponding interrupt
@@ -195,7 +195,7 @@ void handleInterrupt( bool fromThread ) {         // called for external interru
     enableInputs( fromThread );     // no detectedUpKey -- re-enable interrupts
 }
 
-//****** TBook_V2_Rev3  EXTI ints 0 Hom, 1 Pot, 3 Tab, 4 Plu, 5-9 Min/LHa/Sta/Cir,  10-15 RHa/Tre
+//****** TBook_V2_Rev3  EXTI ints 0 Hom, 1 Bowl, 3 Tab, 4 Plu, 5-9 Min/LHa/Sta/Cir,  10-15 RHa/Tre
 // BOTH:  EXTI0 EXTI3 EXTI9_5 EXTI15_10
 extern "C" {
 void EXTI0_IRQHandler(void) {
@@ -265,7 +265,7 @@ void initializeInterrupts() {     // configure each keypad GPIO pin to input, pu
     KEY k;
     // using CMSIS GPIO
     // iterate over the membrane switch (keypad) keys
-    for (k = KEY::HOME; k < KEY::INVALID; k++) {
+    for (k = KEY::HOUSE; k < KEY::INVALID; k++) {
         GPIO_ID id = keydef[k].id;      // GPIO::gpio_def idx for this key
         keydef[k].port    = GPIO::gpio_def[id].port;
         keydef[k].pin     = GPIO::gpio_def[id].bit;
@@ -278,7 +278,7 @@ void initializeInterrupts() {     // configure each keypad GPIO pin to input, pu
             configInputKey( keydef[k].key );
     }
     // load initial state of keypad pins
-    for (k           = KEY::HOME; k < KEY::INVALID; k++) {
+    for (k           = KEY::HOUSE; k < KEY::INVALID; k++) {
         keydef[k].down   = GPIO::getLogical( keydef[k].id );
         keydef[k].tstamp = tbTimeStamp();
     }

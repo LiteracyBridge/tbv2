@@ -16,14 +16,14 @@
 
 // @formatter:off
 #define GPIO_DEFINITION_LIST \
-    X( HOME,              GPIOA,  0, GDEF_NONE ) \
+    X( HOUSE,              GPIOA,  0, GDEF_NONE ) \
     X( CIRCLE,            GPIOE,  9, GDEF_NONE ) \
     X( PLUS,              GPIOA,  4, GDEF_NONE ) \
     X( MINUS,             GPIOA,  5, GDEF_NONE ) \
     X( TREE,              GPIOA, 15, GDEF_NONE ) \
     X( LHAND,             GPIOB,  7, GDEF_NONE ) \
     X( RHAND,             GPIOB, 10, GDEF_NONE ) \
-    X( POT,               GPIOC,  1, GDEF_NONE ) \
+    X( BOWL,              GPIOC,  1, GDEF_NONE ) \
     X( STAR,              GPIOE,  8, GDEF_NONE ) \
     X( TABLE,             GPIOE,  3, GDEF_NONE ) \
     X( RED,               GPIOE,  1, GDEF_NONE ) \
@@ -98,15 +98,15 @@
 //             dd = 0..15  -- GPIO pin #
 //             _  = means 'active low', i.e, 0 if pressed
 //             cc = 0..15 -- alternate function code
-{ gHOME,        "PA0"        },   // IN:  SW9_HOUSE,  1 when pressed    configured by inputmanager.c
+{ gHOUSE,       "PA0"        },   // IN:  SW9_HOUSE,  1 when pressed    configured by inputmanager.c
 { gCIRCLE,      "PE9"        },   // IN:  SW8_CIRCLE, 1 when pressed    configured by inputmanager.c
 { gPLUS,        "PA4"        },   // IN:  SW7_PLUS,   1 when pressed    configured by inputmanager.c
 { gMINUS,        "PA5"        },   // IN:  SW6_MINUS,  1 when pressed    configured by inputmanager.c
 { gTREE,        "PA15"      },   // IN:  SW5_TREE,   1 when pressed    configured by inputmanager.c
 { gLHAND,        "PB7"        },   // IN:  SW4_LEFT,   1 when pressed    configured by inputmanager.c
 { gRHAND,        "PB10"      },   // IN:  SW3_RIGHT,  1 when pressed    configured by inputmanager.c
-{ gPOT,          "PC1"        },   // IN:  SW2_POT,    1 when pressed    configured by inputmanager.c
-{ gSTAR,        "PE8"        },   // IN:  SW1_STAR,   1 when pressed    configured by inputmanager.c
+{ gBOWL,         "PC1"        },   // IN:  SW2_BOWL,    1 when pressed    configured by inputmanager.c
+{ gSTAR,         "PE8"        },   // IN:  SW1_STAR,   1 when pressed    configured by inputmanager.c
 { gTABLE,        "PE3"        },   // IN:  SW0_TABLE,  1 when pressed    configured by inputmanager.c
 {  gRED,          "PE1"        },   // OUT: 1 to turn Red LED ON       configured by ledmanager.c
 { gGREEN,       "PE0"        },   // OUT: 1 to turn Green LED ON    configured by ledmanager.c

@@ -11,13 +11,13 @@ int        upCnt = 0;
 char       lstKey, dnKey;
 
 GPIO_ID keyDown() {
-    // gHOME, gCIRCLE, gPLUS,  gMINUS, gTREE, gLHAND, gRHAND, gPOT, gSTAR, gTABLE
+    // gHOUSE, gCIRCLE, gPLUS,  gMINUS, gTREE, gLHAND, gRHAND, gBOWL, gSTAR, gTABLE
     GPIO_ID      dnK     = gINVALID;
-    for (int k       = gHOME; k <= gTABLE; k++) {
+    for (int k       = gHOUSE; k <= gTABLE; k++) {
         if ( GPIO::getLogical( static_cast<GPIO_ID>(k) ))
             dnK = static_cast<GPIO_ID>(k);
     }
-    //                gORANGE, gBLUE, gRED,  gGREEN, gINVALID,  gHOME, gCIRCLE, gPLUS,  gMINUS, gTREE, gLHAND, gRHAND, gPOT,   gSTAR,  gTABLE
+    //                gORANGE, gBLUE, gRED,  gGREEN, gINVALID,  gHOUSE, gCIRCLE, gPLUS,  gMINUS, gTREE, gLHAND, gRHAND, gBOWL,   gSTAR,  gTABLE
     //  const char *    dbgNm[]= { "Or",   "Bl",  "Rd",  "Gr",   "In",    "Hm",   "Ci",   "Pl",   "Mi",   "Tr",  "Lh",   "Rh",   "Po",   "St",   "Ta" };
     const char   dbgNm[] = { 'O', 'B', 'R', 'G', 'I', 'H', 'C', '+', '-', 'T', 'L', 'R', 'P', 'S', 't' };
     //  sprintf( dbgKeySt, "%c%c%4d", dbgNm[lstKey], dbgNm[dnKey], upCnt );
@@ -52,7 +52,7 @@ void tglUSBmode() {
         disableMassStorage();
         GPIO::setLogical( gGREEN, 0 );
         GPIO::setLogical( gRED, 0 );
-    } else if ( fsNDevs > 0 ) {  // HOME => if have a filesystem but no data -- try USB MSC
+    } else if ( fsNDevs > 0 ) {  // HOUSE => if have a filesystem but no data -- try USB MSC
         GPIO::setLogical( gGREEN, 1 );
         GPIO::setLogical( gRED, 1 );
         for (int i = fsNDevs; fsDevs[i] != NULL; i++) fsDevs[i] = NULL;
@@ -109,7 +109,7 @@ void PlayRecCmd( GPIO_ID k ) {   // PlayRecording mode subcommands --
         case gLHAND:    // adjust debug flags mask
             tglDebugFlag( RecDBG );
             break;
-        case gRHAND:      // USB commands -- have FS and autoUSB or HOME -- enable
+        case gRHAND:      // USB commands -- have FS and autoUSB or HOUSE -- enable
             tglUSBmode();
             break;
 
@@ -165,9 +165,9 @@ void CodecCmd( GPIO_ID k ) {     // Codec mode subcommands
             cdc_SetMute( mutOn );
             break;
 
-        case gPOT:
+        case gBOWL:
             spkrOn = !spkrOn;
-            dbgLog( " Pot: spkr enab %s \n", spkrOn ? "on" : "off" );
+            dbgLog( " Bowl: spkr enab %s \n", spkrOn ? "on" : "off" );
             cdc_SpeakerEnable( spkrOn );
             break;
 
@@ -212,7 +212,7 @@ void debugLoop( bool autoUSB ) {     // called if boot-MINUS, no file system,  a
 
     const int nMDs = 2;
     const char *cmdMd[] = { "Rec/Play= Tr: play, Cir: record, LH: mask, RH: USB",
-                      "Codec= Tr: pwr, Cir: freq, LH: mute, Pot: spkrEn, RH: recEn" };
+                      "Codec= Tr: pwr, Cir: freq, LH: mute, Bowl: spkrEn, RH: recEn" };
     int iMd = 0;
     while (true) {   // loop processing debug commands
         CheckRecording();

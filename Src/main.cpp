@@ -16,10 +16,10 @@ DbgInfo Dbg;      // things to make visible in debugger
 int  BootMode; // DEBUG**********************************
 char BootKey;
 // BootOption-- 
-// STAR=1 LHAND=2 MINUS=3  PLUS=4  RHAND=5 CIRCLE=6 HOME=7
+// STAR=1 LHAND=2 MINUS=3  PLUS=4  RHAND=5 CIRCLE=6 HOUSE=7
 // hardware boot functions:
 //  TABLE + TREE => hardware forced reboot
-//  TABLE + TREE + POT => hardware forced DFU mode
+//  TABLE + TREE + BOWL => hardware forced DFU mode
 
 // 'P'                                      => enter USBmode() before starting CSM
 // 'M'                                      => call debugLoop() in talking_book() thread
@@ -49,7 +49,7 @@ bool     BootFormatFileSys  = false;
 uint16_t keysDetectedAtBoot = 0;          // Which keys were detected at boot time.
 
 void setBootMode() { // use key to to select value for BootMode
-    GPIO_ID key_gpios[] = { gHOME, gCIRCLE, gPLUS, gMINUS, gTREE, gLHAND, gRHAND, gPOT, gSTAR, gTABLE };
+    GPIO_ID key_gpios[] = { gHOUSE, gCIRCLE, gPLUS, gMINUS, gTREE, gLHAND, gRHAND, gBOWL, gSTAR, gTABLE };
     flashInit();      // enable keyboard to decode boot type
     for (int i          = 0; i <= KEY::TABLE; i++) {
         if ( GPIO::getLogical( key_gpios[i] )) keysDetectedAtBoot |= 1 << i;
@@ -82,7 +82,7 @@ void setBootMode() { // use key to to select value for BootMode
 
             // debug switches
             if ( GPIO::getLogical( gCIRCLE )) bootToQcTest    = true;
-            if ( GPIO::getLogical( gPOT )) BootVerboseLog     = true;
+            if ( GPIO::getLogical( gBOWL )) BootVerboseLog     = true;
             if ( GPIO::getLogical( gRHAND )) BootVerbosePower = true;
 
             if ( GPIO::getLogical( gTABLE )) break;

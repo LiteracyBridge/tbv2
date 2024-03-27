@@ -264,7 +264,7 @@ void enterStopMode( void ) {                    // put STM32F4 into Stop mode
     // disable power Fail interrupt
     GPIO::disableEXTI(gPWR_FAIL_N);
 
-    disableKeyInterrupts( static_cast<KEYS_MASK>(KM_HOME|KM_RHAND) );
+    disableKeyInterrupts( static_cast<KEYS_MASK>(KM_HOUSE|KM_RHAND) );
 
     ResetGPIO();
 

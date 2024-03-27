@@ -58,7 +58,7 @@ void flashInit() {
     LED_Init( gRED );
     /////////////////////////////////////////////////
 
-    for (GPIO_ID id = gHOME; id <= gTABLE; id++)
+    for (GPIO_ID id = gHOUSE; id <= gTABLE; id++)
         GPIO::configureKey( id ); // low speed pulldown input
 }
 

@@ -21,34 +21,34 @@
 //region CSM_EVENT_LIST
 #define CSM_EVENT_LIST \
     X(eNull)          \
-    X(Home)           \
+    X(House)          \
     X(Circle)         \
     X(Plus)           \
     X(Minus)          \
     X(Tree)           \
     X(Lhand)          \
     X(Rhand)          \
-    X(Pot)            \
+    X(Bowl)           \
     X(Star)           \
     X(Table)          \
-    X(Home__)         \
+    X(House__)        \
     X(Circle__)       \
     X(Plus__)         \
     X(Minus__)        \
     X(Tree__)         \
     X(Lhand__)        \
     X(Rhand__)        \
-    X(Pot__)          \
+    X(Bowl__)         \
     X(Star__)         \
     X(Table__)        \
-    X(starHome)       \
+    X(starHouse)      \
     X(starCircle)     \
     X(starPlus)       \
     X(starMinus)      \
     X(starTree)       \
     X(starLhand)      \
     X(starRhand)      \
-    X(starPot)        \
+    X(starBowl)       \
     X(starStar)       \
     X(starTable)      \
     X(AudioStart)     \
@@ -130,14 +130,14 @@
 
 //region GPIO_DEFINITION_LIST
 #define GPIO_DEFINITION_LIST \
-    X( HOME,              GPIOA,  0, GDEF_NONE ) \
+    X( HOUSE,             GPIOA,  0, GDEF_NONE ) \
     X( CIRCLE,            GPIOE,  9, GDEF_NONE ) \
     X( PLUS,              GPIOA,  4, GDEF_NONE ) \
     X( MINUS,             GPIOA,  5, GDEF_NONE ) \
     X( TREE,              GPIOA, 15, GDEF_NONE ) \
     X( LHAND,             GPIOB,  7, GDEF_NONE ) \
     X( RHAND,             GPIOB, 10, GDEF_NONE ) \
-    X( POT,               GPIOC,  1, GDEF_NONE ) \
+    X( BOWL,              GPIOC,  1, GDEF_NONE ) \
     X( STAR,              GPIOE,  8, GDEF_NONE ) \
     X( TABLE,             GPIOE,  3, GDEF_NONE ) \
     X( RED,               GPIOE,  1, GDEF_NONE ) \
@@ -228,6 +228,7 @@
         X(FIRMWARE_ID_TXT,      "M0:/system/firmware_ID.txt")           \
         X(AUDIO_WAV,            "M0:/audio.wav")                        \
         X(CONFIG_TXT,           "M0:/system/config.txt")                \
+        X(SYSTEM_PATH,          "M0:/system/")                          \
 //endregion
 
 

@@ -39,6 +39,7 @@ private:
 
     void playSysAudio(const char *arg);
     void playSubject(const char *arg);
+    void playMessage(const char *arg);
     void playSquareTune(const char *notes);
 
     void startRecAudio(const char *arg);

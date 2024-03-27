@@ -187,6 +187,41 @@ void ControlManager::playSubject(const char *arg ) {       // play current Subje
     playAudio( path, stats, playbackType, ++audioPlayCounter );
 }
 
+void ControlManager::playMessage(const char *arg) {
+    char path[MAX_PATH];
+    MsgStats        *stats = NULL;
+    PlaybackType_t playbackType;
+    ++audioPlayCounter;
+    resetAudio();
+
+    int iSubj, iMsg;
+    const char *filename;
+    bool foundInPackage = currPkg->findMessage(arg, &iSubj, &iMsg);
+    if (foundInPackage) {
+        Subject *subj = currPkg->getSubject( iSubj );
+        AudioFile *audioFile     = subj->getMessage(iMsg );
+        filename = audioFile->filename;
+        Deployment::instance->getPathForAudioFile( path, audioFile );
+        stats = loadStats( subj->getName(), iSubj, iMsg ); // load stats for message
+    } else {
+        iSubj=0;
+        iMsg=0;
+        filename=arg;
+        // find audio file on path
+        if (currPkg->findAudioPath(path, arg) == NULL) {
+            return;
+        }
+    }
+    // Program content message
+    playbackType = kPlayTypeMessage;
+    logEvtFmt( "PlayMsg", "iS:%d, iM:%d, fn:%s", iSubj, iMsg, filename );
+
+    ++audioPlayCounter;
+    resetAudio();
+    clearIdle();
+    playAudio( path, stats, playbackType, ++audioPlayCounter );
+}
+
 void ControlManager::playSquareTune( const char *notes ) {       // play seq of notes as sqrwaves
     ++audioPlayCounter;
     resetAudio();
@@ -457,6 +492,7 @@ ControlManager::ACTION_DISPOSITION ControlManager::doAction( CSM_ACTION action, 
         switch (action) {
             case CSM_ACTION::playSys:
             case CSM_ACTION::playSubject:
+            case CSM_ACTION::playMessage:
             case CSM_ACTION::startRecording:
             case CSM_ACTION::pausePlay:
             case CSM_ACTION::resumePlay:
@@ -485,6 +521,9 @@ ControlManager::ACTION_DISPOSITION ControlManager::doAction( CSM_ACTION action, 
             break;
         case CSM_ACTION::playSubject:
             playSubject(arg);
+            break;
+        case CSM_ACTION::playMessage:
+            playMessage(arg);
             break;
         case CSM_ACTION::startRecording:
             startRecAudio(arg);

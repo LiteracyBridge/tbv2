@@ -91,7 +91,6 @@ public:
 
     Package() : ixUserFeedback(-1) {};
 
-    const char *findFileOnPath(char *pathBuf, const char *fn, const char * const paths[], int nPaths, const char * const exts[], int nExts);
     const char *findAudioPath(char *pathBuf, const char *fn);
     const char *findScriptPath(char *pathBuf, const char *fn);
 
@@ -102,6 +101,8 @@ public:
     Subject *getSubject(int ixSubj);
 
     void addRecording(const char *recordingFileName);
+
+    bool findMessage(const char *filename, int *piSubj, int *piMsg);
 
 private:
     const char *getPath(int pathIx);
@@ -127,6 +128,8 @@ public:
 
     const char *getPathForAudioFile(char *pathBuffer, AudioFile *audioFile);
 
+    static const char *findFileOnPath(char *pathBuf, const char *fn, const char * const paths[], int nPaths, const char * const exts[], int nExts);
+
 public:
     const char *name;               // version string for loaded deployment
     int        numPaths;
@@ -146,7 +149,7 @@ extern Package *currPkg;        // TBook content package in use
 // Deployment loading & access interface
 extern bool readPackageData(void);                        // load structured TBook package contents
 
-extern char *getPathForAudioFile(char *path, AudioFile *aud); // fill path[] with dir/filename & return it
+//extern char *getPathForAudioFile(char *path, AudioFile *aud); // fill path[] with dir/filename & return it
 
 
 #endif           // PACKAGE_DATA_H`

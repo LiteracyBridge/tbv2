@@ -98,7 +98,7 @@ const char *Package::getPath(int pathIx) {         // return content directory p
     return Deployment::instance->audioPaths[dirIdx];
 }
 
-const char *Package::findFileOnPath(char *pathBuf, const char *fn, const char * const paths[], int nPaths, const char * const exts[], int nExts) { // fill path[] with first dir/nm.wav & return it
+const char *Deployment::findFileOnPath(char *pathBuf, const char *fn, const char * const paths[], int nPaths, const char * const exts[], int nExts) { // fill path[] with first dir/nm.wav & return it
     char fname[MAX_PATH];
     strcpy(fname, fn);
     // Drop any leading path.
@@ -131,19 +131,21 @@ const char *Package::findAudioPath(char *pathBuf, const char *fn) {
     for (int ix = 0; ix < nPathIxs; ix++) {
         paths[ix] = getPath(ix);
     }
-    return findFileOnPath(pathBuf, fn, paths, nPathIxs, preferredAudioExtensions, numAudioExtensions);
+    return Deployment::findFileOnPath(pathBuf, fn, paths, nPathIxs, preferredAudioExtensions, numAudioExtensions);
 }
 
 const char *Package::findScriptPath(char *pathBuf, const char *fn) {
     if (pathBuf == NULL || pathIxs == NULL)
         errLog("findScriptPath bad srchpaths");
-    const char *paths[nPathIxs];
+    const char *paths[nPathIxs+1];
     static const char * const exts[] = {".csm"};
     // Build paths array for search
     for (int ix = 0; ix < nPathIxs; ix++) {
         paths[ix] = getPath(ix);
     }
-    return findFileOnPath(pathBuf, fn, paths, nPathIxs, exts, 1);
+    // Add "system" to the list.
+    paths[nPathIxs] = TBP[pSYSTEM_PATH];
+    return Deployment::findFileOnPath(pathBuf, fn, paths, nPathIxs+1, exts, 1);
 }
 
 void Package::addRecording(const char *recordingFileName) {
@@ -174,6 +176,29 @@ const char *Deployment::getPathForAudioFile(char *pathBuffer, AudioFile *aud) { 
     strcat(pathBuffer, aud->filename);                      // filename (with extension)
     return pathBuffer;
 }
+
+bool Package::findMessage(const char *filename, int *piSubj, int *piMsg) {
+    // Find the length of the non-extension part of the filename.
+    const char *pDot = strrchr(filename, '.');
+    int baseLen = pDot ? (pDot - filename) : strlen(filename);
+    // Search playlists looking for the file.
+    for (int iSubj=0; iSubj<nSubjects; ++iSubj) {
+        Subject *subj = currPkg->getSubject( iSubj );
+        for (int iMsg=0; iMsg<subj->messages.size(); ++iMsg) {
+            AudioFile *audioFile = subj->messages[iMsg];
+            // Find the length of the non-extension part of the message's filename.
+            int msgLen = (pDot=strrchr(audioFile->filename, '.')) ? (pDot - audioFile->filename) : strlen(audioFile->filename);
+            // Are the names the same length? Are they equal?
+            if (baseLen == msgLen && strncasecmp(filename, audioFile->filename, msgLen)==0) {
+                *piSubj = iSubj;
+                *piMsg = iMsg;
+                return true;
+            }
+        }
+    }
+    return false;
+}
+
 //endregion
 
 class PackageDataReader : LineReader {

@@ -35,6 +35,7 @@ public:
 
     FILE *getFile() { return inFile; }
 
+    const bool isOpen() { return inFile != NULL; }
     const char *getLine() { return line; }
 protected:
     const char  *fname;

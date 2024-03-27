@@ -24,6 +24,8 @@
 #include "rtx_os.h"
 #include "rl_fs.h"
 
+#include "tbconfig.h"
+
 #ifdef __packed
 #undef __packed
 #endif
@@ -51,7 +53,7 @@
 extern bool BootToUSB;
 extern bool BootDebugLoop;
 extern bool BootVerboseLog;
-extern bool BootToQCtest;
+extern bool bootToQcTest;
 extern bool BootVerbosePower;
 extern bool BootResetLog;
 extern bool BootFormatFileSys;
@@ -66,7 +68,7 @@ extern bool controlManagerReady;
 extern char CPU_ID[20], TB_ID[20];
 extern bool NO_OS_DEBUG;          // set in main.c, used in tbook.c
 extern bool FirstSysBoot;         // defined in logger
-extern bool RunQCTest;            // defined in tbook.c -- if no /system/QC_PASS.txt  or Circle boot
+extern bool runQcTest;            // defined in tbook.c -- if no /system/QC_PASS.txt  or Circle boot
 extern char BootKey;                        // set in main.c, used in tbook.c
 extern bool PowerChecksEnabled;       // set true for normal operation
 
@@ -136,7 +138,7 @@ extern void tbShw(const char *s, char **p1, char **p2);
 
 extern void _Error_Handler(char *, int);
 
-extern int BootMode;   // defined in main.c -- set by booting with a key:  none=0 STAR=1 LHAND=2 MINUS=3  PLUS=4  RHAND=5 CIRCLE=6 HOME=7
+extern int BootMode;   // defined in main.c -- set by booting with a key:  none=0 STAR=1 LHAND=2 MINUS=3  PLUS=4  RHAND=5 CIRCLE=6 HOUSE=7
 extern char BootKey;        // char for BootMode tests:  'S'tar, 'L'hand, 'M'inus, 'P'lus, 'R'hand, 'C'ircle, 'H'ome
 extern void debugLoop(bool autoUSB);      // dbgLoop.c: called if boot-MINUS, no file system,  autoUSB => usbMode
 
@@ -202,33 +204,33 @@ extern const int MEDIA_ALREADY_IN_USE;
 #define MAX_PATH  80
 
 
-typedef struct TBConfig {       // TBConfig
-    short default_volume;
-    int powerCheckMS;         // used by powermanager.c
-    int shortIdleMS;
-    int longIdleMS;
-    int minShortPressMS;      // used by inputmanager.c
-    int minLongPressMS;       // used by inputmanager.c
-    int qcTestState;          // first state if running QC acceptance test
-    int initState;
+//typedef struct {       // TBConfig
+//    short default_volume;
+//    int powerCheckMS;         // used by powermanager.c
+//    int shortIdleMS;
+//    int longIdleMS;
+//    int minShortPressMS;      // used by inputmanager.c
+//    int minLongPressMS;       // used by inputmanager.c
+//    int qcTestState;          // first state if running QC acceptance test
+//    int initState;
+//
+//    const char *systemAudio;          // path to system audio files
+//    const char *bgPulse;              // LED sequences used in Firmware
+//    const char *fgPlaying;
+//    const char *fgPlayPaused;
+//    const char *fgRecording;
+//    const char *fgRecordPaused;
+//    const char *fgSavingRec;
+//    const char *fgSaveRec;
+//    const char *fgCancelRec;
+//    const char *fgUSB_MSC;
+//    const char *fgTB_Error;
+//    const char *fgNoUSBcable;
+//    const char *fgUSBconnect;
+//    const char *fgPowerDown;
+//} TBConfig_t;
 
-    const char *systemAudio;          // path to system audio files
-    const char *bgPulse;              // LED sequences used in Firmware
-    const char *fgPlaying;
-    const char *fgPlayPaused;
-    const char *fgRecording;
-    const char *fgRecordPaused;
-    const char *fgSavingRec;
-    const char *fgSaveRec;
-    const char *fgCancelRec;
-    const char *fgUSB_MSC;
-    const char *fgTB_Error;
-    const char *fgNoUSBcable;
-    const char *fgUSBconnect;
-    const char *fgPowerDown;
-} TBConfig_t;
-
-extern TBConfig_t *TB_Config;    // global TBook configuration
+//extern TBConfig_t *TB_Config;    // global TBook configuration
 
 // for tbUtil.c
 #define dbgLns          80
@@ -253,8 +255,8 @@ typedef struct {
     bool starUsed;         // true if STAR used as shift-- Star up is ignored
     /*
       KEY           detectedUpKey;    // shared variable between ISR and thread
-      bool          DFUkeysDown;      // TRUE if special DFU keypair down: TABLE + POT
-      bool          keytestKeysDown;  // TRUE if special keytest pair down: HOME + POT
+      bool          DFUkeysDown;      // TRUE if special DFU keypair down: TABLE + BOWL
+      bool          keytestKeysDown;  // TRUE if special keytest pair down: HOUSE + BOWL
       bool          starDown;         // flags to prevent STAR keypress on key-up after STAR-key alt sequence
       bool          starAltUsed;
       KEY           DownKey;          // key currently down
@@ -281,7 +283,7 @@ typedef struct {      // Dbg -- pointers for easy access to debug info
     char keypad[11];   // keypad keys as string
 
     osRtxThread_t *thread[6];    // ptrs to osRtxThread
-    TBConfig_t *TBookConfig;  // TalkingBook configuration block
+    TBConfig *pTBConfig;  // TalkingBook configuration block
     TBH_arr *TBookLog;     // TalkingBook event log
 
 } DbgInfo;

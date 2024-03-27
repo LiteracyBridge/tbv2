@@ -37,6 +37,10 @@ enum AUX_FILE_TYPE {
     AUX_FILE_RECORDING=0,     // Audio recording associated with a content message.
     AUX_FILE_MESSAGE=1        // Saved text message associated with a content message.
 };
+
+extern const char *            auxFilePrefixes[];
+extern const char *            auxFileExtensions[];
+
 //
 // external functions
 extern void         initLogger( void );                                     // init tbLog file on bootup
@@ -45,6 +49,7 @@ extern char *       loadLine( char * line, const char * fpath, fsTime *tm ); // 
 extern void         logPowerDown( void );                                   // save & shut down logger for USB or sleeping
 extern void         writeLine( const char * line, const char * fpath );     // write one line to file
 extern void         saveStats( MsgStats *st );                              // save statistics block to file
+extern int          uniquifyFilename(char *buf, int bufSize);               // Add '_N' to 'foo.bar' to create unique 'foo_N.bar'
 extern int          makeAuxFileName( char *buf, enum AUX_FILE_TYPE auxFileType); // fn for recording or msg
 extern void         saveAuxProperties( char *baseFilename );                // auxillary "sidecar" file with info about selected content.
 extern void         flushStats( void );                                     // save all cached stats files

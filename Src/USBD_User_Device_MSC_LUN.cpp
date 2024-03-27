@@ -120,9 +120,9 @@ bool enableMassStorage( const char *drv0, const char *drv1, const char *drv2, co
     if ( usbProvidingMassStorage ) return true;
     LedManager::ledFg( NULL );
     if ( !haveUSBpower())
-        LedManager::ledFg( TB_Config->fgNoUSBcable ); // no USB cable!
+        LedManager::ledFg( tbConfig.fgNoUSBcable ); // no USB cable!
     else
-        LedManager::ledFg( TB_Config->fgUSBconnect );
+        LedManager::ledFg( tbConfig.fgUSBconnect );
 
     // initialize LUN[] array for specified drives
     addLUN( drv0 == NULL ? "M0:" : drv0 );
@@ -273,7 +273,7 @@ void USBD_MSC0_Initialize( void ) {                   // callback from USBD_Init
     for (int i = 0; i < nLUNs; i++)
         initLUN( i );
     usbProvidingMassStorage = true;
-    LedManager::ledFg( TB_Config->fgUSB_MSC );      // connected
+    LedManager::ledFg( tbConfig.fgUSB_MSC );      // connected
 }
 
 void USBD_MSC0_Uninitialize( void ) {                 // callback from USBD_Uninitialize to de-init all Logical Units of the USB MSC class instance.

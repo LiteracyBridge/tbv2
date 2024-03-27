@@ -58,4 +58,7 @@ extern void encUfAudioAppend(Buffer_t *pData, size_t dataLen);
  */
 extern void encUfAudioFinalize(size_t fileLen);
 
+// Helper also used by Random.
+extern void TlsErr(const char *msg, int cd);
+
 #endif // _ENC_AUDIO_H_

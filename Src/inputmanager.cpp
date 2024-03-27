@@ -43,8 +43,8 @@ const char *keyTestSuccess = "G8R_3 G8R_3 G8R_3";  // 3 long green then red puls
 
 
 /*  External interrupts used by the TBook keypad, and corresponding Interrupt Mask Bits
-exti0     PA0   gHOME     0001
-exti1     PC1   gPOT      0002
+exti0     PA0   gHOUSE     0001
+exti1     PC1   gBOWL      0002
 exti2   
 exti3     PE3   gTABLE -- 0008
 exti4     PA4   gPLUS     0010
@@ -64,17 +64,17 @@ EXTI_IMR                  87BB
 
 KeyPadKey_t keydef[10] = {
     // @formatter: off
-    // keypad GPIO in order: kHOME, kCIRCLE, KEY::PLUS, KEY::MINUS, KEY::TREE, KEY::LHAND, KEY::POT, KEY::RHAND, KEY::STAR, KEY::TABLE
+    // keypad GPIO in order: kHOUSE, kCIRCLE, KEY::PLUS, KEY::MINUS, KEY::TREE, KEY::LHAND, KEY::BOWL, KEY::RHAND, KEY::STAR, KEY::TABLE
     // static placeholders, filled in by initializeInterrupts
     //  GPIO_ID    key,    port,    pin,         intq       extiBit   signal    pressed  down   tstamp dntime
-    { gHOME,   KEY::HOME,   NULL, 0, WWDG_IRQn, 0, "", 0, false, 0, 0 },
+    { gHOUSE,  KEY::HOUSE,  NULL, 0, WWDG_IRQn, 0, "", 0, false, 0, 0 },
     { gCIRCLE, KEY::CIRCLE, NULL, 0, WWDG_IRQn, 0, "", 0, false, 0, 0 },
     { gPLUS,   KEY::PLUS,   NULL, 0, WWDG_IRQn, 0, "", 0, false, 0, 0 },
     { gMINUS,  KEY::MINUS,  NULL, 0, WWDG_IRQn, 0, "", 0, false, 0, 0 },
     { gTREE,   KEY::TREE,   NULL, 0, WWDG_IRQn, 0, "", 0, false, 0, 0 },
     { gLHAND,  KEY::LHAND,  NULL, 0, WWDG_IRQn, 0, "", 0, false, 0, 0 },
     { gRHAND,  KEY::RHAND,  NULL, 0, WWDG_IRQn, 0, "", 0, false, 0, 0 },
-    { gPOT,    KEY::POT,    NULL, 0, WWDG_IRQn, 0, "", 0, false, 0, 0 },
+    { gBOWL,   KEY::BOWL,   NULL, 0, WWDG_IRQn, 0, "", 0, false, 0, 0 },
     { gSTAR,   KEY::STAR,   NULL, 0, WWDG_IRQn, 0, "", 0, false, 0, 0 },
     { gTABLE,  KEY::TABLE,  NULL, 0, WWDG_IRQn, 0, "", 0, false, 0, 0 }
     // @formatter: on
@@ -94,7 +94,7 @@ void enableInputs( bool fromThread ) {              // check for any unprocessed
     //BUG CHECK-- sometimes this is called when the keydef[].down state doesn't match the IDR state
     // which can happen if a transitions occurs while interrupts are disabled -- seems more common than one would expect
     // AND new interrupt doesn't happen when re-enabled! 
-    for (KEY k = KEY::HOME; k < KEY::INVALID; k++) {   // process key transitions
+    for (KEY k = KEY::HOUSE; k < KEY::INVALID; k++) {   // process key transitions
         //    int idr = keydef[k].port->IDR;    // port Input data register
         bool kdn = GPIO::getLogical( keydef[(int)k].id );  // gets LOGICAL value of port/pin
         if ( kdn != keydef[(int)k].down ) {     // should == current state
@@ -125,7 +125,7 @@ void enableInputs( bool fromThread ) {              // check for any unprocessed
  */
 void disableKeyInterrupts( KEYS_MASK keysToRemainEnabled ) {
     // iterate over the membrane switch (keypad) keys
-    for (KEY k = KEY::HOME; k < KEY::INVALID; k++) {
+    for (KEY k = KEY::HOUSE; k < KEY::INVALID; k++) {
         if ((( 1 << k ) & keysToRemainEnabled ) == 0 ) {
             int pin    = keydef[k].pin;
             int pinBit = 1 << pin;      // bit mask for EXTI->IMR, RTSR, FTSR
@@ -176,7 +176,7 @@ void handleInterrupt( bool fromThread ) {         // called for external interru
     dbgEvt( TB_keyIRQ, KSt.msecSince, fromThread, 0, 0 );
 
     int downCnt = 0;
-    for (k      = KEY::HOME; k < KEY::INVALID; k++) {   // process key transitions
+    for (k      = KEY::HOUSE; k < KEY::INVALID; k++) {   // process key transitions
         if (( EXTI->PR & keydef[k].extiBit ) != 0 ) {  // pending bit for this key set?
             EXTI->PR = keydef[k].extiBit;           // clear pending bit
             NVIC_ClearPendingIRQ( keydef[k].intq ); // and the corresponding interrupt
@@ -195,7 +195,7 @@ void handleInterrupt( bool fromThread ) {         // called for external interru
     enableInputs( fromThread );     // no detectedUpKey -- re-enable interrupts
 }
 
-//****** TBook_V2_Rev3  EXTI ints 0 Hom, 1 Pot, 3 Tab, 4 Plu, 5-9 Min/LHa/Sta/Cir,  10-15 RHa/Tre
+//****** TBook_V2_Rev3  EXTI ints 0 Hom, 1 Bowl, 3 Tab, 4 Plu, 5-9 Min/LHa/Sta/Cir,  10-15 RHa/Tre
 // BOTH:  EXTI0 EXTI3 EXTI9_5 EXTI15_10
 extern "C" {
 void EXTI0_IRQHandler(void) {
@@ -265,7 +265,7 @@ void initializeInterrupts() {     // configure each keypad GPIO pin to input, pu
     KEY k;
     // using CMSIS GPIO
     // iterate over the membrane switch (keypad) keys
-    for (k = KEY::HOME; k < KEY::INVALID; k++) {
+    for (k = KEY::HOUSE; k < KEY::INVALID; k++) {
         GPIO_ID id = keydef[k].id;      // GPIO::gpio_def idx for this key
         keydef[k].port    = GPIO::gpio_def[id].port;
         keydef[k].pin     = GPIO::gpio_def[id].bit;
@@ -278,7 +278,7 @@ void initializeInterrupts() {     // configure each keypad GPIO pin to input, pu
             configInputKey( keydef[k].key );
     }
     // load initial state of keypad pins
-    for (k           = KEY::HOME; k < KEY::INVALID; k++) {
+    for (k           = KEY::HOUSE; k < KEY::INVALID; k++) {
         keydef[k].down   = GPIO::getLogical( keydef[k].id );
         keydef[k].tstamp = tbTimeStamp();
     }
@@ -291,9 +291,9 @@ void initializeInterrupts() {     // configure each keypad GPIO pin to input, pu
 
 
 //
-// inputThread-- thread to process key transitions & timeouts => TBook Event messages
-void inputThread( void *arg ) {     // converts TB_Key msgs from keypad ISR's to TB Event msgs to controlManager queue
-    dbgLog( "4 inThr: 0x%x 0x%x \n", &arg, &arg + INPUT_STACK_SIZE );
+// inputThreadFunc-- thread to process key transitions & timeouts => TBook Event messages
+void inputThreadFunc( void *arg ) {     // converts TB_Key msgs from keypad ISR's to TB Event msgs to controlManager queue
+    dbgLog( "4 inputThread: 0x%x 0x%x \n", &arg, &arg - INPUT_STACK_SIZE );
     TB_Key *transition;
     while (true) {
         transition        = NULL;
@@ -314,7 +314,7 @@ void inputThread( void *arg ) {     // converts TB_Key msgs from keypad ISR's to
             if ( KSt.firstDown == KEY::INVALID ) {
                 KSt.firstDown   = k;
                 KSt.firstDownTS = ts;
-                osTimerStart( keyDownTimer, TB_Config->minLongPressMS );  // start long press timer
+                osTimerStart( keyDownTimer, tbConfig.minLongPressMS );  // start long press timer
             } else if ( KSt.secondDown == KEY::INVALID ) {
                 KSt.secondDown   = k;
                 KSt.secondDownTS = ts;
@@ -339,12 +339,12 @@ void inputThread( void *arg ) {     // converts TB_Key msgs from keypad ISR's to
                        ( KSt.secondDown == KEY::INVALID )) {   // only one key was down & it came up
                 osTimerStop( keyDownTimer );  // cancel long press timer
                 dntime = ts - KSt.firstDownTS;
-                if ( dntime >= TB_Config->minShortPressMS ) // legal click
+                if ( dntime >= tbConfig.minShortPressMS ) // legal click
                     sendEvent( toShortEvt( KSt.firstDown ), dntime );  // so send TB Event
                 KSt.firstDown = KEY::INVALID;   // reset to all keys up
             } else if (( KSt.firstDown == KEY::STAR ) && ( k == KSt.secondDown )) {  // star-K & K came up
                 dntime = ts - KSt.secondDownTS;
-                if ( dntime >= TB_Config->minShortPressMS ) // legal click
+                if ( dntime >= tbConfig.minShortPressMS ) // legal click
                     sendEvent( toStarEvt( KSt.secondDown ), dntime );  // so send TB star-Event
                 KSt.starUsed   = true;          // so star-up will be ignored
                 KSt.secondDown = KEY::INVALID;    // back to just STAR down
@@ -366,7 +366,7 @@ void initInputManager( void ) {       // initializes keypad & starts thread
     Dbg.KeyTest      = &KTest;
     Dbg.KeyPadStatus = &KSt;
     Dbg.KeyPadDef    = &keydef;
-    Dbg.TBookConfig  = TB_Config;
+    Dbg.pTBConfig  = &tbConfig;
     //  resetKeypadTest();
 
     osFlag_InpThr = osEventFlagsNew( NULL );  // os flag ID -- used so ISR can wakeup inputThread
@@ -393,7 +393,8 @@ void initInputManager( void ) {       // initializes keypad & starts thread
 
     thread_attr.name       = "input_thread";
     thread_attr.stack_size = INPUT_STACK_SIZE;
-    Dbg.thread[4] = (osRtxThread_t *) osThreadNew( inputThread, NULL, &thread_attr );
+    Dbg.thread[4] = (osRtxThread_t *) osThreadNew( inputThreadFunc, NULL, &thread_attr );
+    dbgLog("4 inputThread: %x\n", Dbg.thread[4]);
     if ( Dbg.thread[4] == NULL )
         tbErr( "inputThread spawn failed" );
 
@@ -409,23 +410,23 @@ void initInputManager( void ) {       // initializes keypad & starts thread
     dbgLog( "4 InputMgr OK \n" );
 }
 
-void sendEvent( CSM_EVENT key, int32_t arg ) {  // log & send TB_Event to CSM
-    if ( key == eNull || key == anyKey || key == eUNDEF || (int) key < 0 || (int) key > (int) eUNDEF )
+void sendEvent( CSM_EVENT eventId, int32_t arg ) {  // log & send TB_Event to CSM
+    if ( eventId == eNull || eventId == anyKey || eventId == eUNDEF || (int) eventId < 0 || (int) eventId > (int) eUNDEF )
         tbErr( "bad event" );
     if ( TBEvent_pool == NULL ) return; //DEBUG
     if ( !controlManagerReady ) {
-        dbgLog( "enqueue event, csm not ready" );
+        dbgLog( "enqueue event, controlManagerReady not ready" );
         return;
     }
-    dbgEvt( TB_keyEvt, key, arg, 0, 0 );
-    dbgLog( "A Evt: %s %d \n", CSM::eventName( key ), arg );
+    dbgEvt( TB_keyEvt, eventId, arg, 0, 0 );
+    dbgLog( "A Event: %s %d \n", CSM::eventName( eventId ), arg );
 
-    TB_Event *evt = (TB_Event *) osMemoryPoolAlloc( TBEvent_pool, osWaitForever );
-    evt->typ = key;
-    evt->arg = arg;
+    TB_Event *event = (TB_Event *) osMemoryPoolAlloc( TBEvent_pool, osWaitForever );
+    event->eventId = eventId;
+    event->arg = arg;
     osStatus_t result;
     // send with Priority 0, no wait
-    if (( result = osMessageQueuePut( osMsg_TBEvents, &evt, 0, 0 )) != osOK ) {
+    if (( result = osMessageQueuePut( osMsg_TBEvents, &event, 0, 0 )) != osOK ) {
         printf( "failed to enQ tbEvent: %d \n", result );
         tbErr( "failed to enQ tbEvent" );
     }

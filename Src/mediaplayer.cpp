@@ -42,13 +42,14 @@ static volatile int             mNoteDur[MAX_NOTE_CNT];  // duration in buffers 
 
 static volatile int             mAdjPosSec;
 static volatile char            mPlaybackFilePath[MAX_PATH];
-static volatile PlaybackType_t mPlayType;              //  sys/pkg/msg/nm/pr
+static volatile PlaybackType_t  mPlayType;              //  sys/pkg/msg/nm/pr
+static int32_t                  mPlayCounter;
 static volatile MsgStats        *mPlaybackStats;
-volatile char                   mRecordFilePath[MAX_PATH];
+char                            mRecordFilePath[MAX_PATH];
 static volatile MsgStats        *mRecordStats;
 static volatile MsgStats        *sysStats;           // subst buffer for system files
 
-static void mediaThread( void *arg );           // forward
+static void mediaThreadFunc( void *arg );           // forward
 
 void initMediaPlayer( void ) {            // init mediaPlayer & spawn thread to handle  playback & record requests
     mMediaEventId = osEventFlagsNew( NULL );          // osEvent channel for communication with mediaThread
@@ -62,7 +63,8 @@ void initMediaPlayer( void ) {            // init mediaPlayer & spawn thread to 
 
     thread_attr.name       = "Media";
     thread_attr.stack_size = MEDIA_STACK_SIZE;
-    Dbg.thread[2] = (osRtxThread_t *) osThreadNew( mediaThread, NULL, &thread_attr );
+    Dbg.thread[2] = (osRtxThread_t *) osThreadNew( mediaThreadFunc, NULL, &thread_attr );
+    dbgLog("4 mediaThread: %x\n", Dbg.thread[2]);
     if ( Dbg.thread[2] == NULL )
         tbErr( "mediaThread spawn failed" );
 
@@ -78,14 +80,15 @@ void mediaPowerDown( void ) {     // not called currently
 // external methods for  controlManager executeActions
 //
 //**** Operations signaled to complete on media thread
-void playAudio( const char *fileName, MsgStats *stats, PlaybackType_t typ ) { // start playback from fileName
+void playAudio( const char *fileName, MsgStats *stats, PlaybackType_t pbType, int32_t audioPlayCounter ) { // start playback from fileName
     strcpy((char *) mPlaybackFilePath, fileName );
     mPlaybackStats = stats == NULL ? sysStats : stats;
-    mPlayType      = typ;
+    mPlayType      = pbType;
+    mPlayCounter   = audioPlayCounter;
     osEventFlagsSet( mMediaEventId, MEDIA_PLAY_EVENT );
 }
 
-void playNotes(const char *notes) {     // play square tones for 1/4 sec per 'notes'
+void playNotes(const char *notes, int32_t playCounter) {     // play square tones for 1/4 sec per 'notes'
     mNoteCnt = 0;
     int nSyms = strlen( notes );
     mNxtNote = 0;
@@ -122,6 +125,7 @@ void playNotes(const char *notes) {     // play square tones for 1/4 sec per 'no
         mNoteCnt++;
         if ( mNoteCnt > MAX_NOTE_CNT ) tbErr("playNotes: %d notes");
     }
+    mPlayCounter = playCounter;
     osEventFlagsSet( mMediaEventId, MEDIA_PLAY_TUNE );
 }
 
@@ -131,8 +135,9 @@ void recordAudio( const char *fileName, MsgStats *stats ) {  // start recording 
     osEventFlagsSet( mMediaEventId, MEDIA_RECORD_START );
 }
 
-void playRecording() { // play back just recorded audio
+void playRecordingMP(int32_t playCounter) { // play back just recorded audio
     if ( mRecordFilePath[0] == 0 ) return;
+    mPlayCounter = playCounter;
     osEventFlagsSet( mMediaEventId, MEDIA_PLAY_RECORD );
 }
 
@@ -140,15 +145,15 @@ void playRecording() { // play back just recorded audio
  * Save the recording. If configured for "private feedback" encrypt first.
  * Save the "sidecar" file with info about the track to which the recording applies.
  */
-void saveRecording() { // encrypt recorded audio & delete original
+void saveRecordingMP() { // encrypt recorded audio & delete original
     if ( mRecordFilePath[0] == 0 ) return;
-    LedManager::ledFg( TB_Config->fgSaveRec );
+    LedManager::ledFg( tbConfig.fgSaveRec );
     osEventFlagsSet( mMediaEventId, MEDIA_SAVE_RECORD );
 }
 
 void cancelRecording() { // delete recorded message
     if ( mRecordFilePath[0] == 0 ) return;
-    LedManager::ledFg( TB_Config->fgCancelRec );
+    LedManager::ledFg( tbConfig.fgCancelRec );
     osEventFlagsSet( mMediaEventId, MEDIA_DEL_RECORD );
 }
 
@@ -216,8 +221,8 @@ int playCnt = 0;  // DEBUG**********************************
 //    CODEC_DATA_RECEIVE_DONE    => buffer filled, call audSaveBuffs outside ISR
 //    CODEC_RECORD_DONE     => finish recording & save file
 ***************/
-static void mediaThread( void *arg ) {           // communicates with audio codec for playback & recording
-    dbgLog( "4 mediaThr: 0x%x 0x%x \n", &arg, &arg + MEDIA_STACK_SIZE );
+static void mediaThreadFunc( void *arg ) {           // communicates with audio codec for playback & recording
+    dbgLog( "4 mediaThread: 0x%x 0x%x \n", &arg, &arg - MEDIA_STACK_SIZE );
     bool      setVolumePending = false;
 
     while (true) {
@@ -244,7 +249,7 @@ static void mediaThread( void *arg ) {           // communicates with audio code
                 int fr  = mNoteFreq[mNxtNote];
                 int dur = mNoteDur[mNxtNote];
                 mNxtNote++;
-                audPlayTone( mNxtNote, fr, dur );
+                audPlayTone( mNxtNote, fr, dur, mPlayCounter );
                 if ( mNxtNote >= mNoteCnt )
                     mNoteCnt = 0;     // done with tune next time
             }
@@ -257,11 +262,11 @@ static void mediaThread( void *arg ) {           // communicates with audio code
         if (( flags & MEDIA_PLAY_EVENT ) != 0 ) {   // request to start playback
             if ( mPlaybackFilePath[0] == 0 ) continue;
             resetAudio();
-            audPlayAudio((const char *) mPlaybackFilePath, (MsgStats *) mPlaybackStats, mPlayType );
+            audPlayAudio((const char *) mPlaybackFilePath, (MsgStats *) mPlaybackStats, mPlayType, mPlayCounter );
         }
         if (( flags & MEDIA_PLAY_TUNE ) != 0 ) {          // 1b) request to start tune-- playNotes()
             resetAudio();
-            audPlayTone( 0, mNoteFreq[0], mNoteDur[0] );
+            audPlayTone( 0, mNoteFreq[0], mNoteDur[0], mPlayCounter );
             mNxtNote = 1;
             if ( mNoteCnt == 1 ) mNoteCnt = 0;    // 1 and done
         }
@@ -274,7 +279,7 @@ static void mediaThread( void *arg ) {           // communicates with audio code
 
         if (( flags & MEDIA_PLAY_RECORD ) != 0 ) {  // R4) request to play recording
             resetAudio();
-            audPlayAudio((const char *) mRecordFilePath, (MsgStats *) sysStats, kPlayTypeRecording );
+            audPlayAudio((const char *) mRecordFilePath, (MsgStats *) sysStats, kPlayTypeRecording, mPlayCounter );
         }
 
         if (( flags & MEDIA_SAVE_RECORD ) != 0 ) {  // R5) request to save recording

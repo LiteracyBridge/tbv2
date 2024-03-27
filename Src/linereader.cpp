@@ -25,7 +25,8 @@ const char *LineReader::readLine(const char *tag) {
         return NULL;
     }
 
-    while (fscanf(inFile, "%201[^\n]%*[\n]", line) == 1) {
+    int fResult;
+    while ((fResult=fscanf(inFile, "%201[^\n]%*[\n]", line)) == 1) {
         lineNum++;
         if (strlen(line) > 200)
             return static_cast<const char *>(error("Line too long"));
@@ -46,21 +47,6 @@ const char *LineReader::readLine(const char *tag) {
         // Got anything?
         if (strlen(line))
             return line;
-//            char *cret = strchr( line, '\r' );
-//            if ( cret != NULL ) *cret = '\0';
-//            for (int i = 0; i < strlen( line ); i++)
-//                if ( line[i] != ' ' && line[i] != '\t' ) {
-//                    if ( i > 0 ) strcpy( &line[0], &line[i] );   // skip leading whitespace
-//
-//                    for (int j = strlen( line ) - 1; j > i; j--) {
-//                        if ( line[j] == ' ' || line[j] == '\t' ) {
-//                            line[j] = '\0';  // truncate trailing whitespace
-//                        } else {
-//                            break;   // last non-whitespace char
-//                        }
-//                    }
-//                    return; // non-empty line -- so return
-//                }
     }
     return static_cast<const char *>(error(tag));  // no str found (EOF)
 }

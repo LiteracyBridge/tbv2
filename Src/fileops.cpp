@@ -49,8 +49,9 @@ extern void fileOpInit( void ) {                // init fileOps & spawn thread t
     };
     threadAttr.stack_size = 10000; //FILEOP_STACK_SIZE;
     osThreadId_t decoderThread = osThreadNew(fileOpThreadFunc, NULL, &threadAttr);
+    dbgLog("4 fileopThread: %x\n", decoderThread);
     if (decoderThread == NULL) {
-        tbErr("mp3 decode spawn failed");
+        tbErr("fileopThread spawn failed");
     }
 
     // There should be no reason we need to supply the mq memory, but without this, for some unknowable
@@ -67,6 +68,7 @@ extern void fileOpInit( void ) {                // init fileOps & spawn thread t
  * @param args arguments provided to the thread.
  */
 void fileOpThreadFunc(void *args) {
+    dbgLog( "4 fileOpThread: 0x%x 0x%x \n", &args, &args - FILEOP_STACK_SIZE );
     int32_t waitFlags = kDecodeRequest | kEncryptPrepareRequest;
     while (true) {
         uint32_t eventFlags = osEventFlagsWait(fileOpRequestEventId, waitFlags, osFlagsWaitAny, osWaitForever);

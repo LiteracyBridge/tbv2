@@ -7,6 +7,7 @@
 #include "tbook.h"
 #include "logger.h"
 #include "controlmanager.h"
+#include "random.h"
 
 static FILE *           logF = NULL;      // file ptr for open log file
 static int              totLogCh = 0;
@@ -43,7 +44,7 @@ extern fsTime           lastRTCinLog;
 extern bool             BootToUSB;
 extern bool             BootDebugLoop;
 extern bool             BootVerboseLog;
-extern bool             BootToQCtest;
+extern bool             bootToQcTest;
 extern bool             BootVerbosePower;
 extern bool             BootResetLog;
 extern bool             BootFormatFileSys;
@@ -271,7 +272,7 @@ void logPowerUp( bool reboot ) {                      // re-init logger after re
         totLogCh = 0;     // tot chars appended
         if ( logF != NULL ) fprintf( logF, "\n" );
         sprintf( line, " %s %s %s %s %s %s ", BootToUSB ? "USB" : "", BootResetLog ? "ResetLog" : "",
-                 BootFormatFileSys ? "FormatFilesys" : "", BootToQCtest ? "QCTest" : "",
+                 BootFormatFileSys ? "FormatFilesys" : "", bootToQcTest ? "QCTest" : "",
                  BootVerboseLog ? "VerboseLog" : "", BootVerbosePower ? "VerbosePwr" : "" );
         logEvtNS( "REBOOT --------", "BootKeys", line );
         gotRtc = showRTC();      // show current RTC time, or false if unset
@@ -411,6 +412,7 @@ static char *statFNm( const char *nm, short iS, short iM ) {   // INTERNAL: fill
     return statFileNm;
 }
 
+
 /**
  * Given a pattern of the form "xxxx_*yyyy", return the next unused value.
  * Gaps are ignored, and the next value greater than the highest value found is
@@ -425,17 +427,49 @@ int findFilenameUniquifier( const char *fnPatt ) {
     fsFileInfo fInfo;
     fInfo.fileID = 0;
     int nextUniquifier = 0;
-
+    uint32_t mask = 0;
     FileSysPower( true );
     while (ffind( fnPatt, &fInfo ) == fsOK) {
+//        printf("found %s\n", fInfo.name);
         // uniqueness counter is digits after rightmost _
         char *pSep = strrchr( fInfo.name, '_' );
         if ( pSep ) {
             int v = atoi( pSep + 1 );
+            if (v<32) mask |= (1<<v);
             if ( v >= nextUniquifier ) nextUniquifier = v + 1;
         }
     }
+    tbDelay_ms(50);
+    printf("uniquifier: %d, mask: %08x\n", nextUniquifier, mask);
+    tbDelay_ms(50);
     return nextUniquifier;
+}
+
+/**
+ * Add '_N' to 'foo.bar' to create unique 'foo_N.bar'
+ * NOTE: Multiple threads can return the same value.
+ * NOTE: The extension must be less than 30 characters, including the dot.
+ *       The buffer must be large enough to add the uniquifier. 4 characters is probably safe.
+ * @param buf [in] file name, [out] file name modified to be unique.
+ * @param bufSize size of buffer.
+ * @return the uniquifier.
+ */
+int uniquifyFilename(char *buf, int bufSize) {
+    // Find, and save, any extension.
+    char ext[30] = "";
+    char *pUnique = strrchr(buf, '.');
+    if (pUnique) {
+        strncpy(ext, pUnique, sizeof(ext));
+        ext[sizeof(ext)-1] = '\0';
+    } else {
+        pUnique = buf + strlen(buf);
+    }
+    // add "_*" before the extension, then search for any existing files with uniquifiers.
+    strcpy(pUnique, "_*");
+    int uniquifier = findFilenameUniquifier(buf);
+    // Make the input file name unique.
+    sprintf(pUnique, "_%d%s", uniquifier, ext);
+    return uniquifier;
 }
 
 /**
@@ -484,6 +518,9 @@ void saveAuxProperties( char *baseFilename ) {
                          currPkg->subjects[TBook.iSubj]->messages[TBook.iMsg]->filename );
                 fprintf( outFP, "MESSAGE_NUM:%d\n", TBook.iMsg );
             }
+        }
+        if (controlManager.isSurveyActive()) {
+            fprintf(outFP, "SURVEY_UUID=%s\n", random.formatUUID(controlManager.getSurveyUUID()));
         }
         fprintf( outFP, "DEVICE_ID:%s\n", TB_ID );
         tbFclose( outFP );

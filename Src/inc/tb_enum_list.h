@@ -21,34 +21,34 @@
 //region CSM_EVENT_LIST
 #define CSM_EVENT_LIST \
     X(eNull)          \
-    X(Home)           \
+    X(House)          \
     X(Circle)         \
     X(Plus)           \
     X(Minus)          \
     X(Tree)           \
     X(Lhand)          \
     X(Rhand)          \
-    X(Pot)            \
+    X(Bowl)           \
     X(Star)           \
     X(Table)          \
-    X(Home__)         \
+    X(House__)        \
     X(Circle__)       \
     X(Plus__)         \
     X(Minus__)        \
     X(Tree__)         \
     X(Lhand__)        \
     X(Rhand__)        \
-    X(Pot__)          \
+    X(Bowl__)         \
     X(Star__)         \
     X(Table__)        \
-    X(starHome)       \
+    X(starHouse)      \
     X(starCircle)     \
     X(starPlus)       \
     X(starMinus)      \
     X(starTree)       \
     X(starLhand)      \
     X(starRhand)      \
-    X(starPot)        \
+    X(starBowl)       \
     X(starStar)       \
     X(starTable)      \
     X(AudioStart)     \
@@ -67,8 +67,8 @@
     X(MpuHot)         \
     X(FilesSuccess)   \
     X(FilesFail)      \
-    X(BattCharging75) \
-    X(BattNotCharging)\
+    X(OK)             \
+    X(CANCEL)         \
     X(anyKey)         \
     X(eUNDEF)         \
 //endregion
@@ -76,41 +76,48 @@
 // This is also expanded for the Java TknAction
 //region CSM_ACTION_LIST
 #define CSM_ACTION_LIST \
-    X(aNull)          \
-    X(LED)            \
-    X(bgLED)          \
-    X(playSys)        \
-    X(playSubj)       \
-    X(pausePlay)      \
-    X(resumePlay)     \
-    X(stopPlay)       \
-    X(volAdj)         \
-    X(spdAdj)         \
-    X(posAdj)         \
-    X(startRec)       \
-    X(pauseRec)       \
-    X(resumeRec)      \
-    X(finishRec)      \
-    X(playRec)        \
-    X(saveRec)        \
-    X(writeMsg)       \
-    X(goPrevSt)       \
-    X(saveSt)         \
-    X(goSavedSt)      \
-    X(subjAdj)        \
-    X(msgAdj)         \
-    X(setTimer)       \
-    X(resetTimer)     \
-    X(showCharge)     \
-    X(startUSB)       \
-    X(endUSB)         \
-    X(powerDown)      \
-    X(sysBoot)        \
-    X(sysTest)        \
-    X(playNxtPkg)     \
-    X(changePkg)      \
-    X(playTune)       \
-    X(filesTest)      \
+    X(aNull)            \
+    X(LED)              \
+    X(bgLED)            \
+    X(playSys)          \
+    X(playSubject)      \
+    X(playMessage)      \
+    X(pausePlay)        \
+    X(resumePlay)       \
+    X(stopPlay)         \
+    X(volAdj)           \
+    X(spdAdj)           \
+    X(posAdj)           \
+    X(startRecording)   \
+    X(pauseRecording)   \
+    X(resumeRecording)  \
+    X(finishRecording)  \
+    X(playRecording)    \
+    X(saveRecording)    \
+    X(writeMsg)         \
+    X(resumePrevState)  \
+    X(saveState)        \
+    X(resumeSavedState) \
+    X(subjAdj)          \
+    X(msgAdj)           \
+    X(setTimer)         \
+    X(resetTimer)       \
+    X(showCharge)       \
+    X(startUSB)         \
+    X(endUSB)           \
+    X(powerDown)        \
+    X(sysBoot)          \
+    X(sysTest)          \
+    X(playNxtPkg)       \
+    X(changePkg)        \
+    X(playTune)         \
+    X(filesTest)        \
+    X(callScript)       \
+    X(exitScript)       \
+    X(enterState)       \
+    X(beginSurvey)      \
+    X(endSurvey)        \
+    X(writeRecId)       \
 //endregion
 
 #define GDEF_AF_0 0
@@ -123,14 +130,14 @@
 
 //region GPIO_DEFINITION_LIST
 #define GPIO_DEFINITION_LIST \
-    X( HOME,              GPIOA,  0, GDEF_NONE ) \
+    X( HOUSE,             GPIOA,  0, GDEF_NONE ) \
     X( CIRCLE,            GPIOE,  9, GDEF_NONE ) \
     X( PLUS,              GPIOA,  4, GDEF_NONE ) \
     X( MINUS,             GPIOA,  5, GDEF_NONE ) \
     X( TREE,              GPIOA, 15, GDEF_NONE ) \
     X( LHAND,             GPIOB,  7, GDEF_NONE ) \
     X( RHAND,             GPIOB, 10, GDEF_NONE ) \
-    X( POT,               GPIOC,  1, GDEF_NONE ) \
+    X( BOWL,              GPIOC,  1, GDEF_NONE ) \
     X( STAR,              GPIOE,  8, GDEF_NONE ) \
     X( TABLE,             GPIOE,  3, GDEF_NONE ) \
     X( RED,               GPIOE,  1, GDEF_NONE ) \
@@ -202,6 +209,7 @@
 #define FILENAME_LIST \
         X(BOOTCOUNT_TXT,        "M0:/system/bootcount.txt")             \
         X(CSM_DATA_TXT,         "M0:/system/csm_data.txt")              \
+        X(CONTROL_DEF,          "M0:/system/control_def.csm")           \
         X(LOG_TXT,              "M0:/log/tbLog.txt")                    \
         X(TB_LOG_NN_TXT,        "M0:/log/tbLog_%d.txt")                 \
         X(BAD_LOG_NN_TXT,       "M0:/log/badLog_%d.txt")                \
@@ -219,6 +227,8 @@
         X(DEVICE_ID_TXT,        "M0:/system/device_ID.txt")             \
         X(FIRMWARE_ID_TXT,      "M0:/system/firmware_ID.txt")           \
         X(AUDIO_WAV,            "M0:/audio.wav")                        \
+        X(CONFIG_TXT,           "M0:/system/config.txt")                \
+        X(SYSTEM_PATH,          "M0:/system/")                          \
 //endregion
 
 

@@ -7,7 +7,7 @@
 // TalkingBook keypad has 10 keys, each connected to a line of the keypad cable
 //  plus KEY::INVALID for no key value, & KEY::TIMER for long press timer elapsed
 typedef enum ENUM_KEY {
-     HOME = 0, CIRCLE, PLUS, MINUS, TREE, LHAND, RHAND, POT, STAR, TABLE, INVALID, TIMER
+     HOUSE = 0, CIRCLE, PLUS, MINUS, TREE, LHAND, RHAND, BOWL, STAR, TABLE, INVALID, TIMER
 } KEY;
 
 #if defined __cplusplus
@@ -18,14 +18,14 @@ constexpr int operator<<(int v, enum ENUM_KEY s) {
 #endif
 
 typedef enum {
-    KM_HOME   = 1 << KEY::HOME,
+    KM_HOUSE  = 1 << KEY::HOUSE,
     KM_CIRCLE = 1 << KEY::CIRCLE,
     KM_PLUS   = 1 << KEY::PLUS,
     KM_MINUS  = 1 << KEY::MINUS,
     KM_TREE   = 1 << KEY::TREE,
     KM_LHAND  = 1 << KEY::LHAND,
     KM_RHAND  = 1 << KEY::RHAND,
-    KM_POT    = 1 << KEY::POT,
+    KM_BOWL   = 1 << KEY::BOWL,
     KM_STAR   = 1 << KEY::STAR,
     KM_TABLE  = 1 << KEY::TABLE
 } KEYS_MASK;
@@ -50,14 +50,6 @@ typedef struct { // KeyPadKey -- assignments to GPIO pins, in inputManager.cpp
 typedef KeyPadKey_t KeyPadKey_arr[10];   // so Dbg knows array size
 extern KeyPadKey_t  keydef[10];
 
-/*typedef struct {  // KeyState --  to keep track of the state of a keypad GPIO line-- SET/RESET and time of last change
-  KEY         key;
-  bool        down;     // true if key is depressed
-  uint32_t    tstamp;   // tstamp of down transition
-  uint32_t    dntime;   // num tbTicks it was down
-} KeyState;
-*/
-
 typedef struct {  // TB_Key --  msg for key Q from ISR to InputThread
     KEY      k;         // keyboard key that changed (or KEY::TIMER)
     bool     down;      // down transition
@@ -65,37 +57,26 @@ typedef struct {  // TB_Key --  msg for key Q from ISR to InputThread
 } TB_Key;
 
 typedef struct {  // TB_Event --  event & downMS for event Q
-    CSM_EVENT    typ;
+    CSM_EVENT    eventId;
     uint32_t arg;
 } TB_Event;
 
-// define TBV2_REV2B for board redesigned in Jan-2020 
-#define TBV2_REV2B
+// At one time, these didn't compile with compiler6 -O0 (no optimization); macros below are workaround.
+inline bool TB_isShort( TB_Event evt ) { return evt.eventId >= House && evt.eventId <= Table; }
+inline bool TB_isLong( TB_Event evt ) { return evt.eventId >= House__ && evt.eventId <= Table__; }
+inline bool TB_isStar( TB_Event evt ) { return evt.eventId >= starHouse && evt.eventId <= starTable; }
+inline bool TB_isSystem( TB_Event evt ) { return evt.eventId >= AudioDone && evt.eventId <= eUNDEF; }
+inline CSM_EVENT toShortEvt( KEY k ) { return (CSM_EVENT) ((int) k + House ); }
+inline CSM_EVENT toLongEvt( KEY k ) { return (CSM_EVENT) ((int) k + House__ ); }
+inline CSM_EVENT toStarEvt( KEY k ) { return (CSM_EVENT) ((int) k + starHouse ); }
 
-//typedef enum {  // Event -- TBook event types
-//      eNull=0, 
-//      Home,     Circle,   Plus,     Minus,    Tree,     Lhand,    Rhand,    Pot,   Star,    Table,
-//      Home__,   Circle__,   Plus__,   Minus__,  Tree__,   Lhand__,  Rhand__,  Pot__,   Star__,  Table__,
-//      starHome, starCircle, starPlus,   starMinus,  starTree,   starLhand,  starRhand,  starPot, starStar,  starTable,
-//      AudioDone,  AudioStart, ShortIdle,  LongIdle, LowBattery, BattCharging, BattCharged,  FirmwareUpdate, Timer, anyKey, eUNDEF
-//} Event;
-
-// Thesse don't compile with compiler6 -O0 (no optimization)
-//inline bool TB_isShort( TB_Event evt ) { return evt.typ >= Home && evt.typ <= Table; }
-//inline bool TB_isLong( TB_Event evt ) { return evt.typ >= Home__ && evt.typ <= Table__; }
-//inline bool TB_isStar( TB_Event evt ) { return evt.typ >= starHome && evt.typ <= starTable; }
-//inline bool TB_isSystem( TB_Event evt ) { return evt.typ >= AudioDone && evt.typ <= eUNDEF; }
-//inline Event toShortEvt( KEY k ) { return (Event) ((int) k + Home ); }
-//inline Event toLongEvt( KEY k ) { return (Event) ((int) k + Home__ ); }
-//inline Event toStarEvt( KEY k ) { return (Event) ((int) k + starHome ); }
-
-#define TB_isShort( evt ) ( evt.typ >= Home && evt.typ <= Table )
-#define TB_isLong( evt ) ( evt.typ >= Home__ && evt.typ <= Table__ )
-#define TB_isStar( evt ) ( evt.typ >= starHome && evt.typ <= starTable )
-#define TB_isSystem( evt ) ( evt.typ >= AudioDone && evt.typ <= eUNDEF )
-#define toShortEvt( k ) ( (CSM_EVENT) ((int) k + Home ) )
-#define toLongEvt( k ) ( (CSM_EVENT) ((int) k + Home__ ) )
-#define toStarEvt( k ) ( (CSM_EVENT) ((int) k + starHome ) )
+//#define TB_isShort( evt ) ( evt.eventId >= House && evt.eventId <= Table )
+//#define TB_isLong( evt ) ( evt.eventId >= House__ && evt.eventId <= Table__ )
+//#define TB_isStar( evt ) ( evt.eventId >= starHouse && evt.eventId <= starTable )
+//#define TB_isSystem( evt ) ( evt.eventId >= AudioDone && evt.eventId <= eUNDEF )
+//#define toShortEvt( k ) ( (CSM_EVENT) ((int) k + House ) )
+//#define toLongEvt( k ) ( (CSM_EVENT) ((int) k + House__ ) )
+//#define toStarEvt( k ) ( (CSM_EVENT) ((int) k + starHouse ) )
 
 
 extern void initInputManager( void );

@@ -16,10 +16,10 @@ DbgInfo Dbg;      // things to make visible in debugger
 int  BootMode; // DEBUG**********************************
 char BootKey;
 // BootOption-- 
-// STAR=1 LHAND=2 MINUS=3  PLUS=4  RHAND=5 CIRCLE=6 HOME=7
+// STAR=1 LHAND=2 MINUS=3  PLUS=4  RHAND=5 CIRCLE=6 HOUSE=7
 // hardware boot functions:
 //  TABLE + TREE => hardware forced reboot
-//  TABLE + TREE + POT => hardware forced DFU mode
+//  TABLE + TREE + BOWL => hardware forced DFU mode
 
 // 'P'                                      => enter USBmode() before starting CSM
 // 'M'                                      => call debugLoop() in talking_book() thread
@@ -42,14 +42,14 @@ char BootKey;
 bool     BootToUSB          = false;
 bool     BootDebugLoop      = false;
 bool     BootVerboseLog     = false;
-bool     BootToQCtest       = false;
+bool     bootToQcTest       = false;
 bool     BootVerbosePower   = false;
 bool     BootResetLog       = false;
 bool     BootFormatFileSys  = false;
 uint16_t keysDetectedAtBoot = 0;          // Which keys were detected at boot time.
 
 void setBootMode() { // use key to to select value for BootMode
-    GPIO_ID key_gpios[] = { gHOME, gCIRCLE, gPLUS, gMINUS, gTREE, gLHAND, gRHAND, gPOT, gSTAR, gTABLE };
+    GPIO_ID key_gpios[] = { gHOUSE, gCIRCLE, gPLUS, gMINUS, gTREE, gLHAND, gRHAND, gBOWL, gSTAR, gTABLE };
     flashInit();      // enable keyboard to decode boot type
     for (int i          = 0; i <= KEY::TABLE; i++) {
         if ( GPIO::getLogical( key_gpios[i] )) keysDetectedAtBoot |= 1 << i;
@@ -71,8 +71,8 @@ void setBootMode() { // use key to to select value for BootMode
             if ( BootToUSB || BootResetLog || BootFormatFileSys )
                 sprintf( prog, "_%c_%c_%c__", BootToUSB ? 'R' : '_', BootResetLog ? 'R' : '_',
                          BootFormatFileSys ? 'R' : '_' );
-            else if ( BootToQCtest || BootVerboseLog || BootVerbosePower )
-                sprintf( prog, "_%c_%c_%c__", BootToQCtest ? 'G' : '_', BootVerboseLog ? 'G' : '_',
+            else if ( bootToQcTest || BootVerboseLog || BootVerbosePower )
+                sprintf( prog, "_%c_%c_%c__", bootToQcTest ? 'G' : '_', BootVerboseLog ? 'G' : '_',
                          BootVerbosePower ? 'G' : '_' );
             LedManager::showProgress( prog, 100 );    // select boot keys
 
@@ -81,8 +81,8 @@ void setBootMode() { // use key to to select value for BootMode
             if ( GPIO::getLogical( gLHAND )) BootFormatFileSys = true;  // reformat EMMC filesystem
 
             // debug switches
-            if ( GPIO::getLogical( gCIRCLE )) BootToQCtest    = true;
-            if ( GPIO::getLogical( gPOT )) BootVerboseLog     = true;
+            if ( GPIO::getLogical( gCIRCLE )) bootToQcTest    = true;
+            if ( GPIO::getLogical( gBOWL )) BootVerboseLog     = true;
             if ( GPIO::getLogical( gRHAND )) BootVerbosePower = true;
 
             if ( GPIO::getLogical( gTABLE )) break;
@@ -98,8 +98,8 @@ void setBootMode() { // use key to to select value for BootMode
 #endif
 }
 
-
 static osThreadAttr_t tb_attr;                                        // has to be static!
+
 int main( void ) {
     GPIO::defineGPIOs();   // create GPIO_Def_t entries { id, port, pin, intq, signm, pressed } for each GPIO signal in use
 
@@ -130,6 +130,7 @@ int main( void ) {
     tb_attr.name       = (const char *) "talking_book";
     tb_attr.stack_size = TBOOK_STACK_SIZE;
     Dbg.thread[0] = (osRtxThread_t *) osThreadNew( talking_book, NULL, &tb_attr );    // Create application main thread
+    dbgLog("4 tbookThread: %x\n", Dbg.thread[0]);
 
     osKernelStart();                      // Start thread execution
     for (;;) {}

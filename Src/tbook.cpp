@@ -39,7 +39,7 @@ const int MALLOC_HEAP_SIZE = 20000;
 //char      MallocHeap[20000];    // MALLOC_HEAP_SIZE ];
 bool      FileSysOK        = false;
 bool      TBDataOK         = true;     // false if no TB config found
-bool      RunQCTest        = false;
+bool      runQcTest        = false;
 bool      PrecompiledCSM   = false;
 
 
@@ -66,12 +66,13 @@ void copyFile( const char *src, const char *dst ) {
     tbFclose( fdst );
 }
 
-extern bool BootToQCtest;
+extern bool bootToQcTest;
 extern bool BootDebugLoop;
 
 //
 //  TBook main thread
 void talking_book( void *tbAttr ) {    // talking book initialization & control manager thread
+    dbgLog( "4 tbookThread: 0x%x 0x%x \n", &tbAttr, &tbAttr - TBOOK_STACK_SIZE );
 
     EventRecorderInitialize( EventRecordNone, 1 );  // start EventRecorder
     EventRecorderEnable( evrE, EvtFsCore_No, EvtFsMcSPI_No );    //FileSys library
@@ -116,8 +117,8 @@ void talking_book( void *tbAttr ) {    // talking book initialization & control 
         //    setDev( TBP[i], fsDevs[0] );
         //}
 
-        if ( BootToQCtest || !fexists( TBP[pQC_PASS_TXT] )) {
-            RunQCTest = true;
+        if ( bootToQcTest || !fexists( TBP[pQC_PASS_TXT] )) {
+            runQcTest = true;
         }
 
         if ( BootDebugLoop ) {

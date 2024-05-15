@@ -39,3 +39,7 @@ old/*
 ######################
 Thumbs.db
 .idea/
+
+# Vscode build files
+out
+tmp

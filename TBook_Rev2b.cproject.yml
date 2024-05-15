@@ -1,0 +1,166 @@
+project:
+  packs:
+    - pack: Keil::STM32F4xx_DFP
+    - pack: ARM::CMSIS@5.9.0
+    - pack: ARM::mbedCrypto
+    - pack: Keil::ARM_Compiler
+    - pack: Keil::MDK-Middleware
+    - pack: ARM::CMSIS-Driver
+    - pack: Keil::MDK-Middleware_Graphics
+  setups:
+    - setup: Options for TBv2b
+      processor:
+        fpu: sp
+      add-path:
+        # - C:/Keil_v5/ARM/PACK/ARM/CMSIS/5.9.0/CMSIS/RTOS2/Include
+        # - C:/Keil_v5/ARM/PACK/ARM/CMSIS/5.9.0/CMSIS/RTOS2/RTX/Include
+        # - C:/Keil_v5/ARM/PACK/ARM/CMSIS/5.9.0/CMSIS/Core/Include
+        # - C:/Keil_v5/ARM/PACK/ARM/CMSIS/5.9.0/CMSIS/Driver/Include
+        # - C:/Keil_v5/ARM/PACK/ARM/mbedCrypto/3.0.1/include
+        # - C:/Keil_v5/ARM/PACK/Keil/STM32F4xx_DFP/2.16.0/CMSIS/Driver
+        # - C:/Keil_v5/ARM/PACK/Keil/STM32F4xx_DFP/2.16.0/Drivers/CMSIS/Device/ST/STM32F4xx/Include
+        # - C:/Keil_v5/ARM/PACK/Keil/STM32F4xx_DFP/2.16.0/Drivers/STM32F4xx_HAL_Driver/Inc
+        - /home/ephrim/.cache/arm/packs/ARM/CMSIS/5.9.0/CMSIS/RTOS2/Include
+        - /home/ephrim/.cache/arm/packs/ARM/CMSIS/5.9.0/CMSIS/RTOS2/RTX/Include
+        - /home/ephrim/.cache/arm/packs/ARM/CMSIS/5.9.0/CMSIS/Core/Include
+        - /home/ephrim/.cache/arm/packs/ARM/CMSIS/5.9.0/CMSIS/Driver/Include
+        - /home/ephrim/.cache/arm/packs/ARM/mbedCrypto/3.0.2/include
+        - /home/ephrim/.cache/arm/packs/Keil/STM32F4xx_DFP/2.17.1/CMSIS/Driver
+        - /home/ephrim/.cache/arm/packs/Keil/STM32F4xx_DFP/2.17.1/Drivers/CMSIS/Device/ST/STM32F4xx/Include
+        - /home/ephrim/.cache/arm/packs/Keil/STM32F4xx_DFP/2.17.1/Drivers/STM32F4xx_HAL_Driver/Inc
+        - Src/inc
+        - Src/libmad/inc
+      debug: "on"
+      define:
+        - TBOOKREV2B
+        - STM32F412Vx
+        - HSE_VALUE: "8000000"
+        - _RTE_
+        - FPM_DEFAULT
+      misc:
+        - C:
+            - -std=c99
+          C-CPP:
+            - -fno-rtti
+            - -funsigned-char
+            - -fshort-enums
+            - -fshort-wchar
+            - -ffunction-sections
+            - -Wno-packed
+            - -Wno-missing-variable-declarations
+            - -Wno-missing-prototypes
+            - -Wno-missing-noreturn
+            - -Wno-sign-conversion
+            - -Wno-nonportable-include-path
+            - -Wno-reserved-id-macro
+            - -Wno-unused-macros
+            - -Wno-documentation-unknown-command
+            - -Wno-documentation
+            - -Wno-license-management
+            - -Wno-parentheses-equality
+          CPP:
+            - -xc++
+            - -std=c++11
+          ASM:
+            - -masm=auto
+          Link:
+            - --map
+            - --load_addr_map_info
+            - --xref
+            - --callgraph
+            - --symbols
+            - --info sizes
+            - --info totals
+            - --info unused
+            - --info veneers
+            - --lto
+            - --strict
+            - --summary_stderr
+            - --info summarysizes
+  linker:
+    - script: TBook_Rev2b_TBv2b.sct
+  groups:
+    - group: TBook
+      files:
+        - file: Src/audio.cpp
+        - file: Src/buffers.cpp
+        - file: Src/codeci2c.cpp
+        - file: Src/controlmanager.cpp
+        - file: Src/csm.cpp
+        - file: Src/dbgloop.cpp
+        - file: Src/encaudio.cpp
+        - file: Src/fileops.cpp
+        - file: Src/fs_get_time.cpp
+        - file: Src/gpio_stm32f4xx.cpp
+        - file: Src/hardfault.s
+        - file: Src/i2s_stm32f4xx.cpp
+        - file: Src/inputmanager.cpp
+        - file: Src/ledmanager.cpp
+        - file: Src/linereader.cpp
+        - file: Src/logger.cpp
+        - file: Src/main.cpp
+        - file: Src/mediaplayer.cpp
+        - file: Src/mp3timing.cpp
+        - file: Src/mp3tostream.cpp
+        - file: Src/norlog.cpp
+        - file: Src/packagedata.cpp
+        - file: Src/powermanager.cpp
+        - file: Src/random.cpp
+        - file: Src/tbconfig.cpp
+        - file: Src/tbook.cpp
+        - file: Src/tbutil.cpp
+        - file: Src/ti_aic3100.cpp
+        - file: Src/USBD_User_Device_MSC_LUN.cpp
+        - file: Src/w25q64jv.cpp
+        - file: Src/wav.cpp
+    - group: libMAD
+      files:
+        - file: Src/libmad/huffman.c
+        - file: Src/libmad/layer3.c
+        - file: Src/libmad/synth.c
+        - file: Src/libmad/layer12.c
+        - file: Src/libmad/frame.c
+        - file: Src/libmad/decoder.c
+        - file: Src/libmad/timer.c
+        - file: Src/libmad/bit.c
+        - file: Src/libmad/stream.c
+        - file: Src/libmad/version.c
+        - file: Src/libmad/fixed.c
+  components:
+    - component: ARM::CMSIS Driver:Flash:Custom
+    - component: ARM::CMSIS:CORE
+    - component: ARM::CMSIS:RTOS2:Keil RTX5&Source
+    - component: ARM::Security:mbed Crypto
+    - component: Keil::Compiler&ARM Compiler:Event Recorder&DAP
+    - component: Keil::Compiler&ARM Compiler:I/O:File&File System
+    - component: Keil::Compiler&ARM Compiler:I/O:STDERR&ITM
+    - component: Keil::Compiler&ARM Compiler:I/O:STDOUT&ITM
+    - component: Keil::File System&MDK-Plus:CORE&LFN Debug
+    - component: Keil::File System&MDK-Plus:Drive:Memory Card
+    - component: Keil::USB&MDK-Plus:CORE&Debug
+    - component: Keil::USB&MDK-Plus:Device
+    - component: Keil::USB&MDK-Plus:Device:MSC
+    # - component: Keil::CMSIS Driver:Flash:AT45DB641E
+    # - component: Keil::CMSIS Driver:Flash:AT45DB642D
+      define:
+        - DRIVER_SPI_NUM: "4"
+    # - component: Keil::CMSIS Driver:Flash:N25Q032A
+    - component: Keil::CMSIS Driver:I2C
+    - component: Keil::CMSIS Driver:MCI
+    - component: Keil::CMSIS Driver:SPI
+    - component: Keil::CMSIS Driver:USB Device:Full-speed
+    - component: Keil::Device:STM32Cube Framework:Classic
+    # - component: Keil::Device:STM32Cube HAL:ADC
+    - component: Keil::Device:STM32Cube HAL:Common
+    - component: Keil::Device:STM32Cube HAL:Cortex
+    - component: Keil::Device:STM32Cube HAL:DMA
+    # - component: Keil::Device:STM32Cube HAL:Flash
+    - component: Keil::Device:STM32Cube HAL:GPIO
+    - component: Keil::Device:STM32Cube HAL:I2C
+    # - component: Keil::Device:STM32Cube HAL:NAND
+    # - component: Keil::Device:STM32Cube HAL:NOR
+    - component: Keil::Device:STM32Cube HAL:PWR
+    - component: Keil::Device:STM32Cube HAL:QSPI
+    - component: Keil::Device:STM32Cube HAL:RCC
+    - component: Keil::Device:STM32Cube HAL:SPI
+    - component: Keil::Device:Startup

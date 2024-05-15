@@ -6,7 +6,7 @@
 #include "encAudio.h"
 #include "mediaplayer.h"
 #include "controlmanager.h"
-#include "mp3toStream.h"
+#include "mp3tostream.h"
 #include "buffers.h"
 #include "fileOps.h"
 
@@ -31,7 +31,7 @@ const int RECORD_SEC            = 30;
 const int WAV_DATA_SIZE         = RECORD_SAMPLE_RATE * 2 * RECORD_SEC;    // 30sec at 8K 16bit samples
 
 const int WAV_FILE_SIZE         = WAV_DATA_SIZE + sizeof(WavFileHeader_t);
-            
+
 extern char                   mRecordFilePath[MAX_PATH];
 
 const WavFileHeader_t newWavHeader =  {
@@ -150,7 +150,7 @@ void                fillSqrBuff( Buffer_t * pB, int nSamp, bool stereo );
  * Initialize the audio module. Once per execution.
  * Allocate buffers, set up SAI (Serial Audio Interface).
  */
-void audInitialize( void ) { 
+void audInitialize( void ) {
     pSt.state = pbIdle;
     initBufferPool();
     fileOpInit();
@@ -513,7 +513,7 @@ bool audStartRecording( const char * fname, MsgStats *stats ) {  // start record
     minFreeBuffs = numBuffersAvailable();
     audInitState();
     pSt.audioFormat = kAudioWav;
-    
+
     dbgEvt( TB_recWv, 0, 0, 0, 0 );
     pSt.stats = stats;
     stats->RecStart++;
@@ -873,7 +873,7 @@ void saveBuff(Buffer_t *pB) {                    // save buff to file, then free
     }
 
     int nB = fwrite(pB, 1, nS * 2, pSt.audF);   // write nS*2 bytes (1/2 buffer)
-    if (nB != nS * 2) 
+    if (nB != nS * 2)
         tbErr("svBuf write(%d)=>%d", nS * 2, nB);
 
     pSt.nSaved += nS;     // count of samples saved

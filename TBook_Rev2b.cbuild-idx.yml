@@ -1,0 +1,9 @@
+build-idx:
+  generated-by: csolution version 2.3.0
+  csolution: TBook_Rev2b.csolution.yml
+  cprojects:
+    - cproject: TBook_Rev2b.cproject.yml
+  cbuilds:
+    - cbuild: TBook_Rev2b+TBv2b.cbuild.yml
+      project: TBook_Rev2b
+      configuration: +TBv2b

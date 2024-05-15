@@ -1,0 +1,872 @@
+build:
+  generated-by: csolution version 2.3.0
+  solution: TBook_Rev2b.csolution.yml
+  project: TBook_Rev2b.cproject.yml
+  context: TBook_Rev2b+TBv2b
+  compiler: AC6
+  device: STM32F412VETx
+  device-pack: Keil::STM32F4xx_DFP@2.17.1
+  processor:
+    endian: little
+    fpu: sp
+    core: Cortex-M4
+  packs:
+    - pack: ARM::CMSIS@5.9.0
+      path: ${CMSIS_PACK_ROOT}/ARM/CMSIS/5.9.0
+    - pack: ARM::mbedCrypto@3.0.2
+      path: ${CMSIS_PACK_ROOT}/ARM/mbedCrypto/3.0.2
+    - pack: Keil::ARM_Compiler@1.7.2
+      path: ${CMSIS_PACK_ROOT}/Keil/ARM_Compiler/1.7.2
+    - pack: Keil::MDK-Middleware@7.16.0
+      path: ${CMSIS_PACK_ROOT}/Keil/MDK-Middleware/7.16.0
+    - pack: Keil::STM32F4xx_DFP@2.17.1
+      path: ${CMSIS_PACK_ROOT}/Keil/STM32F4xx_DFP/2.17.1
+  optimize: none
+  debug: on
+  misc:
+    ASM:
+      - -masm=auto
+    C:
+      - -std=c99
+      - -fno-rtti
+      - -funsigned-char
+      - -fshort-enums
+      - -fshort-wchar
+      - -ffunction-sections
+      - -Wno-packed
+      - -Wno-missing-variable-declarations
+      - -Wno-missing-prototypes
+      - -Wno-missing-noreturn
+      - -Wno-sign-conversion
+      - -Wno-nonportable-include-path
+      - -Wno-reserved-id-macro
+      - -Wno-unused-macros
+      - -Wno-documentation-unknown-command
+      - -Wno-documentation
+      - -Wno-license-management
+      - -Wno-parentheses-equality
+    CPP:
+      - -xc++
+      - -std=c++11
+      - -fno-rtti
+      - -funsigned-char
+      - -fshort-enums
+      - -fshort-wchar
+      - -ffunction-sections
+      - -Wno-packed
+      - -Wno-missing-variable-declarations
+      - -Wno-missing-prototypes
+      - -Wno-missing-noreturn
+      - -Wno-sign-conversion
+      - -Wno-nonportable-include-path
+      - -Wno-reserved-id-macro
+      - -Wno-unused-macros
+      - -Wno-documentation-unknown-command
+      - -Wno-documentation
+      - -Wno-license-management
+      - -Wno-parentheses-equality
+    Link:
+      - --map
+      - --load_addr_map_info
+      - --xref
+      - --callgraph
+      - --symbols
+      - --info sizes
+      - --info totals
+      - --info unused
+      - --info veneers
+      - --lto
+      - --strict
+      - --summary_stderr
+      - --info summarysizes
+  define:
+    - TBOOKREV2B
+    - STM32F412Vx
+    - HSE_VALUE: 8000000
+    - _RTE_
+    - FPM_DEFAULT
+    - STM32F412Vx
+    - _RTE_
+  add-path:
+    - .
+    - Src/inc
+    - Src/libmad/inc
+    - RTE/CMSIS
+    - RTE/Compiler
+    - RTE/Device/STM32F412VETx
+    - RTE/File_System
+    - RTE/Security
+    - RTE/USB
+    - RTE/_TBv2b
+    - ${CMSIS_PACK_ROOT}/ARM/CMSIS/5.9.0/CMSIS/Core/Include
+    - ${CMSIS_PACK_ROOT}/ARM/CMSIS/5.9.0/CMSIS/Driver/Include
+    - ${CMSIS_PACK_ROOT}/ARM/CMSIS/5.9.0/CMSIS/RTOS2/Include
+    - ${CMSIS_PACK_ROOT}/ARM/CMSIS/5.9.0/CMSIS/RTOS2/RTX/Include
+    - ${CMSIS_PACK_ROOT}/ARM/mbedCrypto/3.0.2/include
+    - ${CMSIS_PACK_ROOT}/Keil/ARM_Compiler/1.7.2/Include
+    - ${CMSIS_PACK_ROOT}/Keil/MDK-Middleware/7.16.0/FileSystem/Include
+    - ${CMSIS_PACK_ROOT}/Keil/MDK-Middleware/7.16.0/USB/Include
+    - ${CMSIS_PACK_ROOT}/Keil/STM32F4xx_DFP/2.17.1/Drivers/CMSIS/Device/ST/STM32F4xx/Include
+    - ${CMSIS_PACK_ROOT}/Keil/STM32F4xx_DFP/2.17.1/Drivers/STM32F4xx_HAL_Driver/Inc
+  output-dirs:
+    intdir: tmp/TBook_Rev2b/TBv2b
+    outdir: out/TBook_Rev2b/TBv2b
+    rtedir: RTE
+  output:
+    - type: elf
+      file: TBook_Rev2b.axf
+  components:
+    - component: ARM::CMSIS Driver:Flash:Custom@1.0.0
+      from-pack: ARM::CMSIS@5.9.0
+      selected-by: ARM::CMSIS Driver:Flash:Custom
+      files:
+        - file: ${CMSIS_PACK_ROOT}/ARM/CMSIS/5.9.0/CMSIS/Driver/Include/Driver_Flash.h
+          category: api
+        - file: ${CMSIS_PACK_ROOT}/ARM/CMSIS/5.9.0/CMSIS/Driver/DriverTemplates/Driver_Flash.c
+          category: sourceC
+          attr: template
+          version: 1.0.0
+          select: Flash Driver
+    - component: ARM::CMSIS:CORE@5.6.0
+      condition: ARMv6_7_8-M Device
+      from-pack: ARM::CMSIS@5.9.0
+      selected-by: ARM::CMSIS:CORE
+      files:
+        - file: ${CMSIS_PACK_ROOT}/ARM/CMSIS/5.9.0/CMSIS/Documentation/Core/html/index.html
+          category: doc
+          version: 5.6.0
+        - file: ${CMSIS_PACK_ROOT}/ARM/CMSIS/5.9.0/CMSIS/Core/Template/ARMv8-M/main_s.c
+          category: sourceC
+          attr: template
+          version: 1.1.1
+          select: Secure mode 'main' module for ARMv8-M
+        - file: ${CMSIS_PACK_ROOT}/ARM/CMSIS/5.9.0/CMSIS/Core/Template/ARMv8-M/tz_context.c
+          category: sourceC
+          attr: template
+          version: 1.1.1
+          select: RTOS Context Management (TrustZone for ARMv8-M)
+    - component: ARM::CMSIS:RTOS2:Keil RTX5&Source@5.5.4
+      condition: RTOS2 RTX5
+      from-pack: ARM::CMSIS@5.9.0
+      selected-by: ARM::CMSIS:RTOS2:Keil RTX5&Source
+      files:
+        - file: ${CMSIS_PACK_ROOT}/ARM/CMSIS/5.9.0/CMSIS/RTOS2/RTX/Source/GCC/irq_armv7m.S
+          category: source
+        - file: ${CMSIS_PACK_ROOT}/ARM/CMSIS/5.9.0/CMSIS/RTOS2/RTX/Source/rtx_delay.c
+          category: source
+        - file: ${CMSIS_PACK_ROOT}/ARM/CMSIS/5.9.0/CMSIS/RTOS2/RTX/Source/rtx_evflags.c
+          category: source
+        - file: ${CMSIS_PACK_ROOT}/ARM/CMSIS/5.9.0/CMSIS/RTOS2/RTX/Source/rtx_evr.c
+          category: source
+        - file: ${CMSIS_PACK_ROOT}/ARM/CMSIS/5.9.0/CMSIS/RTOS2/RTX/Source/rtx_kernel.c
+          category: source
+        - file: ${CMSIS_PACK_ROOT}/ARM/CMSIS/5.9.0/CMSIS/RTOS2/RTX/Source/rtx_lib.c
+          category: source
+        - file: ${CMSIS_PACK_ROOT}/ARM/CMSIS/5.9.0/CMSIS/RTOS2/RTX/Source/rtx_memory.c
+          category: source
+        - file: ${CMSIS_PACK_ROOT}/ARM/CMSIS/5.9.0/CMSIS/RTOS2/RTX/Source/rtx_mempool.c
+          category: source
+        - file: ${CMSIS_PACK_ROOT}/ARM/CMSIS/5.9.0/CMSIS/RTOS2/RTX/Source/rtx_msgqueue.c
+          category: source
+        - file: ${CMSIS_PACK_ROOT}/ARM/CMSIS/5.9.0/CMSIS/RTOS2/RTX/Source/rtx_mutex.c
+          category: source
+        - file: ${CMSIS_PACK_ROOT}/ARM/CMSIS/5.9.0/CMSIS/RTOS2/RTX/Source/rtx_semaphore.c
+          category: source
+        - file: ${CMSIS_PACK_ROOT}/ARM/CMSIS/5.9.0/CMSIS/RTOS2/RTX/Source/rtx_system.c
+          category: source
+        - file: ${CMSIS_PACK_ROOT}/ARM/CMSIS/5.9.0/CMSIS/RTOS2/RTX/Source/rtx_thread.c
+          category: source
+        - file: ${CMSIS_PACK_ROOT}/ARM/CMSIS/5.9.0/CMSIS/RTOS2/RTX/Source/rtx_timer.c
+          category: source
+        - file: ${CMSIS_PACK_ROOT}/ARM/CMSIS/5.9.0/CMSIS/RTOS2/Source/os_systick.c
+          category: source
+        - file: ${CMSIS_PACK_ROOT}/ARM/CMSIS/5.9.0/CMSIS/RTOS2/Include/cmsis_os2.h
+          category: api
+        - file: ${CMSIS_PACK_ROOT}/ARM/CMSIS/5.9.0/CMSIS/Documentation/RTOS2/html/rtx5_impl.html
+          category: doc
+          version: 5.5.4
+        - file: ${CMSIS_PACK_ROOT}/ARM/CMSIS/5.9.0/CMSIS/RTOS2/RTX/Template/main.c
+          category: source
+          attr: template
+          version: 2.1.0
+          select: CMSIS-RTOS2 'main' function
+        - file: ${CMSIS_PACK_ROOT}/ARM/CMSIS/5.9.0/CMSIS/RTOS2/RTX/Template/Events.c
+          category: source
+          attr: template
+          version: 2.0.0
+          select: CMSIS-RTOS2 Events
+        - file: ${CMSIS_PACK_ROOT}/ARM/CMSIS/5.9.0/CMSIS/RTOS2/RTX/Template/MemPool.c
+          category: source
+          attr: template
+          version: 2.0.0
+          select: CMSIS-RTOS2 Memory Pool
+        - file: ${CMSIS_PACK_ROOT}/ARM/CMSIS/5.9.0/CMSIS/RTOS2/RTX/Template/MsgQueue.c
+          category: source
+          attr: template
+          version: 2.0.0
+          select: CMSIS-RTOS2 Message Queue
+        - file: ${CMSIS_PACK_ROOT}/ARM/CMSIS/5.9.0/CMSIS/RTOS2/RTX/Template/Mutex.c
+          category: source
+          attr: template
+          version: 2.0.0
+          select: CMSIS-RTOS2 Mutex
+        - file: ${CMSIS_PACK_ROOT}/ARM/CMSIS/5.9.0/CMSIS/RTOS2/RTX/Template/Semaphore.c
+          category: source
+          attr: template
+          version: 2.0.0
+          select: CMSIS-RTOS2 Semaphore
+        - file: ${CMSIS_PACK_ROOT}/ARM/CMSIS/5.9.0/CMSIS/RTOS2/RTX/Template/Thread.c
+          category: source
+          attr: template
+          version: 2.0.0
+          select: CMSIS-RTOS2 Thread
+        - file: ${CMSIS_PACK_ROOT}/ARM/CMSIS/5.9.0/CMSIS/RTOS2/RTX/Template/Timer.c
+          category: source
+          attr: template
+          version: 2.0.1
+          select: CMSIS-RTOS2 Timer
+        - file: ${CMSIS_PACK_ROOT}/ARM/CMSIS/5.9.0/CMSIS/RTOS2/RTX/Template/svc_user.c
+          category: source
+          attr: template
+          version: 1.0.0
+          select: CMSIS-RTOS2 SVC User Table
+        - file: RTE/CMSIS/RTX_Config.c
+          category: source
+          attr: config
+          version: 5.1.1
+        - file: RTE/CMSIS/RTX_Config.h
+          category: header
+          attr: config
+          version: 5.5.2
+    - component: ARM::Security:mbed Crypto@3.0.1
+      from-pack: ARM::mbedCrypto@3.0.2
+      selected-by: ARM::Security:mbed Crypto
+      files:
+        - file: ${CMSIS_PACK_ROOT}/ARM/mbedCrypto/3.0.2/library/aes.c
+          category: source
+        - file: ${CMSIS_PACK_ROOT}/ARM/mbedCrypto/3.0.2/library/arc4.c
+          category: source
+        - file: ${CMSIS_PACK_ROOT}/ARM/mbedCrypto/3.0.2/library/aria.c
+          category: source
+        - file: ${CMSIS_PACK_ROOT}/ARM/mbedCrypto/3.0.2/library/asn1parse.c
+          category: source
+        - file: ${CMSIS_PACK_ROOT}/ARM/mbedCrypto/3.0.2/library/asn1write.c
+          category: source
+        - file: ${CMSIS_PACK_ROOT}/ARM/mbedCrypto/3.0.2/library/base64.c
+          category: source
+        - file: ${CMSIS_PACK_ROOT}/ARM/mbedCrypto/3.0.2/library/bignum.c
+          category: source
+        - file: ${CMSIS_PACK_ROOT}/ARM/mbedCrypto/3.0.2/library/blowfish.c
+          category: source
+        - file: ${CMSIS_PACK_ROOT}/ARM/mbedCrypto/3.0.2/library/camellia.c
+          category: source
+        - file: ${CMSIS_PACK_ROOT}/ARM/mbedCrypto/3.0.2/library/ccm.c
+          category: source
+        - file: ${CMSIS_PACK_ROOT}/ARM/mbedCrypto/3.0.2/library/chacha20.c
+          category: source
+        - file: ${CMSIS_PACK_ROOT}/ARM/mbedCrypto/3.0.2/library/chachapoly.c
+          category: source
+        - file: ${CMSIS_PACK_ROOT}/ARM/mbedCrypto/3.0.2/library/cipher.c
+          category: source
+        - file: ${CMSIS_PACK_ROOT}/ARM/mbedCrypto/3.0.2/library/cipher_wrap.c
+          category: source
+        - file: ${CMSIS_PACK_ROOT}/ARM/mbedCrypto/3.0.2/library/cmac.c
+          category: source
+        - file: ${CMSIS_PACK_ROOT}/ARM/mbedCrypto/3.0.2/library/ctr_drbg.c
+          category: source
+        - file: ${CMSIS_PACK_ROOT}/ARM/mbedCrypto/3.0.2/library/des.c
+          category: source
+        - file: ${CMSIS_PACK_ROOT}/ARM/mbedCrypto/3.0.2/library/dhm.c
+          category: source
+        - file: ${CMSIS_PACK_ROOT}/ARM/mbedCrypto/3.0.2/library/ecdh.c
+          category: source
+        - file: ${CMSIS_PACK_ROOT}/ARM/mbedCrypto/3.0.2/library/ecdsa.c
+          category: source
+        - file: ${CMSIS_PACK_ROOT}/ARM/mbedCrypto/3.0.2/library/ecjpake.c
+          category: source
+        - file: ${CMSIS_PACK_ROOT}/ARM/mbedCrypto/3.0.2/library/ecp.c
+          category: source
+        - file: ${CMSIS_PACK_ROOT}/ARM/mbedCrypto/3.0.2/library/ecp_curves.c
+          category: source
+        - file: ${CMSIS_PACK_ROOT}/ARM/mbedCrypto/3.0.2/library/entropy.c
+          category: source
+        - file: ${CMSIS_PACK_ROOT}/ARM/mbedCrypto/3.0.2/library/entropy_poll.c
+          category: source
+        - file: ${CMSIS_PACK_ROOT}/ARM/mbedCrypto/3.0.2/library/error.c
+          category: source
+        - file: ${CMSIS_PACK_ROOT}/ARM/mbedCrypto/3.0.2/library/gcm.c
+          category: source
+        - file: ${CMSIS_PACK_ROOT}/ARM/mbedCrypto/3.0.2/library/havege.c
+          category: source
+        - file: ${CMSIS_PACK_ROOT}/ARM/mbedCrypto/3.0.2/library/hkdf.c
+          category: source
+        - file: ${CMSIS_PACK_ROOT}/ARM/mbedCrypto/3.0.2/library/hmac_drbg.c
+          category: source
+        - file: ${CMSIS_PACK_ROOT}/ARM/mbedCrypto/3.0.2/library/md.c
+          category: source
+        - file: ${CMSIS_PACK_ROOT}/ARM/mbedCrypto/3.0.2/library/md2.c
+          category: source
+        - file: ${CMSIS_PACK_ROOT}/ARM/mbedCrypto/3.0.2/library/md4.c
+          category: source
+        - file: ${CMSIS_PACK_ROOT}/ARM/mbedCrypto/3.0.2/library/md5.c
+          category: source
+        - file: ${CMSIS_PACK_ROOT}/ARM/mbedCrypto/3.0.2/library/memory_buffer_alloc.c
+          category: source
+        - file: ${CMSIS_PACK_ROOT}/ARM/mbedCrypto/3.0.2/library/nist_kw.c
+          category: source
+        - file: ${CMSIS_PACK_ROOT}/ARM/mbedCrypto/3.0.2/library/oid.c
+          category: source
+        - file: ${CMSIS_PACK_ROOT}/ARM/mbedCrypto/3.0.2/library/pem.c
+          category: source
+        - file: ${CMSIS_PACK_ROOT}/ARM/mbedCrypto/3.0.2/library/pk.c
+          category: source
+        - file: ${CMSIS_PACK_ROOT}/ARM/mbedCrypto/3.0.2/library/pk_wrap.c
+          category: source
+        - file: ${CMSIS_PACK_ROOT}/ARM/mbedCrypto/3.0.2/library/pkcs12.c
+          category: source
+        - file: ${CMSIS_PACK_ROOT}/ARM/mbedCrypto/3.0.2/library/pkcs5.c
+          category: source
+        - file: ${CMSIS_PACK_ROOT}/ARM/mbedCrypto/3.0.2/library/pkparse.c
+          category: source
+        - file: ${CMSIS_PACK_ROOT}/ARM/mbedCrypto/3.0.2/library/pkwrite.c
+          category: source
+        - file: ${CMSIS_PACK_ROOT}/ARM/mbedCrypto/3.0.2/library/platform.c
+          category: source
+        - file: ${CMSIS_PACK_ROOT}/ARM/mbedCrypto/3.0.2/library/platform_util.c
+          category: source
+        - file: ${CMSIS_PACK_ROOT}/ARM/mbedCrypto/3.0.2/library/poly1305.c
+          category: source
+        - file: ${CMSIS_PACK_ROOT}/ARM/mbedCrypto/3.0.2/library/psa_crypto.c
+          category: source
+        - file: ${CMSIS_PACK_ROOT}/ARM/mbedCrypto/3.0.2/library/psa_crypto_se.c
+          category: source
+        - file: ${CMSIS_PACK_ROOT}/ARM/mbedCrypto/3.0.2/library/psa_crypto_slot_management.c
+          category: source
+        - file: ${CMSIS_PACK_ROOT}/ARM/mbedCrypto/3.0.2/library/psa_crypto_storage.c
+          category: source
+        - file: ${CMSIS_PACK_ROOT}/ARM/mbedCrypto/3.0.2/library/psa_its_file.c
+          category: source
+        - file: ${CMSIS_PACK_ROOT}/ARM/mbedCrypto/3.0.2/library/ripemd160.c
+          category: source
+        - file: ${CMSIS_PACK_ROOT}/ARM/mbedCrypto/3.0.2/library/rsa.c
+          category: source
+        - file: ${CMSIS_PACK_ROOT}/ARM/mbedCrypto/3.0.2/library/rsa_internal.c
+          category: source
+        - file: ${CMSIS_PACK_ROOT}/ARM/mbedCrypto/3.0.2/library/sha1.c
+          category: source
+        - file: ${CMSIS_PACK_ROOT}/ARM/mbedCrypto/3.0.2/library/sha256.c
+          category: source
+        - file: ${CMSIS_PACK_ROOT}/ARM/mbedCrypto/3.0.2/library/sha512.c
+          category: source
+        - file: ${CMSIS_PACK_ROOT}/ARM/mbedCrypto/3.0.2/library/threading.c
+          category: source
+        - file: ${CMSIS_PACK_ROOT}/ARM/mbedCrypto/3.0.2/library/timing.c
+          category: source
+        - file: ${CMSIS_PACK_ROOT}/ARM/mbedCrypto/3.0.2/library/version.c
+          category: source
+        - file: ${CMSIS_PACK_ROOT}/ARM/mbedCrypto/3.0.2/library/version_features.c
+          category: source
+        - file: ${CMSIS_PACK_ROOT}/ARM/mbedCrypto/3.0.2/library/xtea.c
+          category: source
+        - file: RTE/Security/mbedTLS_config.h
+          category: header
+          attr: config
+          version: 1.0.0
+    - component: Keil::CMSIS Driver:I2C@2.12
+      condition: STM32F4 CMSIS_Driver I2C
+      from-pack: Keil::STM32F4xx_DFP@2.17.1
+      selected-by: Keil::CMSIS Driver:I2C
+      files:
+        - file: ${CMSIS_PACK_ROOT}/Keil/STM32F4xx_DFP/2.17.1/CMSIS/Driver/I2C_STM32F4xx.c
+          category: source
+        - file: ${CMSIS_PACK_ROOT}/ARM/CMSIS/5.9.0/CMSIS/Driver/Include/Driver_I2C.h
+          category: api
+    - component: Keil::CMSIS Driver:MCI@2.11
+      condition: STM32F4 CMSIS_Driver MCI
+      from-pack: Keil::STM32F4xx_DFP@2.17.1
+      selected-by: Keil::CMSIS Driver:MCI
+      files:
+        - file: ${CMSIS_PACK_ROOT}/Keil/STM32F4xx_DFP/2.17.1/CMSIS/Driver/MCI_STM32F4xx.c
+          category: source
+        - file: ${CMSIS_PACK_ROOT}/ARM/CMSIS/5.9.0/CMSIS/Driver/Include/Driver_MCI.h
+          category: api
+    - component: Keil::CMSIS Driver:SPI@2.18
+      condition: STM32F4 CMSIS_Driver SPI
+      from-pack: Keil::STM32F4xx_DFP@2.17.1
+      selected-by: Keil::CMSIS Driver:SPI
+      files:
+        - file: ${CMSIS_PACK_ROOT}/Keil/STM32F4xx_DFP/2.17.1/CMSIS/Driver/SPI_STM32F4xx.c
+          category: source
+        - file: ${CMSIS_PACK_ROOT}/ARM/CMSIS/5.9.0/CMSIS/Driver/Include/Driver_SPI.h
+          category: api
+    - component: Keil::CMSIS Driver:USB Device:Full-speed@2.23
+      condition: STM32F4 CMSIS_Driver USB0
+      from-pack: Keil::STM32F4xx_DFP@2.17.1
+      selected-by: Keil::CMSIS Driver:USB Device:Full-speed
+      files:
+        - file: ${CMSIS_PACK_ROOT}/Keil/STM32F4xx_DFP/2.17.1/CMSIS/Driver/OTG_FS_STM32F4xx.c
+          category: source
+        - file: ${CMSIS_PACK_ROOT}/Keil/STM32F4xx_DFP/2.17.1/CMSIS/Driver/USBD_FS_STM32F4xx.c
+          category: source
+        - file: ${CMSIS_PACK_ROOT}/ARM/CMSIS/5.9.0/CMSIS/Driver/Include/Driver_USBD.h
+          category: api
+    - component: Keil::Compiler&ARM Compiler:Event Recorder&DAP@1.5.1
+      condition: Cortex-M Device
+      from-pack: Keil::ARM_Compiler@1.7.2
+      selected-by: Keil::Compiler&ARM Compiler:Event Recorder&DAP
+      files:
+        - file: ${CMSIS_PACK_ROOT}/Keil/ARM_Compiler/1.7.2/Source/EventRecorder.c
+          category: source
+        - file: ${CMSIS_PACK_ROOT}/Keil/ARM_Compiler/1.7.2/Doc/EventRecorder/html/index.html
+          category: doc
+          version: 1.5.1
+        - file: RTE/Compiler/EventRecorderConf.h
+          category: header
+          attr: config
+          version: 1.1.0
+    - component: Keil::Compiler&ARM Compiler:I/O:File&File System@1.2.0
+      condition: ARMCC Cortex-M with File System
+      from-pack: Keil::ARM_Compiler@1.7.2
+      selected-by: Keil::Compiler&ARM Compiler:I/O:File&File System
+    - component: Keil::Compiler&ARM Compiler:I/O:STDERR&ITM@1.2.0
+      condition: ARMCC Cortex-M with ITM
+      from-pack: Keil::ARM_Compiler@1.7.2
+      selected-by: Keil::Compiler&ARM Compiler:I/O:STDERR&ITM
+    - component: Keil::Compiler&ARM Compiler:I/O:STDOUT&ITM@1.2.0
+      condition: ARMCC Cortex-M with ITM
+      from-pack: Keil::ARM_Compiler@1.7.2
+      selected-by: Keil::Compiler&ARM Compiler:I/O:STDOUT&ITM
+      files:
+        - file: ${CMSIS_PACK_ROOT}/Keil/ARM_Compiler/1.7.2/Source/retarget_io.c
+          category: source
+    - component: Keil::Device:STM32Cube Framework:Classic@1.8.1
+      condition: STM32F4 Framework Classic
+      from-pack: Keil::STM32F4xx_DFP@2.17.1
+      selected-by: Keil::Device:STM32Cube Framework:Classic
+      files:
+        - file: ${CMSIS_PACK_ROOT}/Keil/STM32F4xx_DFP/2.17.1/MDK/CubeMX/Documentation/classic.html
+          category: doc
+          version: 1.8.1
+        - file: ${CMSIS_PACK_ROOT}/Keil/STM32F4xx_DFP/2.17.1/MDK/Templates/Src/stm32f4xx_hal_msp.c
+          category: source
+          attr: template
+          version: 1.8.1
+          select: MCU Specific HAL Initialization / De-Initialization
+        - file: ${CMSIS_PACK_ROOT}/Keil/STM32F4xx_DFP/2.17.1/MDK/Templates/Inc/stm32f4xx_it.h
+          category: header
+          attr: template
+          version: 1.8.1
+          select: Exception Handlers and Peripheral IRQ
+        - file: ${CMSIS_PACK_ROOT}/Keil/STM32F4xx_DFP/2.17.1/MDK/Templates/Src/stm32f4xx_it.c
+          category: source
+          attr: template
+          version: 1.8.1
+          select: Exception Handlers and Peripheral IRQ
+        - file: ${CMSIS_PACK_ROOT}/Keil/STM32F4xx_DFP/2.17.1/MDK/Templates/Inc/main.h
+          category: header
+          attr: template
+          version: 1.8.1
+          select: "'main' module for STM32Cube HAL"
+        - file: ${CMSIS_PACK_ROOT}/Keil/STM32F4xx_DFP/2.17.1/MDK/Templates/Src/main.c
+          category: source
+          attr: template
+          version: 1.8.1
+          select: "'main' module for STM32Cube HAL"
+        - file: ${CMSIS_PACK_ROOT}/Keil/STM32F4xx_DFP/2.17.1/MDK/Templates_LL/Inc/main.h
+          category: header
+          attr: template
+          version: 1.8.1
+          select: "'main' module for STM32Cube LL"
+        - file: ${CMSIS_PACK_ROOT}/Keil/STM32F4xx_DFP/2.17.1/MDK/Templates_LL/Src/main.c
+          category: source
+          attr: template
+          version: 1.8.1
+          select: "'main' module for STM32Cube LL"
+        - file: RTE/Device/STM32F412VETx/RTE_Device.h
+          category: header
+          attr: config
+          version: 2.4.5
+        - file: RTE/Device/STM32F412VETx/stm32f4xx_hal_conf.h
+          category: header
+          attr: config
+          version: 1.8.1
+          base: RTE/Device/STM32F412VETx/stm32f4xx_hal_conf.h.base@1.7.13
+          update: RTE/Device/STM32F412VETx/stm32f4xx_hal_conf.h.update@1.8.1
+    - component: Keil::Device:STM32Cube HAL:Common@1.8.1
+      condition: STM32F4 HAL Common
+      from-pack: Keil::STM32F4xx_DFP@2.17.1
+      selected-by: Keil::Device:STM32Cube HAL:Common
+      files:
+        - file: ${CMSIS_PACK_ROOT}/Keil/STM32F4xx_DFP/2.17.1/Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal.c
+          category: source
+    - component: Keil::Device:STM32Cube HAL:Cortex@1.8.1
+      condition: STM32F4 HAL
+      from-pack: Keil::STM32F4xx_DFP@2.17.1
+      selected-by: Keil::Device:STM32Cube HAL:Cortex
+      files:
+        - file: ${CMSIS_PACK_ROOT}/Keil/STM32F4xx_DFP/2.17.1/Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_cortex.c
+          category: source
+    - component: Keil::Device:STM32Cube HAL:DMA@1.8.1
+      condition: STM32F4 HAL
+      from-pack: Keil::STM32F4xx_DFP@2.17.1
+      selected-by: Keil::Device:STM32Cube HAL:DMA
+      files:
+        - file: ${CMSIS_PACK_ROOT}/Keil/STM32F4xx_DFP/2.17.1/Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_dma.c
+          category: source
+        - file: ${CMSIS_PACK_ROOT}/Keil/STM32F4xx_DFP/2.17.1/Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_dma_ex.c
+          category: source
+    - component: Keil::Device:STM32Cube HAL:GPIO@1.8.1
+      condition: STM32F4 HAL
+      from-pack: Keil::STM32F4xx_DFP@2.17.1
+      selected-by: Keil::Device:STM32Cube HAL:GPIO
+      files:
+        - file: ${CMSIS_PACK_ROOT}/Keil/STM32F4xx_DFP/2.17.1/Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_gpio.c
+          category: source
+    - component: Keil::Device:STM32Cube HAL:I2C@1.8.1
+      condition: STM32F4 HAL DMA RCC
+      from-pack: Keil::STM32F4xx_DFP@2.17.1
+      selected-by: Keil::Device:STM32Cube HAL:I2C
+      files:
+        - file: ${CMSIS_PACK_ROOT}/Keil/STM32F4xx_DFP/2.17.1/Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_i2c.c
+          category: source
+    - component: Keil::Device:STM32Cube HAL:PWR@1.8.1
+      condition: STM32F4 HAL
+      from-pack: Keil::STM32F4xx_DFP@2.17.1
+      selected-by: Keil::Device:STM32Cube HAL:PWR
+      files:
+        - file: ${CMSIS_PACK_ROOT}/Keil/STM32F4xx_DFP/2.17.1/Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_pwr.c
+          category: source
+        - file: ${CMSIS_PACK_ROOT}/Keil/STM32F4xx_DFP/2.17.1/Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_pwr_ex.c
+          category: source
+    - component: Keil::Device:STM32Cube HAL:QSPI@1.8.1
+      condition: STM32F412_44_46_47x_4x3 HAL DMA
+      from-pack: Keil::STM32F4xx_DFP@2.17.1
+      selected-by: Keil::Device:STM32Cube HAL:QSPI
+      files:
+        - file: ${CMSIS_PACK_ROOT}/Keil/STM32F4xx_DFP/2.17.1/Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_qspi.c
+          category: source
+    - component: Keil::Device:STM32Cube HAL:RCC@1.8.1
+      condition: STM32F4 HAL GPIO
+      from-pack: Keil::STM32F4xx_DFP@2.17.1
+      selected-by: Keil::Device:STM32Cube HAL:RCC
+      files:
+        - file: ${CMSIS_PACK_ROOT}/Keil/STM32F4xx_DFP/2.17.1/Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc.c
+          category: source
+        - file: ${CMSIS_PACK_ROOT}/Keil/STM32F4xx_DFP/2.17.1/Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.c
+          category: source
+    - component: Keil::Device:STM32Cube HAL:SPI@1.8.1
+      condition: STM32F4 HAL DMA
+      from-pack: Keil::STM32F4xx_DFP@2.17.1
+      selected-by: Keil::Device:STM32Cube HAL:SPI
+      files:
+        - file: ${CMSIS_PACK_ROOT}/Keil/STM32F4xx_DFP/2.17.1/Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_spi.c
+          category: source
+    - component: Keil::Device:Startup@2.6.3
+      condition: STM32F4 CMSIS
+      from-pack: Keil::STM32F4xx_DFP@2.17.1
+      selected-by: Keil::Device:Startup
+      files:
+        - file: ${CMSIS_PACK_ROOT}/Keil/STM32F4xx_DFP/2.17.1/MDK/Device/Source/ARM/STM32F401xx_OPT.s
+          category: source
+          attr: template
+          version: 2.6.3
+          select: Flash Option Bytes
+        - file: ${CMSIS_PACK_ROOT}/Keil/STM32F4xx_DFP/2.17.1/MDK/Device/Source/ARM/STM32F411xx_OPT.s
+          category: source
+          attr: template
+          version: 2.6.3
+          select: Flash Option Bytes
+        - file: ${CMSIS_PACK_ROOT}/Keil/STM32F4xx_DFP/2.17.1/MDK/Device/Source/ARM/STM32F410xx_412xx_OPT.s
+          category: source
+          attr: template
+          version: 2.6.3
+          select: Flash Option Bytes
+        - file: ${CMSIS_PACK_ROOT}/Keil/STM32F4xx_DFP/2.17.1/MDK/Device/Source/ARM/STM32F413xx_423xx_OPT.s
+          category: source
+          attr: template
+          version: 2.6.3
+          select: Flash Option Bytes
+        - file: ${CMSIS_PACK_ROOT}/Keil/STM32F4xx_DFP/2.17.1/MDK/Device/Source/ARM/STM32F40xxx_41xxx_OPT.s
+          category: source
+          attr: template
+          version: 2.6.3
+          select: Flash Option Bytes
+        - file: ${CMSIS_PACK_ROOT}/Keil/STM32F4xx_DFP/2.17.1/MDK/Device/Source/ARM/STM32F42xxx_43xxx_OPT.s
+          category: source
+          attr: template
+          version: 2.6.3
+          select: Flash Option Bytes
+        - file: ${CMSIS_PACK_ROOT}/Keil/STM32F4xx_DFP/2.17.1/MDK/Device/Source/ARM/STM32F446xx_OPT.s
+          category: source
+          attr: template
+          version: 2.6.3
+          select: Flash Option Bytes
+        - file: ${CMSIS_PACK_ROOT}/Keil/STM32F4xx_DFP/2.17.1/MDK/Device/Source/ARM/STM32F469xx_479xx_OPT.s
+          category: source
+          attr: template
+          version: 2.6.3
+          select: Flash Option Bytes
+        - file: ${CMSIS_PACK_ROOT}/Keil/STM32F4xx_DFP/2.17.1/MDK/Device/Source/ARM/STM32F4xx_OTP.s
+          category: source
+          attr: template
+          version: 2.6.3
+          select: Flash One-Time programmable Bytes
+        - file: RTE/Device/STM32F412VETx/startup_stm32f412vx.s
+          category: source
+          attr: config
+          version: 2.6.8
+          base: RTE/Device/STM32F412VETx/startup_stm32f412vx.s.base@2.6.2
+          update: RTE/Device/STM32F412VETx/startup_stm32f412vx.s.update@2.6.8
+        - file: RTE/Device/STM32F412VETx/system_stm32f4xx.c
+          category: source
+          attr: config
+          version: 2.6.8
+          base: RTE/Device/STM32F412VETx/system_stm32f4xx.c.base@2.6.3
+          update: RTE/Device/STM32F412VETx/system_stm32f4xx.c.update@2.6.8
+    - component: Keil::File System&MDK-Plus:CORE&LFN Debug@6.15.3
+      condition: CMSIS Core with RTOS and File System I/O and Event Recorder
+      from-pack: Keil::MDK-Middleware@7.16.0
+      selected-by: Keil::File System&MDK-Plus:CORE&LFN Debug
+      files:
+        - file: ${CMSIS_PACK_ROOT}/Keil/MDK-Middleware/7.16.0/FileSystem/Lib/ARM/FS_Dbg_LFN_CM3_L.lib
+          category: library
+        - file: RTE/File_System/FS_Config.c
+          category: source
+          attr: config
+          version: 6.3.0
+        - file: RTE/File_System/FS_Debug.c
+          category: source
+          attr: config
+          version: 1.0.0
+    - component: Keil::File System&MDK-Plus:Drive:Memory Card@6.15.3
+      condition: File System and SD/MMC Driver
+      from-pack: Keil::MDK-Middleware@7.16.0
+      selected-by: Keil::File System&MDK-Plus:Drive:Memory Card
+      files:
+        - file: ${CMSIS_PACK_ROOT}/Keil/MDK-Middleware/7.16.0/Doc/FileSystem/html/fs_create_app.html#mc_usage
+          category: doc
+          version: 6.15.3
+        - file: RTE/File_System/FS_Config_MC_0.h
+          category: header
+          attr: config
+          version: 6.2.0
+    - component: Keil::USB&MDK-Plus:CORE&Debug@6.16.1
+      condition: CMSIS Core with RTOS and Event Recorder
+      from-pack: Keil::MDK-Middleware@7.16.0
+      selected-by: Keil::USB&MDK-Plus:CORE&Debug
+      files:
+        - file: ${CMSIS_PACK_ROOT}/Keil/MDK-Middleware/7.16.0/USB/Lib/ARM/USB_Dbg_CM3_L.lib
+          category: library
+        - file: RTE/USB/USB_Debug.c
+          category: source
+          attr: config
+          version: 1.0.0
+    - component: Keil::USB&MDK-Plus:Device:MSC@6.16.1
+      condition: USB Core and Device Instance and Device Driver
+      from-pack: Keil::MDK-Middleware@7.16.0
+      selected-by: Keil::USB&MDK-Plus:Device:MSC
+      define:
+        - DRIVER_SPI_NUM: 4
+      files:
+        - file: ${CMSIS_PACK_ROOT}/Keil/MDK-Middleware/7.16.0/Doc/USB/html/_m_s_c.html
+          category: doc
+          version: 6.16.1
+        - file: ${CMSIS_PACK_ROOT}/Keil/MDK-Middleware/7.16.0/USB/Template/USBD_User_MSC.c
+          category: source
+          attr: template
+          version: 6.16.1
+          select: USB Device MSC (Mass Storage Class)
+        - file: ${CMSIS_PACK_ROOT}/Keil/MDK-Middleware/7.16.0/USB/Template/USBD_User_MSC_LUN.c
+          category: source
+          attr: template
+          version: 6.16.1
+          select: USB Device MSC multiple Logical Units (Mass Storage Class)
+        - file: ${CMSIS_PACK_ROOT}/Keil/MDK-Middleware/7.16.0/USB/Template/USBD_MSC.c
+          category: source
+          attr: template
+          version: 6.16.1
+          select: USB Device MSC Media Ownership Control
+        - file: ${CMSIS_PACK_ROOT}/Keil/MDK-Middleware/7.16.0/USB/Template/USBD_MSC.h
+          category: source
+          attr: template
+          version: 6.16.1
+          select: USB Device MSC Media Ownership Control
+        - file: RTE/USB/USBD_Config_MSC_0.h
+          category: header
+          attr: config
+          version: 5.1.1
+    - component: Keil::USB&MDK-Plus:Device@6.16.1
+      condition: USB Core and Device Driver and Class Instance
+      from-pack: Keil::MDK-Middleware@7.16.0
+      selected-by: Keil::USB&MDK-Plus:Device
+      files:
+        - file: ${CMSIS_PACK_ROOT}/Keil/MDK-Middleware/7.16.0/Doc/USB/html/_u_s_b__device.html
+          category: doc
+          version: 6.16.1
+        - file: ${CMSIS_PACK_ROOT}/Keil/MDK-Middleware/7.16.0/USB/Template/USBD_User_Device.c
+          category: source
+          attr: template
+          version: 6.16.1
+          select: USB Device
+        - file: ${CMSIS_PACK_ROOT}/Keil/MDK-Middleware/7.16.0/USB/Template/USBD_User_Device_SerNum.c
+          category: source
+          attr: template
+          version: 6.16.1
+          select: USB Device Serial Number
+        - file: RTE/USB/USBD_Config_0.c
+          category: source
+          attr: config
+          version: 5.2.0
+  linker:
+    script: TBook_Rev2b_TBv2b.sct
+  groups:
+    - group: TBook
+      files:
+        - file: Src/audio.cpp
+          category: sourceCpp
+        - file: Src/buffers.cpp
+          category: sourceCpp
+        - file: Src/codeci2c.cpp
+          category: sourceCpp
+        - file: Src/controlmanager.cpp
+          category: sourceCpp
+        - file: Src/csm.cpp
+          category: sourceCpp
+        - file: Src/dbgloop.cpp
+          category: sourceCpp
+        - file: Src/encaudio.cpp
+          category: sourceCpp
+        - file: Src/fileops.cpp
+          category: sourceCpp
+        - file: Src/fs_get_time.cpp
+          category: sourceCpp
+        - file: Src/gpio_stm32f4xx.cpp
+          category: sourceCpp
+        - file: Src/hardfault.s
+          category: sourceAsm
+        - file: Src/i2s_stm32f4xx.cpp
+          category: sourceCpp
+        - file: Src/inputmanager.cpp
+          category: sourceCpp
+        - file: Src/ledmanager.cpp
+          category: sourceCpp
+        - file: Src/linereader.cpp
+          category: sourceCpp
+        - file: Src/logger.cpp
+          category: sourceCpp
+        - file: Src/main.cpp
+          category: sourceCpp
+        - file: Src/mediaplayer.cpp
+          category: sourceCpp
+        - file: Src/mp3timing.cpp
+          category: sourceCpp
+        - file: Src/mp3tostream.cpp
+          category: sourceCpp
+        - file: Src/norlog.cpp
+          category: sourceCpp
+        - file: Src/packagedata.cpp
+          category: sourceCpp
+        - file: Src/powermanager.cpp
+          category: sourceCpp
+        - file: Src/random.cpp
+          category: sourceCpp
+        - file: Src/tbconfig.cpp
+          category: sourceCpp
+        - file: Src/tbook.cpp
+          category: sourceCpp
+        - file: Src/tbutil.cpp
+          category: sourceCpp
+        - file: Src/ti_aic3100.cpp
+          category: sourceCpp
+        - file: Src/USBD_User_Device_MSC_LUN.cpp
+          category: sourceCpp
+        - file: Src/w25q64jv.cpp
+          category: sourceCpp
+        - file: Src/wav.cpp
+          category: sourceCpp
+    - group: libMAD
+      files:
+        - file: Src/libmad/huffman.c
+          category: sourceC
+        - file: Src/libmad/layer3.c
+          category: sourceC
+        - file: Src/libmad/synth.c
+          category: sourceC
+        - file: Src/libmad/layer12.c
+          category: sourceC
+        - file: Src/libmad/frame.c
+          category: sourceC
+        - file: Src/libmad/decoder.c
+          category: sourceC
+        - file: Src/libmad/timer.c
+          category: sourceC
+        - file: Src/libmad/bit.c
+          category: sourceC
+        - file: Src/libmad/stream.c
+          category: sourceC
+        - file: Src/libmad/version.c
+          category: sourceC
+        - file: Src/libmad/fixed.c
+          category: sourceC
+  constructed-files:
+    - file: RTE/_TBv2b/Pre_Include_Global.h
+      category: preIncludeGlobal
+    - file: RTE/_TBv2b/RTE_Components.h
+      category: header
+  licenses:
+    - license: <unknown>
+      packs:
+        - pack: ARM::CMSIS@5.9.0
+      components:
+        - component: ::CMSIS Driver:Flash(API)
+        - component: ::CMSIS Driver:I2C(API)
+        - component: ::CMSIS Driver:MCI(API)
+        - component: ::CMSIS Driver:SPI(API)
+        - component: ::CMSIS Driver:USB Device(API)
+        - component: ::CMSIS:RTOS2(API)
+        - component: ARM::CMSIS Driver:Flash:Custom@1.0.0
+        - component: ARM::CMSIS:CORE@5.6.0
+        - component: ARM::CMSIS:RTOS2:Keil RTX5&Source@5.5.4
+    - license: <unknown>
+      packs:
+        - pack: ARM::mbedCrypto@3.0.2
+      components:
+        - component: ARM::Security:mbed Crypto@3.0.1
+    - license: <unknown>
+      packs:
+        - pack: Keil::ARM_Compiler@1.7.2
+      components:
+        - component: Keil::Compiler&ARM Compiler:Event Recorder&DAP@1.5.1
+        - component: Keil::Compiler&ARM Compiler:I/O:File&File System@1.2.0
+        - component: Keil::Compiler&ARM Compiler:I/O:STDERR&ITM@1.2.0
+        - component: Keil::Compiler&ARM Compiler:I/O:STDOUT&ITM@1.2.0
+    - license: <unknown>
+      license-agreement: ${CMSIS_PACK_ROOT}/Keil/MDK-Middleware/7.16.0/license.rtf
+      packs:
+        - pack: Keil::MDK-Middleware@7.16.0
+      components:
+        - component: Keil::File System&MDK-Plus:CORE&LFN Debug@6.15.3
+        - component: Keil::File System&MDK-Plus:Drive:Memory Card@6.15.3
+        - component: Keil::USB&MDK-Plus:CORE&Debug@6.16.1
+        - component: Keil::USB&MDK-Plus:Device:MSC@6.16.1
+        - component: Keil::USB&MDK-Plus:Device@6.16.1
+    - license: <unknown>
+      packs:
+        - pack: Keil::STM32F4xx_DFP@2.17.1
+      components:
+        - component: ::Device:STM32Cube Framework(API)
+        - component: Keil::CMSIS Driver:I2C@2.12
+        - component: Keil::CMSIS Driver:MCI@2.11
+        - component: Keil::CMSIS Driver:SPI@2.18
+        - component: Keil::CMSIS Driver:USB Device:Full-speed@2.23
+        - component: Keil::Device:STM32Cube Framework:Classic@1.8.1
+        - component: Keil::Device:STM32Cube HAL:Common@1.8.1
+        - component: Keil::Device:STM32Cube HAL:Cortex@1.8.1
+        - component: Keil::Device:STM32Cube HAL:DMA@1.8.1
+        - component: Keil::Device:STM32Cube HAL:GPIO@1.8.1
+        - component: Keil::Device:STM32Cube HAL:I2C@1.8.1
+        - component: Keil::Device:STM32Cube HAL:PWR@1.8.1
+        - component: Keil::Device:STM32Cube HAL:QSPI@1.8.1
+        - component: Keil::Device:STM32Cube HAL:RCC@1.8.1
+        - component: Keil::Device:STM32Cube HAL:SPI@1.8.1
+        - component: Keil::Device:Startup@2.6.3

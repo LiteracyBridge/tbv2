@@ -1,4 +1,4 @@
-// TBookV2   TBook.h 
+// TBookV2   TBook.h
 // Gene Ball   Apr-2018  -- Nov-2019
 
 #ifndef TBook_H
@@ -32,7 +32,7 @@
 #define __packed
 
 #if  defined( RTE_Compiler_EventRecorder )
-#include "eventrecorder.h"
+#include "EventRecorder.h"
 #endif
 
 // from Keil_v5/ARM/PACK/Keil/STM32F4xx_DFP/2.16.0/Release_notes.html
@@ -163,7 +163,7 @@ extern bool isMassStorageEnabled(void);         // => true if usb is providing F
 
 extern void initPrintf(const char *hdr);
 
-//extern    char    Screen[ ][ dbgScreenChars ];        
+//extern    char    Screen[ ][ dbgScreenChars ];
 
 #define Error_Handler() _Error_Handler( __FILE__, __LINE__ )
 // TODO: stdlib?
@@ -191,7 +191,7 @@ extern const int FILEOP_STACK_SIZE;    // opens in/out files
 extern const int CONTROL_STACK_SIZE;   // opens in/out files
 extern const int LED_STACK_SIZE;
 
-// SD card path definitions  
+// SD card path definitions
 extern const char *TBP[];      // indexed by 0.. pLAST
 
 //TBOOK error codes
@@ -299,4 +299,3 @@ extern char *allocStr(const char *s, const char *tag);
 
 
 #endif /* __TBOOK_H__ */
-

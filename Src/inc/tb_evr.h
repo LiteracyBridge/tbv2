@@ -1,4 +1,4 @@
-// TBookV2   TB_EVR.h 
+// TBookV2   TB_EVR.h
 // Gene Ball   Apr2020  -- TB event recorder events
 
 /* Define to prevent recursive inclusion -------------------------------------*/
@@ -13,7 +13,7 @@
 //#include "stm32f412vx.h"
 #include <string.h>
 
-#include "eventrecorder.h"   
+#include "EventRecorder.h"
 
 #define evrE 		(EventRecordError)
 #define evrEA 	(EventRecordError | EventRecordAPI)
@@ -120,7 +120,7 @@ extern void 			dbgEvtS( int id, const char *d );
 #define TBUSB_no            (0x05)
 #define TB_usbInit					EventID(EventLevelDetail,     TBUSB_no, 0x00)
 #define TB_usbUninit				EventID(EventLevelDetail,     TBUSB_no, 0x01)
-#define TB_usbVbchg					EventID(EventLevelDetail,     TBUSB_no, 0x02)	
+#define TB_usbVbchg					EventID(EventLevelDetail,     TBUSB_no, 0x02)
 #define TB_usbReset         EventID(EventLevelDetail,     TBUSB_no, 0x03)
 #define TB_usbHSAct         EventID(EventLevelDetail,     TBUSB_no, 0x04)
 #define TB_usbSusp          EventID(EventLevelDetail,     TBUSB_no, 0x05)
@@ -213,4 +213,3 @@ extern void 			dbgEvtS( int id, const char *d );
 //#define TB_norX						EventID(EventLevelAPI, 				TBnor_no, 0x01)
 
 #endif /* __TBEVR_H__ */
-

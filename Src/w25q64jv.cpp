@@ -37,12 +37,12 @@
     #define DRIVER_FLASH_NUM   #
     Replace symbol # with any integer to customize the number of exported
     driver (i.e. Driver_Flash#) Default setting is 0.
-    
+
     #define DRIVER_SPI_NUM     #
     Replace symbol # with any integer to customize the number of SPI driver
     (i.e. Driver_SPI#) used to communicate with Flash device.
     Default setting is 0.
-    
+
     #define DRIVER_SPI_BUS_SPEED #
     Replace symbol # with any integer to customize the SPI bus frequency.
     Default setting is 40000000 (40MHz).
@@ -151,7 +151,7 @@ static ARM_FLASH_STATUS GetStatus( void ) {                        // return fla
     return FlashStatus;
 }
 
-// INTERNAL 
+// INTERNAL
 static uint8_t  currCmd;
 static uint32_t maxBusyCnt = 0;
 const uint32_t  MAX_WAIT   = 50000;
@@ -389,9 +389,9 @@ static int32_t PowerControl( ARM_POWER_STATE state ) {                         /
 
 static int32_t ReadData( uint32_t addr, void *data, uint32_t cnt ) {            // read 'cnt' bytes into 'data' from 'addr' in flash --> status
     const int FN              = 50;
-    uint8_t   buf[]           = { CMD_PAGE_READ, 
-                                  static_cast<uint8_t>(( addr >> 16 ) & 0xFF ), 
-                                  static_cast<uint8_t>(( addr >> 8 ) & 0xFF ), 
+    uint8_t   buf[]           = { CMD_PAGE_READ,
+                                  static_cast<uint8_t>(( addr >> 16 ) & 0xFF ),
+                                  static_cast<uint8_t>(( addr >> 8 ) & 0xFF ),
                                   static_cast<uint8_t>( addr & 0xFF ) };
     int32_t   result, waitcnt = 0;
 

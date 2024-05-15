@@ -2,7 +2,7 @@
 //   Gene Ball  Sept2021
 #include <ctype.h>
 
-#include "encaudio.h"
+#include "encAudio.h"
 #include "linereader.h"
 #include "tbook.h"
 #include "csm.h"
@@ -438,4 +438,4 @@ bool readPackageData(void) {
 
 
 
-// packageData.c 
+// packageData.c

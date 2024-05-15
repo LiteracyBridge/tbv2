@@ -1,7 +1,7 @@
 // JEB based on keil/arm/pack/amr/cmsis/pack/example/cmsis_driver/I2S_LBC18xx.h
-// maybe names should be all SAI instead of I2S 
-// I2C_STM32F4xx.h  
-/* -------------------------------------------------------------------------- 
+// maybe names should be all SAI instead of I2S
+// I2C_STM32F4xx.h
+/* --------------------------------------------------------------------------
  * Copyright (c) 2013-2016 ARM Limited. All rights reserved.
  *
  * SPDX-License-Identifier: Apache-2.0
@@ -27,8 +27,8 @@
 #ifndef __I2S_STM32F4XX_H
 #define __I2S_STM32F4XX_H
 
-#include "STM32F4xx.h"
-#include "Driver_SAI.h"	
+#include "stm32f4xx.h"
+#include "Driver_SAI.h"
 #include "GPIO_STM32F4xx.h"
 
 /* REPLACED: RTE_Device based configuration -- with gpio_def[ GPIO_ID ] from main.h
@@ -52,12 +52,12 @@
 // RCC_CR						= 0x40023800
 // RCC_PLLI2SCFGR 	= 0x40023884
 // RCC_DCKCFGR 			= 0x4002388C
-// I2S2 RCC configuration 
+// I2S2 RCC configuration
 // RCC_PLLI2SCFGR_PLLI2SR  R	2..7  		default: 2
 // RCC_PLLI2SCFGR_PLLI2SQ  Q	2..15 		default: 4
 // RCC_PLLI2SCFGR_PLLI2SRC 0/1   				default: 0 = HSI (16MHz)
 // RCC_PLLI2SCFGR_PLLI2SN  N	2..432 		default: 0x0c0 = 192
-// RCC_PLLI2SCFGR_PLLI2SM	 M  2..63			default: 0x10 = 16  
+// RCC_PLLI2SCFGR_PLLI2SM	 M  2..63			default: 0x10 = 16
 //  VCO_clk = 16MHz * N/M 							default: 192MHz
 //  USB/SDIO clk = VCO_clk/ Q						default: 48MHz
 // 	I2S_clk = VCO_clk/ R								default: 96MHz
@@ -135,7 +135,7 @@ typedef struct _I2S_INFO {
 //	bool 										monoMode;	 		 // mono data stream-- use sample duplicating intq handler
 //	uint16_t							* dataPtr;			 // monoMode-- curr 16bit sample being transmitted
 //	bool										firstChannel;	 // monoMode-- ready to send 1st copy of *dataPtr
-	
+
 	uint32_t                tx_req;				 // bytes requested to be sent
 	uint32_t                tx_cnt;				 // tx bytes sent
 
@@ -156,7 +156,7 @@ typedef struct _I2S_RESOURCES {
 	uint16_t 								tx_dma_chan;	 // tx_dma_chan  channel corresponding to tx stream
 	DMA_Stream_TypeDef			*rx_dma;			 // DMA stream for RX
 	uint16_t 								rx_dma_chan;	 // rx_dma_chan  channel corresponding to rx stream
-	
+
 	//REPLACED:  I2S_PINS                rxtx_pins;     // I2S receive pins configuration
 	// pins used are  gI2S2_SD,	gI2S2_WS,	gI2S2_CK,	gI2S2_MCK
 

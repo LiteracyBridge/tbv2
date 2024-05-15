@@ -16,7 +16,7 @@
 //        CK: Serial Clock (mapped on SCK pin as  I2S2_CK )
 //        MCK: Master Clock (mapped separately as I2S3_MCK )  12MHz reference clock to codec
 //        extSD: Serial full-duplex data          I2S2ext_SD
-//  Usage: 
+//  Usage:
 //    Driver_SAI0.Initialize( cb_func ) -- allocate & initialize I2S & codec hardware, register event callback fn
 //    Driver_SAI0.PowerControl( ARM_POWER_FULL );   // power up audio
 //    Driver_SAI0.Control( control, 0, freq);      // control settings & audio_frequency
@@ -36,7 +36,7 @@
 //    Driver_SAI0.PowerControl( ARM_POWER_OFF )           // power down codec
 //  and optionally
 //    Driver_SAI0.Uninitialize( )                         // shut down I2S & I2C, release GPIOs
-/* -------------------------------------------------------------------------- 
+/* --------------------------------------------------------------------------
  * Copyright (c) 2013-2016 ARM Limited. All rights reserved.
  *
  * SPDX-License-Identifier: Apache-2.0
@@ -82,7 +82,7 @@
  *  Version 1.0
  *    - Initial release
  */
- 
+
 #include <arm_compat.h>
 
 #include "tbook.h"            // includes main.h with GPIO_IDs:   gI2S2_SD, gI2S2_WS, gI2S2_CK, gI2S2_MCK
@@ -112,20 +112,20 @@ extern "C" {
 static const ARM_DRIVER_VERSION DriverVersion = {   // Driver Version
         ARM_SAI_API_VERSION, ARM_SAI_DRV_VERSION};
 
-/* REPLACED: RTE_Device configuration --- replaced with gpio_def[ GPIO_ID ] 
+/* REPLACED: RTE_Device configuration --- replaced with gpio_def[ GPIO_ID ]
 // I2S0 data structures, initialized based on RTE_Device.h definitions
 static SPI_PIN I2S_ws =   { RTE_I2S0_WS_PORT_DEF,   RTE_I2S0_WS_BIT_DEF  };
 static SPI_PIN I2S_sck =  { RTE_I2S0_SCK_PORT_DEF,  RTE_I2S0_SCK_BIT_DEF };
 static SPI_PIN I2S_sd =   { RTE_I2S0_SD_PORT_DEF,   RTE_I2S0_SD_BIT_DEF  };
 static SPI_PIN I2S_mck =  { RTE_I2S0_MCK_PORT_DEF,  RTE_I2S0_MCK_BIT_DEF };
-static DMA_INFO I2S_DMA_Rx = {  
+static DMA_INFO I2S_DMA_Rx = {
   I2S0_RX_DMA_Instance,
   I2S0_RX_DMA_Number,
   I2S0_RX_DMA_Channel,
   I2S0_RX_DMA_Priority
 };
 
-static DMA_INFO I2S_DMA_Tx = {  
+static DMA_INFO I2S_DMA_Tx = {
   I2S0_TX_DMA_Instance,
   I2S0_TX_DMA_Number,
   I2S0_TX_DMA_Channel,
@@ -299,7 +299,7 @@ static int32_t I2S_Configure(I2S_RESOURCES *i2s, uint32_t freq, bool monoMode, b
     // RM0402  STM32F412xx Reference Manual
     //  I2SCLK from PLLI2S = 48MHz by default
     //    fs = PLLI2S/ (256*( 2*I2SDIV + ODD )
-    //  
+    //
     I2S3_ClockEnable(true);     // configure & start I2S3 to generate 12MHz on I2S3_MCK
 
     SPI_TypeDef *i2s_inst = xmt ? i2s->xmt_inst : i2s->rcv_inst;
@@ -361,7 +361,7 @@ static int32_t I2S_Configure(I2S_RESOURCES *i2s, uint32_t freq, bool monoMode, b
 }
 
 //
-// exported in Driver_SAI0 
+// exported in Driver_SAI0
 static ARM_DRIVER_VERSION I2Sx_GetVersion(void) {
     /**
       \fn          ARM_DRIVER_VERSION I2Sx_GetVersion (void)
@@ -818,5 +818,4 @@ ARM_DRIVER_SAI Driver_SAI0 = {
 };
 
 }
-//*********** end I2S_stm32F10x.c 
-
+//*********** end I2S_stm32F10x.c

@@ -55,7 +55,7 @@ void TBConfig::setValue(const char *key, const char *value) {
     else if (strcmp(key, "minLongPressMS") == 0) minLongPressMS = atoi(value);
     else if (strcmp(key, "qcTestState") == 0) qcTestState = atoi(value);
     else if (strcmp(key, "initState") == 0) initState = atoi(value);
-    else if (strcmp(key, "VOLUME_STEP") == 0)   maxVolumeStep = atoi(value);
+    else if (strcmp(key, "volume_step") == 0)   volumeStep = atoi(value);
     else if (strcmp(key, "bgPulse") == 0) bgPulse = allocStr(value, "config");
     else if (strcmp(key, "fgPlaying") == 0) fgPlaying = allocStr(value, "config");
     else if (strcmp(key, "fgPlayPaused") == 0) fgPlayPaused = allocStr(value, "config");
@@ -69,6 +69,11 @@ void TBConfig::setValue(const char *key, const char *value) {
     else if (strcmp(key, "fgNoUSBcable") == 0) fgNoUSBcable = allocStr(value, "config");
     else if (strcmp(key, "fgUSBconnect") == 0) fgUSBconnect = allocStr(value, "config");
     else if (strcmp(key, "fgPowerDown") == 0) fgPowerDown = allocStr(value, "config");
+
+    // call function to set maximum volume step
+    if (volumeStep != -1) {
+        cdc_SetVolumeStep(volumeStep);
+    }
 }
 
 void TBConfig::setValue(const char *line) {
@@ -113,6 +118,7 @@ const char *TBConfig::ledStr( const char *seq ) {
     if (strchr("rRgGoO_", *seq)) {
         return seq;
     }
+
     return bgPulse;
 }
 
@@ -122,11 +128,6 @@ void TBConfig::initConfig(void) {
     if (lr.isOpen() ) {
         while (lr.readLine("config")) {
             tbConfig.setValue(lr.getLine());
-        }
-
-        // call function to set maximum volume step
-        if (volumeStep != -1) {
-            cdc_SetVolumeStep(volumeStep);
         }
     }
 }

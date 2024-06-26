@@ -24,6 +24,10 @@ static int aicCurrPg = 0;      // keeps track of currently selected register pag
 static int WatchReg = 0;     //DEBUG: log register read/write ops for a specific codec register; -1 for all regs
 #endif
 
+// table of volumes
+int8_t AIC3100_VOLUME[] = { -57, -45, -34, -22, -14, -7, 0, 7 };
+int8_t audio_step = 7;
+
 // AIC_REG{ pg, reg, W1_allowed, W1_required, reset_val, name, prev_val, curr_val }
 AIC_REG codec_regs[] = {  // array of info for codec registers in use -- must include Page_Select for all pages in use
 //********** AIC3100 PAGE 0
@@ -1401,6 +1405,20 @@ void cdc_PowerDown(void) {                                        // power down 
     codecIsReady = false;
 }
 
+/// \brief              Updates the volume entry table by incrementally adjusting its entries based on a given step value.
+///                     Starting from the default volume index, each element in the volume table is set to the value of the preceding entry plus the specified step.
+///                     This results in a sequence of values where each is increased by the step relative to the previous one.
+///                     This operation can be used to uniformly increase the volume levels across the entries in the volume table.
+/// \param[in] step     The number to control the maximum volume
+/// \return             Nothing
+void cdc_SetVolumeStep(int step) {
+    int array_size = sizeof(AIC3100_VOLUME) / sizeof(AIC3100_VOLUME[0]);
+    // the index of the default audio volume in the volumes table is 4
+    for (auto idx = 4; idx < array_size; idx++) {
+        AIC3100_VOLUME[idx] = AIC3100_VOLUME[idx - 1] + step;
+    }
+}
+
 //
 //
 /// \brief Sets the codec volume per config file or in response to volume up/down
@@ -1434,19 +1452,10 @@ void cdc_SetVolume(uint8_t Volume) {
     //int8_t cdcFmtVolume = AIC3100_VOLUME[v];
     // A bug in the implementation gave values that were really: -57, -48, -38, -28, -18, -8, 2, 12
     // And it was decided that 12 was too high.
-    // Restoring the original values in the low range, and lowering the values in the high range might
-    // yield this table:
-#define USE_TABLE 1
-#if USE_TABLE
-    static int8_t AIC3100_VOLUME[] = {-57, -45, -34, -22, -14, -7, 0, 7};
+
     v = max(0, min(v-MIN_VOLUME_SETTING, 7));
     int8_t cdcFmtVolume = AIC3100_VOLUME[v];
-#else
-    const int8_t minUseful = -57;
-    const int8_t maxUseful = 22;
-    const uint8_t usefulRange = maxUseful - minUseful;
-    int8_t cdcFmtVolume = minUseful + (usefulRange * (v-MIN_VOLUME_SETTING)) / MAX_VOLUME_SETTING;
-#endif
+
     printf("Setting volume to %d\n", cdcFmtVolume);
     // Uncomment and adjust for volume level testing.
     //static uint8_t testVol = 0x19;      // DEBUG

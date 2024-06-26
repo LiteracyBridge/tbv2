@@ -55,7 +55,7 @@ void TBConfig::setValue(const char *key, const char *value) {
     else if (strcmp(key, "minLongPressMS") == 0) minLongPressMS = atoi(value);
     else if (strcmp(key, "qcTestState") == 0) qcTestState = atoi(value);
     else if (strcmp(key, "initState") == 0) initState = atoi(value);
-    else if (strcmp(key, "VOLUME_STEP") == 0)   maxVolumeStep = atoi(value);
+    else if (strcmp(key, "volume_step") == 0)   maxVolumeStep = atoi(value);
     else if (strcmp(key, "bgPulse") == 0) bgPulse = allocStr(value, "config");
     else if (strcmp(key, "fgPlaying") == 0) fgPlaying = allocStr(value, "config");
     else if (strcmp(key, "fgPlayPaused") == 0) fgPlayPaused = allocStr(value, "config");

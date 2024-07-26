@@ -8,7 +8,6 @@
 
 #include "linereader.h"
 #include "tbconfig.h"
-#include "ti_aic3100.h"
 
 TBConfig tbConfig = TBConfig();
 
@@ -38,7 +37,6 @@ TBConfig::TBConfig() {
     fgNoUSBcable    = "_3R3_3R3_3R3_5!";
     fgUSBconnect    = "G5g5!";
     fgPowerDown     = "G_3G_3G_9G_3G_9G_3";
-    volumeStep = -1;     // not set
 }
 
 /**
@@ -55,7 +53,6 @@ void TBConfig::setValue(const char *key, const char *value) {
     else if (strcmp(key, "minLongPressMS") == 0) minLongPressMS = atoi(value);
     else if (strcmp(key, "qcTestState") == 0) qcTestState = atoi(value);
     else if (strcmp(key, "initState") == 0) initState = atoi(value);
-    else if (strcmp(key, "volume_step") == 0)   maxVolumeStep = atoi(value);
     else if (strcmp(key, "bgPulse") == 0) bgPulse = allocStr(value, "config");
     else if (strcmp(key, "fgPlaying") == 0) fgPlaying = allocStr(value, "config");
     else if (strcmp(key, "fgPlayPaused") == 0) fgPlayPaused = allocStr(value, "config");
@@ -122,11 +119,6 @@ void TBConfig::initConfig(void) {
     if (lr.isOpen() ) {
         while (lr.readLine("config")) {
             tbConfig.setValue(lr.getLine());
-        }
-
-        // call function to set maximum volume step
-        if (volumeStep != -1) {
-            cdc_SetVolumeStep(volumeStep);
         }
     }
 }

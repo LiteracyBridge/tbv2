@@ -17,6 +17,7 @@ public:
     int minLongPressMS;       // used by inputmanager.c
     int qcTestState;          // first state if running QC acceptance test
     int initState;
+    int volumeStep;           // used to configure the maximum volume
 
     const char *bgPulse;              // LED sequences used in Firmware
     const char *fgPlaying;

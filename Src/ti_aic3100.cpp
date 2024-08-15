@@ -1409,6 +1409,8 @@ void cdc_PowerDown(void) {                                        // power down 
 ///                     Starting from the default volume index, each element in the volume table is set to the value of the preceding entry plus the specified step.
 ///                     This results in a sequence of values where each is increased by the step relative to the previous one.
 ///                     This operation can be used to uniformly increase the volume levels across the entries in the volume table.
+///                     When the step value is set to ‘2’, the volume hardly goes up at all, when set to ‘11’, it gets too loud.
+///                     With a step value of 7, the volume increases at a comfortable rate, providing a balanced sound level that is neither too soft nor too loud, making it ideal for most listening environments. 
 /// \param[in] step     The number to control the maximum volume
 /// \return             Nothing
 void cdc_SetVolumeStep(int step) {

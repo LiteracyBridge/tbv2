@@ -1,0 +1,10 @@
+{
+    "recommendations": [
+        "arm.environment-manager",
+        "arm.device-manager",
+        "arm.arm-debugger",
+        "arm.cmsis-csolution",
+        "arm.embedded-debug",
+        "arm.keil-studio-pack"
+    ]
+}

@@ -10,7 +10,7 @@
             "request": "launch",
             "serialNumber": "${command:device-manager.getSerialNumber}",
             "program": "${command:arm-debugger.getApplicationFile}",
-            "cmsisPack": "${command:device-manager.getDevicePack}",
+            "cmsisPack": "${command:cmsis-csolution.getTargetPack}",
             "deviceName": "${command:cmsis-csolution.getDeviceName}",
             "processorName": "${command:cmsis-csolution.getProcessorName}"
         }

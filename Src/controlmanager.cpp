@@ -3,7 +3,7 @@
 
 #include "controlmanager.h"
 
-#include "tbook.h"        // enableMassStorage 
+#include "tbook.h"        // enableMassStorage
 #include "mediaplayer.h"    // audio operations
 #include "inputmanager.h"     // osMsg_TBEvents
 #include "fileOps.h"
@@ -508,7 +508,7 @@ ControlManager::ACTION_DISPOSITION ControlManager::doAction( CSM_ACTION action, 
             default: break;
         }
     }
-    
+
     switch (action) {
         case CSM_ACTION::LED:
             LedManager::ledFg(tbConfig.ledStr(arg));
@@ -628,6 +628,7 @@ ControlManager::ACTION_DISPOSITION ControlManager::doAction( CSM_ACTION action, 
             break;
         case CSM_ACTION::playNxtPkg:
             playNextPackage();
+            changePackage();
             break;
         case CSM_ACTION::changePkg:
             changePackage();
@@ -844,4 +845,4 @@ void initControlManager( void ) {       // initialize control manager
 
 
 }
-// contentmanager.cpp 
+// contentmanager.cpp

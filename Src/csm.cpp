@@ -305,4 +305,3 @@ CSM *loadControlDef(void) {
     logEvtFmt( "TB_CSM", "Ver: %04x", csm->signature() );        // log CSM version comment
     return csm;
 }
-

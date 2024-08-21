@@ -140,6 +140,7 @@ void cdc_Init(void);                        // init I2C & codec
 void I2C_Reinit(int lev);                   // lev&1 SWRST, &2 => RCC reset, &4 => device re-init
 void cdc_PowerUp(void);                     // supply power to codec, & disable PDN, before re-init
 void cdc_PowerDown(void);                   // power down entire codec, requires re-init
+void cdc_SetVolumeStep(int);        // set the default audio table values   
 void cdc_SetVolume(uint8_t Volume);         // 0..10
 void cdc_SetMute(bool muted);               // for temporarily muting, while speaker powered
 void cdc_SetOutputMode(uint8_t Output);

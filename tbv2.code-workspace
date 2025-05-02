@@ -13,6 +13,13 @@
 					"run": "Flash Device",
 					"debug": "Arm Debugger"
 				}
+			},
+			{
+				"path": "tbv2/TBook_Rev2b.csolution.yml",
+				"target": "TBv2b",
+				"config": {
+					"run": "Flash Device"
+				}
 			}
 		]
 	}
